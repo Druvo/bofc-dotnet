@@ -1,0 +1,22 @@
+.month-year-selector {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.month-year-picker {
+  min-width: 200px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+/* Match the theme styling */
+.month-year-picker.ant-picker {
+  border-color: #d9d9d9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* These styles will be overridden by inline styles that respect the theme */
+.month-year-picker.ant-picker:hover,
+.month-year-picker.ant-picker:focus {
+  border-color: #1e3c72;
+}

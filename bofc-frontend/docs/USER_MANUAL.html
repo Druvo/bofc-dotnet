@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOFC User Manual</title>
+<style>
+  :root {
+    --bg: #f6f3ea;
+    --bg-raised: #fffdf7;
+    --ink: #182018;
+    --ink-soft: #4b5750;
+    --line: #dcd5c2;
+    --green: #1f5c3d;
+    --green-deep: #123524;
+    --gold: #a9812f;
+    --gold-soft: #e8d9ab;
+    --red: #7a1620;
+    --ok: #1f7a4d;
+    --no: #9a3b3b;
+    --radius: 6px;
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10160f;
+      --bg-raised: #161f16;
+      --ink: #eae5d6;
+      --ink-soft: #a9b3a5;
+      --line: #2a3628;
+      --green: #4d9c72;
+      --green-deep: #1c5236;
+      --gold: #d3ab5e;
+      --gold-soft: #4a3f22;
+      --red: #c2626d;
+      --ok: #4d9c72;
+      --no: #c2626d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10160f;
+    --bg-raised: #161f16;
+    --ink: #eae5d6;
+    --ink-soft: #a9b3a5;
+    --line: #2a3628;
+    --green: #4d9c72;
+    --green-deep: #1c5236;
+    --gold: #d3ab5e;
+    --gold-soft: #4a3f22;
+    --red: #c2626d;
+    --ok: #4d9c72;
+    --no: #c2626d;
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f3ea;
+    --bg-raised: #fffdf7;
+    --ink: #182018;
+    --ink-soft: #4b5750;
+    --line: #dcd5c2;
+    --green: #1f5c3d;
+    --green-deep: #123524;
+    --gold: #a9812f;
+    --gold-soft: #e8d9ab;
+    --red: #7a1620;
+    --ok: #1f7a4d;
+    --no: #9a3b3b;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+  }
+
+  a { color: var(--green); }
+  :root[data-theme="dark"] a, @media (prefers-color-scheme: dark) { }
+  a:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 0;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ---- Sidebar / TOC ---- */
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 32px 20px 32px 28px;
+    border-right: 1px solid var(--line);
+  }
+  .toc-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .toc-crest {
+    width: 34px; height: 34px; flex: none;
+    border-radius: 50%;
+    background: conic-gradient(from 210deg, var(--green), var(--green-deep), var(--gold), var(--green));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .toc-brand-text { font-family: var(--serif); font-size: 14.5px; line-height: 1.25; }
+  .toc-brand-text b { display: block; letter-spacing: 0.02em; }
+  .toc-brand-text span { color: var(--ink-soft); font-family: var(--sans); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  nav.toc ol {
+    list-style: none;
+    margin: 0; padding: 0;
+    counter-reset: sec;
+    font-size: 13.5px;
+  }
+  nav.toc li { counter-increment: sec; margin-bottom: 2px; }
+  nav.toc a {
+    display: flex;
+    gap: 9px;
+    text-decoration: none;
+    color: var(--ink-soft);
+    padding: 6px 8px;
+    border-radius: var(--radius);
+  }
+  nav.toc a::before {
+    content: counter(sec, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gold);
+    flex: none;
+    padding-top: 1px;
+  }
+  nav.toc a:hover { background: var(--bg-raised); color: var(--ink); }
+
+  /* ---- Main content ---- */
+  main {
+    padding: 44px 48px 90px;
+    min-width: 0;
+  }
+  .kicker {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 10px;
+  }
+  h1.title {
+    font-family: var(--serif);
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.12;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  .subtitle {
+    color: var(--ink-soft);
+    font-size: 15.5px;
+    max-width: 62ch;
+    margin: 0 0 40px;
+  }
+
+  section { margin-bottom: 46px; scroll-margin-top: 24px; }
+  section h2 {
+    font-family: var(--serif);
+    font-size: 23px;
+    margin: 0 0 4px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  section h2 .num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--gold);
+  }
+  section h3 {
+    font-family: var(--sans);
+    font-weight: 650;
+    font-size: 15.5px;
+    margin: 26px 0 8px;
+    color: var(--green);
+  }
+  :root[data-theme="dark"] section h3 { color: var(--gold); }
+  @media (prefers-color-scheme: dark) { section h3 { color: var(--gold); } }
+  :root[data-theme="light"] section h3 { color: var(--green); }
+
+  section p { max-width: 66ch; margin: 0 0 14px; }
+  section ul, section ol { max-width: 66ch; padding-left: 22px; margin: 0 0 14px; }
+  section li { margin-bottom: 6px; }
+  section p:last-child, section ul:last-child, section ol:last-child { margin-bottom: 0; }
+
+  .card {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .card p:last-child { margin-bottom: 0; }
+
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    white-space: nowrap;
+  }
+  .role-badge.player { color: var(--green); border-color: color-mix(in srgb, var(--green) 40%, var(--line)); }
+  .role-badge.coord  { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); }
+  .role-badge.admin  { color: var(--red);  border-color: color-mix(in srgb, var(--red) 40%, var(--line)); }
+  .role-badge.super  { color: var(--ink); background: var(--gold-soft); border-color: transparent; }
+
+  /* ---- Permission table ---- */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table.perm {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 560px;
+    font-size: 13.5px;
+  }
+  table.perm caption { text-align: left; color: var(--ink-soft); font-size: 12.5px; margin-bottom: 6px; }
+  table.perm th, table.perm td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+  table.perm thead th {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  table.perm tbody th { font-weight: 500; }
+  table.perm td.mark { text-align: center; font-variant-numeric: tabular-nums; }
+  .yes, .no {
+    display: inline-flex;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .yes { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
+  .no  { background: color-mix(in srgb, var(--no) 12%, transparent); color: var(--no); opacity: 0.65; }
+
+  dl.faq dt {
+    font-weight: 650;
+    margin-top: 18px;
+  }
+  dl.faq dt:first-child { margin-top: 0; }
+  dl.faq dd {
+    margin: 4px 0 0;
+    color: var(--ink-soft);
+    max-width: 64ch;
+  }
+
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 34px;
+    margin-bottom: 12px;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--green-deep);
+    color: var(--gold-soft);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  :root[data-theme="light"] .steps li::before { background: var(--green); color: #fff; }
+  @media (prefers-color-scheme: light) { }
+
+  footer.page {
+    border-top: 1px solid var(--line);
+    margin-top: 60px;
+    padding-top: 18px;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; }
+    nav.toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+    main { padding: 32px 22px 70px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; }
+  }
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-brand">
+      <div class="toc-crest" aria-hidden="true">⚽</div>
+      <div class="toc-brand-text"><b>BOFC</b><span>User Manual</span></div>
+    </div>
+    <ol>
+      <li><a href="#getting-started">Getting started</a></li>
+      <li><a href="#dashboard">The dashboard</a></li>
+      <li><a href="#profile">Your profile</a></li>
+      <li><a href="#tournaments">Tournaments</a></li>
+      <li><a href="#running">Running a tournament</a></li>
+      <li><a href="#auctions">Player auctions</a></li>
+      <li><a href="#finance">Finance</a></li>
+      <li><a href="#venues">Venues &amp; club rules</a></li>
+      <li><a href="#settings">Account settings</a></li>
+      <li><a href="#roles">Roles &amp; permissions</a></li>
+      <li><a href="#faq">Troubleshooting &amp; FAQ</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <p class="kicker">[BJIT-2.0] Originals Football Club</p>
+    <h1 class="title">BOFC User Manual</h1>
+    <p class="subtitle">How to sign in, follow your tournaments, take part in player auctions, and — if you're a coordinator or admin — run the club's matches and records.</p>
+
+    <section id="getting-started">
+      <h2><span class="num">01</span> Getting started</h2>
+
+      <h3>Signing in</h3>
+      <ol class="steps">
+        <li>Enter your <strong>email address</strong> and <strong>password</strong>.</li>
+        <li>Optionally check <strong>Enable Auto Login</strong> to stay signed in on this device. Leave it unchecked on a shared or public computer.</li>
+        <li>Click <strong>Sign In to Dashboard</strong>.</li>
+      </ol>
+
+      <h3>First time signing in</h3>
+      <p>If your account was just created — by an admin, or through auction registration — you'll be asked to set a new password before continuing. Enter the temporary password you were given as "Old Password," then choose a new one (8+ characters, with an uppercase letter, a lowercase letter, and a number).</p>
+
+      <div class="card">
+        <p><strong>Forgot your password?</strong> There's no self-service reset yet — ask a coordinator or admin to reset it from the Players list. You'll set a new password on your next login, the same way as a first-time sign-in.</p>
+      </div>
+
+      <h3>Your role</h3>
+      <p>What you can see and do depends on your role: <span class="role-badge player">Player</span> <span class="role-badge coord">Coordinator</span> <span class="role-badge admin">Admin</span> <span class="role-badge super">Super Admin</span> — each one builds on the last. If a button or menu isn't visible to you, it's usually gated to a role above yours. See the full breakdown in <a href="#roles">Roles &amp; permissions</a>.</p>
+    </section>
+
+    <section id="dashboard">
+      <h2><span class="num">02</span> The dashboard</h2>
+      <p>Your home screen after signing in. It shows total collections, total expenses, and the current account balance; the next upcoming match; and a chart of player payments by month.</p>
+    </section>
+
+    <section id="profile">
+      <h2><span class="num">03</span> Your profile</h2>
+      <p>Click your name or avatar anywhere in the app to open a profile page: photo, contact details, and playing position, plus stat tiles for Matches, Goals, Assists, Goals+Assists, and cards.</p>
+      <ul>
+        <li><strong>Match History</strong> — your record of wins, draws, and losses, with your contribution in each match.</li>
+        <li><strong>Goalkeeping History</strong> — a timeline of rounds you played in goal.</li>
+      </ul>
+      <p>On your own profile you'll also find tabs to edit your details and change your password. Admins can do the same for any player from the Players list.</p>
+    </section>
+
+    <section id="tournaments">
+      <h2><span class="num">04</span> Tournaments</h2>
+
+      <h3>Browsing</h3>
+      <p>Open <strong>Tournaments</strong> in the sidebar. Cards are filterable by status — Upcoming, Ongoing, Concluded — and searchable by name. Each card shows the date, venue, status, and a menu of actions available to you.</p>
+
+      <h3>Joining (RSVP)</h3>
+      <p>Choose <strong>Join</strong> on a tournament to open its RSVP page. There you can see how many players are In, Out, or still Pending, and respond yourself:</p>
+      <ul>
+        <li><strong>Yes, I'm in</strong> or <strong>Can't make it</strong>, with an optional comment</li>
+        <li>Your comment auto-saves — no separate save button</li>
+        <li>Once teams are formed, a <strong>View Team</strong> button shows your side</li>
+      </ul>
+
+      <h3>Following a tournament — the Match Center</h3>
+      <p>A tournament's own tabs (or <strong>Match Center</strong> in the sidebar) cover everything about it:</p>
+      <ul>
+        <li><strong>Fixtures</strong> — the schedule, with live scores and timers for matches in progress</li>
+        <li><strong>Roadmap</strong> — a visual bracket of rounds and groups</li>
+        <li><strong>Results</strong> and <strong>Table</strong> — completed matches and standings</li>
+        <li><strong>Stats</strong> — top scorers and other leaderboards</li>
+        <li><strong>Players</strong> — team rosters, with captain/vice-captain badges</li>
+        <li><strong>Rules</strong> and <strong>Prizes</strong> — if the organizer added them</li>
+      </ul>
+      <div class="card">
+        <p><strong>No account needed.</strong> Anyone can view a tournament's Match Center without logging in — share the link with friends, family, or fans. A Login tab is right there if they decide to sign in.</p>
+      </div>
+    </section>
+
+    <section id="running">
+      <h2><span class="num">05</span> Running a tournament <span class="role-badge coord">Coordinator</span> <span class="role-badge admin">Admin</span></h2>
+
+      <h3>Creating one</h3>
+      <p><strong>Tournaments → New Tournament.</strong> Set the name, date/time, venue, season, description, and rules. Turn on <strong>Auction Mode</strong> if teams should be formed through a player auction instead of manual assignment — see <a href="#auctions">Player auctions</a>.</p>
+
+      <h3>Building teams</h3>
+      <p>On the tournament's <strong>Team Building</strong> tab: create teams, upload team logos, and drag players from the unassigned pool into a team. The <strong>Picker Wheel</strong> can randomly decide things like captain toss order. Export the roster to Excel at any time.</p>
+
+      <h3>Rounds, groups, and fixtures</h3>
+      <p>Once teams exist, the <strong>Fixtures</strong> tab unlocks the full structure:</p>
+      <ol class="steps">
+        <li>In the <strong>Tournament</strong> tab, build rounds (Group-Based or Direct Knockout), add groups, assign teams, and generate matches. Set advancement rules for which group positions move on.</li>
+        <li>In the <strong>Matches</strong> tab, review and edit the schedule — teams, venue, date/time — in calendar, list, card, or timeline view.</li>
+        <li>The <strong>Overview</strong> tab tracks round/group/match counts, completion progress, and top scorers.</li>
+      </ol>
+
+      <h3>Live match scoring</h3>
+      <p>From a fixture, click <strong>Start Match</strong> and choose a venue. While play is live, record <strong>Goal, Assist, Yellow Card, Red Card, Substitution,</strong> and <strong>Injury</strong> events by team, player, and minute — the score updates as you go. Click <strong>Complete Match</strong> when it's over.</p>
+
+      <h3>Prizes</h3>
+      <p>Add prizes under a tournament's <strong>Prizes</strong> tab — team or player, position, category, amount, and an optional description or image.</p>
+    </section>
+
+    <section id="auctions">
+      <h2><span class="num">06</span> Player auctions</h2>
+      <p>Some tournaments form their teams through an auction instead of manual assignment. Open <strong>Auction</strong> in the sidebar for a list of auction tournaments, each with a live status: Not Started, Running, Paused, or Completed.</p>
+
+      <h3>Registering</h3>
+      <ul>
+        <li><strong>Already have an account?</strong> Click <strong>Register Me for This Auction</strong> — instant, using your existing profile.</li>
+        <li><strong>New to the club?</strong> Fill in the public registration form — name, email, employee ID, phone, preferred position, availability, experience, and an optional photo. An admin reviews and approves it; once approved, an account is created for you with a temporary password to change on first login.</li>
+      </ul>
+
+      <h3>Watching live</h3>
+      <p>Click <strong>Live Auction</strong> to follow along: the player currently up for bid, a countdown timer, bid history, and every team's remaining budget.</p>
+
+      <h3>If you're a team owner</h3>
+      <p>Place bids in preset increments while a player is up for auction, and check your squad and remaining budget at any point.</p>
+
+      <h3>Admin auction management</h3>
+      <p>Admins configure <strong>Settings</strong> (starting budget, bid increments, timer length, squad limits), manage the <strong>Player Pool</strong> and price categories, set up <strong>Team Budgets</strong> and owners, review registrations, and run the live auction — start, pause, next player, sell, mark unsold, or end.</p>
+    </section>
+
+    <section id="finance">
+      <h2><span class="num">07</span> Finance</h2>
+      <p>Everyone can view financial records; only Admins and Super Admins can create or edit them.</p>
+      <ul>
+        <li><strong>Collections (+)</strong> — payments received from players, with monthly filters and a per-player chart</li>
+        <li><strong>Bill Payment (-)</strong> — club expenses by cost type</li>
+        <li><strong>Voucher Register</strong> — a combined transaction ledger</li>
+        <li><strong>Accounts Reports</strong> — Accounts Report, Balances Summary, and Balances Sheet</li>
+        <li><strong>Configuration</strong> <span class="role-badge admin">Admin</span> — the Voucher Types, AC Natures, and Chart of Account tables used across finance</li>
+      </ul>
+    </section>
+
+    <section id="venues">
+      <h2><span class="num">08</span> Venues &amp; club rules</h2>
+      <p><strong>Venues</strong> lists the grounds used for matches; admins can add or edit them. <strong>Club Rules</strong> holds the club's official rules, readable by everyone, editable by admins.</p>
+    </section>
+
+    <section id="settings">
+      <h2><span class="num">09</span> Account settings</h2>
+      <p>From your avatar menu, top right, you can switch between dark and light mode (your choice is remembered on this device), open <strong>Settings</strong> to change your password or update your profile, check your Goalkeeping History, or log out.</p>
+    </section>
+
+    <section id="roles">
+      <h2><span class="num">10</span> Roles &amp; permissions</h2>
+      <div class="table-wrap">
+        <table class="perm">
+          <caption>What each role can do across the app</caption>
+          <thead>
+            <tr>
+              <th scope="col">Feature</th>
+              <th scope="col" class="mark">Player</th>
+              <th scope="col" class="mark">Coordinator</th>
+              <th scope="col" class="mark">Admin</th>
+              <th scope="col" class="mark">Super Admin</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">View dashboard, tournaments, players, finance, venues, rules</th>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <th scope="row">RSVP to tournaments</th>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Edit own profile &amp; password</th>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Manage tournaments, rounds, fixtures, teams</th>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Run live matches (record events)</th>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Manage players &amp; reset others' passwords</th>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Manage finance, venues, club rules</th>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Manage auctions (settings, pool, budgets, approvals)</th>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Assign roles to other players</th>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="no">✕</span></td>
+              <td class="mark"><span class="yes">✓</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="faq">
+      <h2><span class="num">11</span> Troubleshooting &amp; FAQ</h2>
+      <dl class="faq">
+        <dt>I can't see a button or menu I expected.</dt>
+        <dd>It's likely gated to a role above yours — check the table above. Ask an admin if you think you need access.</dd>
+
+        <dt>I forgot my password.</dt>
+        <dd>Ask an admin or coordinator to reset it from the Players list. You'll set a new one on your next sign-in.</dd>
+
+        <dt>A tournament isn't showing fixtures yet.</dt>
+        <dd>Fixtures only appear once teams have been built and matches generated by a coordinator or admin.</dd>
+
+        <dt>I don't have an account but want to join an auction.</dt>
+        <dd>Use the public registration form linked from the auction page — no login required to apply.</dd>
+
+        <dt>Can I share a tournament with someone who doesn't have an account?</dt>
+        <dd>Yes — the Match Center (fixtures, results, standings, stats, players, rules) is public. Just share the link.</dd>
+      </dl>
+    </section>
+
+    <footer class="page">
+      [BJIT-2.0] Originals Football Club — BOFC User Manual
+    </footer>
+  </main>
+</div>
+</body>
+</html>

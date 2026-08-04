@@ -1,0 +1,1067 @@
+.tableData :global(.ant-table) {
+  border-radius: 12px ;
+  overflow: hidden;
+}
+
+.tableData :global(.ant-table-thead > tr > th) {
+  color: #F5F7FA ;
+  font-weight: 700 ;
+  border-bottom: 2px solid #C6A15B ;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Club navy header in both themes (with gold underline above) */
+.lightTheme :global(.ant-table-thead > tr > th),
+.darkTheme :global(.ant-table-thead > tr > th) {
+  background: #123524 ;
+}
+
+/* Keep sort-hover from washing the navy header to a light grey */
+.tableData :global(.ant-table-thead > tr > th.ant-table-column-has-sorters:hover) {
+  background: #1B4A34 ;
+}
+
+.tableData :global(.ant-table-thead .ant-table-column-sorter) {
+  color: rgba(245, 247, 250, 0.55) ;
+}
+
+/* Total / summary row — scoreboard footer */
+.tableData :global(.ant-table-summary) {
+  background: rgba(198, 161, 91, 0.08);
+}
+
+.tableData :global(.ant-table-summary > tr > td) {
+  border-top: 2px solid rgba(198, 161, 91, 0.45) ;
+  color: var(--color-accent) !important;
+  font-weight: 700 ;
+}
+
+/* Ant renders sticky/fixed-left columns as a separate cloned cell that doesn't
+   always nest under .ant-table-summary > tr > td the same way — force it here
+   too so the "Total" footer cell in the frozen Name column isn't left on the
+   unthemed literal gold. */
+.tableData :global(.ant-table-summary .ant-table-cell-fix-left) {
+  color: var(--color-accent) !important;
+}
+
+/* Filter buttons — selected state uses club gold instead of blue */
+.styledRadioGroup :global(.ant-radio-button-wrapper-checked) {
+  background: #C6A15B !important;
+  border-color: var(--color-accent) !important;
+  color: #0B2417 !important;
+}
+
+.styledRadioGroup :global(.ant-radio-button-wrapper-checked:hover) {
+  background: #D8BC84 !important;
+  border-color: #D8BC84 !important;
+  color: #0B2417 !important;
+}
+
+/* Remove the shadow that causes gaps */
+.table :global(.ant-table-cell-fix-left) {
+  box-shadow: none ;
+}
+
+/* Ensure proper border styling for fixed columns without shadow */
+.table :global(.ant-table-cell-fix-left::after) {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  content: '';
+  background: var(--ant-color-border);
+}
+
+.viewToggle {
+  display: none;
+  padding: 12px 20px;
+  background: var(--ant-color-bg-layout);
+  border-bottom: 1px solid var(--ant-color-border);
+}
+
+/* Enhanced Control Styles */
+.styledSelect {
+  vertical-align: middle ;
+}
+
+.styledSelect :global(.ant-select-selector) {
+  padding: 8px 12px ;
+  font-weight: 500 ;
+  transition: box-shadow 0.3s ease ;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) ;
+  min-height: 34px ;
+  height: 34px ;
+  display: flex ;
+  align-items: center ;
+}
+
+.styledSelect :global(.ant-select-selection-search) {
+  inset-inline-start: 12px ;
+}
+
+.styledSelect :global(.ant-select-selection-item) {
+  padding-left: 0 ;
+  font-weight: 500 ;
+  line-height: 20px ;
+  display: flex ;
+  align-items: center ;
+}
+
+.styledSelect:hover :global(.ant-select-selector) {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) ;
+}
+
+.styledRadioGroup {
+  display: flex ;
+  gap: 6px ;
+  align-items: center ;
+  vertical-align: middle ;
+}
+
+.styledRadioGroup :global(.ant-radio-button-wrapper) {
+  padding: 0 ;
+  border-radius: 8px ;
+  border-width: 1.5px ;
+  font-weight: 500 ;
+  transition: box-shadow 0.3s ease ;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) ;
+  margin-right: 0 ;
+  display: flex ;
+  align-items: center ;
+  justify-content: center ;
+  min-height: 36px ;
+  height: 36px ;
+  line-height: 1 ;
+}
+
+.styledRadioGroup :global(.ant-radio-button-wrapper > span) {
+  padding: 8px 14px ;
+  display: flex ;
+  align-items: center ;
+  height: 100% ;
+}
+
+.styledRadioGroup :global(.ant-radio-button-wrapper:not(:first-child)::before) {
+  display: none ;
+}
+
+.styledRadioGroup :global(.ant-radio-button-wrapper):hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) ;
+}
+
+.styledRadioGroup :global(.ant-radio-button-wrapper:first-child) {
+  border-top-left-radius: 8px ;
+  border-bottom-left-radius: 8px ;
+}
+
+.styledRadioGroup :global(.ant-radio-button-wrapper:last-child) {
+  border-top-right-radius: 8px ;
+  border-bottom-right-radius: 8px ;
+}
+
+.styledRadioButton {
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap ;
+  height: 36px ;
+  display: flex ;
+  align-items: center ;
+}
+
+.styledRadioButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.styledRadioButton:hover::before {
+  left: 100%;
+}
+
+.styledButton {
+  padding: 0 ;
+  border-radius: 8px ;
+  border-width: 1.5px ;
+  font-weight: 500 ;
+  transition: box-shadow 0.3s ease ;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) ;
+  position: relative;
+  overflow: hidden;
+  display: flex ;
+  align-items: center ;
+  justify-content: center ;
+  min-height: 36px ;
+  height: 36px ;
+  vertical-align: middle ;
+  min-width: 120px ;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .styledRadioGroup {
+    width: 100% ;
+    justify-content: center ;
+    margin-bottom: 8px ;
+  }
+  
+  .styledRadioGroup :global(.ant-radio-button-wrapper) {
+    flex: 1 ;
+    text-align: center ;
+    justify-content: center ;
+  }
+  
+  .styledButton {
+    width: 100% ;
+    text-align: center ;
+    justify-content: center ;
+    min-width: 100% ;
+  }
+}
+
+/* Mobile Table Border Theming - Only apply on mobile */
+@media (max-width: 768px) {
+  .lightTheme :global(.ant-table-bordered) :global(.ant-table-tbody) > :global(tr) > :global(td),
+  .lightTheme :global(.ant-table-bordered) :global(.ant-table-thead) > :global(tr) > :global(th),
+  .lightTheme :global(.ant-table-bordered) :global(.ant-table-container) {
+    border-color: var(--ant-color-border) !important;
+  }
+  
+  .darkTheme :global(.ant-table-bordered) :global(.ant-table-tbody) > :global(tr) > :global(td),
+  .darkTheme :global(.ant-table-bordered) :global(.ant-table-thead) > :global(tr) > :global(th),
+  .darkTheme :global(.ant-table-bordered) :global(.ant-table-container) {
+    border-color: #000000 !important;
+  }
+}
+
+/* Integrated Legend with Year Selector */
+.integratedLegend {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--ant-color-bg-layout) 0%, var(--ant-color-fill-quaternary) 100%);
+  border-radius: 12px;
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Dark theme support for integrated legend */
+.darkTheme .integratedLegend {
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  border: 1px solid #3a3a3a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.lightTheme .integratedLegend {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Compact Mobile Card View */
+.compactPlayerCard {
+  background: linear-gradient(135deg, var(--ant-color-bg-container) 0%, var(--ant-color-fill-quaternary) 100%);
+  border: 1px solid var(--ant-color-border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.compactPlayerCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.compactPlayerCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #D8BC84 0%, #C6A15B 100%);
+}
+
+.compactPlayerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+}
+
+.compactPlayerName {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ant-color-text);
+  display: block;
+  line-height: 1.3;
+}
+
+.compactYearInfo {
+  font-size: 10px;
+  color: var(--ant-color-text-secondary);
+  font-weight: 500;
+  display: block;
+  margin-top: 1px;
+}
+
+.compactPlayerIndex {
+  background: linear-gradient(135deg, #D8BC84 0%, #C6A15B 100%);
+  color: #0B2417;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  min-width: 24px;
+  text-align: center;
+}
+
+.compactMonthsGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+
+.compactMonthItem {
+  position: relative;
+  text-align: center;
+  padding: 6px 2px;
+  border-radius: 6px;
+  border: 1px solid var(--ant-color-border);
+  background: linear-gradient(135deg, var(--ant-color-bg-layout) 0%, var(--ant-color-fill-quaternary) 100%);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+}
+
+.compactMonthItem:hover {
+  border-color: var(--ant-color-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.compactMonthName {
+  font-size: 8px;
+  color: var(--ant-color-text-secondary);
+  margin-bottom: 1px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+.compactMonthAmount {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+  line-height: 1;
+}
+
+.compactMonthIndicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid var(--ant-color-bg-container);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* Status styles for compact view */
+.compactMonthItem.monthPaid {
+  border-color: var(--ant-color-success-border);
+  background: linear-gradient(135deg, var(--ant-color-success-bg) 0%, var(--ant-color-success-bg-hover) 100%);
+}
+
+.compactMonthItem.monthPaid .compactMonthIndicator {
+  background: #52c41a;
+  border-color: var(--ant-color-bg-container);
+}
+
+.compactMonthItem.monthDue {
+  border-color: var(--ant-color-error);
+  background: linear-gradient(135deg, var(--ant-color-error-bg) 0%, var(--ant-color-error-bg-hover) 100%);
+}
+
+.compactMonthItem.monthDue .compactMonthIndicator {
+  background: #ff4d4f;
+  border-color: var(--ant-color-bg-container);
+  animation: pulse 1.5s infinite;
+}
+
+.compactMonthItem.monthDue .compactMonthAmount {
+  color: var(--ant-color-error);
+  font-weight: 700;
+}
+
+.compactMonthItem.monthCurrent {
+  border-color: var(--color-accent);
+  background: linear-gradient(135deg, rgba(198, 161, 91, 0.16) 0%, rgba(198, 161, 91, 0.28) 100%);
+}
+
+.compactMonthItem.monthCurrent .compactMonthIndicator {
+  background: #C6A15B;
+  border-color: var(--ant-color-bg-container);
+  box-shadow: 0 0 0 1px rgba(198, 161, 91, 0.35), 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.compactMonthItem.monthEmpty .compactMonthIndicator {
+  background: #d9d9d9;
+  border-color: var(--ant-color-bg-container);
+}
+
+/* Mobile Card Year Select */
+.mobileCardYearSelect {
+  font-size: 12px !important;
+}
+
+.mobileCardYearSelect :global(.ant-select-selector) {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 8px !important;
+  border: 1px solid rgba(198, 161, 91, 0.45) !important;
+  background: var(--ant-color-bg-container) !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+.mobileCardYearSelect :global(.ant-select-selection-item) {
+  line-height: 26px !important;
+  font-weight: 600 !important;
+  color: var(--color-accent) !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+}
+
+.mobileCardYearSelect :global(.ant-select-arrow) {
+  color: var(--color-accent) !important;
+  font-size: 10px !important;
+}
+
+.mobileCardYearSelect:hover :global(.ant-select-selector) {
+  border-color: rgba(216, 188, 132, 0.7) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Dark theme support for mobile card year select */
+.darkTheme .mobileCardYearSelect :global(.ant-select-selector) {
+  background: #1f1f1f !important;
+  border-color: rgba(198, 161, 91, 0.45) !important;
+}
+
+.darkTheme .mobileCardYearSelect :global(.ant-select-selection-item) {
+  color: var(--color-accent) !important;
+}
+
+/* Light theme support for mobile card year select */
+.lightTheme .mobileCardYearSelect :global(.ant-select-selector) {
+  background: var(--ant-color-bg-container) !important;
+}
+
+/* Mobile responsive adjustments for integrated legend and compact view */
+@media (max-width: 768px) {
+  .integratedLegend {
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  
+  .integratedLegend > div:first-child {
+    align-self: flex-start;
+  }
+  
+  .integratedLegend > div:last-child {
+    justify-content: center;
+    gap: 16px;
+  }
+  
+  .mobileCardView {
+    padding: 8px 12px;
+  }
+  
+  .compactPlayerCard {
+    padding: 10px;
+    margin-bottom: 6px;
+  }
+  
+  .compactMonthsGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+  }
+  
+  .compactMonthItem {
+    min-height: 32px;
+    padding: 4px 1px;
+  }
+  
+  .compactMonthName {
+    font-size: 7px;
+  }
+  
+  .compactMonthAmount {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .integratedLegend {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  
+  .integratedLegend > div:last-child {
+    gap: 12px;
+  }
+  
+  .legendText {
+    font-size: 11px;
+  }
+  
+  .legendDot {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .mobileCardView {
+    padding: 6px 8px;
+  }
+  
+  .compactPlayerCard {
+    padding: 8px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+  }
+  
+  .compactPlayerName {
+    font-size: 12px;
+  }
+  
+  .compactYearInfo {
+    font-size: 9px;
+  }
+  
+  .compactPlayerIndex {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+  
+  .compactMonthsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  
+  .compactMonthItem {
+    min-height: 28px;
+    padding: 3px 1px;
+    border-radius: 4px;
+  }
+  
+  .compactMonthName {
+    font-size: 6px;
+  }
+  
+  .compactMonthAmount {
+    font-size: 7px;
+  }
+  
+  .compactMonthIndicator {
+    width: 4px;
+    height: 4px;
+    top: 1px;
+    right: 1px;
+  }
+  
+  .mobileCardYearSelect {
+    width: 70px !important;
+  }
+  
+  .mobileCardYearSelect :global(.ant-select-selector) {
+    font-size: 11px !important;
+    height: 26px !important;
+    min-height: 26px !important;
+    padding: 0 6px !important;
+  }
+  
+  .mobileCardYearSelect :global(.ant-select-selection-item) {
+    line-height: 24px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* Dark theme support for compact view */
+.darkTheme .compactMonthItem.monthPaid .compactMonthIndicator {
+  background: #52c41a;
+  border-color: #1f1f1f;
+}
+
+.darkTheme .compactMonthItem.monthDue .compactMonthIndicator {
+  background: #ff4d4f;
+  border-color: #1f1f1f;
+}
+
+.darkTheme .compactMonthItem.monthCurrent .compactMonthIndicator {
+  background: #C6A15B;
+  border-color: #1f1f1f;
+  box-shadow: 0 0 0 1px rgba(198, 161, 91, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.darkTheme .compactMonthItem.monthEmpty .compactMonthIndicator {
+  background: #434343;
+  border-color: #1f1f1f;
+}
+
+.table {
+    padding: 16px;
+  }
+  
+  .controlsRow {
+    gap: 12px;
+  }
+  
+  .controlLabel {
+    font-size: 12px;
+  }
+  
+  .filterButton {
+    font-size: 12px ;
+    padding: 6px 8px ;
+  }
+  
+  .resetButton {
+    font-size: 12px ;
+  }
+
+
+/* Mobile Card View */
+.mobileCardView {
+  padding: 16px 20px;
+  background: var(--ant-color-bg-container);
+}
+
+.playerCard {
+  background: linear-gradient(135deg, var(--ant-color-bg-container) 0%, var(--ant-color-fill-quaternary) 100%);
+  border: 1px solid var(--ant-color-border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.playerCard:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.playerCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #D8BC84 0%, #C6A15B 100%);
+}
+
+.playerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+}
+
+.playerName {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ant-color-text);
+}
+
+.playerIndex {
+  background: linear-gradient(135deg, #D8BC84 0%, #C6A15B 100%);
+  color: #0B2417;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.monthsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.monthItem {
+  position: relative;
+  text-align: center;
+  padding: 14px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--ant-color-border);
+  background: linear-gradient(135deg, var(--ant-color-bg-layout) 0%, var(--ant-color-fill-quaternary) 100%);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  min-height: 65px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: default;
+}
+
+.monthItem:hover {
+  border-color: var(--ant-color-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.monthName {
+  font-size: 11px;
+  color: var(--ant-color-text-secondary);
+  margin-bottom: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.monthAmount {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ant-color-text);
+  line-height: 1.2;
+}
+
+/* Status Indicators */
+.monthIndicator {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--ant-color-bg-container);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.monthPaid {
+  border-color: var(--ant-color-success-border);
+  background: linear-gradient(135deg, var(--ant-color-success-bg) 0%, var(--ant-color-success-bg-hover) 100%);
+}
+
+.monthPaid .monthIndicator {
+  background: #52c41a;
+  border-color: var(--ant-color-bg-container);
+}
+
+.monthDue {
+  border-color: var(--ant-color-error);
+  background: linear-gradient(135deg, var(--ant-color-error-bg) 0%, var(--ant-color-error-bg-hover) 100%);
+}
+
+.monthDue .monthIndicator {
+  background: #ff4d4f;
+  border-color: var(--ant-color-bg-container);
+  animation: pulse 1.5s infinite;
+}
+
+.monthDue .monthAmount {
+  color: var(--ant-color-error);
+  font-weight: 700;
+}
+
+.monthCurrent {
+  border-color: var(--color-accent);
+  background: linear-gradient(135deg, rgba(198, 161, 91, 0.16) 0%, rgba(198, 161, 91, 0.28) 100%);
+}
+
+.monthCurrent .monthIndicator {
+  background: #C6A15B;
+  border-color: var(--ant-color-bg-container);
+  box-shadow: 0 0 0 3px rgba(198, 161, 91, 0.3), 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.monthEmpty .monthIndicator {
+  background: #d9d9d9;
+  border-color: var(--ant-color-bg-container);
+}
+
+/* Pulse animation for due payments */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compactMonthItem.monthDue .compactMonthIndicator,
+  .monthDue .monthIndicator {
+    animation: none;
+  }
+}
+
+/* Legend for mobile view */
+.legendContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--ant-color-bg-layout) 0%, var(--ant-color-fill-quaternary) 100%);
+  border-radius: 12px;
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--ant-color-bg-container);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.legendDot.paid {
+  background: #52c41a;
+}
+
+.legendDot.due {
+  background: #ff4d4f;
+}
+
+.legendDot.current {
+  background: #C6A15B;
+  box-shadow: 0 0 0 2px rgba(198, 161, 91, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.legendDot.empty {
+  background: #d9d9d9;
+}
+
+.legendText {
+  font-size: 13px;
+  color: var(--ant-color-text);
+  font-weight: 500;
+}
+
+/* Dark theme support for mobile indicators */
+.darkTheme .monthPaid .monthIndicator {
+  background: #52c41a;
+  border-color: #1f1f1f;
+}
+
+.darkTheme .monthDue .monthIndicator {
+  background: #ff4d4f;
+  border-color: #1f1f1f;
+}
+
+.darkTheme .monthCurrent .monthIndicator {
+  background: #C6A15B;
+  border-color: #1f1f1f;
+  box-shadow: 0 0 0 3px rgba(198, 161, 91, 0.3), 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.darkTheme .monthEmpty .monthIndicator {
+  background: #434343;
+  border-color: #1f1f1f;
+}
+
+.darkTheme .legendDot.paid {
+  background: #52c41a;
+  border-color: #1f1f1f;
+}
+
+.darkTheme .legendDot.due {
+  background: #ff4d4f;
+  border-color: #1f1f1f;
+}
+
+.darkTheme .legendDot.current {
+  background: #C6A15B;
+  border-color: #1f1f1f;
+  box-shadow: 0 0 0 2px rgba(198, 161, 91, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.darkTheme .legendDot.empty {
+  background: #434343;
+  border-color: #1f1f1f;
+}
+
+.darkTheme .legendText {
+  color: #ffffff;
+}
+
+/* Integrated Legend with Year Selector */
+.integratedLegend {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--ant-color-bg-layout) 0%, var(--ant-color-fill-quaternary) 100%);
+  border-radius: 12px;
+  border: 1px solid var(--ant-color-border-secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Dark theme support for integrated legend */
+.darkTheme .integratedLegend {
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  border: 1px solid #3a3a3a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.lightTheme .integratedLegend {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Mobile responsive adjustments for integrated legend */
+@media (max-width: 768px) {
+  .integratedLegend {
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  
+  .integratedLegend > div:first-child {
+    align-self: flex-start;
+  }
+  
+  .integratedLegend > div:last-child {
+    justify-content: center;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .integratedLegend {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  
+  .integratedLegend > div:last-child {
+    gap: 12px;
+  }
+  
+  .legendText {
+    font-size: 11px;
+  }
+  
+  .legendDot {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .mobileCardYearSelect {
+    width: 70px !important;
+  }
+}
+
+/* Mobile Card Year Select */
+.mobileCardYearSelect {
+  font-size: 12px !important;
+}
+
+.mobileCardYearSelect :global(.ant-select-selector) {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 8px !important;
+  border: 1px solid rgba(198, 161, 91, 0.45) !important;
+  background: var(--ant-color-bg-container) !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+}
+
+.mobileCardYearSelect :global(.ant-select-selection-item) {
+  line-height: 26px !important;
+  font-weight: 600 !important;
+  color: var(--color-accent) !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+}
+
+.mobileCardYearSelect :global(.ant-select-arrow) {
+  color: var(--color-accent) !important;
+  font-size: 10px !important;
+}
+
+.mobileCardYearSelect:hover :global(.ant-select-selector) {
+  border-color: rgba(216, 188, 132, 0.7) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Dark theme support for mobile card year select */
+.darkTheme .mobileCardYearSelect :global(.ant-select-selector) {
+  background: #1f1f1f !important;
+  border-color: rgba(198, 161, 91, 0.45) !important;
+}
+
+.darkTheme .mobileCardYearSelect :global(.ant-select-selection-item) {
+  color: var(--color-accent) !important;
+}
+
+/* Light theme support for mobile card year select */
+.lightTheme .mobileCardYearSelect :global(.ant-select-selector) {
+  background: var(--ant-color-bg-container) !important;
+}
+
+@media (max-width: 480px) {
+  .mobileCardYearSelect {
+    width: 70px !important;
+  }
+  
+  .mobileCardYearSelect :global(.ant-select-selector) {
+    font-size: 11px !important;
+    height: 26px !important;
+    min-height: 26px !important;
+    padding: 0 6px !important;
+  }
+  
+  .mobileCardYearSelect :global(.ant-select-selection-item) {
+    line-height: 24px !important;
+    font-size: 11px !important;
+  }
+}

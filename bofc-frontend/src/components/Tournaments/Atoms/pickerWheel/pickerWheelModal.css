@@ -1,0 +1,45 @@
+/* Target the radio button wrapper */
+.square-radio.ant-radio-wrapper {
+    margin-right: 8px;
+}
+
+/* Style the radio button itself */
+.square-radio .ant-radio {
+    top: 0;
+}
+
+/* Style the inner part of the radio button */
+.square-radio .ant-radio-inner {
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 2px !important;
+    background-color: white !important;
+    border: 1px solid #d9d9d9 !important;
+}
+
+/* Style for checked state */
+.square-radio .ant-radio-checked .ant-radio-inner {
+    border-color: var(--color-accent) !important;
+    background-color: white !important;
+}
+
+/* Create checkmark using pseudo-element */
+.square-radio .ant-radio-checked .ant-radio-inner::after {
+    content: "\2714" !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-00%, -9%) !important;
+    font-size: 11px !important;
+    color: var(--color-accent) !important;
+    border: none !important;
+    width: auto !important;
+    height: 16px !important;
+    opacity: 1 !important;
+    transition: opacity var(--dur-short) var(--ease-out) 0.1s !important;
+}
+
+/* Style for focus state */
+.square-radio .ant-radio-input:focus + .ant-radio-inner {
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-focus) 30%, transparent) !important;
+}

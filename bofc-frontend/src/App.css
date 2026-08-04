@@ -1,0 +1,283 @@
+.demo-logo-vertical {
+    /* height: 32px; */
+    margin: 10px;
+    border-radius: 6px;
+    justify-content: center;
+    align-content: left;
+    display: flex;
+}
+
+.demo-logo-vertical img {
+    height: 37px;
+    object-fit: contain;
+}
+
+.teams {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.team {
+    padding: 20px;
+    width: 200px;
+    border-radius: 5px;
+}
+
+.player-card {
+    background-color: #6200ea;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.players {
+    display: flex;
+    justify-content: space-around;
+}
+
+.svg_background {
+    background-color: #000000;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='30' viewBox='0 0 1000 120'%3E%3Cg fill='none' stroke='%23222' stroke-width='10' %3E%3Cpath d='M-500 75c0 0 125-30 250-30S0 75 0 75s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 45c0 0 125-30 250-30S0 45 0 45s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 105c0 0 125-30 250-30S0 105 0 105s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 15c0 0 125-30 250-30S0 15 0 15s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500-15c0 0 125-30 250-30S0-15 0-15s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 135c0 0 125-30 250-30S0 135 0 135s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.green-row {
+    background-color: rgb(80, 80, 80);
+    color:yellow;
+}
+
+.green-row:hover {
+    color:rgb(255, 0, 0);
+}
+
+/* Ensure smooth transitions for Ant Design components */
+.ant-layout-sider {
+    transition: width 0.2s ease-in-out, min-width 0.2s ease-in-out, max-width 0.2s ease-in-out !important;
+}
+
+.ant-layout-sider-collapsed .ant-menu-item-icon {
+    transition: margin 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.ant-layout-sider .ant-menu-item {
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+/*
+ * Active-branch parent titles: when a leaf is selected, Ant reuses the leaf's
+ * "selected color" (navy, meant for text on the gold pill) on the ancestor
+ * submenu titles too — which sit on the navy panel and would vanish. Force the
+ * open/active parent titles to gold so the whole branch stays legible.
+ */
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title,
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title .ant-menu-title-content,
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title .anticon,
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title .ant-menu-submenu-arrow {
+    color: #C9AE71 !important;
+}
+
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title:hover,
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title:hover .ant-menu-title-content {
+    color: #D8BC84 !important;
+}
+
+/* User dropdown improvements */
+.ant-dropdown-menu {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    min-width: 200px !important;
+    padding: 8px !important;
+}
+
+.ant-dropdown-menu-item {
+    border-radius: 8px !important;
+    margin: 2px 0 !important;
+    padding: 8px 12px !important;
+    transition: background-color 0.2s ease !important;
+    font-size: 14px !important;
+}
+
+.ant-dropdown-menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* User info item in dropdown - no hover effect */
+.ant-dropdown-menu-item:first-child:hover {
+    background-color: transparent !important;
+    transform: none !important;
+}
+
+.ant-dropdown-menu-divider {
+    margin: 8px 0 !important;
+    background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+[data-theme="dark"] .ant-dropdown-menu {
+    background-color: #1F2937 !important;
+    border: 1px solid #374151 !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="dark"] .ant-dropdown-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .ant-dropdown-menu-item:first-child:hover {
+    background-color: transparent !important;
+}
+
+[data-theme="dark"] .ant-dropdown-menu-divider {
+    background-color: #374151 !important;
+}
+
+/* Theme toggle in dropdown */
+.ant-dropdown-menu-item .ant-switch {
+    margin-left: auto !important;
+}
+
+.ant-dropdown-menu-item:has(.ant-switch):hover {
+    background-color: transparent !important;
+    transform: none !important;
+}
+
+/* User info section in dropdown */
+.dropdown-user-info {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    margin-bottom: 4px;
+}
+
+[data-theme="dark"] .dropdown-user-info {
+    border-bottom-color: #374151;
+}
+
+@media (max-width: 768px) {
+    .ant-layout-sider {
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .demo-logo-vertical {
+        margin: 5px;
+    }
+    
+    .demo-logo-vertical img {
+        height: 30px;
+    }
+
+    /* Mobile header improvements */
+    .ant-layout-header {
+        height: 64px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* Mobile dropdown menu adjustments */
+    .ant-dropdown-menu {
+        min-width: 180px !important;
+        padding: 6px !important;
+    }
+
+    .ant-dropdown-menu-item {
+        padding: 6px 10px !important;
+        font-size: 13px !important;
+    }
+
+    /* Hide mobile user info classes since we're not using them anymore */
+    .mobile-user-info,
+    .mobile-username,
+    .mobile-user-role {
+        display: none;
+    }
+}
+
+/* Header specific fixes */
+.ant-layout-header {
+    height: 64px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.ant-layout-header .ant-row {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.ant-layout-header .ant-col {
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Remove any conflicting line-height */
+.ant-layout-header * {
+    line-height: normal !important;
+}
+
+/* Switch improvements */
+.ant-switch {
+    border-radius: 12px !important;
+    min-width: 44px !important;
+    height: 22px !important;
+}
+
+.ant-switch-small {
+    min-width: 36px !important;
+    height: 18px !important;
+}
+
+.ant-switch-checked {
+    background: linear-gradient(135deg, #28552B, #173F1A) !important;
+}
+
+.ant-switch:not(.ant-switch-checked) {
+    background: linear-gradient(135deg, #bfbfbf, #8c8c8c) !important;
+}
+
+.ant-switch-inner {
+    font-size: 10px !important;
+}
+
+/* Mobile header logo styles */
+.mobile-header-logo {
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+}
+
+.mobile-header-logo img {
+    height: 32px;
+    object-fit: contain;
+}
+
+.mobile-header-title {
+    margin-left: 8px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* User info in header */
+.header-user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 8px;
+}
+
+.header-username {
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 600;
+}
+
+.header-user-role {
+    font-size: 12px;
+    line-height: 16px;
+    opacity: 0.7;
+}
+

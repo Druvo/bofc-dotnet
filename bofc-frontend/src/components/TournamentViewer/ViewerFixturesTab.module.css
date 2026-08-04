@@ -1,0 +1,331 @@
+.pageWrap {
+  padding: 12px 10px 26px;
+}
+
+.header {
+  margin-bottom: 26px;
+  text-align: center;
+}
+
+.title {
+  margin: 0 !important;
+  color: var(--color-ink) !important;
+  font-size: clamp(1.75rem, 2.9vw, 2.4rem) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  display: block;
+  margin-top: 10px;
+  color: color-mix(in oklch, var(--color-ink) 46%, transparent) !important;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.contentWrap {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.filterBar {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.filterButton {
+  height: 36px !important;
+  padding: 0 14px !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in oklch, var(--color-ink) 10%, transparent) !important;
+  background: color-mix(in oklch, var(--color-ink) 4%, transparent) !important;
+  color: color-mix(in oklch, var(--color-ink) 72%, transparent) !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.filterButton:hover {
+  border-color: color-mix(in oklch, var(--color-accent) 38%, transparent) !important;
+  color: color-mix(in oklch, var(--color-ink) 90%, transparent) !important;
+}
+
+.filterButtonActive {
+  border-color: transparent !important;
+  background: linear-gradient(135deg, #10ee8a 0%, #0ecf72 100%) !important;
+  color: #062015 !important;
+  box-shadow: 0 10px 22px rgba(16, 238, 138, 0.2);
+}
+
+.groupSection {
+  margin-bottom: 24px;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.groupTitleWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.groupTitle {
+  margin: 0 !important;
+  color: var(--color-ink) !important;
+  font-size: clamp(1rem, 2vw, 1.3rem) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.groupDivider {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    color-mix(in oklch, var(--color-ink) 18%, transparent),
+    color-mix(in oklch, var(--color-ink) 2%, transparent)
+  );
+}
+
+.groupCountTag {
+  margin: 0 !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in oklch, var(--color-ink) 8%, transparent) !important;
+  background: color-mix(in oklch, var(--color-ink) 4%, transparent) !important;
+  color: color-mix(in oklch, var(--color-ink) 60%, transparent) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.03em;
+  padding: 4px 11px !important;
+}
+
+.matchCard {
+  margin-bottom: 14px;
+  border-radius: 22px !important;
+  border: 1px solid color-mix(in oklch, var(--color-ink) 10%, transparent) !important;
+}
+
+.matchCardLive {
+  border-color: rgba(16, 238, 138, 0.42) !important;
+}
+
+.cardTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 11px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid color-mix(in oklch, var(--color-ink) 8%, transparent);
+}
+
+.stageTag {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 999px !important;
+  padding: 5px 12px !important;
+  background: rgba(16, 238, 138, 0.14) !important;
+  color: #24eba1 !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em;
+}
+
+.statusTag {
+  font-size: 0.72rem !important;
+  font-weight: 700;
+}
+
+.liveStatusText {
+  color: #52c41a !important;
+  font-weight: 600 !important;
+  font-size: 0.72rem !important;
+}
+
+.cardTopMeta {
+  color: color-mix(in oklch, var(--color-ink) 55%, transparent) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.teamsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 12px;
+  padding: 2px 0;
+}
+
+.teamBlock {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 1px 0;
+}
+
+.teamHome {
+  justify-content: flex-end;
+}
+
+.teamAway {
+  justify-content: flex-start;
+}
+
+.teamName {
+  color: var(--color-ink) !important;
+  font-size: 1.4rem;
+  line-height: 1.15;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teamLogo {
+  border: 2px solid color-mix(in oklch, var(--color-ink) 78%, transparent);
+  background: linear-gradient(180deg, #f0fff5 0%, #ddf7e9 100%) !important;
+  color: #16da84 !important;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.vsWrap {
+  text-align: center;
+}
+
+.vsBadge {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklch, var(--color-ink) 14%, transparent);
+  background: color-mix(in oklch, var(--color-ink) 5%, transparent);
+  color: color-mix(in oklch, var(--color-ink) 55%, transparent);
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.cardMetaRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin-top: 16px;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem !important;
+  color: color-mix(in oklch, var(--color-ink) 66%, transparent) !important;
+}
+
+.loadingWrap {
+  text-align: center;
+  padding: 48px;
+}
+
+.emptyWrap {
+  padding: 48px;
+}
+
+@media (max-width: 640px) {
+  .pageWrap {
+    padding: 0px 0px 0px;
+  }
+
+  .title {
+    font-size: 1.45rem !important;
+    line-height: 1.08 !important;
+  }
+
+  .subtitle {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+  }
+
+  .filterBar {
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .filterButton {
+    height: 34px !important;
+    padding: 0 12px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .matchCard {
+    border-radius: 18px !important;
+  }
+
+  .stageTag {
+    font-size: 0.6rem !important;
+    padding: 3px 8px !important;
+  }
+
+  .statusTag,
+  .liveStatusText,
+  .cardTopMeta {
+    font-size: 0.6rem !important;
+  }
+
+  .teamsGrid {
+    gap: 10px;
+    margin-bottom: 8px;
+    padding: 0;
+  }
+
+  .teamBlock {
+    flex-direction: column;
+    justify-content: center !important;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+  }
+
+  .teamName {
+    order: 2;
+    font-size: 11px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    text-align: center;
+  }
+
+  .teamLogo {
+    order: 1;
+  }
+
+  .vsBadge {
+    width: 35px;
+    height: 35px;
+    font-size: 0.78rem;
+  }
+
+  .metaItem {
+    font-size: 0.74rem !important;
+  }
+}

@@ -1,0 +1,607 @@
+.team-container {
+}
+.team-card-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 450px;
+    overflow-x: scroll;
+    gap: 10px;
+}
+
+/* Webkit-based browsers (Chrome, Safari) */
+.team-card-container::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.team-card-container::-webkit-scrollbar-track {
+    background: #e7e7e7;
+}
+
+.team-card-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 20px;
+}
+
+.team-card-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.team-player-container::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.team-player-container::-webkit-scrollbar-track {
+
+}
+
+.team-player-container::-webkit-scrollbar-thumb {
+
+    border-radius: 20px;
+}
+
+.team-player-container::-webkit-scrollbar-thumb:hover {
+
+}
+
+.SingleTournament-container .bottom-card {
+    display: flex;
+}
+.SingleTournament-container .players-container {
+    flex: 1;
+}
+
+.SingleTournament-container .goalkeepers-container {
+    width: 300px;
+}
+
+/* Fix for uneven analytics boxes - ensure consistent heights */
+.tournament-stats-row .ant-col {
+    display: flex;
+}
+
+.tournament-stats-row .ant-card {
+    width: 100%;
+    height: 100%;
+    min-height: 55px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.tournament-stats-row .ant-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tournament-stats-row .ant-card-body {
+    padding: 8px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    min-height: 39px;
+}
+
+.tournament-stats-row .ant-space-vertical {
+    width: 100%;
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4px !important;
+}
+
+/* Better text handling for medium screens */
+@media (min-width: 992px) and (max-width: 1625px) {
+    .tournament-stats-row .ant-card {
+        min-height: 60px;
+    }
+    
+    .tournament-stats-row .ant-card-body {
+        min-height: 44px;
+        padding: 6px !important;
+    }
+}
+
+/* Ensure proper alignment for small text */
+.tournament-stats-row .ant-typography[style*="fontSize: 9"] {
+    line-height: 1.2;
+    font-size: 8px !important;
+    font-weight: 500;
+}
+
+/* Additional responsive handling */
+@media (min-width: 576px) and (max-width: 991px) {
+    .tournament-stats-row .ant-card {
+        min-height: 50px;
+    }
+}
+
+/* Mobile Tournament Cards */
+.tournament-mobile-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.tournament-mobile-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.tournament-mobile-card .ant-card-body {
+    padding: 16px !important;
+}
+
+.tournament-mobile-card .ant-typography {
+    margin-bottom: 0;
+}
+
+.tournament-mobile-card .ant-space-item {
+    display: flex;
+    align-items: center;
+}
+
+/* Hide scrollbar for mobile tournament list */
+.mobile-tournament-scroll {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.mobile-tournament-scroll::-webkit-scrollbar {
+    display: none; /* WebKit */
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+    .tournament-mobile-card {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        margin-bottom: 12px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .tournament-mobile-card:first-child {
+        margin-top: 0;
+    }
+    
+    .tournament-mobile-card:last-child {
+        margin-bottom: 8px !important;
+    }
+
+    /* Ensure dropdown doesn't get triggered by card click */
+    .tournament-mobile-card .ant-dropdown-trigger {
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Fix mobile container padding */
+    .tournaments-mobile-container {
+        padding: 8px !important;
+        margin: 0 !important;
+    }
+    
+    /* Fix mobile card content overflow */
+    .tournament-mobile-card .ant-card-body {
+        padding: 12px !important;
+        overflow: hidden;
+    }
+    
+    /* Ensure mobile rows are not cut off */
+    .tournament-mobile-card .ant-row {
+        margin: 0 !important;
+        width: 100% !important;
+    }
+    
+    .tournament-mobile-card .ant-col {
+        padding: 0 4px !important;
+    }
+    
+    /* Fix mobile text wrapping */
+    .tournament-mobile-card .ant-typography {
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    
+    /* Mobile container - remove fixed height and scroll */
+    .mobile-tournament-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Fix mobile title overflow */
+    .tournament-mobile-card .ant-typography h5 {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+}
+
+/* Better spacing for mobile cards */
+@media (max-width: 480px) {
+    .tournaments-mobile-container {
+        padding: 4px !important;
+    }
+    
+    .tournament-mobile-card {
+        margin-bottom: 8px !important;
+        border-radius: 6px !important;
+    }
+    
+    .tournament-mobile-card .ant-card-body {
+        padding: 8px !important;
+    }
+    
+    .tournament-mobile-card .ant-typography h5 {
+        font-size: 13px !important;
+        line-height: 1.2 !important;
+        margin-bottom: 4px !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+    }
+    
+    .tournament-mobile-card .ant-typography {
+        font-size: 10px !important;
+    }
+    
+    .tournament-mobile-card .ant-tag {
+        font-size: 8px !important;
+        padding: 0 3px;
+        margin: 0 !important;
+    }
+}
+
+/* Ensure dropdown doesn't overflow on mobile */
+@media (max-width: 768px) {
+    .ant-dropdown {
+        z-index: 1050;
+    }
+    
+    .tournament-mobile-card .ant-dropdown-trigger {
+        padding: 4px;
+        background: transparent;
+        border: none;
+    }
+}
+
+/* Compact tournament stats styling */
+.tournament-stats-compact .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 4px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background 0.2s ease-in-out;
+    cursor: pointer;
+    gap: 2px;
+    min-height: 42px;
+}
+
+.tournament-stats-compact .stat-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.tournament-stats-compact .ant-col {
+    display: flex;
+}
+
+/* Responsive adjustments for compact stats */
+@media (max-width: 768px) {
+    .tournament-stats-compact .stat-item {
+        min-height: 38px;
+        padding: 4px 2px;
+        gap: 1px;
+    }
+    
+    .tournament-stats-compact .anticon {
+        font-size: 12px !important;
+    }
+    
+    .tournament-stats-compact .ant-typography {
+        font-size: 11px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .tournament-stats-compact .stat-item {
+        min-height: 34px;
+        padding: 3px 1px;
+        border-radius: 4px;
+    }
+    
+    .tournament-stats-compact .anticon {
+        font-size: 11px !important;
+    }
+    
+    .tournament-stats-compact .ant-typography {
+        font-size: 10px !important;
+    }
+}
+
+
+/* ── Join Tournament cards ──────────────────────────────────────── */
+.jt-card {
+    border-radius: 14px !important;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* Club "matchday" panel — navy gradient + gold trim (matches dashboard) */
+.jt-card--panel {
+    background: linear-gradient(160deg, var(--color-paper-3) 0%, var(--color-paper-2) 55%, var(--color-paper) 100%) !important;
+    border: 1px solid color-mix(in oklch, var(--color-accent) 28%, transparent) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12) !important;
+}
+
+.jt-card--panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Primary action card — gold ring to signal the main call-to-action */
+.jt-card--primary {
+    box-shadow: 0 0 0 1px rgba(198, 161, 91, 0.45), 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+.jt-card--primary:hover {
+    box-shadow: 0 0 0 1px rgba(198, 161, 91, 0.6), 0 8px 22px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* ── Your Team card ─────────────────────────────────────────────── */
+.jt-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.jt-status-badge--success {
+    background: rgba(46, 158, 91, 0.14);
+    color: #2E9E5B;
+    border: 1px solid rgba(46, 158, 91, 0.35);
+}
+
+.jt-status-badge--error {
+    background: rgba(197, 53, 62, 0.14);
+    color: #c5353e;
+    border: 1px solid rgba(197, 53, 62, 0.35);
+}
+
+.jt-status-badge--warning {
+    background: rgba(250, 173, 20, 0.14);
+    color: #faad14;
+    border: 1px solid rgba(250, 173, 20, 0.35);
+}
+
+.jt-team-focus {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    text-align: center;
+    background: color-mix(in oklch, var(--color-ink) 4%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-ink) 10%, transparent);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.jt-team-focus .ant-btn {
+    width: 100%;
+    justify-content: center;
+}
+
+.jt-team-focus-trigger.ant-btn {
+    height: auto !important;
+    padding: 10px 16px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    background: color-mix(in oklch, var(--color-accent) 12%, transparent) !important;
+    border: 1px solid color-mix(in oklch, var(--color-accent) 35%, transparent) !important;
+    color: var(--color-accent) !important;
+}
+
+.jt-team-focus-trigger.ant-btn:hover {
+    background: color-mix(in oklch, var(--color-accent) 20%, transparent) !important;
+    border-color: color-mix(in oklch, var(--color-accent) 55%, transparent) !important;
+    color: var(--color-accent-hover) !important;
+}
+
+.jt-team-helper {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* Tournament grid cards — navy matchday panel with gold trim */
+.tournament-grid-card {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.tournament-grid-card--active:hover {
+    transform: translateY(-4px);
+    border-color: rgba(198, 161, 91, 0.55) !important;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Participants — mobile card list (replaces the horizontal-scroll table) */
+.jt-mplayer-card {
+    background: var(--ant-color-fill-quaternary);
+    border: 1px solid var(--ant-color-border-secondary);
+    border-left: 3px solid rgba(198, 161, 91, 0.45);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.jt-mplayer-card--me {
+    border-color: rgba(198, 161, 91, 0.5);
+    background: rgba(198, 161, 91, 0.08);
+    border-left: 3px solid #C6A15B;
+    box-shadow: 0 2px 10px rgba(198, 161, 91, 0.18);
+}
+
+/* ── Participation Yes/No select — themed for the adaptive card ──── */
+.jt-part-select .ant-select-selector {
+    background: color-mix(in oklch, var(--color-ink) 6%, transparent) !important;
+    border: 1px solid color-mix(in oklch, var(--color-accent) 30%, transparent) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jt-part-select:not(.ant-select-disabled):hover .ant-select-selector {
+    border-color: color-mix(in oklch, var(--color-accent) 60%, transparent) !important;
+    background: color-mix(in oklch, var(--color-ink) 8%, transparent) !important;
+}
+
+.jt-part-select.ant-select-focused .ant-select-selector {
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-accent) 18%, transparent) !important;
+}
+
+.jt-part-select .ant-select-selection-item {
+    color: var(--color-ink) !important;
+    font-weight: 600;
+}
+
+.jt-part-select .ant-select-arrow {
+    color: var(--color-accent);
+}
+
+.jt-part-select.ant-select-disabled .ant-select-selector {
+    background: color-mix(in oklch, var(--color-ink) 2%, transparent) !important;
+    border-color: color-mix(in oklch, var(--color-ink) 10%, transparent) !important;
+}
+
+.jt-part-select.ant-select-disabled .ant-select-selection-item {
+    color: var(--color-muted) !important;
+}
+
+/* Dropdown popup — matches the card surface */
+.jt-part-dropdown {
+    background: var(--color-paper-2) !important;
+    border: 1px solid color-mix(in oklch, var(--color-accent) 30%, transparent) !important;
+}
+
+.jt-part-dropdown .ant-select-item {
+    color: var(--color-ink);
+}
+
+.jt-part-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled),
+.jt-part-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+    background: color-mix(in oklch, var(--color-accent) 16%, transparent) !important;
+}
+
+/* ── Comment field — same subtle boxed style as the select ──────── */
+.jt-part-comment.ant-input,
+.jt-part-comment .ant-input {
+    background: color-mix(in oklch, var(--color-ink) 4%, transparent) !important;
+    border: 1px solid color-mix(in oklch, var(--color-accent) 20%, transparent) !important;
+    border-bottom: 1px solid color-mix(in oklch, var(--color-accent) 20%, transparent) !important;
+    border-radius: 8px !important;
+    color: var(--color-ink) !important;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.jt-part-comment.ant-input:hover,
+.jt-part-comment .ant-input:hover {
+    border-color: color-mix(in oklch, var(--color-accent) 45%, transparent) !important;
+    background: color-mix(in oklch, var(--color-ink) 6%, transparent) !important;
+}
+
+.jt-part-comment.ant-input:focus,
+.jt-part-comment.ant-input-focused,
+.jt-part-comment .ant-input:focus {
+    border-color: var(--color-accent) !important;
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-accent) 16%, transparent) !important;
+}
+
+.jt-part-comment.ant-input::placeholder,
+.jt-part-comment .ant-input::placeholder {
+    color: var(--color-muted) !important;
+}
+
+/* ── Participation filter segmented — gold thumb on adaptive track ─ */
+.jt-part-segmented.ant-segmented {
+    background: color-mix(in oklch, var(--color-ink) 6%, transparent) !important;
+    border: 1px solid color-mix(in oklch, var(--color-accent) 30%, transparent);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.jt-part-segmented .ant-segmented-item {
+    color: var(--color-muted);
+    border-radius: 6px !important;
+    transition: color 0.2s ease;
+}
+
+.jt-part-segmented .ant-segmented-item:hover:not(.ant-segmented-item-selected) {
+    color: var(--color-ink);
+}
+
+.jt-part-segmented .ant-segmented-item-selected {
+    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 100%) !important;
+    color: var(--color-accent-ink) !important;
+    font-weight: 600;
+    box-shadow: 0 1px 4px color-mix(in oklch, var(--color-accent) 35%, transparent);
+}
+
+.jt-part-segmented .ant-segmented-thumb {
+    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 100%) !important;
+    border-radius: 6px !important;
+}
+
+/* Participants table — surface header with gold underline (matches dashboard) */
+.jt-participants-table .ant-table-thead > tr > th {
+    background: var(--color-paper-2) !important;
+    color: var(--color-ink) !important;
+    font-weight: 700;
+    border-bottom: 2px solid var(--color-accent) !important;
+}
+
+.jt-participants-table .ant-table-thead > tr > th.ant-table-column-has-sorters:hover {
+    background: var(--color-paper-3) !important;
+}
+
+.jt-participants-table .ant-table-thead .ant-table-column-sorter {
+    color: var(--color-muted);
+}
+
+/* Keep the fixed-column header cell matching while scrolling */
+.jt-participants-table .ant-table-thead > tr > th.ant-table-cell-fix-left,
+.jt-participants-table .ant-table-thead > tr > th.ant-table-cell-fix-right {
+    background: var(--color-paper-2) !important;
+}
+
+/* Ensure logged-in player row stands out */
+.logged-in-player-row td:first-child {
+    border-left: 3px solid var(--color-accent);
+}
+
+.logged-in-player-row {
+    background-color: color-mix(in oklch, var(--color-accent) 6%, transparent) !important;
+}
+
+.logged-in-player-row:hover > td {
+    background-color: color-mix(in oklch, var(--color-accent) 10%, transparent) !important;
+}

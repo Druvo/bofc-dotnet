@@ -1,0 +1,78 @@
+.flowTabWrap {
+  width: 100%;
+  height: calc(100vh - 220px);
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.toggleWrap {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.toggleWrap :global(.ant-segmented) {
+  background: color-mix(in oklch, var(--color-ink) 3%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-ink) 8%, transparent);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.toggleWrap :global(.ant-segmented-item) {
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.toggleWrap :global(.ant-segmented-item-label) {
+  color: color-mix(in oklch, var(--color-ink) 72%, transparent);
+  font-weight: 700;
+}
+
+.toggleWrap :global(.ant-segmented-item:hover .ant-segmented-item-label) {
+  color: var(--color-accent);
+}
+
+.toggleWrap :global(.ant-segmented-thumb) {
+  background: color-mix(in oklch, var(--color-accent) 8%, transparent) !important;
+  border: 1px solid var(--color-accent);
+  border-radius: 10px !important;
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-accent) 30%, transparent);
+}
+
+.toggleWrap :global(.ant-segmented-item-selected) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.toggleWrap :global(.ant-segmented-item-selected .ant-segmented-item-label) {
+  color: var(--color-accent) !important;
+}
+
+.flowWrap {
+  flex: 1;
+  min-height: 0;
+}
+
+.imageWrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.roadmapImage {
+  max-width: 100%;
+}
+
+.loadingWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.emptyWrap {
+  padding: 60px 0;
+}

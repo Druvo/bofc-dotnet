@@ -1,0 +1,69 @@
+/* Club-themed auction surfaces — matches Tournaments/Players broadcast styling. */
+
+.auction-panel-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.auction-panel-card--hover:hover {
+  transform: translateY(-2px);
+  border-color: rgba(198, 161, 91, 0.55);
+  box-shadow: 0 10px 26px rgba(14, 24, 48, 0.45);
+}
+
+/* Broadcast label */
+.auction-kicker {
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+/* Pulsing "LIVE" chip for auctions in progress */
+.auction-live-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #2e9e5b;
+  background: rgba(46, 158, 91, 0.16);
+  border: 1px solid rgba(46, 158, 91, 0.5);
+  border-radius: 999px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+.auction-live-chip::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2e9e5b;
+  animation: auctionPulse 1.2s infinite;
+}
+@keyframes auctionPulse {
+  0% { box-shadow: 0 0 0 0 rgba(46, 158, 91, 0.6); }
+  70% { box-shadow: 0 0 0 6px rgba(46, 158, 91, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 158, 91, 0); }
+}
+
+/* Admin quick-guide — collapsed by default, gold-accented header */
+.auction-guide-collapse {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(198, 161, 91, 0.3);
+}
+.auction-guide-collapse .ant-collapse-item {
+  border-bottom: none;
+}
+.auction-guide-collapse .ant-collapse-header {
+  align-items: center !important;
+}
+.auction-guide-collapse .ant-steps-item-icon {
+  background: rgba(198, 161, 91, 0.14);
+  border-color: rgba(198, 161, 91, 0.5);
+}
+.auction-guide-collapse .ant-steps-item-icon .ant-steps-icon {
+  color: #c6a15b;
+}

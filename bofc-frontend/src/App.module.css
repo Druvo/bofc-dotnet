@@ -1,0 +1,129 @@
+/* User dropdown improvements */
+:global(.ant-dropdown-menu) {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  min-width: 200px !important;
+  padding: 8px !important;
+}
+
+:global(.ant-dropdown-menu-item) {
+  border-radius: 8px !important;
+  margin: 2px 0 !important;
+  padding: 8px 12px !important;
+  transition: background-color 0.2s ease, transform 0.2s ease !important;
+  font-size: 14px !important;
+}
+
+:global(.ant-dropdown-menu-item:hover) {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* User info item in dropdown - no hover effect */
+:global(.ant-dropdown-menu-item:first-child:hover) {
+  background-color: transparent !important;
+  transform: none !important;
+}
+
+:global(.ant-dropdown-menu-divider) {
+  margin: 8px 0 !important;
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+:global([data-theme="dark"] .ant-dropdown-menu) {
+  background-color: #1f1f1f !important;
+  border: 1px solid #303030 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+:global([data-theme="dark"] .ant-dropdown-menu-item:hover) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+:global([data-theme="dark"] .ant-dropdown-menu-item:first-child:hover) {
+  background-color: transparent !important;
+}
+
+:global([data-theme="dark"] .ant-dropdown-menu-divider) {
+  background-color: #303030 !important;
+}
+
+/* Theme toggle in dropdown */
+:global(.ant-dropdown-menu-item .ant-switch) {
+  margin-left: auto !important;
+}
+
+:global(.ant-dropdown-menu-item:has(.ant-switch):hover) {
+  background-color: transparent !important;
+  transform: none !important;
+}
+
+/* Switch improvements */
+:global(.ant-switch) {
+  border-radius: 12px !important;
+  min-width: 44px !important;
+  height: 22px !important;
+}
+
+:global(.ant-switch-small) {
+  min-width: 36px !important;
+  height: 18px !important;
+}
+
+:global(.ant-switch-checked) {
+  background: linear-gradient(135deg, #c6a15b, #a8863f) !important;
+}
+
+:global(.ant-switch:not(.ant-switch-checked)) {
+  background: linear-gradient(135deg, #bfbfbf, #8c8c8c) !important;
+}
+
+:global(.ant-switch-inner) {
+  font-size: 10px !important;
+}
+
+/* Tooltip improvements */
+:global(.ant-tooltip) {
+  max-width: 300px !important;
+}
+
+:global(.ant-tooltip-inner) {
+  word-wrap: break-word !important;
+  white-space: normal !important;
+  text-align: center !important;
+  font-weight: 500 !important;
+}
+
+@media (max-width: 768px) {
+  :global(.ant-dropdown-menu) {
+    min-width: 180px !important;
+    padding: 6px !important;
+  }
+
+  :global(.ant-dropdown-menu-item) {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  :global(.ant-modal) {
+    max-width: calc(100vw - 16px) !important;
+    margin: 8px auto !important;
+  }
+
+  :global(.ant-modal-content) {
+    padding: 12px !important;
+  }
+
+  :global(.ant-modal-header) {
+    padding: 12px !important;
+  }
+
+  :global(.ant-modal-body) {
+    padding: 12px !important;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}

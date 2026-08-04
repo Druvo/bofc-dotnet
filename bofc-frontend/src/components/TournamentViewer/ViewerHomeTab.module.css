@@ -1,0 +1,99 @@
+/* Hallmark · macrostructure: Stat-Led (continued) · theme: custom · design-system: design.md */
+
+.heroCard {
+  border-radius: 24px;
+  text-align: center;
+  padding: var(--space-2xl) var(--space-lg);
+}
+
+.heroBadge {
+  margin-bottom: var(--space-md);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklch, var(--color-accent) 10%, transparent);
+  color: var(--color-accent);
+  border: 1px solid color-mix(in oklch, var(--color-accent) 35%, transparent);
+}
+
+.heroTitleRow {
+  display: block;
+  width: 100%;
+}
+
+.heroTitleWrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.heroTitle {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: var(--tracking-display);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  line-height: 1.15;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Single one-time reveal on mount — not a forever-looping animation */
+.titleReveal {
+  display: block;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: titleIn var(--dur-long) var(--ease-out) forwards;
+}
+
+@keyframes titleIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .titleReveal {
+    animation-duration: 1ms;
+  }
+}
+
+.football {
+  display: none;
+}
+
+.heroSeason {
+  display: block;
+  margin-top: var(--space-xs);
+  color: var(--color-ink-2);
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+}
+
+.heroDescription {
+  margin-top: var(--space-md);
+  margin-bottom: 0;
+  color: var(--color-ink-2);
+  white-space: pre-line;
+  font-size: clamp(0.9rem, 2vw, 1.05rem);
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  .heroCard {
+    padding: var(--space-xl) var(--space-sm);
+  }
+
+  .heroBadge {
+    margin-bottom: var(--space-sm);
+  }
+
+  .heroDescription {
+    margin-top: var(--space-sm);
+  }
+}

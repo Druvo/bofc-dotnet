@@ -1,0 +1,30 @@
+.dashboardContainer {
+  padding: 24px;
+}
+
+.summaryCard {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: 32px;
+}
+
+.loadingText {
+  margin-top: 12px;
+}
+
+.contributionsCard {
+  /* Specific styles for contributions card if needed */
+}
+
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Mobile specific styles */
+}

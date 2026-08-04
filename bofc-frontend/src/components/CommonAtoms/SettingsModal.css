@@ -1,0 +1,26 @@
+.settings-collapse .ant-collapse-content {
+    border: none;
+}
+
+/* Input styling */
+.settings-input {
+    border-radius: 0px;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    padding: 10px;
+}
+
+.settings-select {
+    width: 100%; /* Full width */
+    border-radius: 0px;
+    border: none;
+}
+
+/* Button styling */
+.settings-button {
+    width: 100%;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 500;
+}

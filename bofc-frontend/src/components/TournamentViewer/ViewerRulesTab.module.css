@@ -1,0 +1,64 @@
+.rulesContent {
+  color: color-mix(in oklch, var(--color-ink) 82%, transparent);
+  line-height: 1.7;
+}
+
+.rulesContent h1,
+.rulesContent h2,
+.rulesContent h3 {
+  color: var(--color-ink);
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+.rulesContent h1:first-child,
+.rulesContent h2:first-child,
+.rulesContent h3:first-child {
+  margin-top: 0;
+}
+
+.rulesContent h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  border-bottom: 1px solid color-mix(in oklch, var(--color-ink) 8%, transparent);
+  padding-bottom: 8px;
+}
+
+.rulesContent p {
+  margin: 8px 0;
+}
+
+.rulesContent ol,
+.rulesContent ul {
+  padding-left: 24px;
+  margin: 8px 0;
+}
+
+.rulesContent li {
+  margin: 6px 0;
+}
+
+.rulesContent li > ul,
+.rulesContent li > ol {
+  margin-top: 6px;
+}
+
+.rulesContent strong {
+  color: var(--color-ink);
+}
+
+.rulesContent a {
+  color: var(--color-accent);
+}
+
+.rulesContent code {
+  background: color-mix(in oklch, var(--color-ink) 6%, transparent);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.rulesContent hr {
+  border: none;
+  border-top: 1px solid color-mix(in oklch, var(--color-ink) 8%, transparent);
+  margin: 20px 0;
+}

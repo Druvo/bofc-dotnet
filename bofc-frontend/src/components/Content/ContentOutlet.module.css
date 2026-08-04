@@ -1,0 +1,12 @@
+.container {
+  padding: 8px 8px 8px;
+  overflow: auto;
+}
+
+.container.mobile {
+  max-height: calc(100vh - 64px);
+}
+
+.container.desktop {
+  max-height: calc(100vh - 64px);
+}

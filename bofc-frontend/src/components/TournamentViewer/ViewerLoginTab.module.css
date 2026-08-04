@@ -1,0 +1,204 @@
+.wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 32px 0 56px;
+}
+
+.card {
+  display: flex;
+  width: 100%;
+  max-width: 920px;
+  min-height: 440px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px color-mix(in oklch, var(--color-ink) 6%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-ink) 8%, transparent);
+  animation: viewerLoginRise 0.5s ease-out;
+}
+
+/* ---------- Left branding panel ---------- */
+.brandPanel {
+  position: relative;
+  flex: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: var(--login-bg);
+  background-size: cover;
+  background-position: center;
+}
+
+.brandOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(8, 12, 20, 0.35) 0%,
+    rgba(11, 18, 32, 0.2) 50%,
+    rgba(8, 28, 22, 0.35) 100%
+  );
+}
+
+.brandContent {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 40px 32px;
+}
+
+.brandLogo {
+  width: 140px;
+  max-width: 60%;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45));
+}
+
+.brandTitle {
+  color: #ffffff;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin: 0 0 6px;
+}
+
+.brandSubtitle {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ---------- Right form panel ---------- */
+.formPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 44px 40px;
+  background: linear-gradient(135deg, var(--color-paper-3) 0%, var(--color-paper) 100%);
+}
+
+.title {
+  color: var(--color-ink);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.subtitle {
+  color: color-mix(in oklch, var(--color-ink) 60%, transparent);
+  font-size: 0.92rem;
+  margin: 0 0 26px;
+}
+
+.form :global(.ant-form-item-label > label) {
+  color: color-mix(in oklch, var(--color-ink) 82%, transparent);
+}
+
+/* ---------- Dark-themed inputs (match the navy panel) ---------- */
+.form :global(.ant-input),
+.form :global(.ant-input-affix-wrapper) {
+  background: color-mix(in oklch, var(--color-ink) 6%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-ink) 14%, transparent);
+  color: var(--color-ink);
+}
+
+/* inner input of Input.Password sits inside the affix wrapper */
+.form :global(.ant-input-affix-wrapper > .ant-input) {
+  background: transparent;
+  border: none;
+  color: var(--color-ink);
+}
+
+.form :global(.ant-input::placeholder),
+.form :global(.ant-input-affix-wrapper > .ant-input::placeholder) {
+  color: color-mix(in oklch, var(--color-ink) 40%, transparent);
+}
+
+.form :global(.ant-input:hover),
+.form :global(.ant-input-affix-wrapper:hover) {
+  border-color: color-mix(in oklch, var(--color-ink) 28%, transparent);
+}
+
+.form :global(.ant-input:focus),
+.form :global(.ant-input-focused),
+.form :global(.ant-input-affix-wrapper-focused) {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-accent) 20%, transparent);
+}
+
+/* password reveal icon */
+.form :global(.ant-input-password-icon),
+.form :global(.ant-input-suffix .anticon) {
+  color: color-mix(in oklch, var(--color-ink) 55%, transparent);
+}
+
+.form :global(.ant-input-password-icon:hover) {
+  color: color-mix(in oklch, var(--color-ink) 85%, transparent);
+}
+
+/* override Chrome's white autofill background with the panel color */
+.form :global(.ant-input:-webkit-autofill),
+.form :global(.ant-input:-webkit-autofill:hover),
+.form :global(.ant-input:-webkit-autofill:focus),
+.form :global(.ant-input:-webkit-autofill:active) {
+  -webkit-box-shadow: 0 0 0 1000px #141a2e inset !important;
+  box-shadow: 0 0 0 1000px #141a2e inset !important;
+  -webkit-text-fill-color: var(--color-ink) !important;
+  caret-color: var(--color-ink);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.rememberRow {
+  margin-bottom: 14px;
+}
+
+.submitRow {
+  margin-bottom: 0;
+}
+
+@keyframes viewerLoginRise {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .wrap {
+    padding: 16px 0 40px;
+    min-height: auto;
+  }
+
+  .card {
+    flex-direction: column;
+    max-width: 420px;
+    min-height: auto;
+  }
+
+  .brandPanel {
+    flex: none;
+    min-height: 170px;
+  }
+
+  .brandLogo {
+    width: 96px;
+    margin-bottom: 12px;
+  }
+
+  .brandTitle {
+    font-size: 1.3rem;
+  }
+
+  .formPanel {
+    padding: 28px 24px 32px;
+  }
+}

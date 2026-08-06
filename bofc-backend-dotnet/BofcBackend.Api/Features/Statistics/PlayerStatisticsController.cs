@@ -17,7 +17,8 @@ public class PlayerStatisticsController(IPlayerStatisticsService playerStatistic
     [HttpGet]
     public async Task<IActionResult> GetPlayerStatistics(
         [FromQuery] long? tournamentId,
-        [FromQuery] FootballPosition? position,
+        [FromQuery] bool weeklyMatchDaysOnly = false,
+        [FromQuery] FootballPosition? position = null,
         [FromQuery] string sortBy = "goalsAssists",
         [FromQuery] string sortOrder = "DESC",
         [FromQuery] int limit = 100,
@@ -26,6 +27,7 @@ public class PlayerStatisticsController(IPlayerStatisticsService playerStatistic
         var filter = new PlayerStatisticsFilterRequest
         {
             TournamentId = tournamentId,
+            WeeklyMatchDaysOnly = weeklyMatchDaysOnly,
             Position = position,
             SortBy = sortBy,
             SortOrder = sortOrder,

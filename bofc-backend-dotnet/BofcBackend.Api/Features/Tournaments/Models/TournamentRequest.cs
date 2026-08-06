@@ -14,6 +14,9 @@ public class TournamentRequest
     [Required(ErrorMessage = "Tournament date is mandatory")]
     public DateTime? TournamentDate { get; set; }
 
+    /// <summary>How long the MatchDay runs, in minutes — drives the derived ONGOING/CONCLUDED window. Null = unknown, client falls back to a default.</summary>
+    public int? DurationMinutes { get; set; }
+
     [Required(ErrorMessage = "Venue ID is mandatory")]
     public long? VenueId { get; set; }
 

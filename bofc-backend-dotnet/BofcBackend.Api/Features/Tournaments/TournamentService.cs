@@ -29,6 +29,7 @@ public class TournamentService(BofcDbContext db) : ITournamentService
             Rules = request.Rules,
             RoadmapImageUrl = request.RoadmapImageUrl,
             TournamentDate = request.TournamentDate!.Value,
+            DurationMinutes = request.DurationMinutes,
             VenueId = venue.Id,
             TournamentStatus = request.TournamentDate.Value > DateTime.UtcNow ? TournamentStatus.UPCOMING : TournamentStatus.ONGOING,
             IsActive = true,
@@ -124,6 +125,7 @@ public class TournamentService(BofcDbContext db) : ITournamentService
         tournament.Rules = request.Rules;
         tournament.RoadmapImageUrl = request.RoadmapImageUrl;
         tournament.TournamentDate = request.TournamentDate!.Value;
+        tournament.DurationMinutes = request.DurationMinutes;
         tournament.VenueId = venue.Id;
 
         if (request.SportType != null)
@@ -264,6 +266,24 @@ public class TournamentService(BofcDbContext db) : ITournamentService
         return tournament == null ? null : ToDto(tournament);
     }
 
+    public async Task<TournamentResponse?> GetCurrentMatchDayAsync()
+    {
+        var today = DateTime.UtcNow.Date;
+        var tournament = await db.Tournaments.Include(t => t.Venue)
+            .Where(t => t.IsWeeklyMatchDay
+                && (t.TournamentStatus == TournamentStatus.UPCOMING
+                    || (t.TournamentStatus == TournamentStatus.ONGOING && t.TournamentDate.Date >= today)))
+            .OrderBy(t => t.TournamentStatus == TournamentStatus.ONGOING ? 0 : 1)
+            .ThenBy(t => t.TournamentDate)
+            .FirstOrDefaultAsync()
+            ?? await db.Tournaments.Include(t => t.Venue)
+                .Where(t => t.IsWeeklyMatchDay)
+                .OrderByDescending(t => t.TournamentDate)
+                .FirstOrDefaultAsync();
+
+        return tournament == null ? null : ToDto(tournament);
+    }
+
     public async Task<List<TournamentListResponse>> GetTournamentListAsync(string? year)
     {
         List<Tournament> tournaments;
@@ -324,6 +344,7 @@ public class TournamentService(BofcDbContext db) : ITournamentService
         Rules = tournament.Rules,
         RoadmapImageUrl = tournament.RoadmapImageUrl,
         TournamentDate = tournament.TournamentDate,
+        DurationMinutes = tournament.DurationMinutes,
         ActiveStatus = tournament.IsActive,
         DefaultTournament = tournament.DefaultTournament,
         TournamentStatus = tournament.TournamentStatus,
@@ -333,5 +354,6 @@ public class TournamentService(BofcDbContext db) : ITournamentService
         TournamentType = tournament.TournamentType.ToString(),
         GroupCount = tournament.GroupCount,
         AuctionMode = tournament.AuctionMode,
+        IsWeeklyMatchDay = tournament.IsWeeklyMatchDay,
     };
 }

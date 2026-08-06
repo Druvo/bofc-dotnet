@@ -23,6 +23,7 @@ public class TournamentConfiguration : IEntityTypeConfiguration<Tournament>
         builder.Property(t => t.Rules).HasColumnName("rules").HasColumnType("NVARCHAR(MAX)");
         builder.Property(t => t.RoadmapImageUrl).HasColumnName("roadmap_image_url").HasMaxLength(500);
         builder.Property(t => t.TournamentDate).HasColumnName("tournament_date").IsRequired();
+        builder.Property(t => t.DurationMinutes).HasColumnName("duration_minutes");
 
         builder.Property(t => t.TournamentStatus).HasColumnName("tournament_status").HasConversion<string>().IsRequired();
         builder.Property(t => t.IsActive).HasColumnName("is_active").IsRequired();
@@ -32,6 +33,8 @@ public class TournamentConfiguration : IEntityTypeConfiguration<Tournament>
         builder.Property(t => t.GroupCount).HasColumnName("group_count");
         builder.Property(t => t.AuctionMode).HasColumnName("auction_mode").IsRequired();
         builder.Property(t => t.VenueId).HasColumnName("venue_id");
+        builder.Property(t => t.ReminderSentAt).HasColumnName("reminder_sent_at");
+        builder.Property(t => t.IsWeeklyMatchDay).HasColumnName("is_weekly_match_day").IsRequired();
 
         builder.Property(t => t.CreatedBy).HasColumnName("created_by").IsRequired();
         builder.Property(t => t.CreatedDate).HasColumnName("created_date").IsRequired();

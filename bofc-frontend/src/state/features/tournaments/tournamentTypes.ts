@@ -4,6 +4,7 @@ export interface IoTournamentSingleSummaryType {
     id: number;
     name: string;
     tournamentDate: string;
+    durationMinutes?: number | null;
     venueName: string;
     venueMapLink?: string;
     activeStatus: boolean;
@@ -14,6 +15,7 @@ export interface IoTournamentSingleSummaryType {
     description?: string;
     rules?: string;
     roadmapImageUrl?: string;
+    isWeeklyMatchDay?: boolean;
 }
 
 export interface getSingleTournamentInfoType extends BasicResType {
@@ -77,6 +79,7 @@ export interface TournamentSummeryResType {
             venueName: string;
             venueMapLink?: string;
             activeStatus: boolean;
+            isWeeklyMatchDay?: boolean;
             teams: [
                 {
                     teamId: number;
@@ -123,6 +126,7 @@ export interface LatestTournamentWithUserStatusType extends BasicResType {
             id: number;
             name: string;
             tournamentDate: string;
+            durationMinutes?: number | null;
             venueName: string;
             venueMapLink?: string;
             activeStatus: boolean;
@@ -148,4 +152,20 @@ export interface TournamentListItemType {
 
 export interface TournamentListResType extends BasicResType {
     content: TournamentListItemType[];
+}
+
+export interface CurrentMatchDayType {
+    id: number;
+    name: string;
+    tournamentDate: string;
+    durationMinutes?: number | null;
+    venueName: string;
+    venueMapLink?: string;
+    activeStatus: boolean;
+    tournamentStatus: string;
+    isWeeklyMatchDay: boolean;
+}
+
+export interface CurrentMatchDayResType extends BasicResType {
+    content: CurrentMatchDayType | null;
 }

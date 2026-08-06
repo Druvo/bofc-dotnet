@@ -46,7 +46,7 @@ const LatestTournamentCard: React.FC = () => {
     const latestTournamentId = latestTournamentData?.content?.tournament?.id;
     const latestTournament = latestTournamentData?.content?.tournament;
     const tournamentEffectiveStatus = latestTournament
-        ? getEffectiveTournamentStatus(latestTournament.tournamentStatus, latestTournament.tournamentDate)
+        ? getEffectiveTournamentStatus(latestTournament.tournamentStatus, latestTournament.tournamentDate, latestTournament.durationMinutes)
         : undefined;
     const { data: tournamentParticipantsData } = useGetTournamentParticipantsListQuery(
         { tournamentId: latestTournamentId ?? 0 },
@@ -83,7 +83,7 @@ const LatestTournamentCard: React.FC = () => {
             await addParticipationToTournament(payload).unwrap();
 
             const statusMessage = participationStatus
-                ? 'Successfully joined the tournament!'
+                ? 'Successfully joined the MatchDay!'
                 : 'Updated to not participating';
 
             toast.success(statusMessage);
@@ -107,7 +107,7 @@ const LatestTournamentCard: React.FC = () => {
         return (
             <div className="rounded-2xl border border-gray-200 bg-white py-8 text-center shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
                 <TrophyOutlined className="mb-2 text-3xl text-gray-300 dark:text-gray-600" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming tournaments</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming MatchDays</p>
             </div>
         );
     }
@@ -136,7 +136,7 @@ const LatestTournamentCard: React.FC = () => {
     // share the "Starts in ___" prefix the duration branches need.
     const getCountdown = (): { prefix: string | null; text: string } => {
         const diffMs = new Date(tournament.tournamentDate).getTime() - Date.now();
-        if (getEffectiveTournamentStatus(tournament.tournamentStatus, tournament.tournamentDate) === 'ONGOING') {
+        if (getEffectiveTournamentStatus(tournament.tournamentStatus, tournament.tournamentDate, tournament.durationMinutes) === 'ONGOING') {
             return { prefix: null, text: 'Happening now' };
         }
         if (diffMs <= 0) return { prefix: null, text: 'Match started' };
@@ -225,12 +225,12 @@ const LatestTournamentCard: React.FC = () => {
                 <div className="min-w-0 flex-1">
                     <div className="min-w-0">
                             <div className="flex items-center gap-1.5 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">
-                                <CalendarOutlined /> Matchday
+                                <CalendarOutlined /> Next Match
                             </div>
                             <div className="mt-0.5 flex flex-wrap items-center gap-2.5">
                                 <h5 className="truncate text-xl font-bold text-gray-800 dark:text-white/90">{tournament.name}</h5>
                                 <span className="inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
-                                    {getEffectiveTournamentStatus(tournament.tournamentStatus, tournament.tournamentDate)}
+                                    {getEffectiveTournamentStatus(tournament.tournamentStatus, tournament.tournamentDate, tournament.durationMinutes)}
                                 </span>
                             </div>
                             <div className="mt-1 flex flex-wrap items-center gap-3 text-theme-sm text-gray-500 dark:text-gray-400">
@@ -334,7 +334,7 @@ const LatestTournamentCard: React.FC = () => {
                         size="sm"
                         event={{
                             title: `BOFC Match: ${tournament.name}`,
-                            description: `BOFC tournament match. ${tournament.venueName ? `Venue: ${tournament.venueName}.` : ''}`,
+                            description: `BOFC MatchDay. ${tournament.venueName ? `Venue: ${tournament.venueName}.` : ''}`,
                             location: tournament.venueName,
                             start: new Date(tournament.tournamentDate),
                         }}

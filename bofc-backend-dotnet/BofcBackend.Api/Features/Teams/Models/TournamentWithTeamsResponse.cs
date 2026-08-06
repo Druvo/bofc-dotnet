@@ -20,5 +20,6 @@ public class TournamentWithTeamsResponse
     public string? VenueName { get; set; }
     public string? VenueMapLink { get; set; }
     public bool ActiveStatus { get; set; }
+    public bool IsWeeklyMatchDay { get; set; }
     public List<TournamentTeamResponse> Teams { get; set; } = [];
 }

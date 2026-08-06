@@ -11,6 +11,9 @@ public interface IPlayerService
     Task<PlayerResponse> GetPlayerByIdAsync(long id);
     Task UpdatePlayerStatusAsync(long id, bool active);
     Task<PlayerResponse> UpdatePlayerAsync(long id, PlayerUpdateRequest request);
+
+    /// <summary>Sets the logged-in caller's own theme preference — synced across devices via the player row instead of localStorage.</summary>
+    Task UpdateOwnThemePreferenceAsync(string? themePreference);
     Task<int> CountActivePlayersAsync();
     Task<Dictionary<int, List<GoalKeeperHistoryDto>>> GoalKeepingHistoryAsync();
     Task<List<GoalKeeperHistoryDto>> GetGoalKeeperHistoryByLoggedInUserAsync();

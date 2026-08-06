@@ -148,6 +148,13 @@ public class PlayerService(
         return ToResponse(player);
     }
 
+    public async Task UpdateOwnThemePreferenceAsync(string? themePreference)
+    {
+        var player = await GetPlayerEntityAsync(currentUser.GetPlayerId());
+        player.ThemePreference = themePreference;
+        await db.SaveChangesAsync();
+    }
+
     public async Task<int> CountActivePlayersAsync() => await db.Players.CountAsync(p => p.IsActive);
 
     public async Task<Dictionary<int, List<GoalKeeperHistoryDto>>> GoalKeepingHistoryAsync()
@@ -460,5 +467,6 @@ public class PlayerService(
         Roles = player.Roles.Select(r => new RoleResponse { Id = r.Id, Name = r.Name }).ToHashSet(),
         PhotoKey = player.PhotoKey,
         PhotoUrl = player.PhotoKey != null ? $"/files/player-photos/{player.PhotoKey}" : null,
+        ThemePreference = player.ThemePreference,
     };
 }

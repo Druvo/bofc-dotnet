@@ -64,6 +64,9 @@ public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUser
     public DbSet<NotificationRecipient> NotificationRecipients => Set<NotificationRecipient>();
     public DbSet<PushSubscription> PushSubscriptions => Set<PushSubscription>();
 
+    // Phase 7 — global admin settings (SMTP + email notification toggles)
+    public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

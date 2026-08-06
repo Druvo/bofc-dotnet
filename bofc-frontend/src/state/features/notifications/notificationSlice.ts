@@ -36,6 +36,7 @@ export interface SendNotificationRequest {
     body: string;
     targetType: NotificationTargetType;
     userIds?: number[];
+    sendEmail?: boolean;
 }
 
 export interface PushSubscriptionPayload {

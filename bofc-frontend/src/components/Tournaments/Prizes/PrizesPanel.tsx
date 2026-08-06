@@ -22,7 +22,7 @@ export default function PrizesPanel({ tournamentId }: PrizesPanelProps) {
         <div className="flex items-center gap-3">
           <TrophyOutlined className="text-3xl text-amber-500 dark:text-amber-400" />
           <h2 className="text-2xl font-bold text-amber-500 dark:text-amber-400">
-            Tournament Prizes & Awards
+            MatchDay Prizes & Awards
           </h2>
         </div>
         {isAdmin && (

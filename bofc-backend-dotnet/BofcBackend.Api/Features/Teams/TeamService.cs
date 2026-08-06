@@ -214,6 +214,7 @@ public class TeamService(
             VenueName = tournament.Venue.Name,
             VenueMapLink = tournament.Venue.MapLink,
             ActiveStatus = tournament.IsActive,
+            IsWeeklyMatchDay = tournament.IsWeeklyMatchDay,
             Teams = teams.Select(ConvertToTournamentTeamResponse).ToList(),
         };
     }

@@ -2,9 +2,11 @@ using System.Net;
 using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Data;
+using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Features.Accounting.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace BofcBackend.Api.Features.Accounting;
 
@@ -14,8 +16,23 @@ namespace BofcBackend.Api.Features.Accounting;
 /// conversion loads every chart + nature once and resolves the parent chain in memory —
 /// avoids either an unbounded EF Include chain or N+1 queries for an arbitrarily deep hierarchy.
 /// </summary>
-public class AcChartService(BofcDbContext db, AcNatureService acNatureService)
+public class AcChartService(BofcDbContext db, AcNatureService acNatureService, IOptions<AccountingOptions> accountingOptions)
 {
+    /// <summary>The "cash" chart every collection debits and every bill payment credits — resolved from Settings (admin-editable, live) falling back to the Accounting:CashChartCode appsettings default.</summary>
+    public async Task<AcChart> GetCashChartAsync() =>
+        await GetAcChartByCodeAsync(await ResolveCodeAsync(s => s.CashChartCode, accountingOptions.Value.CashChartCode));
+
+    /// <summary>The income chart credited when a player collection is recorded — resolved the same way as GetCashChartAsync.</summary>
+    public async Task<AcChart> GetCollectionIncomeChartAsync() =>
+        await GetAcChartByCodeAsync(await ResolveCodeAsync(s => s.CollectionIncomeChartCode, accountingOptions.Value.CollectionIncomeChartCode));
+
+    private async Task<string> ResolveCodeAsync(Func<SystemSettings, string?> selector, string fallback)
+    {
+        var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
+        var code = settings != null ? selector(settings) : null;
+        return string.IsNullOrWhiteSpace(code) ? fallback : code;
+    }
+
     public async Task<List<AcChartResponse>> GetAcChartsAsync()
     {
         var (charts, byId) = await LoadAllAsync();

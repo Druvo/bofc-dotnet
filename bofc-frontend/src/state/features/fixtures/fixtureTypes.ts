@@ -39,9 +39,12 @@ export interface IFixture {
   venueName: string | null;
   venueMapLink?: string | null;
   matchDate: string;
+  endTime?: string | null;
   matchStatus: MatchStatus | string;
   homeTeamScore: number;
   awayTeamScore: number;
+  homeJerseyColor?: string | null;
+  awayJerseyColor?: string | null;
   homeYellowCards?: number;
   homeRedCards?: number;
   awayYellowCards?: number;
@@ -78,6 +81,10 @@ export interface IFixtureGenerationRequest {
   matchDurationMinutes?: number;
   venueId?: number;
   tournamentType?: TournamentType;
+  /** 1-based match number after which a one-time break is inserted. */
+  breakAfterMatchNumber?: number;
+  /** Length of that one-time break, in minutes. Ignored unless breakAfterMatchNumber is set. */
+  breakDurationMinutes?: number;
 }
 
 // Match Statistics
@@ -232,6 +239,8 @@ export interface ICreateMatchRequest {
   matchOrder?: number;
   matchDurationMinutes?: number;
   groupName?: string;
+  homeJerseyColor?: string;
+  awayJerseyColor?: string;
 }
 
 // Create Match Response

@@ -18,6 +18,7 @@ import { AuctionRegistrationPage } from "./components/Auction";
 import AppFooter from "./components/CommonAtoms/AppFooter";
 import { club } from "./theme/clubTheme";
 import { notificationApi } from "./state/features/notifications/notificationSlice";
+import { useGetUserProfileQuery, useUpdateThemePreferenceMutation } from "./state/features/auth/authSlice";
 
 function App() {
     const [collapsed, setCollapsed] = useState(false);
@@ -38,6 +39,45 @@ function App() {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    // Same-browser persistence (the localStorage write-back was previously missing entirely —
+    // toggling only ever changed in-memory state, so a refresh/relogin always fell back to
+    // whatever "isDarkMode" last happened to be in storage, i.e. never anything you'd set).
+    useEffect(() => {
+        try {
+            localStorage.setItem("isDarkMode", String(isDarkMode));
+        } catch {
+            // ignore storage failures (private browsing, quota, etc.)
+        }
+    }, [isDarkMode]);
+
+    // Cross-device persistence: the player's own themePreference on the server. Only applied
+    // when the server actually has one set (null means "never explicitly chosen on any device"
+    // — leave the local/OS default alone rather than forcing light on a brand-new device).
+    // Safe to depend on this re-running after every toggle: the mutation below invalidates this
+    // query, so it refetches and converges on the value we just saved — not a fight, a no-op.
+    const { data: ownProfile } = useGetUserProfileQuery(
+        { id: user?.userId ?? "" },
+        { skip: !user?.token || !user?.userId }
+    );
+    const [updateThemePreference] = useUpdateThemePreferenceMutation();
+
+    useEffect(() => {
+        const serverPreference = ownProfile?.content?.themePreference;
+        if (serverPreference === "light" || serverPreference === "dark") {
+            setIsDarkMode(serverPreference === "dark");
+        }
+    }, [ownProfile?.content?.themePreference]);
+
+    const handleSetIsDarkMode = (value: boolean) => {
+        setIsDarkMode(value);
+        // Fire-and-forget: RTK Query mutation triggers resolve (not reject) even on API
+        // error, so a failed server sync just means the next device won't pick it up yet —
+        // the local toggle above already applied, not worth interrupting the user over.
+        if (user?.token) {
+            updateThemePreference({ themePreference: value ? "dark" : "light" });
+        }
+    };
 
     // Clicking a push notification posts {type, url} from public/sw.js's
     // "notificationclick" handler to an already-open tab — route there via
@@ -249,7 +289,7 @@ function App() {
                 },
             }}
         >
-            <DefaultLayout isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode}>
+            <DefaultLayout isDarkMode={isDarkMode} setIsDarkMode={handleSetIsDarkMode}>
                 <ToastContainer
                     theme={isDarkMode ? "dark" : "light"}
                     position="top-right"
@@ -264,7 +304,7 @@ function App() {
                 <ContentComponent
                     collapsed={collapsed}
                     onToggleCollapse={handleToggleCollapse}
-                    setIsDarkMode={setIsDarkMode}
+                    setIsDarkMode={handleSetIsDarkMode}
                     isDarkMode={isDarkMode}
                 />
             </DefaultLayout>

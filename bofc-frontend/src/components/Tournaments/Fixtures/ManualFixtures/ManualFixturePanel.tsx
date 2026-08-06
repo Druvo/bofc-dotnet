@@ -73,7 +73,7 @@ export default function ManualFixturePanel({
       label: (
         <span className="inline-flex items-center gap-1.5">
           <NodeIndexOutlined />
-          Tournament
+          MatchDay
         </span>
       ),
     },

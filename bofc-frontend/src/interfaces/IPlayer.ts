@@ -18,6 +18,7 @@ interface IPlayer {
     }>;
     photoKey?: string;
     photoUrl?: string;
+    themePreference?: "light" | "dark" | null;
 }
 
 export default IPlayer;

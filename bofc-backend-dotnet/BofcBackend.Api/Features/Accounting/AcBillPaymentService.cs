@@ -3,11 +3,9 @@ using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
-using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Features.Accounting.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace BofcBackend.Api.Features.Accounting;
 
@@ -16,8 +14,7 @@ public class AcBillPaymentService(
     BofcDbContext db,
     CostTypeService costTypeService,
     AcVoucherService voucherService,
-    AcChartService acChartService,
-    IOptions<AccountingOptions> accountingOptions)
+    AcChartService acChartService)
 {
     public async Task<List<AcBillPaymentResponse>> GetAllBillPaymentsAsync()
     {
@@ -100,8 +97,8 @@ public class AcBillPaymentService(
     {
         var costType = await costTypeService.GetCostTypeEntityAsync(billPayment.CostTypeId);
 
-        // Resolved by Code, not a hardcoded chart Id — see AccountingOptions.
-        var cashChart = await acChartService.GetAcChartByCodeAsync(accountingOptions.Value.CashChartCode);
+        // Resolved by Code (Settings, falling back to appsettings), not a hardcoded chart Id — see AcChartService.
+        var cashChart = await acChartService.GetCashChartAsync();
 
         var voucherRequest = new AcVoucherRequest
         {

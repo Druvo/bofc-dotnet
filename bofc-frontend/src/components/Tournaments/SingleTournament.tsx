@@ -20,14 +20,20 @@ import PickerWheelModal from "./Atoms/pickerWheel/PickerWheelModal";
 import { BarChartOutlined, FileExcelOutlined, RightSquareOutlined, TrophyOutlined, SearchOutlined } from "@ant-design/icons";
 import { exportToExcel, showBdLocalTime } from "../../utils/utils";
 import FixturesPanel from "./Fixtures/FixturesPanel";
+import SimpleMatchesPanel from "./Fixtures/SimpleMatchesPanel";
 import PrizesPanel from "./Prizes/PrizesPanel";
 import StatsLeaderboardPanel from "./Statistics/StatsLeaderboardPanel";
 import Button from "../ui/button";
 import Tabs from "../ui/tabs";
 
-const buildMainTabs = (hasTeams: boolean) => [
+const buildMainTabs = (hasTeams: boolean, isWeeklyMatchDay: boolean) => [
   { key: "team-building", label: "Team Building" },
-  { key: "fixtures", label: "Fixtures", disabled: !hasTeams, disabledTitle: "Add teams in Team Building first" },
+  {
+    key: "fixtures",
+    label: isWeeklyMatchDay ? "Matches" : "Fixtures",
+    disabled: !hasTeams,
+    disabledTitle: "Add teams in Team Building first",
+  },
   { key: "prizes", label: <span className="flex items-center gap-1.5"><TrophyOutlined /> Prizes & Awards</span> },
   { key: "stats-leaderboard", label: <span className="flex items-center gap-1.5"><BarChartOutlined /> Stats & Leaderboard</span> },
 ];
@@ -53,6 +59,7 @@ function SingleTournament() {
 
   const [playerSearch, setPlayerSearch] = useState("");
 
+  const isWeeklyMatchDay = Boolean(tournamentSummary?.content[0]?.isWeeklyMatchDay);
   const hasTeams = Array.isArray(teams) && teams.length > 0;
   const isAdmin = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN") || loginInfo.roles.includes("COORDINATOR");
 
@@ -166,7 +173,7 @@ function SingleTournament() {
         </div>
       </div>
 
-      <Tabs items={buildMainTabs(hasTeams)} active={activeTab} onChange={handleTabChange} />
+      <Tabs items={buildMainTabs(hasTeams, isWeeklyMatchDay)} active={activeTab} onChange={handleTabChange} />
 
       {activeTab === "team-building" && (
         <div>
@@ -244,7 +251,15 @@ function SingleTournament() {
 
       {activeTab === "fixtures" && (
         hasTeams ? (
-          <FixturesPanel tournamentId={tournamentId} teams={teams} />
+          isWeeklyMatchDay ? (
+            <SimpleMatchesPanel
+              tournamentId={tournamentId}
+              teams={teams}
+              tournamentStartDate={tournamentSummary?.content[0]?.tournamentDate}
+            />
+          ) : (
+            <FixturesPanel tournamentId={tournamentId} teams={teams} />
+          )
         ) : (
           <p className="text-theme-sm text-gray-400 dark:text-gray-500">Please add teams in Team Building tab first</p>
         )
@@ -253,7 +268,11 @@ function SingleTournament() {
       {activeTab === "prizes" && <PrizesPanel tournamentId={tournamentId} />}
 
       {activeTab === "stats-leaderboard" && (
-        <StatsLeaderboardPanel tournamentId={tournamentId} isActive={activeTab === "stats-leaderboard"} />
+        <StatsLeaderboardPanel
+          tournamentId={tournamentId}
+          isActive={activeTab === "stats-leaderboard"}
+          weeklyMatchDaysOnly={isWeeklyMatchDay}
+        />
       )}
     </div>
   );

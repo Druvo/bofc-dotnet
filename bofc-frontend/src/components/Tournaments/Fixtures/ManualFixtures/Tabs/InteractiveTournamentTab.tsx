@@ -1238,7 +1238,7 @@ export default function InteractiveTournamentTab({
       {renderEmptyState ? (
         <div className="flex h-full items-center justify-center rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
           <div className="text-center">
-            <p className="mb-4 text-theme-sm text-gray-400 dark:text-gray-500">No tournament structure yet.</p>
+            <p className="mb-4 text-theme-sm text-gray-400 dark:text-gray-500">No MatchDay structure yet.</p>
             <Button type="button" startIcon={<PlusOutlined />} onClick={() => handleCreateRound()}>
               Add First Round
             </Button>

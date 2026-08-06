@@ -85,6 +85,24 @@ public class TournamentController(ITournamentService tournamentService, ITeamSer
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
     }
 
+    /// <summary>The next non-concluded match — ONGOING (not stale) first, then soonest UPCOMING. Same pick as the Dashboard's "Next Match" card. Content is null when nothing qualifies.</summary>
+    [AllowAnonymous]
+    [HttpGet("next-active")]
+    public async Task<IActionResult> GetNextActiveTournament()
+    {
+        var response = await tournamentService.GetMostRecentActiveTournamentAsync();
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
+    }
+
+    /// <summary>The current/upcoming auto-created "Match Day" — content is null (not a 404) when the scheduler hasn't created one yet.</summary>
+    [AllowAnonymous]
+    [HttpGet("current-match-day")]
+    public async Task<IActionResult> GetCurrentMatchDay()
+    {
+        var response = await tournamentService.GetCurrentMatchDayAsync();
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
+    }
+
     /// <summary>Id, name, and tournamentDate ordered by tournamentDate descending; optional 4-digit year filter.</summary>
     [AllowAnonymous]
     [HttpGet("list")]

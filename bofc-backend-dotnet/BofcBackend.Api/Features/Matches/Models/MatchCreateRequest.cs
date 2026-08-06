@@ -23,4 +23,8 @@ public class MatchCreateRequest
     public int? MatchOrder { get; set; }
     public int? MatchDurationMinutes { get; set; }
     public string? GroupName { get; set; }
+
+    /// <summary>Which of the club's 2 physical jerseys each side wears — optional, set manually per match.</summary>
+    public string? HomeJerseyColor { get; set; }
+    public string? AwayJerseyColor { get; set; }
 }

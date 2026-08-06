@@ -18,6 +18,9 @@ public interface ITournamentService
     Task ConcludeTournamentAsync(long tournamentId);
     Task<TournamentResponse> GetMostRecentTournamentAsync();
     Task<TournamentResponse?> GetMostRecentActiveTournamentAsync();
+
+    /// <summary>The current/upcoming auto-created "Match Day" (IsWeeklyMatchDay=true) — null if the scheduler hasn't created one yet (e.g. the feature was just enabled).</summary>
+    Task<TournamentResponse?> GetCurrentMatchDayAsync();
     Task<List<TournamentListResponse>> GetTournamentListAsync(string? year);
     Task<List<string>> GetTournamentSessionsAsync();
 }

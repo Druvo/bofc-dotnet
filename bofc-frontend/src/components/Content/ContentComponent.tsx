@@ -16,7 +16,6 @@ import AccountBalanceSummary from "../Account/Report/AccountBalanceSummary";
 import AccountsReport from "../Account/Report/AccountReport";
 import AcVouchers from "../Account/Voucher/AcVouchers";
 import UserProfile from "../authPages/UserProfile";
-import SettingsModal from "../CommonAtoms/SettingsModal";
 import Dashboard from "../Dashboard/DashboardComponent";
 import Player from "../Player/Player";
 import Players from "../Player/Players";
@@ -28,6 +27,8 @@ import Venue from "../Venue/Venue";
 import ContentOutlet from "./ContentOutlet";
 import { useAppShell } from "../layout/AppShellContext";
 import ClubRules from "../ClubRules/ClubRules";
+import GlobalSettingsPage from "../Settings/SettingsPage";
+import MatchDayPage from "../MatchDay/MatchDayPage";
 import MatchDetailsPage from "../Tournaments/Fixtures/MatchDetailsPage";
 import {
   AuctionHubPage,
@@ -67,7 +68,7 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
     const { user } = useAuthHook();
     const dispatch = useDispatch();
 
-    const { data: playerProfileData, refetch } = useGetUserProfileQuery({
+    const { data: playerProfileData } = useGetUserProfileQuery({
         id: loginInfo?.userId || "",
     }, {
         skip: !loginInfo?.userId
@@ -79,15 +80,9 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
         refetch: refetchGoalkeepingHistory
     } = useGetMyGoalkeepingHistoryQuery();
 
-    // Settings modal and the goalkeeping-history drawer are now opened from
-    // the TailAdmin Header (via AppShellContext) rather than a dropdown menu
-    // built here — this component still owns the actual query data/refetch,
-    // since it's what the Drawer/Modal below render.
-    const handleModalClose = () => {
-        refetch();
-        appShell.closeSettingsModal();
-    };
-
+    // The goalkeeping-history drawer is opened from the TailAdmin Header (via
+    // AppShellContext) rather than a dropdown menu built here — this component still
+    // owns the actual query data/refetch, since it's what the Drawer below renders.
     useEffect(() => {
         if (appShell.goalkeepingHistoryOpen) {
             refetchGoalkeepingHistory();
@@ -213,6 +208,10 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
 
                             <Route path="club-rules" element={<ClubRules />} />
 
+                            <Route path="settings" element={<GlobalSettingsPage />} />
+
+                            <Route path="match-day" element={<MatchDayPage />} />
+
                             {/* Auction Routes */}
                             <Route path="auction" element={<AuctionHubPage />} />
                             <Route path="auction/register/:tournamentId" element={<AuctionRegistrationPage />} />
@@ -225,24 +224,6 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                         </Route>
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
-                    {playerProfileData && loginInfo?.userId && (
-                        <SettingsModal
-                            visible={appShell.settingsModalOpen}
-                            onClose={handleModalClose}
-                            playerData={{
-                                id: playerProfileData?.content?.id,
-                                name: playerProfileData?.content?.name,
-                                email: playerProfileData?.content?.email,
-                                employeeId:
-                                    playerProfileData?.content?.employeeId,
-                                fullName: playerProfileData?.content?.fullName,
-                                teamsId: playerProfileData?.content?.teamsId,
-                                mobileNo: playerProfileData?.content?.mobileNo,
-                                playingPosition:
-                                    playerProfileData?.content?.playingPosition,
-                            }}
-                        />
-                    )}
                         </div>
                         <AppFooter />
             </div>

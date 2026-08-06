@@ -9,31 +9,25 @@ import {
   FireOutlined,
   HomeOutlined,
   LoginOutlined,
-  NodeIndexOutlined,
-  TeamOutlined,
   TrophyOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import ViewerHomeTab from "./ViewerHomeTab";
 import ViewerAuctionTab from "./ViewerAuctionTab";
-import ViewerFixturesTab from "./ViewerFixturesTab";
-import ViewerResultsTab from "./ViewerResultsTab";
+import ViewerFixturesResultsTab from "./ViewerFixturesResultsTab";
 import ViewerTableTab from "./ViewerTableTab";
-import ViewerPlayersTab from "./ViewerPlayersTab";
 import ViewerRulesTab from "./ViewerRulesTab";
-import ViewerTournamentFlowTab from "./ViewerTournamentFlowTab";
 import ViewerLoginTab from "./ViewerLoginTab";
 import StatsLeaderboardPanel from "../Tournaments/Statistics/StatsLeaderboardPanel";
 import {
   useGetTournamentsQuery,
   useGetTournamentSummaryQuery,
+  useGetNextActiveTournamentQuery,
 } from "../../state/features/tournaments/tournamentsSlice";
 import { showBdLocalTime, getEffectiveTournamentStatus } from "../../utils/utils";
 import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import styles from "./TournamentViewerPage.module.css";
-import FormSelect from "../ui/form-select";
-import useIsMobile from "../../hooks/useIsMobile";
 import VenueLink from "../CommonAtoms/VenueLink";
 
 const VIEWER_CONTENT_MAX_WIDTH = 1180;
@@ -63,7 +57,7 @@ const isValidViewerTab = (
   if (!tabKey) return false;
 
   return (
-    ["home", "fixtures", "roadmap", "results", "table", "stats", "players"].includes(tabKey) ||
+    ["home", "results", "table", "stats"].includes(tabKey) ||
     (tabKey === "rules" && hasRules) ||
     (tabKey === "auction" && hasAuction) ||
     (tabKey === "login" && !isLoggedIn)
@@ -75,7 +69,6 @@ export default function TournamentViewerPage({
 }: {
   hasHeader?: boolean;
 }) {
-  const isMobile = useIsMobile(768);
   const loginInfo = useSelector(selectLoginInfo);
   const isLoggedIn = Boolean(loginInfo.token);
   const navigate = useNavigate();
@@ -88,7 +81,7 @@ export default function TournamentViewerPage({
   // itself valid (defaulting to a tournament, correcting an unavailable tab).
   const selectedId = tournamentIdParam ? Number(tournamentIdParam) || null : null;
 
-  const { data: tournamentsData, isLoading: tournamentsLoading } =
+  const { data: tournamentsData } =
     useGetTournamentsQuery({
       offSet: 0,
       pageSize: 200,
@@ -96,12 +89,16 @@ export default function TournamentViewerPage({
       sortDirection: "DESC",
     });
 
+  const { data: nextActiveData, isFetching: nextActiveLoading } = useGetNextActiveTournamentQuery(undefined, {
+    skip: selectedId != null,
+  });
+
   const tournaments = useMemo(() => {
     const list = tournamentsData?.content?.tournaments || [];
     return [...list].sort(
       (a, b) =>
-        (statusOrder[getEffectiveTournamentStatus(a.tournamentStatus?.toUpperCase(), a.tournamentDate)] ?? 5) -
-        (statusOrder[getEffectiveTournamentStatus(b.tournamentStatus?.toUpperCase(), b.tournamentDate)] ?? 5),
+        (statusOrder[getEffectiveTournamentStatus(a.tournamentStatus?.toUpperCase(), a.tournamentDate, a.durationMinutes)] ?? 5) -
+        (statusOrder[getEffectiveTournamentStatus(b.tournamentStatus?.toUpperCase(), b.tournamentDate, b.durationMinutes)] ?? 5),
     );
   }, [tournamentsData]);
 
@@ -117,6 +114,7 @@ export default function TournamentViewerPage({
   const selectedStatus = getEffectiveTournamentStatus(
     (selectedTournament?.tournamentStatus || "").toUpperCase(),
     selectedTournament?.tournamentDate,
+    selectedTournament?.durationMinutes,
   );
 
   const { data: summaryData } = useGetTournamentSummaryQuery(
@@ -136,18 +134,19 @@ export default function TournamentViewerPage({
       : "home";
 
   // No tournament in the URL yet, or the URL points at one that no longer
-  // exists — pick the default/first tournament and settle the URL onto it.
+  // exists — pick the next non-concluded match (same "ONGOING-not-stale,
+  // else soonest UPCOMING" pick as the Dashboard's Next Match card), falling
+  // back to the most recent match overall if nothing qualifies (e.g. every
+  // match has already concluded), and settle the URL onto it. The viewer's
+  // own dropdown lets the user switch to any other match afterward.
   useEffect(() => {
     if (tournaments.length === 0) return;
+    if (selectedId != null && tournaments.some((t) => t.id === selectedId)) return;
+    if (nextActiveLoading) return;
 
-    const urlTournamentStillAvailable =
-      selectedId != null && tournaments.some((t) => t.id === selectedId);
-    if (urlTournamentStillAvailable) return;
-
-    const defaultTournament = tournaments.find((t) => t.defaultTournament);
-    const targetId = (defaultTournament ?? tournaments[0]).id;
+    const targetId = nextActiveData?.content?.id ?? tournaments[0].id;
     navigate(`/tournament-viewer/${targetId}${tabParam ? `/${tabParam}` : ""}`, { replace: true });
-  }, [selectedId, tournaments, tabParam, navigate]);
+  }, [selectedId, tournaments, tabParam, navigate, nextActiveData, nextActiveLoading]);
 
   // The URL's tab segment is present but not valid for this tournament
   // (e.g. deep-linked to "rules" before rules data loaded, or a stale link
@@ -158,14 +157,6 @@ export default function TournamentViewerPage({
     if (isValidViewerTab(tabParam, hasRules, isLoggedIn, hasAuction)) return;
     navigate(`/tournament-viewer/${selectedId}/home`, { replace: true });
   }, [selectedId, tabParam, hasRules, isLoggedIn, hasAuction, navigate]);
-
-  const handleSelect = (id: number) => {
-    // Keep whichever tab is currently active — if it isn't valid for the
-    // newly-picked tournament, the correction effect above settles it once
-    // that tournament's summary data loads (same async pattern as before,
-    // now expressed as a URL redirect instead of a state update).
-    navigate(`/tournament-viewer/${id}/${activeTab}`);
-  };
 
   const tabItems = [
     {
@@ -211,33 +202,6 @@ export default function TournamentViewerPage({
         ]
       : []),
     {
-      key: "fixtures",
-      label: (
-        <span>
-          <CalendarOutlined style={{ marginRight: 6 }} />
-          Fixtures
-        </span>
-      ),
-      children: selectedId ? (
-        <ViewerFixturesTab tournamentId={selectedId} />
-      ) : null,
-    },
-    {
-      key: "roadmap",
-      label: (
-        <span>
-          <NodeIndexOutlined style={{ marginRight: 6 }} />
-          Roadmap
-        </span>
-      ),
-      children: selectedId ? (
-        <ViewerTournamentFlowTab
-          tournamentId={selectedId}
-          isActive={activeTab === "roadmap"}
-        />
-      ) : null,
-    },
-    {
       key: "results",
       label: (
         <span>
@@ -246,7 +210,7 @@ export default function TournamentViewerPage({
         </span>
       ),
       children: selectedId ? (
-        <ViewerResultsTab tournamentId={selectedId} />
+        <ViewerFixturesResultsTab tournamentId={selectedId} />
       ) : null,
     },
     {
@@ -274,18 +238,6 @@ export default function TournamentViewerPage({
           tournamentId={selectedId}
           isActive={activeTab === "stats"}
         />
-      ) : null,
-    },
-    {
-      key: "players",
-      label: (
-        <span>
-          <TeamOutlined style={{ marginRight: 6 }} />
-          Players
-        </span>
-      ),
-      children: selectedId ? (
-        <ViewerPlayersTab tournamentId={selectedId} />
       ) : null,
     },
     ...(!isLoggedIn
@@ -335,7 +287,7 @@ export default function TournamentViewerPage({
                       <div className={styles.identityText}>
                         <div className={styles.titleLine}>
                           <span className={styles.tournamentName}>
-                            {selectedTournament?.name || "Select Tournament"}
+                            {selectedTournament?.name || "Select MatchDay"}
                           </span>
                           {selectedStatus && (
                             <span
@@ -372,25 +324,6 @@ export default function TournamentViewerPage({
                         )}
                       </div>
                     </div>
-
-                    {/* Right: tournament switcher */}
-                    <div className={styles.controlsRow}>
-                      <FormSelect
-                        className={`tournament-portal-select-custom ${styles.tournamentSelect}`}
-                        disabled={tournamentsLoading}
-                        value={selectedId ?? ""}
-                        onChange={(e) => handleSelect(Number(e.target.value))}
-                        style={{
-                          width: isMobile ? "100%" : 260,
-                          flex: isMobile ? 1 : "none",
-                          minWidth: 0,
-                        }}
-                        options={tournaments.map((t) => ({
-                          value: t.id,
-                          label: `${t.name} (${getEffectiveTournamentStatus((t.tournamentStatus || "UNKNOWN").toUpperCase(), t.tournamentDate)})`,
-                        }))}
-                      />
-                    </div>
                   </div>
                 </div>
               )}
@@ -423,7 +356,7 @@ export default function TournamentViewerPage({
           <div className={styles.emptyStateWrap}>
             <TrophyOutlined className={styles.emptyIcon} />
             <span className={styles.emptyDescription}>
-              Select a tournament from the dropdown to view fixtures,
+              Select a MatchDay from the dropdown to view fixtures,
               results, standings and stats
             </span>
           </div>

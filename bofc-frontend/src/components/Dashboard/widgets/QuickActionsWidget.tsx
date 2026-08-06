@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import { isAdmin } from "../../../utils/roleUtils";
+import useAuctionEnabled from "../../../hooks/useAuctionEnabled";
 
 interface Action {
   key: string;
@@ -18,14 +19,15 @@ interface Action {
   icon: React.ReactNode;
   to: string;
   adminOnly?: boolean;
+  auctionOnly?: boolean;
 }
 
 const ACTIONS: Action[] = [
   { key: "pay", label: "Make a Payment", icon: <DollarOutlined />, to: "/ac/collections" },
-  { key: "join", label: "My Tournaments", icon: <TeamOutlined />, to: "/tournaments" },
-  { key: "auction", label: "Auction Hub", icon: <FireOutlined />, to: "/auction" },
+  { key: "join", label: "My MatchDays", icon: <TeamOutlined />, to: "/tournaments" },
+  { key: "auction", label: "Auction Hub", icon: <FireOutlined />, to: "/auction", auctionOnly: true },
   { key: "stats", label: "Player Statistics", icon: <BarChartOutlined />, to: "/player-statistics" },
-  { key: "approve", label: "Approve Registrations", icon: <UserAddOutlined />, to: "/auction", adminOnly: true },
+  { key: "approve", label: "Approve Registrations", icon: <UserAddOutlined />, to: "/auction", adminOnly: true, auctionOnly: true },
   { key: "venues", label: "Manage Venues", icon: <TrophyOutlined />, to: "/venues", adminOnly: true },
 ];
 
@@ -33,7 +35,8 @@ const QuickActionsWidget: React.FC = () => {
   const navigate = useNavigate();
   const loginInfo = useSelector(selectLoginInfo);
   const admin = isAdmin(loginInfo.roles || []);
-  const actions = ACTIONS.filter((a) => !a.adminOnly || admin);
+  const auctionEnabled = useAuctionEnabled();
+  const actions = ACTIONS.filter((a) => (!a.adminOnly || admin) && (!a.auctionOnly || auctionEnabled));
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">

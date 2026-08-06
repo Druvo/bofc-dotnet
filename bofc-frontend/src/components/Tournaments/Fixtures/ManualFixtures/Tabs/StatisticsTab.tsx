@@ -365,7 +365,7 @@ export default function StatisticsTab({ tournamentId, isActive }: StatisticsTabP
     return (
       <Alert
         message="Error Loading Statistics"
-        description="Failed to load tournament statistics. Please try again later."
+        description="Failed to load MatchDay statistics. Please try again later."
         type="error"
         showIcon
       />
@@ -380,7 +380,7 @@ export default function StatisticsTab({ tournamentId, isActive }: StatisticsTabP
           title={
             <span>
               <TrophyOutlined style={{ marginRight: 8 }} />
-              Tournament Standings
+              MatchDay Standings
             </span>
           }
           style={{ marginBottom: 24 }}

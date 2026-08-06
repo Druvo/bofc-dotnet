@@ -3,7 +3,9 @@ import { toast } from "react-toastify";
 import moment from "moment";
 import { useCreateMatchMutation } from "../../../state/features/fixtures/fixturesSlice";
 import { useGetVanuesQuery } from "../../../state/features/vanues/vanuesSlice";
+import { useGetSystemSettingsQuery } from "../../../state/features/settings/settingsSlice";
 import { ICreateMatchRequest } from "../../../state/features/fixtures/fixtureTypes";
+import { JERSEY_COLOR_PALETTE } from "../../../utils/jerseyColors";
 import Modal from "../../ui/modal";
 import Button from "../../ui/button";
 import FormInput from "../../ui/form-input";
@@ -28,6 +30,8 @@ interface FormValues {
   matchTime: string;
   venueId: string;
   matchDurationMinutes: string;
+  homeJerseyColor: string;
+  awayJerseyColor: string;
 }
 
 const emptyValues: FormValues = {
@@ -37,6 +41,8 @@ const emptyValues: FormValues = {
   matchTime: "",
   venueId: "",
   matchDurationMinutes: "90",
+  homeJerseyColor: "",
+  awayJerseyColor: "",
 };
 
 export default function AddMatchModal({
@@ -52,6 +58,13 @@ export default function AddMatchModal({
   const [createMatch, { isLoading }] = useCreateMatchMutation();
   const { data: venuesData, isLoading: isVenuesLoading } = useGetVanuesQuery();
   const venues = venuesData?.content || [];
+  const { data: settingsData } = useGetSystemSettingsQuery();
+  const jerseyColorOptions = [
+    { value: "", label: "Not set" },
+    ...[settingsData?.content.jerseyColorA, settingsData?.content.jerseyColorB]
+      .filter((c): c is string => !!c)
+      .map((c) => ({ value: c, label: JERSEY_COLOR_PALETTE.find((p) => p.value === c)?.label || c })),
+  ];
 
   const [values, setValues] = useState<FormValues>(emptyValues);
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
@@ -94,6 +107,8 @@ export default function AddMatchModal({
       roundId: roundId,
       groupId: groupId,
       groupName: groupName,
+      homeJerseyColor: values.homeJerseyColor || undefined,
+      awayJerseyColor: values.awayJerseyColor || undefined,
     };
 
     try {
@@ -130,6 +145,11 @@ export default function AddMatchModal({
         <div className="flex flex-col gap-4">
           <FormSelect label="Home Team" placeholder="Select home team" value={values.homeTeamId} onChange={(e) => setField("homeTeamId", e.target.value)} error={errors.homeTeamId} options={teams.map((t) => ({ value: t.teamId, label: t.teamName }))} />
           <FormSelect label="Away Team" placeholder="Select away team" value={values.awayTeamId} onChange={(e) => setField("awayTeamId", e.target.value)} error={errors.awayTeamId} options={teams.map((t) => ({ value: t.teamId, label: t.teamName }))} />
+
+          <div className="grid grid-cols-2 gap-3">
+            <FormSelect label="Home Jersey" value={values.homeJerseyColor} onChange={(e) => setField("homeJerseyColor", e.target.value)} options={jerseyColorOptions} />
+            <FormSelect label="Away Jersey" value={values.awayJerseyColor} onChange={(e) => setField("awayJerseyColor", e.target.value)} options={jerseyColorOptions} />
+          </div>
 
           <div className="grid grid-cols-2 gap-3">
             <FormInput type="date" label="Match Date" value={values.matchDate} onChange={(e) => setField("matchDate", e.target.value)} error={errors.matchDate} />

@@ -430,6 +430,8 @@ public class MatchManagementService(
             MatchDurationMinutes = request.MatchDurationMinutes,
             GroupName = request.GroupName ?? group?.GroupName,
             LegacyRound = round?.RoundNumber,
+            HomeJerseyColor = request.HomeJerseyColor,
+            AwayJerseyColor = request.AwayJerseyColor,
         };
 
         db.Matches.Add(match);
@@ -567,6 +569,7 @@ public class MatchManagementService(
             VenueName = match.Venue?.Name,
             VenueMapLink = match.Venue?.MapLink,
             MatchDate = match.MatchDate,
+            EndTime = match.MatchDurationMinutes != null ? match.MatchDate.AddMinutes(match.MatchDurationMinutes.Value) : null,
             MatchStatus = match.MatchStatus.ToString(),
             MatchOrder = match.MatchOrder,
             Round = match.LegacyRound,
@@ -574,6 +577,8 @@ public class MatchManagementService(
             GroupName = groupName,
             HomeTeamScore = match.HomeTeamScore,
             AwayTeamScore = match.AwayTeamScore,
+            HomeJerseyColor = match.HomeJerseyColor,
+            AwayJerseyColor = match.AwayJerseyColor,
             MatchDurationMinutes = match.MatchDurationMinutes,
             ElapsedTimeSeconds = match.ElapsedTimeSeconds,
             StartedAt = match.StartedAt,

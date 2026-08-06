@@ -26,6 +26,7 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.Property(p => p.LastPasswordChangeDate).HasColumnName("last_password_change_date");
         builder.Property(p => p.ProfilePhoto).HasColumnName("profile_photo").HasMaxLength(500);
         builder.Property(p => p.PhotoKey).HasColumnName("photo_key");
+        builder.Property(p => p.ThemePreference).HasColumnName("theme_preference").HasMaxLength(10);
 
         builder.Property(p => p.CreatedBy).HasColumnName("created_by").IsRequired();
         builder.Property(p => p.CreatedDate).HasColumnName("created_date").IsRequired();

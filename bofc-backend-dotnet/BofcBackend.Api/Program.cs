@@ -6,6 +6,7 @@ using BofcBackend.Api.Common;
 using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Common.Json;
 using BofcBackend.Api.Common.Middleware;
+using BofcBackend.Api.Common.Email;
 using BofcBackend.Api.Common.RealTime;
 using BofcBackend.Api.Common.Scheduling;
 using BofcBackend.Api.Common.Security;
@@ -25,6 +26,7 @@ using BofcBackend.Api.Features.PaymentAccounts;
 using BofcBackend.Api.Features.Players;
 using BofcBackend.Api.Features.Prizes;
 using BofcBackend.Api.Features.Rounds;
+using BofcBackend.Api.Features.Settings;
 using BofcBackend.Api.Features.Statistics;
 using BofcBackend.Api.Features.Teams;
 using BofcBackend.Api.Features.TournamentParticipants;
@@ -70,6 +72,17 @@ builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 // --- Web Push: VAPID keypair for signing push messages (see VapidOptions doc comment
 // re: production key handling).
 builder.Services.Configure<VapidOptions>(builder.Configuration.GetSection("Vapid"));
+
+// --- Global admin settings (SMTP + email notification toggles) + the email sender that
+// reads them. SMTP password is encrypted at rest via Data Protection, not appsettings —
+// this is deliberately DB-backed (not IOptions/appsettings) so an admin can change it from
+// the Settings page with no app restart.
+builder.Services.AddDataProtection();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddHostedService<TournamentReminderBackgroundService>();
+builder.Services.AddHostedService<PaymentDueReminderBackgroundService>();
+builder.Services.AddHostedService<MatchDaySchedulerBackgroundService>();
 
 // --- Current-user accessor (SecurityUtil.java port) + domain services.
 builder.Services.AddHttpContextAccessor();

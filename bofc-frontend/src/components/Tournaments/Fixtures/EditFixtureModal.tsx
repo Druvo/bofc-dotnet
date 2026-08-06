@@ -5,7 +5,9 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { useUpdateFixtureMutation } from "../../../state/features/fixtures/fixturesSlice";
 import { useGetVanuesQuery } from "../../../state/features/vanues/vanuesSlice";
+import { useGetSystemSettingsQuery } from "../../../state/features/settings/settingsSlice";
 import { IFixture } from "../../../state/features/fixtures/fixtureTypes";
+import { JERSEY_COLOR_PALETTE } from "../../../utils/jerseyColors";
 import Modal from "../../ui/modal";
 import Button from "../../ui/button";
 import FormInput from "../../ui/form-input";
@@ -29,12 +31,21 @@ export default function EditFixtureModal({
 }: EditFixtureModalProps) {
   const [updateFixture, { isLoading }] = useUpdateFixtureMutation();
   const { data: venuesData, isLoading: isVenuesLoading } = useGetVanuesQuery();
+  const { data: settingsData } = useGetSystemSettingsQuery();
   const [newDateStr, setNewDateStr] = useState("");
   const [newTimeStr, setNewTimeStr] = useState("");
   const [newVenueId, setNewVenueId] = useState<number | null>(null);
   const [venueError, setVenueError] = useState<string | undefined>();
+  const [homeJerseyColor, setHomeJerseyColor] = useState("");
+  const [awayJerseyColor, setAwayJerseyColor] = useState("");
 
   const venues = venuesData?.content || [];
+  const jerseyColorOptions = [
+    { value: "", label: "Not set" },
+    ...[settingsData?.content.jerseyColorA, settingsData?.content.jerseyColorB]
+      .filter((c): c is string => !!c)
+      .map((c) => ({ value: c, label: JERSEY_COLOR_PALETTE.find((p) => p.value === c)?.label || c })),
+  ];
 
   const currentDateTime = fixture?.matchDate ? dayjs.utc(fixture.matchDate).local() : null;
 
@@ -45,6 +56,8 @@ export default function EditFixtureModal({
       setNewTimeStr(currentLocal ? currentLocal.format("HH:mm") : "");
       setNewVenueId(fixture.venueId);
       setVenueError(undefined);
+      setHomeJerseyColor(fixture.homeJerseyColor || "");
+      setAwayJerseyColor(fixture.awayJerseyColor || "");
     }
   }, [fixture, isModalVisible]);
 
@@ -69,6 +82,8 @@ export default function EditFixtureModal({
         matchId: fixture.id,
         matchDate: localDateTime.utc().format("YYYY-MM-DDTHH:mm:ss"),
         venueId: newVenueId,
+        homeJerseyColor,
+        awayJerseyColor,
       }).unwrap();
 
       toast.success("Fixture updated successfully");
@@ -150,6 +165,11 @@ export default function EditFixtureModal({
             error={venueError}
             options={venues.map((v: any) => ({ value: v.id, label: v.name }))}
           />
+
+          <div className="grid grid-cols-2 gap-3">
+            <FormSelect label="Home Jersey" value={homeJerseyColor} onChange={(e) => setHomeJerseyColor(e.target.value)} options={jerseyColorOptions} />
+            <FormSelect label="Away Jersey" value={awayJerseyColor} onChange={(e) => setAwayJerseyColor(e.target.value)} options={jerseyColorOptions} />
+          </div>
 
           {hasChanges && (
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-white/[0.02]">

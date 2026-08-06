@@ -22,10 +22,6 @@ interface AppShellContextValue {
   openGoalkeepingHistory: () => void;
   closeGoalkeepingHistory: () => void;
 
-  settingsModalOpen: boolean;
-  openSettingsModal: () => void;
-  closeSettingsModal: () => void;
-
   notificationsOn: boolean;
   notificationsSupported: boolean;
   toggleNotifications: (checked: boolean) => Promise<void>;
@@ -38,7 +34,6 @@ const AppShellContext = createContext<AppShellContextValue | null>(null);
 
 export function AppShellProvider({ children }: { children: React.ReactNode }) {
   const [goalkeepingHistoryOpen, setGoalkeepingHistoryOpen] = useState(false);
-  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [notificationsOn, setNotificationsOnState] = useState(isNotificationsEnabled());
   const { canInstall, promptInstall } = usePwaInstall();
 
@@ -59,9 +54,6 @@ export function AppShellProvider({ children }: { children: React.ReactNode }) {
     goalkeepingHistoryOpen,
     openGoalkeepingHistory: () => setGoalkeepingHistoryOpen(true),
     closeGoalkeepingHistory: () => setGoalkeepingHistoryOpen(false),
-    settingsModalOpen,
-    openSettingsModal: () => setSettingsModalOpen(true),
-    closeSettingsModal: () => setSettingsModalOpen(false),
     notificationsOn,
     notificationsSupported: isNotificationSupported(),
     toggleNotifications,

@@ -105,7 +105,7 @@ export default function RoundBuilderTab({
           <Col>
             <Space direction="vertical" size={0}>
               <Title level={4} style={{ margin: 0 }}>
-                Tournament Structure Builder
+                MatchDay Structure Builder
               </Title>
               <Text type="secondary">
                 Drag and drop to organize rounds, groups, and teams

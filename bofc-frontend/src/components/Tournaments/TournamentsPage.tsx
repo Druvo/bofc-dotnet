@@ -68,7 +68,7 @@ const TournamentsPage: React.FC = () => {
   const filteredTournaments = useMemo(() => {
     const all = tournamentSummaries?.content?.tournaments ?? [];
     return all.filter((t) => {
-      const effectiveStatus = getEffectiveTournamentStatus(t.tournamentStatus, t.tournamentDate);
+      const effectiveStatus = getEffectiveTournamentStatus(t.tournamentStatus, t.tournamentDate, t.durationMinutes);
       const matchStatus =
         statusFilter === "ALL" ||
         effectiveStatus === statusFilter ||
@@ -80,7 +80,7 @@ const TournamentsPage: React.FC = () => {
 
   const segmentedOptions = useMemo(() => {
     const all = tournamentSummaries?.content?.tournaments ?? [];
-    const effectiveStatuses = all.map((t) => getEffectiveTournamentStatus(t.tournamentStatus, t.tournamentDate));
+    const effectiveStatuses = all.map((t) => getEffectiveTournamentStatus(t.tournamentStatus, t.tournamentDate, t.durationMinutes));
     const opts: { label: string; value: string }[] = [{ label: "All", value: "ALL" }];
     if (effectiveStatuses.some((s) => s === "UPCOMING")) opts.push({ label: "Upcoming", value: "UPCOMING" });
     if (effectiveStatuses.some((s) => s === "ONGOING")) opts.push({ label: "Ongoing", value: "ONGOING" });
@@ -108,7 +108,7 @@ const TournamentsPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
           <TrophyOutlined className="text-brand-500 dark:text-brand-400" />
-          Tournaments
+          MatchDays
         </h2>
         {canManage && <CreateTournament />}
       </div>
@@ -145,12 +145,12 @@ const TournamentsPage: React.FC = () => {
         {filteredTournaments.length === 0 ? (
           <div className="rounded-2xl border border-gray-200 bg-white py-12 text-center dark:border-gray-800 dark:bg-white/[0.03]">
             <TrophyOutlined className="mb-3 block text-5xl text-brand-300 dark:text-brand-500/40" />
-            <p className="text-theme-sm text-gray-400 dark:text-gray-500">No tournaments found.</p>
+            <p className="text-theme-sm text-gray-400 dark:text-gray-500">No MatchDays found.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {filteredTournaments.map((t) => {
-              const conf = getStatusConfig(getEffectiveTournamentStatus(t.tournamentStatus, t.tournamentDate));
+              const conf = getStatusConfig(getEffectiveTournamentStatus(t.tournamentStatus, t.tournamentDate, t.durationMinutes));
               const inactive = !t.activeStatus;
 
               return (

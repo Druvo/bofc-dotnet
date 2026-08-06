@@ -128,6 +128,7 @@ export const statisticsApi = apiWithTags.injectEndpoints({
         sortOrder?: string;
         limit?: number;
         offset?: number;
+        weeklyMatchDaysOnly?: boolean;
       }
     >({
       query: (params) => {
@@ -138,7 +139,8 @@ export const statisticsApi = apiWithTags.injectEndpoints({
         if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
         if (params.limit) queryParams.append('limit', params.limit.toString());
         if (params.offset) queryParams.append('offset', params.offset.toString());
-        
+        if (params.weeklyMatchDaysOnly) queryParams.append('weeklyMatchDaysOnly', 'true');
+
         return {
           url: `/player-statistics${queryParams.toString() ? '?' + queryParams.toString() : ''}`,
           method: "GET",

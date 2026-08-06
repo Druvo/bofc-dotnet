@@ -145,7 +145,7 @@ export default function JoinTournament() {
         {/* Card 1: Match Summary */}
         <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
           <div className="mb-3">
-            <div className="mb-0.5 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">⚽ Matchday</div>
+            <div className="mb-0.5 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">⚽ Next Match</div>
             <h4 className="mb-0.5 text-lg font-bold text-gray-800 dark:text-white/90">{nextTournament?.tournamentName}</h4>
             <span className="flex items-center gap-1.5 text-theme-xs text-gray-500 dark:text-gray-400">
               <CalendarOutlined className="text-brand-500 dark:text-brand-400" />
@@ -260,7 +260,7 @@ export default function JoinTournament() {
               {myParticipation?.participationStatus === true
                 ? "You're confirmed — check back here for your team assignment."
                 : myParticipation?.participationStatus === false
-                ? "You are currently marked as unavailable for this match."
+                ? "You are currently marked as unavailable for this MatchDay."
                 : "Awaiting your response — let us know if you're in."}
             </p>
           </div>
@@ -276,7 +276,7 @@ export default function JoinTournament() {
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <TeamOutlined className="text-brand-500 dark:text-brand-400" />
-            <h4 className="text-lg font-bold text-gray-800 dark:text-white/90">Tournament Participants</h4>
+            <h4 className="text-lg font-bold text-gray-800 dark:text-white/90">MatchDay Participants</h4>
             <Badge variant="light">{players.length}</Badge>
           </span>
           <div className="flex flex-wrap items-center gap-2">

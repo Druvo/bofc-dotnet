@@ -10,6 +10,7 @@ import {
     usePresignRoadmapImageUploadMutation,
 } from "../../../state/features/tournaments/tournamentsSlice";
 import { IoTournamentSingleSummaryType } from "../../../state/features/tournaments/tournamentTypes";
+import useAuctionEnabled from "../../../hooks/useAuctionEnabled";
 import { toAbsoluteLogoUrl } from "../../TournamentViewer/teamLogoUtils";
 import { validateImageFile, compressImage } from "../../../utils/imageUploadUtils";
 import Modal from "../../ui/modal";
@@ -34,6 +35,7 @@ interface FormValues {
     tournamentName: string;
     tournamentDate: string; // YYYY-MM-DD
     tournamentTime: string; // HH:mm
+    durationMinutes: string;
     venueId: string;
     auctionMode: boolean;
     defaultTournament: boolean;
@@ -46,6 +48,7 @@ const emptyValues: FormValues = {
     tournamentName: "",
     tournamentDate: "",
     tournamentTime: "",
+    durationMinutes: "90",
     venueId: "",
     auctionMode: false,
     defaultTournament: false,
@@ -61,6 +64,8 @@ export default function CreateTournament({
     tournamentData,
 }: CreateTournamentProps) {
     const { data: venuesData, isLoading: isVenuesLoading } = useGetVanuesQuery();
+    const auctionEnabled = useAuctionEnabled();
+    const isAutoMatchDay = Boolean(tournamentData?.isWeeklyMatchDay);
     const [createTournament, { isLoading: isCreating }] = useCreateTournamentMutation();
     const [updateTournament, { isLoading: isUpdating }] = useUpdateTournamentMutation();
     const [presignRoadmapImageUpload] = usePresignRoadmapImageUploadMutation();
@@ -81,9 +86,9 @@ export default function CreateTournament({
 
     const validate = () => {
         const next: Partial<Record<keyof FormValues, string>> = {};
-        if (!values.tournamentName.trim()) next.tournamentName = "Please input the tournament name!";
-        if (!values.tournamentDate) next.tournamentDate = "Please select the tournament date!";
-        if (!values.tournamentTime) next.tournamentTime = "Please select the tournament time!";
+        if (!values.tournamentName.trim()) next.tournamentName = "Please input the MatchDay name!";
+        if (!values.tournamentDate) next.tournamentDate = "Please select the MatchDay date!";
+        if (!values.tournamentTime) next.tournamentTime = "Please select the MatchDay time!";
         if (!values.venueId) next.venueId = "Please select a venue!";
         setErrors(next);
         return Object.keys(next).length === 0;
@@ -98,9 +103,10 @@ export default function CreateTournament({
         const payload = {
             tournamentName: values.tournamentName,
             tournamentDate: tournamentDateUTC,
+            durationMinutes: values.durationMinutes ? Number(values.durationMinutes) : undefined,
             venueId: Number(values.venueId),
-            auctionMode: values.auctionMode || false,
-            defaultTournament: Boolean(values.defaultTournament),
+            auctionMode: isAutoMatchDay ? false : values.auctionMode || false,
+            defaultTournament: isAutoMatchDay ? true : Boolean(values.defaultTournament),
             season: values.season,
             description: values.description,
             rules: values.rules,
@@ -111,7 +117,7 @@ export default function CreateTournament({
             updateTournament({ id: tournamentId, ...payload })
                 .unwrap()
                 .then(() => {
-                    toast.success("Tournament updated successfully");
+                    toast.success("MatchDay updated successfully");
                     setOpen(false);
                     resetForm();
                     setRoadmapImageUrl(undefined);
@@ -122,7 +128,7 @@ export default function CreateTournament({
             createTournament(payload)
                 .unwrap()
                 .then(() => {
-                    toast.success("Tournament created successfully");
+                    toast.success("MatchDay created successfully");
                     setOpen(false);
                     resetForm();
                     setRoadmapImageUrl(undefined);
@@ -173,6 +179,7 @@ export default function CreateTournament({
                 tournamentName: tournamentData.name || "",
                 tournamentDate: tournamentDateTime.format("YYYY-MM-DD"),
                 tournamentTime: tournamentDateTime.format("HH:mm"),
+                durationMinutes: String(tournamentData.durationMinutes ?? 90),
                 defaultTournament: Boolean(tournamentData.defaultTournament),
                 season: tournamentData.season || "",
                 description: tournamentData.description || "",
@@ -192,11 +199,11 @@ export default function CreateTournament({
 
     return (
         <div>
-            {!tournamentId && <Button onClick={() => setOpen(true)}>+ New Tournament</Button>}
+            {!tournamentId && <Button onClick={() => setOpen(true)}>+ New MatchDay</Button>}
             <Modal
                 isOpen={open}
                 onClose={closeModal}
-                title={tournamentId ? "Update Tournament" : "Create Tournament"}
+                title={tournamentId ? "Update MatchDay" : "Create MatchDay"}
                 className="max-w-[600px]"
             >
                 {isVenuesLoading ? (
@@ -210,8 +217,8 @@ export default function CreateTournament({
                         className="flex flex-col gap-4"
                     >
                         <FormInput
-                            label="Tournament Name"
-                            placeholder="Enter tournament name"
+                            label="MatchDay Name"
+                            placeholder="Enter MatchDay name"
                             value={values.tournamentName}
                             onChange={(e) => setField("tournamentName", e.target.value)}
                             error={errors.tournamentName}
@@ -220,19 +227,29 @@ export default function CreateTournament({
                         <div className="grid grid-cols-2 gap-3">
                             <FormInput
                                 type="date"
-                                label={<span className="flex items-center gap-1.5"><CalendarOutlined /> Tournament Date</span>}
+                                label={<span className="flex items-center gap-1.5"><CalendarOutlined /> MatchDay Date</span>}
                                 value={values.tournamentDate}
                                 onChange={(e) => setField("tournamentDate", e.target.value)}
                                 error={errors.tournamentDate}
                             />
                             <FormInput
                                 type="time"
-                                label={<span className="flex items-center gap-1.5"><ClockCircleOutlined /> Tournament Time</span>}
+                                label={<span className="flex items-center gap-1.5"><ClockCircleOutlined /> MatchDay Time</span>}
                                 value={values.tournamentTime}
                                 onChange={(e) => setField("tournamentTime", e.target.value)}
                                 error={errors.tournamentTime}
                             />
                         </div>
+
+                        <FormInput
+                            type="number"
+                            min={10}
+                            max={720}
+                            label={<span className="flex items-center gap-1.5"><ClockCircleOutlined /> Duration (minutes)</span>}
+                            hint="How long the MatchDay runs from its start time — drives whether it shows as Upcoming, Ongoing, or Concluded."
+                            value={values.durationMinutes}
+                            onChange={(e) => setField("durationMinutes", e.target.value)}
+                        />
 
                         <FormSelect
                             label="Venue"
@@ -244,94 +261,109 @@ export default function CreateTournament({
                             options={venuesData?.content.map((venue: any) => ({ value: venue.id, label: venue.name })) || []}
                         />
 
+                        {auctionEnabled && (
+                            <div>
+                                <FormSwitch
+                                    label="Auction Mode"
+                                    checked={isAutoMatchDay ? false : values.auctionMode}
+                                    disabled={isAutoMatchDay}
+                                    onChange={(checked) => setField("auctionMode", checked)}
+                                />
+                                <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">
+                                    {isAutoMatchDay
+                                        ? "Auto-created MatchDays never use auction mode."
+                                        : "Enable if teams will be formed by bidding auction instead of manual selection"}
+                                </p>
+                            </div>
+                        )}
+
                         <div>
                             <FormSwitch
-                                label="Auction Mode"
-                                checked={values.auctionMode}
-                                onChange={(checked) => setField("auctionMode", checked)}
+                                label="Default MatchDay"
+                                checked={isAutoMatchDay ? true : values.defaultTournament}
+                                disabled={isAutoMatchDay}
+                                onChange={(checked) => setField("defaultTournament", checked)}
                             />
-                            <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">
-                                Enable if teams will be formed by bidding auction instead of manual selection
-                            </p>
-                        </div>
-
-                        <FormSwitch
-                            label="Default Tournament"
-                            checked={values.defaultTournament}
-                            onChange={(checked) => setField("defaultTournament", checked)}
-                        />
-
-                        <FormInput
-                            label="Season"
-                            placeholder="e.g. Season 2026"
-                            hint="Optional. Shown under the title on the Tournament Viewer Home tab."
-                            value={values.season}
-                            onChange={(e) => setField("season", e.target.value)}
-                        />
-
-                        <div>
-                            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Description / Session Message</label>
-                            <textarea
-                                rows={3}
-                                placeholder="Enter a short description or session message"
-                                value={values.description}
-                                onChange={(e) => setField("description", e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
-                            />
-                            <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Optional. Shown on the Tournament Viewer Home tab below the title.</p>
-                        </div>
-
-                        <div>
-                            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Tournament Rules</label>
-                            <textarea
-                                rows={8}
-                                placeholder="Enter tournament rules in Markdown format"
-                                value={values.rules}
-                                onChange={(e) => setField("rules", e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
-                            />
-                            <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Optional. Supports Markdown formatting. If left empty, the Rules tab will be hidden on the viewer page.</p>
-                        </div>
-
-                        <div>
-                            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Roadmap Image</label>
-                            {roadmapImageUrl ? (
-                                <div className="flex flex-col items-start gap-2.5">
-                                    <img src={toAbsoluteLogoUrl(roadmapImageUrl)} alt="Roadmap" className="w-[200px] rounded" />
-                                    <Button type="button" variant="danger" size="sm" startIcon={<DeleteOutlined />} onClick={() => setRoadmapImageUrl(undefined)}>
-                                        Remove Image
-                                    </Button>
-                                </div>
-                            ) : (
-                                <>
-                                    <input
-                                        type="file"
-                                        accept="image/png,image/jpeg,image/webp"
-                                        className="hidden"
-                                        id="roadmap-image-input"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) handleUploadRoadmapImage(file);
-                                            e.target.value = "";
-                                        }}
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        startIcon={isUploadingRoadmapImage ? <LoadingOutlined /> : <UploadOutlined />}
-                                        disabled={isUploadingRoadmapImage}
-                                        onClick={() => document.getElementById("roadmap-image-input")?.click()}
-                                    >
-                                        Upload Roadmap Image
-                                    </Button>
-                                </>
+                            {isAutoMatchDay && (
+                                <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Auto-created MatchDays are always the default.</p>
                             )}
-                            <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Optional. If uploaded, viewers can switch between this image and the live flow chart in the Roadmap tab.</p>
                         </div>
+
+                        {!isAutoMatchDay && (
+                            <>
+                                <FormInput
+                                    label="Season"
+                                    placeholder="e.g. Season 2026"
+                                    hint="Optional. Shown under the title on the Match Center Home tab."
+                                    value={values.season}
+                                    onChange={(e) => setField("season", e.target.value)}
+                                />
+
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Description / Session Message</label>
+                                    <textarea
+                                        rows={3}
+                                        placeholder="Enter a short description or session message"
+                                        value={values.description}
+                                        onChange={(e) => setField("description", e.target.value)}
+                                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                                    />
+                                    <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Optional. Shown on the Match Center Home tab below the title.</p>
+                                </div>
+
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">MatchDay Rules</label>
+                                    <textarea
+                                        rows={8}
+                                        placeholder="Enter MatchDay rules in Markdown format"
+                                        value={values.rules}
+                                        onChange={(e) => setField("rules", e.target.value)}
+                                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                                    />
+                                    <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Optional. Supports Markdown formatting. If left empty, the Rules tab will be hidden on the viewer page.</p>
+                                </div>
+
+                                <div>
+                                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Roadmap Image</label>
+                                    {roadmapImageUrl ? (
+                                        <div className="flex flex-col items-start gap-2.5">
+                                            <img src={toAbsoluteLogoUrl(roadmapImageUrl)} alt="Roadmap" className="w-[200px] rounded" />
+                                            <Button type="button" variant="danger" size="sm" startIcon={<DeleteOutlined />} onClick={() => setRoadmapImageUrl(undefined)}>
+                                                Remove Image
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <input
+                                                type="file"
+                                                accept="image/png,image/jpeg,image/webp"
+                                                className="hidden"
+                                                id="roadmap-image-input"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) handleUploadRoadmapImage(file);
+                                                    e.target.value = "";
+                                                }}
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                startIcon={isUploadingRoadmapImage ? <LoadingOutlined /> : <UploadOutlined />}
+                                                disabled={isUploadingRoadmapImage}
+                                                onClick={() => document.getElementById("roadmap-image-input")?.click()}
+                                            >
+                                                Upload Roadmap Image
+                                            </Button>
+                                        </>
+                                    )}
+                                    <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Optional. If uploaded, viewers can switch between this image and the live flow chart in the Roadmap tab.</p>
+                                </div>
+                            </>
+                        )}
 
                         <Button type="submit" className="w-full" disabled={isCreating || isUpdating}>
-                            {isCreating || isUpdating ? <LoadingOutlined /> : null} {tournamentId ? "Update Tournament" : "Create Tournament"}
+                            {isCreating || isUpdating ? <LoadingOutlined /> : null} {tournamentId ? "Update MatchDay" : "Create MatchDay"}
                         </Button>
                     </form>
                 )}

@@ -18,5 +18,9 @@ public class Player : AuditableEntity
     public DateTime? LastPasswordChangeDate { get; set; }
     public string? ProfilePhoto { get; set; }
     public string? PhotoKey { get; set; }
+
+    /// <summary>"light" | "dark" | null (no explicit preference — client falls back to OS/browser preference). Synced across devices since it lives on the player, not localStorage.</summary>
+    public string? ThemePreference { get; set; }
+
     public ICollection<Role> Roles { get; set; } = new List<Role>();
 }

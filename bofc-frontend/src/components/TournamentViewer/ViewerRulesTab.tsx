@@ -22,7 +22,7 @@ export default function ViewerRulesTab({ tournamentId }: ViewerRulesTabProps) {
   if (!rules || !rules.trim()) {
     return (
       <div className="p-12 text-center text-theme-sm text-gray-400 dark:text-gray-500">
-        No rules have been added for this tournament
+        No rules have been added for this MatchDay
       </div>
     );
   }

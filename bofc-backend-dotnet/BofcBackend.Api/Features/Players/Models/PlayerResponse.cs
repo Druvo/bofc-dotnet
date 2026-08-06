@@ -27,4 +27,5 @@ public class PlayerResponse
     public HashSet<RoleResponse> Roles { get; set; } = [];
     public string? PhotoKey { get; set; }
     public string? PhotoUrl { get; set; }
+    public string? ThemePreference { get; set; }
 }

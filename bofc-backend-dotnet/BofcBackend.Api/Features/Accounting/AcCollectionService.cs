@@ -3,12 +3,10 @@ using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
-using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Features.Accounting.Models;
 using BofcBackend.Api.Features.Players;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace BofcBackend.Api.Features.Accounting;
 
@@ -18,8 +16,7 @@ public class AcCollectionService(
     IPlayerService playerService,
     CostTypeService costTypeService,
     AcVoucherService voucherService,
-    AcChartService acChartService,
-    IOptions<AccountingOptions> accountingOptions)
+    AcChartService acChartService)
 {
     public async Task<long> SavePaymentCollectionAsync(PaymentCollectionRequest request)
     {
@@ -181,9 +178,9 @@ public class AcCollectionService(
     {
         var totalAmount = request.Amount!.Value * players.Count;
 
-        // Resolved by Code, not a hardcoded chart Id — see AccountingOptions.
-        var cashChart = await acChartService.GetAcChartByCodeAsync(accountingOptions.Value.CashChartCode);
-        var incomeChart = await acChartService.GetAcChartByCodeAsync(accountingOptions.Value.CollectionIncomeChartCode);
+        // Resolved by Code (Settings, falling back to appsettings), not a hardcoded chart Id — see AcChartService.
+        var cashChart = await acChartService.GetCashChartAsync();
+        var incomeChart = await acChartService.GetCollectionIncomeChartAsync();
 
         var voucherRequest = new AcVoucherRequest
         {

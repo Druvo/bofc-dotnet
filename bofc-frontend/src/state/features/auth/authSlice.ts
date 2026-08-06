@@ -88,7 +88,7 @@ export const tournamentsApi = apiWithTags.injectEndpoints({
         resetPlayerPassword: build.mutation<BasicResType, {
             email: string,
             newPassword: string
-        }>({  
+        }>({
             query: (
                 { email, newPassword }
             ) => ({
@@ -96,7 +96,17 @@ export const tournamentsApi = apiWithTags.injectEndpoints({
                 method: "PUT",
                 body: { email, newPassword },
             }),
-        })
+        }),
+        // Synced across devices via the player row — logging in on a different browser/machine
+        // picks up the same theme instead of defaulting back to light/system.
+        updateThemePreference: build.mutation<BasicResType, { themePreference: "light" | "dark" | null }>({
+            query: (data) => ({
+                url: "players/me/theme-preference",
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: ["auth"],
+        }),
     }),
 });
 
@@ -106,5 +116,6 @@ export const {
     useForcePasswordResetMutation,
     useGetUserProfileQuery,
     useUpdatePlayerDataMutation,
-    useResetPlayerPasswordMutation
+    useResetPlayerPasswordMutation,
+    useUpdateThemePreferenceMutation,
 } = tournamentsApi;

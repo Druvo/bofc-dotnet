@@ -28,7 +28,7 @@ const MatchCalendarWidget: React.FC = () => {
     const map = new Map<string, { id: number; name: string }[]>();
     (data?.content?.tournaments || [])
       .filter((t) => {
-        const status = getEffectiveTournamentStatus(t.tournamentStatus, t.tournamentDate);
+        const status = getEffectiveTournamentStatus(t.tournamentStatus, t.tournamentDate, t.durationMinutes);
         return status === "UPCOMING" || status === "ONGOING";
       })
       .forEach((t) => {

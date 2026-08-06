@@ -93,7 +93,7 @@ export default function CanvasBuilder({
   const handleSave = () => {
     // Convert canvas items to tournament structure
     onSave(canvasItems);
-    message.success("Tournament structure saved");
+    message.success("MatchDay structure saved");
   };
 
   return (
@@ -198,7 +198,7 @@ export default function CanvasBuilder({
                     Drag rounds and groups from the toolbar above
                   </Text>
                   <Text type="secondary" style={{ fontSize: 12 }}>
-                    Build your tournament structure visually
+                    Build your MatchDay structure visually
                   </Text>
                 </Space>
               }

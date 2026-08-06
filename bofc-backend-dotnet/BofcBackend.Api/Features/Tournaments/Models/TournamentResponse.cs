@@ -12,6 +12,9 @@ public class TournamentResponse
     public string? Rules { get; set; }
     public string? RoadmapImageUrl { get; set; }
     public DateTime TournamentDate { get; set; }
+
+    /// <summary>How long the MatchDay runs, in minutes — null if not set when created.</summary>
+    public int? DurationMinutes { get; set; }
     public string VenueName { get; set; } = string.Empty;
     public string? VenueMapLink { get; set; }
     public bool ActiveStatus { get; set; }
@@ -21,4 +24,5 @@ public class TournamentResponse
     public string? TournamentType { get; set; }
     public int? GroupCount { get; set; }
     public bool AuctionMode { get; set; }
+    public bool IsWeeklyMatchDay { get; set; }
 }

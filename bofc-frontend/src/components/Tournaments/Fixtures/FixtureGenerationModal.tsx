@@ -22,13 +22,10 @@ import {
   Tooltip,
 } from "antd";
 import {
-  PlusOutlined,
-  DeleteOutlined,
   TrophyOutlined,
   ClockCircleOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
-import moment, { Moment } from "moment";
 import dayjs, { Dayjs } from "dayjs";
 import { useGenerateFixturesMutation } from "../../../state/features/fixtures/fixturesSlice";
 import { useSelector } from "react-redux";
@@ -39,11 +36,12 @@ import {
   calculateMatchCount,
   estimateTournamentDuration,
   validateSchedulingParameters,
+  generateRoundRobinSchedule,
   getTournamentTypeName,
   getTournamentTypeDescription,
 } from "../../../utils/tournamentCalculations";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface FixtureGenerationModalProps {
   tournamentId: number;
@@ -66,19 +64,25 @@ export default function FixtureGenerationModal({
   const loginInfo = useSelector(selectLoginInfo);
   const [form] = Form.useForm();
   const [selectedTeams, setSelectedTeams] = useState<number[]>([]);
-  const [matchDates, setMatchDates] = useState<string[]>([]);
   const [selectedVenueId, setSelectedVenueId] = useState<number | undefined>();
 
-  // Separate date and time states for new match - using Dayjs
-  const [newMatchDate, setNewMatchDate] = useState<Dayjs | null>(null);
-  const [newMatchTime, setNewMatchTime] = useState<Dayjs | null>(null);
+  // Single MatchDay start date/time — this is the only date the backend actually
+  // reads (GenerateFixturesAsync uses request.MatchDates[0]); every subsequent
+  // match's start is computed from duration/gap/break, not entered by hand.
+  const [startDate, setStartDate] = useState<Dayjs | null>(null);
+  const [startTime, setStartTime] = useState<Dayjs | null>(null);
 
-  // New state variables for enhanced features
-  const [timeGapMinutes, setTimeGapMinutes] = useState<number>(120);
-  const [matchDurationMinutes, setMatchDurationMinutes] = useState<number>(90);
+  // Scheduling parameters — gap is the breather AFTER one match ends and BEFORE the
+  // next starts (not the full start-to-start interval; see tournamentCalculations.ts).
+  const [timeGapMinutes, setTimeGapMinutes] = useState<number>(2);
+  const [matchDurationMinutes, setMatchDurationMinutes] = useState<number>(13);
   const [tournamentType, setTournamentType] = useState<TournamentType>(
     TournamentType.ROUND_ROBIN
   );
+
+  // Optional one-time break, e.g. a breather partway through the MatchDay.
+  const [breakAfterMatchNumber, setBreakAfterMatchNumber] = useState<number | undefined>();
+  const [breakDurationMinutes, setBreakDurationMinutes] = useState<number>(10);
 
   const [generateFixtures, { isLoading }] = useGenerateFixturesMutation();
   const { data: venuesData, isLoading: isVenuesLoading } = useGetVanuesQuery();
@@ -91,23 +95,37 @@ export default function FixtureGenerationModal({
     return calculateMatchCount(selectedTeams.length, tournamentType);
   }, [selectedTeams.length, tournamentType]);
 
+  const combinedStart = useMemo(() => {
+    if (!startDate || !startTime) return null;
+    return startDate.hour(startTime.hour()).minute(startTime.minute()).second(0);
+  }, [startDate, startTime]);
+
   // Calculate estimated tournament duration
   const estimatedDuration = useMemo(() => {
     if (estimatedMatchCount === 0) return null;
     return estimateTournamentDuration(
       estimatedMatchCount,
       timeGapMinutes,
-      matchDurationMinutes
+      matchDurationMinutes,
+      breakAfterMatchNumber ? breakDurationMinutes : 0
     );
-  }, [estimatedMatchCount, timeGapMinutes, matchDurationMinutes]);
+  }, [estimatedMatchCount, timeGapMinutes, matchDurationMinutes, breakAfterMatchNumber, breakDurationMinutes]);
 
-  // Calculate estimated date range
-  const estimatedDateRange = useMemo(() => {
-    if (matchDates.length === 0 || !estimatedDuration) return null;
-    const firstDate = dayjs(matchDates[0]);
-    const lastDate = firstDate.add(estimatedDuration.totalMinutes, "minutes");
-    return { firstDate, lastDate };
-  }, [matchDates, estimatedDuration]);
+  // Real per-match schedule — same formula the backend uses, so this is exactly
+  // what will be generated, not just an aggregate estimate.
+  const schedule = useMemo(() => {
+    if (selectedTeams.length < 2 || !combinedStart) return [];
+    return generateRoundRobinSchedule(
+      selectedTeams,
+      combinedStart.toDate(),
+      matchDurationMinutes,
+      timeGapMinutes,
+      breakAfterMatchNumber,
+      breakDurationMinutes
+    );
+  }, [selectedTeams, combinedStart, matchDurationMinutes, timeGapMinutes, breakAfterMatchNumber, breakDurationMinutes]);
+
+  const teamNameById = useMemo(() => new Map(teams.map((t) => [t.teamId, t.teamName])), [teams]);
 
   // Validate scheduling parameters
   const schedulingValidation = useMemo(() => {
@@ -126,35 +144,16 @@ export default function FixtureGenerationModal({
     }
   };
 
-  const handleAddMatchDate = () => {
-    if (!newMatchDate || !newMatchTime) {
-      message.warning("Please select both date and time");
-      return;
-    }
-
-    const combinedDateTime = newMatchDate
-      .hour(newMatchTime.hour())
-      .minute(newMatchTime.minute())
-      .second(0);
-
-    setMatchDates([
-      ...matchDates,
-      combinedDateTime.format("YYYY-MM-DDTHH:mm:ss"),
-    ]);
-    setNewMatchDate(null);
-    setNewMatchTime(null);
-  };
-
-  const handleRemoveMatchDate = (index: number) => {
-    setMatchDates(matchDates.filter((_, i) => i !== index));
-  };
-
-  const handleMatchDateChange = (index: number, date: Moment | null) => {
-    if (date) {
-      const newDates = [...matchDates];
-      newDates[index] = date.format("YYYY-MM-DDTHH:mm:ss");
-      setMatchDates(newDates);
-    }
+  const resetForm = () => {
+    setSelectedTeams([]);
+    setSelectedVenueId(undefined);
+    setStartDate(null);
+    setStartTime(null);
+    setTimeGapMinutes(2);
+    setMatchDurationMinutes(13);
+    setTournamentType(TournamentType.ROUND_ROBIN);
+    setBreakAfterMatchNumber(undefined);
+    setBreakDurationMinutes(10);
   };
 
   const handleGenerate = async () => {
@@ -163,8 +162,8 @@ export default function FixtureGenerationModal({
       return;
     }
 
-    if (matchDates.length === 0) {
-      message.error("Add at least one match date");
+    if (!combinedStart) {
+      message.error("Select a start date and time");
       return;
     }
 
@@ -178,10 +177,11 @@ export default function FixtureGenerationModal({
       await generateFixtures({
         tournamentId,
         teamIds: selectedTeams,
-        matchDates,
+        matchDates: [combinedStart.format("YYYY-MM-DDTHH:mm:ss")],
         timeGapMinutes,
         matchDurationMinutes,
         tournamentType,
+        ...(breakAfterMatchNumber && { breakAfterMatchNumber, breakDurationMinutes }),
         ...(selectedVenueId && { venueId: selectedVenueId }),
       }).unwrap();
 
@@ -189,14 +189,7 @@ export default function FixtureGenerationModal({
         `Successfully generated ${estimatedMatchCount} fixtures!`
       );
 
-      // Reset form
-      setSelectedTeams([]);
-      setMatchDates([]);
-      setSelectedVenueId(undefined);
-      setTimeGapMinutes(120);
-      setMatchDurationMinutes(90);
-      setTournamentType(TournamentType.ROUND_ROBIN);
-
+      resetForm();
       handleSetIsModalVisible(false);
       onSuccess?.();
     } catch (error) {
@@ -205,12 +198,7 @@ export default function FixtureGenerationModal({
   };
 
   const handleCancel = () => {
-    setSelectedTeams([]);
-    setMatchDates([]);
-    setSelectedVenueId(undefined);
-    setTimeGapMinutes(120);
-    setMatchDurationMinutes(90);
-    setTournamentType(TournamentType.ROUND_ROBIN);
+    resetForm();
     handleSetIsModalVisible(false);
   };
 
@@ -242,7 +230,7 @@ export default function FixtureGenerationModal({
           loading={isLoading}
           onClick={handleGenerate}
           size="large"
-          disabled={selectedTeams.length < 2 || matchDates.length === 0}
+          disabled={selectedTeams.length < 2 || !combinedStart}
         >
           Generate {estimatedMatchCount} Fixtures
         </Button>,
@@ -264,14 +252,14 @@ export default function FixtureGenerationModal({
           title={
             <Space>
               <TrophyOutlined />
-              Tournament Configuration
+              MatchDay Configuration
             </Space>
           }
           style={{ borderRadius: 8 }}
         >
           <Row gutter={[16, 16]}>
             <Col xs={24} md={12}>
-              <Form.Item label="Tournament Type" style={{ marginBottom: 0 }}>
+              <Form.Item label="MatchDay Type" style={{ marginBottom: 0 }}>
                 <Select
                   value={tournamentType}
                   onChange={setTournamentType}
@@ -287,10 +275,15 @@ export default function FixtureGenerationModal({
                     <Select.Option
                       key={type}
                       value={type}
+                      disabled={type !== TournamentType.ROUND_ROBIN}
                       label={getTournamentTypeName(type)}
                     >
                       <Tooltip
-                        title={getTournamentTypeDescription(type)}
+                        title={
+                          type === TournamentType.ROUND_ROBIN
+                            ? getTournamentTypeDescription(type)
+                            : "Not implemented yet — fixture generation only produces round-robin pairings today"
+                        }
                         placement="right"
                       >
                         <div style={{ padding: "0px" }}>
@@ -411,44 +404,52 @@ export default function FixtureGenerationModal({
             <Space>
               <CalendarOutlined />
               <span>Match Scheduling</span>
-              {matchDates.length > 0 && (
-                <Text type="success" style={{ fontSize: 12 }}>
-                  ({matchDates.length} dates added)
-                </Text>
-              )}
             </Space>
           }
           extra={
-            matchDates.length === 0 && (
+            !combinedStart && (
               <Text type="danger" style={{ fontSize: 12 }}>
-                At least 1 date required
+                Start time required
               </Text>
             )
           }
           style={{ borderRadius: 8 }}
         >
-          {/* Time Configuration */}
-          <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+          {/* Start date/time — the only date the backend actually reads; every
+              other match's start is computed from duration + gap + break below. */}
+          <Row gutter={[8, 8]} style={{ marginBottom: 16 }}>
             <Col xs={24} sm={12}>
               <Space direction="vertical" size={4} style={{ width: "100%" }}>
-                <Text strong style={{ fontSize: 13 }}>
-                  Time Gap Between Matches
-                </Text>
-                <InputNumber
-                  value={timeGapMinutes}
-                  onChange={(val) => setTimeGapMinutes(val || 120)}
-                  min={5}
-                  max={480}
-                  step={5}
-                  addonAfter="min"
-                  size="large"
+                <Text strong style={{ fontSize: 13 }}>Start Date</Text>
+                <DatePicker
+                  placeholder="Select date"
+                  value={startDate}
+                  onChange={setStartDate}
                   style={{ width: "100%" }}
+                  format="DD/MM/YYYY"
+                  disabledDate={disabledDate}
+                  size="large"
                 />
-                <Text type="secondary" style={{ fontSize: 11 }}>
-                  Time from end of one match to start of next
-                </Text>
               </Space>
             </Col>
+            <Col xs={24} sm={12}>
+              <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                <Text strong style={{ fontSize: 13 }}>Start Time</Text>
+                <TimePicker
+                  placeholder="Select time"
+                  value={startTime}
+                  onChange={setStartTime}
+                  style={{ width: "100%" }}
+                  format="HH:mm"
+                  minuteStep={5}
+                  size="large"
+                />
+              </Space>
+            </Col>
+          </Row>
+
+          {/* Time Configuration */}
+          <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
             <Col xs={24} sm={12}>
               <Space direction="vertical" size={4} style={{ width: "100%" }}>
                 <Text strong style={{ fontSize: 13 }}>
@@ -456,10 +457,10 @@ export default function FixtureGenerationModal({
                 </Text>
                 <InputNumber
                   value={matchDurationMinutes}
-                  onChange={(val) => setMatchDurationMinutes(val || 90)}
-                  min={10}
+                  onChange={(val) => setMatchDurationMinutes(val || 13)}
+                  min={5}
                   max={180}
-                  step={5}
+                  step={1}
                   addonAfter="min"
                   size="large"
                   style={{ width: "100%" }}
@@ -469,114 +470,66 @@ export default function FixtureGenerationModal({
                 </Text>
               </Space>
             </Col>
+            <Col xs={24} sm={12}>
+              <Space direction="vertical" size={4} style={{ width: "100%" }}>
+                <Text strong style={{ fontSize: 13 }}>
+                  Gap After Each Match
+                </Text>
+                <InputNumber
+                  value={timeGapMinutes}
+                  onChange={(val) => setTimeGapMinutes(val ?? 2)}
+                  min={0}
+                  max={120}
+                  step={1}
+                  addonAfter="min"
+                  size="large"
+                  style={{ width: "100%" }}
+                />
+                <Text type="secondary" style={{ fontSize: 11 }}>
+                  Breather between one match ending and the next starting
+                </Text>
+              </Space>
+            </Col>
           </Row>
 
-          {/* Add Date Section */}
+          {/* Optional one-time break */}
           <div
             style={{
               padding: 12,
               background: token.colorBgLayout,
               borderRadius: 6,
-              marginBottom: 12,
             }}
           >
-            <Row gutter={[8, 8]} align="middle">
-              <Col xs={24} sm={10}>
-                <DatePicker
-                  placeholder="Select date"
-                  value={newMatchDate}
-                  onChange={setNewMatchDate}
-                  style={{ width: "100%" }}
-                  format="DD/MM/YYYY"
-                  disabledDate={disabledDate}
+            <Text strong style={{ fontSize: 13, display: "block", marginBottom: 8 }}>
+              Optional Break (not required)
+            </Text>
+            <Row gutter={[8, 8]}>
+              <Col xs={24} sm={12}>
+                <InputNumber
+                  value={breakAfterMatchNumber}
+                  onChange={(val) => setBreakAfterMatchNumber(val ?? undefined)}
+                  min={1}
+                  max={Math.max(1, estimatedMatchCount - 1)}
+                  placeholder="After match #"
+                  addonBefore="After match #"
                   size="large"
+                  style={{ width: "100%" }}
                 />
               </Col>
-              <Col xs={24} sm={8}>
-                <TimePicker
-                  placeholder="Select time"
-                  value={newMatchTime}
-                  onChange={setNewMatchTime}
+              <Col xs={24} sm={12}>
+                <InputNumber
+                  value={breakDurationMinutes}
+                  onChange={(val) => setBreakDurationMinutes(val || 10)}
+                  min={1}
+                  max={120}
+                  addonAfter="min"
+                  disabled={!breakAfterMatchNumber}
+                  size="large"
                   style={{ width: "100%" }}
-                  format="HH:mm"
-                  minuteStep={15}
-                  size="large"
                 />
-              </Col>
-              <Col xs={24} sm={6}>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={handleAddMatchDate}
-                  block
-                  size="large"
-                  disabled={!newMatchDate || !newMatchTime}
-                >
-                  Add
-                </Button>
               </Col>
             </Row>
           </div>
-
-          {/* Match Dates List */}
-          {matchDates.length > 0 ? (
-            <div
-              style={{
-                maxHeight: 150,
-                overflowY: "auto",
-                padding: 8,
-                background: token.colorBgLayout,
-                borderRadius: 6,
-              }}
-            >
-              <Space
-                direction="vertical"
-                style={{ width: "100%" }}
-                size="small"
-              >
-                {matchDates.map((date, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "8px 12px",
-                      background: token.colorBgContainer,
-                      borderRadius: 6,
-                      border: `1px solid ${token.colorBorder}`,
-                    }}
-                  >
-                    <Space size="small">
-                      <CalendarOutlined style={{ color: token.colorPrimary }} />
-                      <Text strong style={{ fontSize: 13 }}>
-                        {dayjs(date).format("DD/MM/YYYY")}
-                      </Text>
-                      <ClockCircleOutlined
-                        style={{ color: token.colorTextSecondary }}
-                      />
-                      <Text type="secondary" style={{ fontSize: 13 }}>
-                        {dayjs(date).format("HH:mm")}
-                      </Text>
-                    </Space>
-                    <Button
-                      danger
-                      type="text"
-                      icon={<DeleteOutlined />}
-                      onClick={() => handleRemoveMatchDate(index)}
-                      size="small"
-                    />
-                  </div>
-                ))}
-              </Space>
-            </div>
-          ) : (
-            <Empty
-              description="No dates added yet"
-              style={{ padding: "20px 0" }}
-              imageStyle={{ height: 40 }}
-            />
-          )}
         </Card>
 
         {/* Warnings */}
@@ -601,7 +554,7 @@ export default function FixtureGenerationModal({
         )}
 
         {/* Preview Panel */}
-        {selectedTeams.length >= 2 && matchDates.length > 0 && (
+        {selectedTeams.length >= 2 && combinedStart && (
           <Card
             style={{
               background: `linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorBgContainer} 100%)`,
@@ -662,47 +615,44 @@ export default function FixtureGenerationModal({
                 </Col>
               </Row>
 
-              {estimatedDateRange && (
+              {schedule.length > 0 && (
                 <div
                   style={{
-                    padding: 12,
+                    padding: 8,
                     background: token.colorBgContainer,
                     borderRadius: 8,
                     border: `1px solid ${token.colorBorder}`,
-                    textAlign: "center",
+                    maxHeight: 260,
+                    overflowY: "auto",
                   }}
                 >
-                  <Text strong>Date Range</Text>
-                  <div style={{ marginTop: 8 }}>
-                    <Space
-                      direction="vertical"
-                      size="small"
-                      style={{ width: "100%" }}
-                    >
-                      <div>
-                        <Text style={{ fontSize: 13 }}>
-                          {estimatedDateRange.firstDate.format(
-                            "DD MMM YYYY, HH:mm"
-                          )}
-                        </Text>
-                      </div>
-                      <div>↓</div>
-                      <div>
-                        <Text style={{ fontSize: 13 }}>
-                          {estimatedDateRange.lastDate.format(
-                            "DD MMM YYYY, HH:mm"
-                          )}
-                        </Text>
-                      </div>
-                    </Space>
-                  </div>
-                  <Text
-                    type="secondary"
-                    style={{ fontSize: 11, marginTop: 4, display: "block" }}
-                  >
-                    ({estimatedDuration?.totalDays || 0} day
-                    {estimatedDuration?.totalDays !== 1 ? "s" : ""})
+                  <Text strong style={{ display: "block", marginBottom: 8, paddingLeft: 4 }}>
+                    Match-by-Match Schedule
                   </Text>
+                  <Space direction="vertical" size="small" style={{ width: "100%" }}>
+                    {schedule.map((m) => (
+                      <div
+                        key={m.matchNumber}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "6px 10px",
+                          background: token.colorBgLayout,
+                          borderRadius: 6,
+                        }}
+                      >
+                        <Text style={{ fontSize: 13 }}>
+                          <Text strong>#{m.matchNumber}</Text>{" "}
+                          {teamNameById.get(m.homeTeamId) || m.homeTeamId} vs{" "}
+                          {teamNameById.get(m.awayTeamId) || m.awayTeamId}
+                        </Text>
+                        <Text type="secondary" style={{ fontSize: 12, whiteSpace: "nowrap" }}>
+                          {dayjs(m.start).format("HH:mm")} – {dayjs(m.end).format("HH:mm")}
+                        </Text>
+                      </div>
+                    ))}
+                  </Space>
                 </div>
               )}
 

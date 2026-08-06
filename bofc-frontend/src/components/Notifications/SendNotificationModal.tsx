@@ -6,7 +6,9 @@ import Button from "../ui/button";
 import FormInput from "../ui/form-input";
 import { useGetPlayersQuery } from "../../state/features/player/playerSlice";
 import { useSendNotificationMutation, NotificationTargetType } from "../../state/features/notifications/notificationSlice";
+import { useGetSystemSettingsQuery } from "../../state/features/settings/settingsSlice";
 import { normalizeErrorMessage } from "../../utils/normalizeErrorMessage";
+import FormSwitch from "../ui/form-switch";
 
 type TargetMode = "SPECIFIC" | "SELECTED" | "ALL";
 
@@ -22,10 +24,13 @@ const SendNotificationModal: React.FC<SendNotificationModalProps> = ({ isOpen, o
   const [body, setBody] = useState("");
   const [targetMode, setTargetMode] = useState<TargetMode>("ALL");
   const [userIds, setUserIds] = useState<number[]>([]);
+  const [sendEmail, setSendEmail] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; body?: string; userIds?: string }>({});
 
   const { data: playersData } = useGetPlayersQuery();
+  const { data: settingsData } = useGetSystemSettingsQuery();
   const [sendNotification, { isLoading }] = useSendNotificationMutation();
+  const emailAvailable = !!settingsData?.content?.notifyCustomEmailEnabled;
 
   const playerOptions = useMemo(
     () => (playersData?.content ?? []).map((p) => ({ value: p.id, label: p.name })),
@@ -46,6 +51,7 @@ const SendNotificationModal: React.FC<SendNotificationModalProps> = ({ isOpen, o
     }
     setTitle("");
     setBody("");
+    setSendEmail(false);
     setErrors({});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -55,6 +61,7 @@ const SendNotificationModal: React.FC<SendNotificationModalProps> = ({ isOpen, o
     setBody("");
     setTargetMode("ALL");
     setUserIds([]);
+    setSendEmail(false);
     setErrors({});
   };
 
@@ -79,6 +86,7 @@ const SendNotificationModal: React.FC<SendNotificationModalProps> = ({ isOpen, o
         body: body.trim(),
         targetType,
         userIds: targetType === "CUSTOM" ? userIds : undefined,
+        sendEmail: emailAvailable && sendEmail,
       }).unwrap();
       toast.success("Notification sent");
       handleClose();
@@ -174,6 +182,20 @@ const SendNotificationModal: React.FC<SendNotificationModalProps> = ({ isOpen, o
             {errors.userIds && <p className="mt-1.5 text-theme-xs text-error-500">{errors.userIds}</p>}
           </div>
         )}
+
+        <div>
+          <FormSwitch
+            label="Also send email"
+            checked={emailAvailable && sendEmail}
+            onChange={setSendEmail}
+            disabled={!emailAvailable}
+          />
+          {!emailAvailable && (
+            <p className="mt-1.5 text-theme-xs text-gray-400">
+              Email notifications are turned off in Settings — enable "Allow email on custom notifications" there to use this.
+            </p>
+          )}
+        </div>
       </div>
     </Modal>
   );

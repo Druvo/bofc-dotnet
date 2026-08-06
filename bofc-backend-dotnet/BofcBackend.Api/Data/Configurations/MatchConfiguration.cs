@@ -31,6 +31,8 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
         builder.Property(m => m.BracketPosition).HasColumnName("bracket_position").HasMaxLength(50);
         builder.Property(m => m.HomeTeamScore).HasColumnName("home_team_score").IsRequired();
         builder.Property(m => m.AwayTeamScore).HasColumnName("away_team_score").IsRequired();
+        builder.Property(m => m.HomeJerseyColor).HasColumnName("home_jersey_color").HasMaxLength(30);
+        builder.Property(m => m.AwayJerseyColor).HasColumnName("away_jersey_color").HasMaxLength(30);
         builder.Property(m => m.MatchDurationMinutes).HasColumnName("match_duration_minutes");
         builder.Property(m => m.ElapsedTimeSeconds).HasColumnName("elapsed_time_seconds").IsRequired();
         builder.Property(m => m.StartedAt).HasColumnName("started_at");

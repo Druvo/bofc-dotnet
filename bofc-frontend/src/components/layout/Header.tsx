@@ -194,7 +194,8 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
               </span>
               <input
                 type="text"
-                placeholder="Search players, tournaments, venues..."
+                autoComplete="off"
+                placeholder="Search players, MatchDays, venues..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -233,7 +234,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                       )}
                       {matchedTournaments.length > 0 && (
                         <div className="mb-1">
-                          <span className="block px-3 py-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Tournaments</span>
+                          <span className="block px-3 py-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">MatchDays</span>
                           {matchedTournaments.map((t) => (
                             <button
                               key={t.id}
@@ -448,7 +449,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                       <button
                         onClick={() => {
                           setUserDropdownOpen(false);
-                          appShell.openSettingsModal();
+                          navigate("/settings");
                         }}
                         className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-theme-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
                       >

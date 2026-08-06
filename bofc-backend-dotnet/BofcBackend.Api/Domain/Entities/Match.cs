@@ -45,6 +45,12 @@ public class Match : AuditableEntity
     public string? BracketPosition { get; set; }
     public int HomeTeamScore { get; set; }
     public int AwayTeamScore { get; set; }
+
+    /// <summary>Which of the club's 2 physical jerseys each side wears for THIS match — the
+    /// club only owns 2, so teams swap between them match to match. Set manually per match
+    /// (Add/Edit Fixture), never auto-assigned by fixture generation.</summary>
+    public string? HomeJerseyColor { get; set; }
+    public string? AwayJerseyColor { get; set; }
     public int? MatchDurationMinutes { get; set; }
     public int ElapsedTimeSeconds { get; set; }
     public DateTime? StartedAt { get; set; }

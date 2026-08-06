@@ -34,11 +34,26 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
     {
         var tournamentId = filter.TournamentId;
 
-        var playerQuery = db.Players.AsQueryable();
+        // Normalize both scoping modes (single tournament / season-cumulative Match Days) into
+        // one nullable Id list: null = no restriction, non-null = must be one of these. A local
+        // C# method wouldn't translate into SQL here, so this "resolve once, then only ever use
+        // captured-variable null-checks + List.Contains" shape is what keeps every query below
+        // translatable by EF Core.
+        List<long>? scopeIds = null;
         if (tournamentId != null)
         {
+            scopeIds = [tournamentId.Value];
+        }
+        else if (filter.WeeklyMatchDaysOnly)
+        {
+            scopeIds = await db.Tournaments.Where(t => t.IsWeeklyMatchDay).Select(t => t.Id).ToListAsync();
+        }
+
+        var playerQuery = db.Players.AsQueryable();
+        if (scopeIds != null)
+        {
             playerQuery = playerQuery.Where(p =>
-                db.TeamPlayers.Any(tp => tp.PlayerId == p.Id && tp.Team.TournamentId == tournamentId));
+                db.TeamPlayers.Any(tp => tp.PlayerId == p.Id && scopeIds.Contains(tp.Team.TournamentId)));
         }
 
         var aggregated = await playerQuery.Select(p => new Aggregate
@@ -47,17 +62,17 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
             PlayerName = p.Name,
             Position = p.Position,
             GoalsScored = db.MatchEvents.Count(me => me.EventType == MatchEventType.GOAL && me.PlayerId == p.Id
-                && (tournamentId == null || me.Match.TournamentId == tournamentId)),
+                && (scopeIds == null || scopeIds.Contains(me.Match.TournamentId))),
             Assists = db.MatchEvents.Count(me => me.EventType == MatchEventType.GOAL && me.RelatedPlayerId == p.Id
-                && (tournamentId == null || me.Match.TournamentId == tournamentId)),
+                && (scopeIds == null || scopeIds.Contains(me.Match.TournamentId))),
             MatchesPlayed = db.Matches
-                .Where(m => m.MatchStatus == MatchStatus.COMPLETED && (tournamentId == null || m.TournamentId == tournamentId)
+                .Where(m => m.MatchStatus == MatchStatus.COMPLETED && (scopeIds == null || scopeIds.Contains(m.TournamentId))
                     && db.TeamPlayers.Any(tp2 => tp2.PlayerId == p.Id && (tp2.TeamId == m.HomeTeamId || tp2.TeamId == m.AwayTeamId)))
                 .Select(m => m.Id).Distinct().Count(),
             YellowCards = db.MatchEvents.Count(me => me.EventType == MatchEventType.YELLOW_CARD && me.PlayerId == p.Id
-                && (tournamentId == null || me.Match.TournamentId == tournamentId)),
+                && (scopeIds == null || scopeIds.Contains(me.Match.TournamentId))),
             RedCards = db.MatchEvents.Count(me => me.EventType == MatchEventType.RED_CARD && me.PlayerId == p.Id
-                && (tournamentId == null || me.Match.TournamentId == tournamentId)),
+                && (scopeIds == null || scopeIds.Contains(me.Match.TournamentId))),
         }).ToListAsync();
 
         if (filter.Position != null)

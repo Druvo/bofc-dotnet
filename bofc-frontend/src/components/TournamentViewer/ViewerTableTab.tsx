@@ -153,7 +153,7 @@ export default function ViewerTableTab({ tournamentId }: ViewerTableTabProps) {
       return [
         {
           key: "all",
-          title: "Tournament Standings",
+          title: "MatchDay Standings",
           meta: "Overall Table",
           rows,
         },
@@ -165,7 +165,7 @@ export default function ViewerTableTab({ tournamentId }: ViewerTableTabProps) {
       if (fixture.round != null) {
         return roundNameMap.get(fixture.round) ?? `Round ${fixture.round}`;
       }
-      return "Tournament Stage";
+      return "MatchDay Stage";
     };
 
     const displayMeta = (fixture: IFixture) => {
@@ -388,7 +388,7 @@ export default function ViewerTableTab({ tournamentId }: ViewerTableTabProps) {
       : [
           {
             key: "all",
-            title: "Tournament Standings",
+            title: "MatchDay Standings",
             meta: "Overall Table",
             rows,
           },
@@ -570,7 +570,7 @@ export default function ViewerTableTab({ tournamentId }: ViewerTableTabProps) {
       <div className={styles.header}>
         <h2 className={styles.title}>
           <UnorderedListOutlined style={{ marginRight: 8 }} />
-          Tournament Standings
+          MatchDay Standings
         </h2>
         <span className={styles.subtitle}>Final Leaderboard & Rankings</span>
       </div>

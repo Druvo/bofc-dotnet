@@ -93,7 +93,7 @@ export default function ViewerTournamentFlowTab({
         <div className={styles.imageWrap}>
           <img
             src={absoluteRoadmapUrl}
-            alt="Tournament Roadmap"
+            alt="MatchDay Roadmap"
             className={styles.roadmapImage}
             onClick={() => setPreviewOpen(true)}
             style={{ cursor: "zoom-in" }}
@@ -145,7 +145,7 @@ export default function ViewerTournamentFlowTab({
             </button>
             <img
               src={absoluteRoadmapUrl}
-              alt="Tournament Roadmap"
+              alt="MatchDay Roadmap"
               style={{ maxWidth: "92vw", maxHeight: "92vh", display: "block", borderRadius: 8 }}
             />
           </div>

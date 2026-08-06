@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
   EditOutlined,
   FireOutlined,
@@ -18,7 +18,6 @@ import { useNavigate } from "react-router-dom";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import type { IPlayerStatisticsData } from "../../../state/features/statistics/statisticsTypes";
 import { toAbsolutePlayerPhotoUrl } from "../../../utils/playerPhotoUtils";
-import TabsNav from "../../ui/tabs";
 import Button from "../../ui/button";
 import Badge from "../../ui/badge";
 import Loader from "../../ui/loader";
@@ -28,6 +27,7 @@ import AlertBox from "../../ui/alert";
 interface StatsLeaderboardPanelProps {
   tournamentId: number;
   isActive?: boolean;
+  weeklyMatchDaysOnly?: boolean;
 }
 
 interface LeaderboardRow {
@@ -246,6 +246,7 @@ function LeaderboardSection({
 export default function StatsLeaderboardPanel({
   tournamentId,
   isActive = false,
+  weeklyMatchDaysOnly = false,
 }: StatsLeaderboardPanelProps) {
   const navigate = useNavigate();
   const loginInfo = useSelector(selectLoginInfo);
@@ -256,7 +257,9 @@ export default function StatsLeaderboardPanel({
   const [aggregateStats, { isLoading: isAggregating }] =
     useAggregateTournamentStatisticsMutation();
   const playerStatisticsQuery = useGetPlayerStatisticsQuery(
-    { tournamentId, limit: 200 },
+    weeklyMatchDaysOnly
+      ? { weeklyMatchDaysOnly: true, limit: 200 }
+      : { tournamentId, limit: 200 },
     { skip: !isActive || !tournamentId, refetchOnMountOrArgChange: true }
   );
   const tournamentSummaryQuery = useGetTournamentSummaryQuery(
@@ -267,8 +270,6 @@ export default function StatsLeaderboardPanel({
     { tournamentId },
     { skip: !isActive || !tournamentId }
   );
-
-  const [activeTab, setActiveTab] = useState("top-scorers");
 
   const completedMatches: CompletedMatch[] = useMemo(() => {
     return (fixturesQuery.data?.content || [])
@@ -360,90 +361,70 @@ export default function StatsLeaderboardPanel({
   const loading = playerStatisticsQuery.isLoading || playerStatisticsQuery.isFetching;
 
   return (
-    <div>
-      <TabsNav
-        active={activeTab}
-        onChange={setActiveTab}
-        items={[
-          { key: "top-scorers", label: "Top Scorers" },
-          { key: "most-assists", label: "Most Assists" },
-          { key: "yellow-cards", label: "Yellow Cards" },
-          { key: "red-cards", label: "Red Cards" },
-        ]}
+    <div className="flex flex-col gap-5">
+      <LeaderboardSection
+        title="Top Scorers"
+        icon={<FireOutlined style={{ color: "#ff4d4f", fontSize: 18 }} />}
+        rows={topScorers}
+        loading={loading}
+        error={playerStatisticsQuery.error}
+        emptyMessage="No goal scorers found for this MatchDay."
+        valueTitle="Goals"
+        accentColor="#ff4d4f"
+        onSync={() => aggregateStats({ tournamentId })}
+        isSyncing={isAggregating}
+        isAdmin={isAdmin}
+        completedMatches={completedMatches}
+        onNavigate={handleNavigateToMatch}
       />
-      <div className="mt-4">
-        {activeTab === "top-scorers" && (
-          <LeaderboardSection
-            title="Top Scorers"
-            icon={<FireOutlined style={{ color: "#ff4d4f", fontSize: 18 }} />}
-            rows={topScorers}
-            loading={loading}
-            error={playerStatisticsQuery.error}
-            emptyMessage="No goal scorers found for this tournament."
-            valueTitle="Goals"
-            accentColor="#ff4d4f"
-            onSync={() => aggregateStats({ tournamentId })}
-            isSyncing={isAggregating}
-            isAdmin={isAdmin}
-            completedMatches={completedMatches}
-            onNavigate={handleNavigateToMatch}
-          />
-        )}
-        {activeTab === "most-assists" && (
-          <LeaderboardSection
-            title="Most Assists"
-            icon={<RiseOutlined style={{ color: "#52c41a", fontSize: 18 }} />}
-            rows={topAssists}
-            loading={loading}
-            error={playerStatisticsQuery.error}
-            emptyMessage="No assists found for this tournament."
-            valueTitle="Assists"
-            accentColor="#52c41a"
-            onSync={() => aggregateStats({ tournamentId })}
-            isSyncing={isAggregating}
-            isAdmin={isAdmin}
-            completedMatches={completedMatches}
-            onNavigate={handleNavigateToMatch}
-            showCompletedMatchesHelp={false}
-          />
-        )}
-        {activeTab === "yellow-cards" && (
-          <LeaderboardSection
-            title="Yellow Cards"
-            icon={<WarningOutlined style={{ color: "#faad14", fontSize: 18 }} />}
-            rows={yellowCardLeaders}
-            loading={loading}
-            error={playerStatisticsQuery.error}
-            emptyMessage="No yellow cards found for this tournament."
-            valueTitle="Cards"
-            accentColor="#faad14"
-            onSync={() => aggregateStats({ tournamentId })}
-            isSyncing={isAggregating}
-            isAdmin={isAdmin}
-            completedMatches={completedMatches}
-            onNavigate={handleNavigateToMatch}
-            showCompletedMatchesHelp={false}
-          />
-        )}
-        {activeTab === "red-cards" && (
-          <LeaderboardSection
-            title="Red Cards"
-            icon={<StopOutlined style={{ color: "#cf1322", fontSize: 18 }} />}
-            rows={redCardLeaders}
-            loading={loading}
-            error={playerStatisticsQuery.error}
-            emptyMessage="No red cards found for this tournament"
-            valueTitle="Cards"
-            accentColor="#cf1322"
-            onSync={() => aggregateStats({ tournamentId })}
-            isSyncing={isAggregating}
-            isAdmin={isAdmin}
-            completedMatches={completedMatches}
-            onNavigate={handleNavigateToMatch}
-            showCompletedMatchesHelp={false}
-          />
-        )}
-      </div>
+      <LeaderboardSection
+        title="Most Assists"
+        icon={<RiseOutlined style={{ color: "#52c41a", fontSize: 18 }} />}
+        rows={topAssists}
+        loading={loading}
+        error={playerStatisticsQuery.error}
+        emptyMessage="No assists found for this MatchDay."
+        valueTitle="Assists"
+        accentColor="#52c41a"
+        onSync={() => aggregateStats({ tournamentId })}
+        isSyncing={isAggregating}
+        isAdmin={isAdmin}
+        completedMatches={completedMatches}
+        onNavigate={handleNavigateToMatch}
+        showCompletedMatchesHelp={false}
+      />
+      <LeaderboardSection
+        title="Yellow Cards"
+        icon={<WarningOutlined style={{ color: "#faad14", fontSize: 18 }} />}
+        rows={yellowCardLeaders}
+        loading={loading}
+        error={playerStatisticsQuery.error}
+        emptyMessage="No yellow cards found for this MatchDay."
+        valueTitle="Cards"
+        accentColor="#faad14"
+        onSync={() => aggregateStats({ tournamentId })}
+        isSyncing={isAggregating}
+        isAdmin={isAdmin}
+        completedMatches={completedMatches}
+        onNavigate={handleNavigateToMatch}
+        showCompletedMatchesHelp={false}
+      />
+      <LeaderboardSection
+        title="Red Cards"
+        icon={<StopOutlined style={{ color: "#cf1322", fontSize: 18 }} />}
+        rows={redCardLeaders}
+        loading={loading}
+        error={playerStatisticsQuery.error}
+        emptyMessage="No red cards found for this MatchDay"
+        valueTitle="Cards"
+        accentColor="#cf1322"
+        onSync={() => aggregateStats({ tournamentId })}
+        isSyncing={isAggregating}
+        isAdmin={isAdmin}
+        completedMatches={completedMatches}
+        onNavigate={handleNavigateToMatch}
+        showCompletedMatchesHelp={false}
+      />
     </div>
   );
 }

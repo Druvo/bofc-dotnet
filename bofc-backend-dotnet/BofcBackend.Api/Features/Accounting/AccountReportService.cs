@@ -1,14 +1,12 @@
 using BofcBackend.Api.Data;
-using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Enums;
 using BofcBackend.Api.Features.Accounting.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace BofcBackend.Api.Features.Accounting;
 
 /// <summary>Port of service/account/AccountReportService.java — read-only ledger reports.</summary>
-public class AccountReportService(BofcDbContext db, AcChartService acChartService, IOptions<AccountingOptions> accountingOptions)
+public class AccountReportService(BofcDbContext db, AcChartService acChartService)
 {
     /// <summary>
     /// Income and Liability accounts are credit-normal — their natural, positive balance is
@@ -94,7 +92,7 @@ public class AccountReportService(BofcDbContext db, AcChartService acChartServic
     /// <summary>Cash chart's own Dr − Cr — see GetAccountSummaryAsync's remarks; same reasoning applies here.</summary>
     public async Task<decimal> GetCurrentBalanceAsync()
     {
-        var cashChart = await acChartService.GetAcChartByCodeAsync(accountingOptions.Value.CashChartCode);
+        var cashChart = await acChartService.GetCashChartAsync();
         var totalDebits = await db.AcVoucherDetails.Where(v => v.AcChartId == cashChart.Id).SumAsync(v => v.Dr ?? 0);
         var totalCredits = await db.AcVoucherDetails.Where(v => v.AcChartId == cashChart.Id).SumAsync(v => v.Cr ?? 0);
         return totalDebits - totalCredits;
@@ -111,7 +109,7 @@ public class AccountReportService(BofcDbContext db, AcChartService acChartServic
     /// </summary>
     public async Task<AccountSummaryResponse> GetAccountSummaryAsync()
     {
-        var cashChart = await acChartService.GetAcChartByCodeAsync(accountingOptions.Value.CashChartCode);
+        var cashChart = await acChartService.GetCashChartAsync();
 
         var totalCollection = await db.AcVoucherDetails
             .Where(v => v.AcChartId == cashChart.Id)
@@ -136,7 +134,7 @@ public class AccountReportService(BofcDbContext db, AcChartService acChartServic
     /// </summary>
     public async Task<List<MonthWiseSummary>> GetMonthlyAccountSummaryAsync()
     {
-        var cashChart = await acChartService.GetAcChartByCodeAsync(accountingOptions.Value.CashChartCode);
+        var cashChart = await acChartService.GetCashChartAsync();
 
         var rows = await db.AcVoucherDetails
             .Where(v => v.AcChartId == cashChart.Id)
@@ -165,7 +163,7 @@ public class AccountReportService(BofcDbContext db, AcChartService acChartServic
     public async Task<List<MonthWiseSummaryResponse>> GetMonthlyIncomeAndExpenseSummaryAsync(int? year)
     {
         var targetYear = year ?? DateTime.Now.Year;
-        var cashChart = await acChartService.GetAcChartByCodeAsync(accountingOptions.Value.CashChartCode);
+        var cashChart = await acChartService.GetCashChartAsync();
 
         var rows = await db.AcVoucherDetails
             .Where(v => v.AcChartId == cashChart.Id && v.Voucher.VoucherDate.Year == targetYear)

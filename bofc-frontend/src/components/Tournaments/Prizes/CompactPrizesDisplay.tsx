@@ -202,7 +202,7 @@ export default function CompactPrizesDisplay({
                 fontWeight: "bold",
               }}
             >
-              Tournament Prizes & Awards
+              MatchDay Prizes & Awards
             </Title>
           </Space>
         </div>

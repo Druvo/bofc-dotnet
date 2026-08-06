@@ -94,14 +94,6 @@ export default function ViewerPlayersTab({
 
   return (
     <div className={styles.pageWrap}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>
-          <TeamOutlined style={{ marginRight: 8 }} />
-          Tournament Players
-        </h2>
-        <span className={styles.subtitle}>Team Roster & Squad Details</span>
-      </div>
-
       <div className={styles.contentWrap}>
         {isMobile ? (
           <div className={styles.filterDropdown}>

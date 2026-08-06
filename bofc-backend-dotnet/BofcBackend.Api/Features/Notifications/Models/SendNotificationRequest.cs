@@ -18,4 +18,7 @@ public class SendNotificationRequest
 
     /// <summary>Required (non-empty) when TargetType is CUSTOM — covers both "one specific user" and "several selected users".</summary>
     public List<long>? UserIds { get; set; }
+
+    /// <summary>When true (and Settings.NotifyCustomEmailEnabled + SMTP are configured), also emails every recipient with an email address on file.</summary>
+    public bool SendEmail { get; set; }
 }

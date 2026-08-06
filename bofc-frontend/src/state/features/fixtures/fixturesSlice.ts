@@ -80,7 +80,7 @@ export const fixturesApi = apiWithTags.injectEndpoints({
      */
     updateFixture: builder.mutation<
       IUpdateFixtureResponse,
-      { matchId: number; matchDate?: string; venueId?: number }
+      { matchId: number; matchDate?: string; venueId?: number; homeJerseyColor?: string; awayJerseyColor?: string }
     >({
       query: ({ matchId, ...body }) => ({
         url: `/fixtures/${matchId}`,

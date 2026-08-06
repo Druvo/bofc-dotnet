@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectUserRoles } from "../../state/slices/loginInfoSlice";
+import useAuctionEnabled from "../../hooks/useAuctionEnabled";
 import companyLogo from "../../assets/logo.png";
 
 /**
@@ -25,12 +26,22 @@ interface NavLeaf {
   adminOnly?: boolean;
 }
 
+interface NavSubGroup {
+  label: string;
+  children: NavLeaf[];
+  adminOnly?: boolean;
+}
+
+type NavChild = NavLeaf | NavSubGroup;
+
+const isSubGroup = (child: NavChild): child is NavSubGroup => "children" in child;
+
 interface NavGroup {
   key: string;
   label: string;
   icon: React.ReactNode;
   matchPrefixes: string[];
-  children: NavLeaf[];
+  children: NavChild[];
   adminOnly?: boolean;
 }
 
@@ -69,6 +80,8 @@ const ChartsIcon = (
     d="M12 2C11.5858 2 11.25 2.33579 11.25 2.75V12C11.25 12.4142 11.5858 12.75 12 12.75H21.25C21.6642 12.75 22 12.4142 22 12C22 6.47715 17.5228 2 12 2ZM12.75 11.25V3.53263C13.2645 3.57761 13.7659 3.66843 14.25 3.80098V3.80099C15.6929 4.19606 16.9827 4.96184 18.0104 5.98959C19.0382 7.01734 19.8039 8.30707 20.199 9.75C20.3316 10.2341 20.4224 10.7355 20.4674 11.25H12.75ZM2 12C2 7.25083 5.31065 3.27489 9.75 2.25415V3.80099C6.14748 4.78734 3.5 8.0845 3.5 12C3.5 16.6944 7.30558 20.5 12 20.5C15.9155 20.5 19.2127 17.8525 20.199 14.25H21.7459C20.7251 18.6894 16.7492 22 12 22C6.47715 22 2 17.5229 2 12Z"
   />
 );
+/** Reuses the "forms" glyph — a settings/config page reads fine under the same icon family as Club Rules. */
+const SettingsIcon = FormsIcon;
 const ArrowDownIcon = (
   <path d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 );
@@ -84,6 +97,7 @@ export default function Sidebar({ sidebarToggle, sidebarExpanded }: SidebarProps
   const navigate = useNavigate();
   const roles = useSelector(selectUserRoles);
   const isUserAdmin = roles.includes("ADMIN") || roles.includes("SUPERADMIN");
+  const auctionEnabled = useAuctionEnabled();
 
   const [selectedGroup, setSelectedGroup] = useState<string>(() => {
     try {
@@ -102,15 +116,21 @@ export default function Sidebar({ sidebarToggle, sidebarExpanded }: SidebarProps
       children: [{ label: "Overview", path: "/dashboard" }],
     },
     {
-      key: "tournaments",
-      label: "Tournaments",
+      key: "match-day",
+      label: "Next Match",
       icon: ChartsIcon,
-      matchPrefixes: ["/tournaments", "/tournament-viewer", "/venues", "/auction"],
+      matchPrefixes: ["/match-day", "/tournament-viewer"],
+      children: [{ label: "Next Match", path: "/match-day" }],
+    },
+    {
+      key: "tournaments",
+      label: "Match Management",
+      icon: ChartsIcon,
+      matchPrefixes: ["/tournaments", "/venues", "/auction"],
       children: [
-        { label: "Tournaments", path: "/tournaments" },
-        { label: "Match Center", path: "/tournament-viewer" },
+        { label: "MatchDays", path: "/tournaments" },
         { label: "Venues", path: "/venues" },
-        { label: "Auction", path: "/auction", adminOnly: true },
+        ...(auctionEnabled ? [{ label: "Auction", path: "/auction", adminOnly: true }] : []),
       ],
     },
     {
@@ -131,15 +151,28 @@ export default function Sidebar({ sidebarToggle, sidebarExpanded }: SidebarProps
       matchPrefixes: ["/ac"],
       adminOnly: true,
       children: [
-        { label: "Voucher Types", path: "/ac/voucher-types" },
-        { label: "AC Natures", path: "/ac/natures" },
-        { label: "Chart of Account", path: "/ac/charts" },
+        {
+          label: "Configuration",
+          children: [
+            { label: "Voucher Types", path: "/ac/voucher-types" },
+            { label: "AC Natures", path: "/ac/natures" },
+            { label: "Chart of Account", path: "/ac/charts" },
+          ],
+        },
         { label: "Collections (+)", path: "/ac/collections" },
         { label: "Bill Payment (-)", path: "/ac/bill-payments" },
-        { label: "Voucher Register", path: "/ac/vouchers" },
-        { label: "Accounts Report", path: "/ac/reports/accounts-summary" },
-        { label: "Balances Summary", path: "/ac/reports/balance-summary" },
-        { label: "Balances Sheet", path: "/ac/reports/balance-sheet" },
+        {
+          label: "Voucher",
+          children: [{ label: "Voucher Register", path: "/ac/vouchers" }],
+        },
+        {
+          label: "Accounts Reports",
+          children: [
+            { label: "Accounts Report", path: "/ac/reports/accounts-summary" },
+            { label: "Balances Summary", path: "/ac/reports/balance-summary" },
+            { label: "Balances Sheet", path: "/ac/reports/balance-sheet" },
+          ],
+        },
       ],
     },
     {
@@ -149,11 +182,23 @@ export default function Sidebar({ sidebarToggle, sidebarExpanded }: SidebarProps
       matchPrefixes: ["/club-rules"],
       children: [{ label: "Club Rules", path: "/club-rules" }],
     },
+    {
+      key: "settings",
+      label: "Settings",
+      icon: SettingsIcon,
+      matchPrefixes: ["/settings"],
+      children: [{ label: "Settings", path: "/settings" }],
+    },
   ];
 
   const visibleGroups = groups
     .filter((g) => !g.adminOnly || isUserAdmin)
-    .map((g) => ({ ...g, children: g.children.filter((c) => !c.adminOnly || isUserAdmin) }))
+    .map((g) => ({
+      ...g,
+      children: g.children
+        .map((c) => (isSubGroup(c) ? { ...c, children: c.children.filter((leaf) => !leaf.adminOnly || isUserAdmin) } : c))
+        .filter((c) => (!c.adminOnly || isUserAdmin) && (!isSubGroup(c) || c.children.length > 0)),
+    }))
     .filter((g) => g.children.length > 0);
 
   const isGroupActive = (group: NavGroup) =>
@@ -179,6 +224,13 @@ export default function Sidebar({ sidebarToggle, sidebarExpanded }: SidebarProps
     } catch {
       // ignore storage failures
     }
+  };
+
+  // Sub-groups (e.g. Finance's "Configuration"/"Voucher"/"Accounts Reports") default
+  // open and toggle independently of each other and of the top-level group state.
+  const [collapsedSubGroups, setCollapsedSubGroups] = useState<Record<string, boolean>>({});
+  const toggleSubGroup = (subGroupKey: string) => {
+    setCollapsedSubGroups((prev) => ({ ...prev, [subGroupKey]: !prev[subGroupKey] }));
   };
 
   // On desktop, collapsing shrinks the rail to icons-only and hides dropdown
@@ -212,16 +264,21 @@ export default function Sidebar({ sidebarToggle, sidebarExpanded }: SidebarProps
               {visibleGroups.map((group) => {
                 const active = isGroupActive(group);
                 const open = selectedGroup === group.key && !collapsed;
-                const hasSingleChild = group.children.length === 1;
+                const onlyChild = group.children.length === 1 ? group.children[0] : null;
+                const hasSingleChild = onlyChild !== null && !isSubGroup(onlyChild);
 
                 return (
                   <li key={group.key}>
                     <button
                       type="button"
                       title={collapsed ? group.label : undefined}
-                      onClick={() =>
-                        hasSingleChild || collapsed ? navigate(group.children[0].path) : toggleGroup(group.key)
-                      }
+                      onClick={() => {
+                        if (hasSingleChild && onlyChild) navigate((onlyChild as NavLeaf).path);
+                        else if (collapsed) {
+                          const firstLeaf = group.children.find((c): c is NavLeaf => !isSubGroup(c)) ?? (isSubGroup(group.children[0]) ? group.children[0].children[0] : undefined);
+                          if (firstLeaf) navigate(firstLeaf.path);
+                        } else toggleGroup(group.key);
+                      }}
                       className={`menu-item group w-full ${collapsed ? "lg:justify-center" : ""} ${active ? "menu-item-active" : "menu-item-inactive"}`}
                     >
                       <svg
@@ -253,21 +310,70 @@ export default function Sidebar({ sidebarToggle, sidebarExpanded }: SidebarProps
                     {!hasSingleChild && (
                       <div className={`overflow-hidden ${collapsed ? "lg:hidden" : ""} ${open ? "block" : "hidden"}`}>
                         <ul className="menu-dropdown mt-2 flex flex-col gap-1 pl-9">
-                          {group.children.map((leaf) => (
-                            <li key={leaf.path}>
-                              <button
-                                type="button"
-                                onClick={() => navigate(leaf.path)}
-                                className={`menu-dropdown-item group w-full text-left ${
-                                  location.pathname.startsWith(leaf.path)
-                                    ? "menu-dropdown-item-active"
-                                    : "menu-dropdown-item-inactive"
-                                }`}
-                              >
-                                {leaf.label}
-                              </button>
-                            </li>
-                          ))}
+                          {group.children.map((child) => {
+                            if (!isSubGroup(child)) {
+                              return (
+                                <li key={child.path}>
+                                  <button
+                                    type="button"
+                                    onClick={() => navigate(child.path)}
+                                    className={`menu-dropdown-item group w-full text-left ${
+                                      location.pathname.startsWith(child.path)
+                                        ? "menu-dropdown-item-active"
+                                        : "menu-dropdown-item-inactive"
+                                    }`}
+                                  >
+                                    {child.label}
+                                  </button>
+                                </li>
+                              );
+                            }
+
+                            const subGroupKey = `${group.key}:${child.label}`;
+                            const subGroupOpen = !collapsedSubGroups[subGroupKey];
+
+                            return (
+                              <li key={subGroupKey}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSubGroup(subGroupKey)}
+                                  className="menu-dropdown-item group flex w-full items-center justify-between text-left menu-dropdown-item-inactive"
+                                >
+                                  {child.label}
+                                  <svg
+                                    className={`h-4 w-4 shrink-0 transition-transform ${subGroupOpen ? "rotate-180" : ""}`}
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    {ArrowDownIcon}
+                                  </svg>
+                                </button>
+                                {subGroupOpen && (
+                                  <ul className="mt-1 flex flex-col gap-1 pl-4">
+                                    {child.children.map((leaf) => (
+                                      <li key={leaf.path}>
+                                        <button
+                                          type="button"
+                                          onClick={() => navigate(leaf.path)}
+                                          className={`menu-dropdown-item group w-full text-left ${
+                                            location.pathname.startsWith(leaf.path)
+                                              ? "menu-dropdown-item-active"
+                                              : "menu-dropdown-item-inactive"
+                                          }`}
+                                        >
+                                          {leaf.label}
+                                        </button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </li>
+                            );
+                          })}
                         </ul>
                       </div>
                     )}

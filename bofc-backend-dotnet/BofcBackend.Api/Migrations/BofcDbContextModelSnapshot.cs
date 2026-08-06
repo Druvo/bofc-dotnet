@@ -1276,6 +1276,11 @@ namespace BofcBackend.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("AwayJerseyColor")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("away_jersey_color");
+
                     b.Property<long>("AwayTeamId")
                         .HasColumnType("bigint")
                         .HasColumnName("away_team_id");
@@ -1312,6 +1317,11 @@ namespace BofcBackend.Api.Migrations
                     b.Property<string>("GroupName")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("group_name");
+
+                    b.Property<string>("HomeJerseyColor")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("home_jersey_color");
 
                     b.Property<long>("HomeTeamId")
                         .HasColumnType("bigint")
@@ -1834,6 +1844,11 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("teams_id");
 
+                    b.Property<string>("ThemePreference")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnName("theme_preference");
+
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
@@ -2182,6 +2197,167 @@ namespace BofcBackend.Api.Migrations
                     b.ToTable("round_team", (string)null);
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.SystemSettings", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("AuctionEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("auction_enabled");
+
+                    b.Property<string>("CashChartCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("cash_chart_code");
+
+                    b.Property<string>("CollectionIncomeChartCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("collection_income_chart_code");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<string>("JerseyColorA")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("red")
+                        .HasColumnName("jersey_color_a");
+
+                    b.Property<string>("JerseyColorB")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasDefaultValue("yellow")
+                        .HasColumnName("jersey_color_b");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<string>("LastPaymentReminderSentMonth")
+                        .HasMaxLength(7)
+                        .HasColumnType("nvarchar(7)")
+                        .HasColumnName("last_payment_reminder_sent_month");
+
+                    b.Property<bool>("NotifyCustomEmailEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("notify_custom_email_enabled");
+
+                    b.Property<bool>("NotifyPaymentDueEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("notify_payment_due_enabled");
+
+                    b.Property<bool>("NotifyTournamentReminderEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("notify_tournament_reminder_enabled");
+
+                    b.Property<int>("PaymentDueReminderDayOfMonth")
+                        .HasColumnType("int")
+                        .HasColumnName("payment_due_reminder_day_of_month");
+
+                    b.Property<bool>("PushNotificationsEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("push_notifications_enabled");
+
+                    b.Property<bool>("SmtpEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("smtp_enabled");
+
+                    b.Property<string>("SmtpFromEmail")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
+                        .HasColumnName("smtp_from_email");
+
+                    b.Property<string>("SmtpFromName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("smtp_from_name");
+
+                    b.Property<string>("SmtpHost")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
+                        .HasColumnName("smtp_host");
+
+                    b.Property<string>("SmtpPasswordEncrypted")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("smtp_password_encrypted");
+
+                    b.Property<int>("SmtpPort")
+                        .HasColumnType("int")
+                        .HasColumnName("smtp_port");
+
+                    b.Property<bool>("SmtpUseSsl")
+                        .HasColumnType("bit")
+                        .HasColumnName("smtp_use_ssl");
+
+                    b.Property<string>("SmtpUsername")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
+                        .HasColumnName("smtp_username");
+
+                    b.Property<int>("TournamentReminderDaysBefore")
+                        .HasColumnType("int")
+                        .HasColumnName("tournament_reminder_days_before");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.Property<string>("WeeklyMatchDayOfWeek")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("weekly_match_day_of_week");
+
+                    b.Property<int>("WeeklyMatchDurationMinutes")
+                        .HasColumnType("int")
+                        .HasColumnName("weekly_match_duration_minutes");
+
+                    b.Property<bool>("WeeklyMatchEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("weekly_match_enabled");
+
+                    b.Property<string>("WeeklyMatchNamePrefix")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("weekly_match_name_prefix");
+
+                    b.Property<string>("WeeklyMatchSportType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("weekly_match_sport_type");
+
+                    b.Property<TimeSpan>("WeeklyMatchTime")
+                        .HasColumnType("time")
+                        .HasColumnName("weekly_match_time");
+
+                    b.Property<int>("WeeklyMatchTimeGapMinutes")
+                        .HasColumnType("int")
+                        .HasColumnName("weekly_match_time_gap_minutes");
+
+                    b.Property<long?>("WeeklyMatchVenueId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("weekly_match_venue_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WeeklyMatchVenueId");
+
+                    b.ToTable("system_settings", (string)null);
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Team", b =>
                 {
                     b.Property<long>("Id")
@@ -2385,6 +2561,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("NVARCHAR(MAX)")
                         .HasColumnName("description");
 
+                    b.Property<int?>("DurationMinutes")
+                        .HasColumnType("int")
+                        .HasColumnName("duration_minutes");
+
                     b.Property<int?>("GroupCount")
                         .HasColumnType("int")
                         .HasColumnName("group_count");
@@ -2392,6 +2572,10 @@ namespace BofcBackend.Api.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")
                         .HasColumnName("is_active");
+
+                    b.Property<bool>("IsWeeklyMatchDay")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_weekly_match_day");
 
                     b.Property<long?>("LastModifiedBy")
                         .HasColumnType("bigint")
@@ -2401,6 +2585,10 @@ namespace BofcBackend.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("name");
+
+                    b.Property<DateTime?>("ReminderSentAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("reminder_sent_at");
 
                     b.Property<string>("RoadmapImageUrl")
                         .HasMaxLength(500)
@@ -3327,6 +3515,16 @@ namespace BofcBackend.Api.Migrations
                     b.Navigation("Round");
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.SystemSettings", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Venue", "WeeklyMatchVenue")
+                        .WithMany()
+                        .HasForeignKey("WeeklyMatchVenueId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("WeeklyMatchVenue");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Team", b =>

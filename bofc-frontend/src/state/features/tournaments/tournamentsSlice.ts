@@ -11,6 +11,7 @@ import {
   LatestTournamentWithUserStatusType,
   TournamentSessionsResType,
   TournamentListResType,
+  CurrentMatchDayResType,
 } from "./tournamentTypes";
 
 const apiWithTags = apiSlice.enhanceEndpoints({
@@ -24,6 +25,7 @@ export const tournamentsApi = apiWithTags.injectEndpoints({
       {
         tournamentName: string;
         tournamentDate: string | Date;
+        durationMinutes?: number;
         venueId: number;
         auctionMode?: boolean;
         defaultTournament?: boolean;
@@ -33,10 +35,10 @@ export const tournamentsApi = apiWithTags.injectEndpoints({
         roadmapImageUrl?: string;
       }
     >({
-      query: ({ tournamentName, tournamentDate, venueId, auctionMode, defaultTournament, season, description, rules, roadmapImageUrl }) => ({
+      query: ({ tournamentName, tournamentDate, durationMinutes, venueId, auctionMode, defaultTournament, season, description, rules, roadmapImageUrl }) => ({
         url: "tournaments",
         method: "POST",
-        body: { tournamentName, tournamentDate, venueId, auctionMode: auctionMode || false, defaultTournament, season, description, rules, roadmapImageUrl },
+        body: { tournamentName, tournamentDate, durationMinutes, venueId, auctionMode: auctionMode || false, defaultTournament, season, description, rules, roadmapImageUrl },
       }),
       invalidatesTags: ["tournaments"],
     }),
@@ -53,6 +55,7 @@ export const tournamentsApi = apiWithTags.injectEndpoints({
         id: number;
         tournamentName: string;
         tournamentDate: string | Date;
+        durationMinutes?: number;
         venueId: number;
         auctionMode?: boolean;
         defaultTournament?: boolean;
@@ -62,10 +65,10 @@ export const tournamentsApi = apiWithTags.injectEndpoints({
         roadmapImageUrl?: string;
       }
     >({
-      query: ({ id, tournamentName, tournamentDate, venueId, auctionMode, defaultTournament, season, description, rules, roadmapImageUrl }) => ({
+      query: ({ id, tournamentName, tournamentDate, durationMinutes, venueId, auctionMode, defaultTournament, season, description, rules, roadmapImageUrl }) => ({
         url: `tournaments/${id}`,
         method: "PUT",
-        body: { tournamentName, tournamentDate, venueId, auctionMode: auctionMode || false, defaultTournament, season, description, rules, roadmapImageUrl },
+        body: { tournamentName, tournamentDate, durationMinutes, venueId, auctionMode: auctionMode || false, defaultTournament, season, description, rules, roadmapImageUrl },
       }),
       invalidatesTags: ["tournaments"],
     }),
@@ -206,6 +209,20 @@ export const tournamentsApi = apiWithTags.injectEndpoints({
       }),
       providesTags: ["tournaments"],
     }),
+    getCurrentMatchDay: builder.query<CurrentMatchDayResType, void>({
+      query: () => ({
+        url: `tournaments/current-match-day`,
+        method: "GET",
+      }),
+      providesTags: ["tournaments"],
+    }),
+    getNextActiveTournament: builder.query<CurrentMatchDayResType, void>({
+      query: () => ({
+        url: `tournaments/next-active`,
+        method: "GET",
+      }),
+      providesTags: ["tournaments"],
+    }),
   }),
 });
 
@@ -225,4 +242,6 @@ export const {
   useGetLatestTournamentWithUserStatusQuery,
   useGetTournamentSessionsQuery,
   useGetTournamentsByYearQuery,
+  useGetCurrentMatchDayQuery,
+  useGetNextActiveTournamentQuery,
 } = tournamentsApi;

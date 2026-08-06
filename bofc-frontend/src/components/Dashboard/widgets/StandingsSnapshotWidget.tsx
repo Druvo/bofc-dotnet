@@ -33,7 +33,7 @@ const StandingsSnapshotWidget: React.FC = () => {
       </div>
 
       {!tournamentId ? (
-        <p className="my-3 text-theme-xs text-gray-400 dark:text-gray-500">No active tournament</p>
+        <p className="my-3 text-theme-xs text-gray-400 dark:text-gray-500">No active MatchDay</p>
       ) : isLoading ? (
         <Spinner className="my-3 text-gray-400" />
       ) : standings.length === 0 ? (

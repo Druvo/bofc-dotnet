@@ -57,6 +57,15 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, response);
     }
 
+    /// <summary>Self-service only — always the caller's own row (no id param), so any authenticated player can set it, not just admins.</summary>
+    [Authorize]
+    [HttpPut("me/theme-preference")]
+    public async Task<IActionResult> UpdateOwnThemePreference([FromBody] ThemePreferenceRequest request)
+    {
+        await playerService.UpdateOwnThemePreferenceAsync(request.ThemePreference);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
+    }
+
     [AllowAnonymous]
     [HttpGet("goal-keeper-history")]
     public async Task<IActionResult> GoalKeepingHistory()

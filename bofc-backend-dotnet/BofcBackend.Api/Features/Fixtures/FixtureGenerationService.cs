@@ -72,12 +72,23 @@ public class FixtureGenerationService(
         var timeGapMinutes = request.TimeGapMinutes ?? 120;
         var matchDurationMinutes = request.MatchDurationMinutes ?? 90;
 
+        // The gap is time AFTER one match ends and BEFORE the next starts — the full
+        // slot each match occupies on the schedule is duration + gap, not gap alone
+        // (previously this ignored duration entirely, silently overlapping matches
+        // whenever gap < duration).
+        var slotMinutes = matchDurationMinutes + timeGapMinutes;
+
         const int minutesPerDay = 12 * 60;
-        var matchesPerDay = minutesPerDay / timeGapMinutes;
+        var matchesPerDay = minutesPerDay / slotMinutes;
         if (matchesPerDay < 1)
         {
             matchesPerDay = 1;
         }
+
+        // Optional one-time break: every match after BreakAfterMatchNumber (1-based) is
+        // pushed later by BreakDurationMinutes, on top of its normal slot spacing.
+        var breakAfterMatchNumber = request.BreakAfterMatchNumber is > 0 ? request.BreakAfterMatchNumber.Value : (int?)null;
+        var breakDurationMinutes = request.BreakDurationMinutes ?? 0;
 
         var startDate = request.MatchDates[0];
 
@@ -91,8 +102,10 @@ public class FixtureGenerationService(
             {
                 var dayOffset = matchIndex / matchesPerDay;
                 var matchIndexOnDay = matchIndex % matchesPerDay;
+                var matchNumber = matchIndex + 1;
+                var breakOffset = breakAfterMatchNumber != null && matchNumber > breakAfterMatchNumber ? breakDurationMinutes : 0;
 
-                var matchDate = startDate.AddDays(dayOffset).AddMinutes((double)matchIndexOnDay * timeGapMinutes);
+                var matchDate = startDate.AddDays(dayOffset).AddMinutes((double)matchIndexOnDay * slotMinutes + breakOffset);
 
                 matches.Add(new Match
                 {
@@ -164,6 +177,16 @@ public class FixtureGenerationService(
                 ?? throw new TournamentServiceException(RestErrorMessageDetail.VenueIsNotFound, HttpStatusCode.NotFound);
             match.VenueId = venue.Id;
             match.Venue = venue;
+        }
+
+        if (request.HomeJerseyColor != null)
+        {
+            match.HomeJerseyColor = request.HomeJerseyColor;
+        }
+
+        if (request.AwayJerseyColor != null)
+        {
+            match.AwayJerseyColor = request.AwayJerseyColor;
         }
 
         await db.SaveChangesAsync();

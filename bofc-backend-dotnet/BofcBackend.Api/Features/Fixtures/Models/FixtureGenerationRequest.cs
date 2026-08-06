@@ -25,6 +25,14 @@ public class FixtureGenerationRequest
     public int? MaxTeamsPerGroup { get; set; }
     public List<CustomMatchPairing>? CustomMatchPairings { get; set; }
 
+    /// <summary>Insert a one-time break after this match number (1-based) in the generated
+    /// schedule — e.g. 3 means the break falls between match 3 and match 4. Null/0 = no break.</summary>
+    public int? BreakAfterMatchNumber { get; set; }
+
+    /// <summary>Length of the one-time break, added on top of the normal gap after
+    /// <see cref="BreakAfterMatchNumber"/>. Ignored unless BreakAfterMatchNumber is set.</summary>
+    public int? BreakDurationMinutes { get; set; }
+
     public class CustomMatchPairing
     {
         public long? HomeTeamId { get; set; }

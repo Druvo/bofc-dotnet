@@ -10,6 +10,7 @@ import { Dropdown, DropdownItem } from "../../ui/dropdown";
 import Button from "../../ui/button";
 import Modal from "../../ui/modal";
 import FormSelect from "../../ui/form-select";
+import useAuctionEnabled from "../../../hooks/useAuctionEnabled";
 
 interface TournamentsActionDropdownProps {
   record: IoTournamentSingleSummaryType;
@@ -31,6 +32,7 @@ const TournamentsActionDropdown: React.FC<TournamentsActionDropdownProps> = ({
 
   const loginInfo = useSelector(selectLoginInfo);
   const canManage = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN") || loginInfo.roles.includes("COORDINATOR");
+  const auctionEnabled = useAuctionEnabled();
 
   const fireMenuClick = (key: string, close: () => void) => {
     close();
@@ -53,11 +55,11 @@ const TournamentsActionDropdown: React.FC<TournamentsActionDropdownProps> = ({
     concludeTournament({ id: record.id })
       .unwrap()
       .then(() => {
-        toast.success("Tournament concluded successfully");
+        toast.success("MatchDay concluded successfully");
         setIsConcludeModalVisible(false);
       })
       .catch(() => {
-        toast.error("Failed to conclude tournament");
+        toast.error("Failed to conclude MatchDay");
       });
   };
 
@@ -73,16 +75,16 @@ const TournamentsActionDropdown: React.FC<TournamentsActionDropdownProps> = ({
       >
         {(close) => (
           <>
-            {record.activeStatus && <DropdownItem onClick={() => fireMenuClick("join", close)}>Join Tournament</DropdownItem>}
-            {record.auctionMode && <DropdownItem onClick={() => fireMenuClick("auction-register", close)}>Register for Auction</DropdownItem>}
-            {record.auctionMode && <DropdownItem onClick={() => fireMenuClick("auction-live", close)}>Live Auction</DropdownItem>}
+            {record.activeStatus && <DropdownItem onClick={() => fireMenuClick("join", close)}>Join MatchDay</DropdownItem>}
+            {auctionEnabled && record.auctionMode && <DropdownItem onClick={() => fireMenuClick("auction-register", close)}>Register for Auction</DropdownItem>}
+            {auctionEnabled && record.auctionMode && <DropdownItem onClick={() => fireMenuClick("auction-live", close)}>Live Auction</DropdownItem>}
             <DropdownItem onClick={() => fireMenuClick("team-building", close)}>Team Building</DropdownItem>
             <DropdownItem onClick={() => fireMenuClick("fixtures", close)}>Teams and Fixtures</DropdownItem>
-            {canManage && <DropdownItem onClick={() => fireMenuClick("update", close)}>Update Tournament</DropdownItem>}
+            {canManage && <DropdownItem onClick={() => fireMenuClick("update", close)}>Update MatchDay</DropdownItem>}
             {canManage && <DropdownItem onClick={() => fireMenuClick("active-status", close)}>Update Active Status</DropdownItem>}
             {loginInfo.roles.includes("SUPERADMIN") && (
               <DropdownItem className="text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10" onClick={() => fireMenuClick("conclude", close)}>
-                Conclude Tournament
+                Conclude MatchDay
               </DropdownItem>
             )}
           </>
@@ -122,7 +124,7 @@ const TournamentsActionDropdown: React.FC<TournamentsActionDropdownProps> = ({
       <Modal
         isOpen={isConcludeModalVisible}
         onClose={() => setIsConcludeModalVisible(false)}
-        title="Conclude Tournament"
+        title="Conclude MatchDay"
         className="max-w-[420px]"
         footer={
           <>

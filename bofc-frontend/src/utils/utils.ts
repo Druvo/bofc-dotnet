@@ -2,22 +2,33 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 /**
- * The backend only assigns tournamentStatus once (at creation) and relies on
- * an admin to manually flip ONGOING -> CONCLUDED afterwards — so a tournament
- * whose date has already passed can sit at "ONGOING" indefinitely. Anywhere
- * a status is displayed, derive the effective status instead of trusting the
- * raw field: a same-day-or-later ONGOING stays ONGOING, anything dated before
- * today reads as CONCLUDED.
+ * The backend only assigns tournamentStatus once (at creation) and relies on a slow
+ * cron job (3x/day) or an admin manually concluding it to advance it further — so a
+ * tournament can sit at stale UPCOMING/ONGOING long past its actual window. Anywhere
+ * a status is displayed, derive the effective status in real time from the MatchDay's
+ * own start + duration instead of trusting the raw field:
+ *   now < start           -> UPCOMING
+ *   start <= now < end    -> ONGOING
+ *   now >= end            -> CONCLUDED
+ * CONCLUDED is treated as terminal (an admin's explicit ConcludeTournamentAsync call)
+ * and never resurrected by date math. durationMinutes defaults to 90 when unset.
  */
-export const getEffectiveTournamentStatus = (status?: string, tournamentDate?: string): string => {
-    if (status !== "ONGOING" || !tournamentDate) return status || "";
+export const getEffectiveTournamentStatus = (
+    status?: string,
+    tournamentDate?: string,
+    durationMinutes?: number | null
+): string => {
+    if (!tournamentDate) return status || "";
+    if (status === "CONCLUDED") return status;
+    if (status !== "UPCOMING" && status !== "ONGOING") return status || "";
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const date = new Date(tournamentDate);
-    date.setHours(0, 0, 0, 0);
+    const start = new Date(tournamentDate);
+    const end = new Date(start.getTime() + (durationMinutes ?? 90) * 60_000);
+    const now = new Date();
 
-    return date < today ? "CONCLUDED" : status;
+    if (now < start) return "UPCOMING";
+    if (now < end) return "ONGOING";
+    return "CONCLUDED";
 };
 
 export const showBdLocalTime = (timeString: string) => {

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using BofcBackend.Api.Common.Constants;
+using BofcBackend.Api.Common.Email;
 using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Common.Security;
 using BofcBackend.Api.Data;
@@ -14,7 +15,8 @@ using WebPushSubscription = WebPush.PushSubscription;
 
 namespace BofcBackend.Api.Features.Notifications;
 
-public class NotificationService(BofcDbContext db, IOptions<VapidOptions> vapidOptions, ILogger<NotificationService> logger)
+public class NotificationService(
+    BofcDbContext db, IOptions<VapidOptions> vapidOptions, IEmailSender emailSender, ILogger<NotificationService> logger)
     : INotificationService
 {
     public async Task SendAsync(SendNotificationRequest request, long senderId)
@@ -47,10 +49,41 @@ public class NotificationService(BofcDbContext db, IOptions<VapidOptions> vapidO
         await db.SaveChangesAsync();
 
         await PushToRecipientsAsync(notification, recipientIds);
+
+        if (request.SendEmail)
+        {
+            await EmailRecipientsAsync(notification, recipientIds);
+        }
+    }
+
+    private async Task EmailRecipientsAsync(Notification notification, List<long> recipientIds)
+    {
+        var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
+        if (settings is not { NotifyCustomEmailEnabled: true })
+        {
+            logger.LogInformation("Custom email notifications are disabled in Settings — skipping email for notification {NotificationId}", notification.Id);
+            return;
+        }
+
+        var emails = await db.Players
+            .Where(p => recipientIds.Contains(p.Id) && p.Email != "")
+            .Select(p => p.Email)
+            .ToListAsync();
+        if (emails.Count == 0) return;
+
+        var htmlBody = $"<p>{System.Net.WebUtility.HtmlEncode(notification.Body)}</p>";
+        await emailSender.SendAsync(emails, notification.Title, htmlBody);
     }
 
     private async Task PushToRecipientsAsync(Notification notification, List<long> recipientIds)
     {
+        var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
+        if (settings is { PushNotificationsEnabled: false })
+        {
+            logger.LogInformation("Push notifications are disabled in Settings — skipping push for notification {NotificationId}", notification.Id);
+            return;
+        }
+
         var vapid = vapidOptions.Value;
         if (string.IsNullOrWhiteSpace(vapid.PublicKey) || string.IsNullOrWhiteSpace(vapid.PrivateKey))
         {

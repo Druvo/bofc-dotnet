@@ -225,25 +225,31 @@ export function generateKnockoutPairings(teamIds: number[]): MatchPairing[] {
 }
 
 /**
- * Estimate tournament duration based on match count and scheduling parameters
+ * Estimate tournament duration based on match count and scheduling parameters.
+ *
+ * Mirrors FixtureGenerationService.GenerateFixturesAsync on the backend: each match
+ * occupies a slot of (duration + gap) minutes — timeGapMinutes is the time AFTER one
+ * match ends and BEFORE the next starts, not the full start-to-start interval.
  *
  * @param matchCount - Total number of matches
- * @param timeGapMinutes - Minutes between the start of consecutive matches
+ * @param timeGapMinutes - Minutes between the end of one match and the start of the next
  * @param matchDurationMinutes - Duration of each match in minutes
+ * @param breakDurationMinutes - Extra one-time break inserted into the schedule, if any
  * @returns Tournament duration estimation
  */
 export function estimateTournamentDuration(
   matchCount: number,
   timeGapMinutes: number,
-  matchDurationMinutes: number
+  matchDurationMinutes: number,
+  breakDurationMinutes = 0
 ): TournamentDuration {
-  // Total time needed for all matches (based on time gap between starts)
-  const totalMinutes = matchCount * timeGapMinutes;
+  const slotMinutes = matchDurationMinutes + timeGapMinutes;
+  const totalMinutes = matchCount * slotMinutes + breakDurationMinutes;
   const totalHours = totalMinutes / 60;
 
   // Assume maximum 12 hours of play per day (reasonable operational hours)
   const maxMinutesPerDay = 12 * 60;
-  const matchesPerDay = Math.floor(maxMinutesPerDay / timeGapMinutes);
+  const matchesPerDay = Math.max(1, Math.floor(maxMinutesPerDay / slotMinutes));
 
   // Calculate number of days needed
   const totalDays = Math.ceil(matchCount / matchesPerDay);
@@ -257,9 +263,11 @@ export function estimateTournamentDuration(
 }
 
 /**
- * Check if scheduling parameters are valid and safe
+ * Check if scheduling parameters are valid and safe. With the corrected model, the gap
+ * is purely the breather AFTER a match — any non-negative value is valid; this only
+ * nudges towards leaving at least a couple of minutes for teams to swap onto the pitch.
  *
- * @param timeGapMinutes - Minutes between matches
+ * @param timeGapMinutes - Minutes between the end of one match and the start of the next
  * @param matchDurationMinutes - Duration of each match
  * @returns Object with validation result and warning message
  */
@@ -267,23 +275,55 @@ export function validateSchedulingParameters(
   timeGapMinutes: number,
   matchDurationMinutes: number
 ): { isValid: boolean; warning?: string } {
-  // Warning if time gap is less than match duration (matches will overlap)
-  if (timeGapMinutes < matchDurationMinutes) {
-    return {
-      isValid: false,
-      warning: `Time gap (${timeGapMinutes} min) is less than match duration (${matchDurationMinutes} min). Matches will overlap!`,
-    };
+  if (timeGapMinutes < 0 || matchDurationMinutes < 1) {
+    return { isValid: false, warning: "Match duration and gap must be positive." };
   }
 
-  // Warning if very short time gap (less than match duration + 15 min buffer)
-  if (timeGapMinutes < matchDurationMinutes + 15) {
+  if (timeGapMinutes === 0) {
     return {
       isValid: true,
-      warning: `Very short time gap. Consider allowing at least 15 minutes between matches for setup and breaks.`,
+      warning: "No gap between matches — the next match starts the instant the previous one ends.",
     };
   }
 
   return { isValid: true };
+}
+
+/**
+ * A single generated match with computed start/end, matching the backend's
+ * round-robin pairing + slot + one-time-break formula exactly (kept in sync with
+ * FixtureGenerationService.GenerateFixturesAsync).
+ */
+export interface ScheduledMatch extends MatchPairing {
+  matchNumber: number;
+  start: Date;
+  end: Date;
+}
+
+/**
+ * Compute the real per-match schedule for a round-robin MatchDay — same formula as
+ * FixtureGenerationService.GenerateFixturesAsync, so the preview always matches what
+ * generation will actually produce.
+ */
+export function generateRoundRobinSchedule(
+  teamIds: number[],
+  startDateTime: Date,
+  matchDurationMinutes: number,
+  timeGapMinutes: number,
+  breakAfterMatchNumber?: number,
+  breakDurationMinutes = 0
+): ScheduledMatch[] {
+  const pairings = generateRoundRobinPairings(teamIds);
+  const slotMinutes = matchDurationMinutes + timeGapMinutes;
+
+  return pairings.map((pairing, index) => {
+    const matchNumber = index + 1;
+    const breakOffset = breakAfterMatchNumber && matchNumber > breakAfterMatchNumber ? breakDurationMinutes : 0;
+    const offsetMinutes = index * slotMinutes + breakOffset;
+    const start = new Date(startDateTime.getTime() + offsetMinutes * 60_000);
+    const end = new Date(start.getTime() + matchDurationMinutes * 60_000);
+    return { ...pairing, matchNumber, start, end };
+  });
 }
 
 /**

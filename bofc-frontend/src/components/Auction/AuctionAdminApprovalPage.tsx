@@ -144,7 +144,7 @@ const AuctionAdminApprovalPage: React.FC = () => {
           <Loader className="py-10" />
         ) : registrations.length === 0 ? (
           <div className="py-10 text-center text-theme-sm text-gray-400 dark:text-gray-500">
-            No registrations yet for this tournament.
+            No registrations yet for this MatchDay.
           </div>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">

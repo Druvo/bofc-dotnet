@@ -14,6 +14,12 @@ public class Tournament : AuditableEntity
     public string? RoadmapImageUrl { get; set; }
     public DateTime TournamentDate { get; set; }
 
+    /// <summary>How long the MatchDay itself runs, from TournamentDate — drives the
+    /// client-derived "effective status" (UPCOMING before start, ONGOING during the
+    /// window, CONCLUDED after) shown across Dashboard/Tournament Viewer/MatchDay
+    /// pages. Null = unknown duration, callers fall back to a default window.</summary>
+    public int? DurationMinutes { get; set; }
+
     public long VenueId { get; set; }
     public Venue Venue { get; set; } = null!;
 
@@ -24,6 +30,12 @@ public class Tournament : AuditableEntity
     public TournamentType TournamentType { get; set; }
     public int? GroupCount { get; set; }
     public bool AuctionMode { get; set; }
+
+    /// <summary>Set once the "tournament starting soon" reminder email/notification has gone out — prevents re-sending on every scheduler tick.</summary>
+    public DateTime? ReminderSentAt { get; set; }
+
+    /// <summary>True for tournaments auto-created weekly by MatchDaySchedulerBackgroundService ("Match Day") rather than manually created by an admin — drives simplified nav/tabs and scopes the season-cumulative stats leaderboard.</summary>
+    public bool IsWeeklyMatchDay { get; set; }
 
     // Java's Tournament entity is bidirectional ONLY with Team (OneToMany "teams" below).
     // TournamentRound/TournamentParticipant/LogicNode/TournamentPrize/

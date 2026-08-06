@@ -529,7 +529,7 @@ export default function OverviewTab({
     if (!tournamentStructure || tournamentStructure.rounds.length === 0) {
         return (
             <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-white/[0.03]">
-                <p className="text-theme-sm text-gray-500 dark:text-gray-400">No tournament structure yet.</p>
+                <p className="text-theme-sm text-gray-500 dark:text-gray-400">No MatchDay structure yet.</p>
                 <p className="text-theme-sm text-gray-500 dark:text-gray-400">Create rounds and groups to see standings.</p>
             </div>
         );

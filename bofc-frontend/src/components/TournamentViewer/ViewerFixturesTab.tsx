@@ -195,16 +195,6 @@ export default function ViewerFixturesTab({ tournamentId }: ViewerFixturesTabPro
 
   return (
     <div className={styles.pageWrap}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>
-          <CalendarOutlined style={{ marginRight: 8 }} />
-          Tournament Fixtures
-        </h2>
-        <span className={styles.subtitle}>
-          Schedule & Match Details
-        </span>
-      </div>
-
       <div className={styles.contentWrap}>
         <div className={styles.filterBar}>
           {filters.map((filter) => {

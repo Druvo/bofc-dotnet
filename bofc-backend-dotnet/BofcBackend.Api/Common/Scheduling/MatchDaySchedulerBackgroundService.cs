@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 namespace BofcBackend.Api.Common.Scheduling;
 
 /// <summary>
-/// Keeps exactly one upcoming "Match Day" queued at all times — a Tournament row
+/// Keeps exactly one upcoming "Match Day" queued at all times — a MatchDay row
 /// (IsWeeklyMatchDay=true) auto-created weekly from SystemSettings.WeeklyMatch* config, reusing
-/// the full existing Tournament system (Teams, fixtures, live scoring, stats, prizes) instead of
+/// the full existing MatchDay system (Teams, fixtures, live scoring, stats, prizes) instead of
 /// a separate bespoke model. As soon as the currently-queued Match Day's date passes, the next
 /// tick creates next week's occurrence and notifies everyone to RSVP via the existing
-/// TournamentParticipant flow (no new RSVP mechanism — see /tournaments/join-tournament/:id).
+/// MatchDayParticipant flow (no new RSVP mechanism — see /MatchDays/join-MatchDay/:id).
 /// Hourly is frequent enough; this isn't time-critical.
 /// </summary>
 public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactory, ILogger<MatchDaySchedulerBackgroundService> logger)
@@ -45,37 +45,37 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
         if (settings is not { WeeklyMatchEnabled: true } || settings.WeeklyMatchVenueId == null) return;
 
         var now = DateTime.Now;
-        var hasUpcoming = await db.Tournaments.AnyAsync(t => t.IsWeeklyMatchDay && t.TournamentDate > now);
+        var hasUpcoming = await db.MatchDays.AnyAsync(t => t.IsWeeklyMatchDay && t.MatchDayDate > now);
         if (hasUpcoming) return;
 
         var nextDate = ComputeNextOccurrence(now, settings.WeeklyMatchDayOfWeek, settings.WeeklyMatchTime);
 
-        // Auto-created MatchDays are always THE default — clear it off every other tournament first
-        // to preserve the single-default invariant TournamentService enforces for manual creates/updates.
-        await db.Tournaments.Where(t => t.DefaultTournament)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(t => t.DefaultTournament, false));
+        // Auto-created MatchDays are always THE default — clear it off every other MatchDay first
+        // to preserve the single-default invariant MatchDayService enforces for manual creates/updates.
+        await db.MatchDays.Where(t => t.DefaultMatchDay)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(t => t.DefaultMatchDay, false));
 
-        var tournament = new Tournament
+        var matchDay = new MatchDay
         {
             Name = $"{settings.WeeklyMatchNamePrefix} — {nextDate:MMM d, yyyy}",
-            TournamentDate = nextDate,
+            MatchDayDate = nextDate,
             DurationMinutes = settings.WeeklyMatchDurationMinutes,
             VenueId = settings.WeeklyMatchVenueId.Value,
-            TournamentStatus = TournamentStatus.UPCOMING,
+            MatchDayStatus = MatchDayStatus.UPCOMING,
             IsActive = true,
             SportType = settings.WeeklyMatchSportType,
-            TournamentType = TournamentType.ROUND_ROBIN,
+            MatchDayType = MatchDayType.ROUND_ROBIN,
             AuctionMode = false,
-            DefaultTournament = true,
+            DefaultMatchDay = true,
             IsWeeklyMatchDay = true,
         };
-        db.Tournaments.Add(tournament);
+        db.MatchDays.Add(matchDay);
         await db.SaveChangesAsync();
 
         var activePlayers = await db.Players.Where(p => p.IsActive).Select(p => new { p.Id, p.Email }).ToListAsync();
         if (activePlayers.Count == 0) return;
 
-        var venueName = await db.Venues.Where(v => v.Id == tournament.VenueId).Select(v => v.Name).FirstOrDefaultAsync() ?? "TBD";
+        var venueName = await db.Venues.Where(v => v.Id == matchDay.VenueId).Select(v => v.Name).FirstOrDefaultAsync() ?? "TBD";
         var title = $"{settings.WeeklyMatchNamePrefix} — {nextDate:dddd, MMM d}";
         var body = $"{nextDate:dddd, MMM d} at {nextDate:h:mm tt}, {venueName}. Are you in?";
 
@@ -96,7 +96,7 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Failed emailing Match Day invite for tournament {TournamentId}", tournament.Id);
+            logger.LogWarning(ex, "Failed emailing Match Day invite for MatchDay {MatchDayId}", matchDay.Id);
         }
     }
 

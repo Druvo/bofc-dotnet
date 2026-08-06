@@ -1,5 +1,5 @@
 import React from "react";
-import { getTeamInitials, getTeamLogoUrlFromSummary } from "../TournamentViewer/teamLogoUtils";
+import { getTeamInitials, getTeamLogoUrlFromSummary } from "../MatchDayViewer/teamLogoUtils";
 
 /**
  * Rank→medal color, previously private to ViewerTableTab.tsx. Canonical home
@@ -17,7 +17,7 @@ interface TeamIdentityCellProps {
   rank: number;
   teamId?: number;
   teamName?: string | null;
-  tournamentSummary?: any;
+  matchDaySummary?: any;
   size?: "small" | "default";
 }
 
@@ -31,12 +31,12 @@ export function TeamIdentityCell({
   rank,
   teamId,
   teamName,
-  tournamentSummary,
+  matchDaySummary,
   size = "default",
 }: TeamIdentityCellProps) {
   const rankSize = size === "small" ? 18 : 32;
   const teamSize = size === "small" ? 22 : 36;
-  const logoUrl = getTeamLogoUrlFromSummary(tournamentSummary, teamId);
+  const logoUrl = getTeamLogoUrlFromSummary(matchDaySummary, teamId);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: size === "small" ? 8 : 12, minWidth: 0 }}>

@@ -16,7 +16,7 @@ export interface IMatchStatistics {
   minutesPlayed: number;
 }
 
-export interface ITournamentStanding {
+export interface IMatchDayStanding {
   teamId: number;
   teamName: string;
   points: number;
@@ -32,13 +32,13 @@ export interface ITournamentStanding {
 }
 
 // Response wrappers
-export interface IGetTournamentStandingsResponse {
+export interface IGetMatchDayStandingsResponse {
   status: string;
   message: string;
-  content: ITournamentStanding[];
+  content: IMatchDayStanding[];
 }
 
-export interface ITournamentTopScorer {
+export interface IMatchDayTopScorer {
   playerId: number;
   playerName: string;
   teamId: number;
@@ -52,7 +52,7 @@ export interface ITournamentTopScorer {
 export interface IGetTopScorersResponse {
   status: string;
   message: string;
-  content: ITournamentTopScorer[];
+  content: IMatchDayTopScorer[];
 }
 
 export interface IGetTopAssistsResponse {
@@ -73,7 +73,7 @@ export interface IGetMatchStatisticsResponse {
   content: IMatchStatistics[];
 }
 
-export interface IGetPlayerTournamentStatisticsResponse {
+export interface IGetPlayerMatchDayStatisticsResponse {
   status: string;
   message: string;
   content: IMatchStatistics[];
@@ -106,7 +106,7 @@ export interface IGetPlayerStatisticsResponse {
 export interface IPlayerMatchHistory {
   matchId: number;
   matchDate: string;
-  tournamentName?: string;
+  matchDayName?: string;
   teamId?: number;
   teamName?: string;
   opponentTeamName?: string;

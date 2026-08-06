@@ -11,7 +11,7 @@ public class AuctionPlayerRegistrationConfiguration : IEntityTypeConfiguration<A
         builder.ToTable("auction_player_registrations");
         builder.HasKey(r => r.Id);
         builder.Property(r => r.Id).HasColumnName("id").ValueGeneratedOnAdd();
-        builder.Property(r => r.TournamentId).HasColumnName("tournament_id").IsRequired();
+        builder.Property(r => r.MatchDayId).HasColumnName("match_day_id").IsRequired();
         builder.Property(r => r.Name).HasColumnName("name").IsRequired();
         builder.Property(r => r.Email).HasColumnName("email").IsRequired();
         builder.Property(r => r.EmployeeId).HasColumnName("employee_id").IsRequired();
@@ -36,7 +36,7 @@ public class AuctionPlayerRegistrationConfiguration : IEntityTypeConfiguration<A
         builder.Property(r => r.LastModifiedBy).HasColumnName("last_modified_by");
         builder.Property(r => r.UpdatedDate).HasColumnName("updated_date");
 
-        builder.HasOne(r => r.Tournament).WithMany().HasForeignKey(r => r.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(r => r.MatchDay).WithMany().HasForeignKey(r => r.MatchDayId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(r => r.ApprovedBy).WithMany().HasForeignKey(r => r.ApprovedById).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(r => r.CreatedPlayer).WithMany().HasForeignKey(r => r.CreatedPlayerId).OnDelete(DeleteBehavior.Restrict);
     }

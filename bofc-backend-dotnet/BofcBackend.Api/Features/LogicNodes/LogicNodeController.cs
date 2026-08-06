@@ -48,10 +48,10 @@ public class LogicNodeController(ILogicNodeService logicNodeService) : Controlle
     }
 
     [AllowAnonymous]
-    [HttpGet("tournament/{tournamentId}")]
-    public async Task<IActionResult> GetLogicNodesByTournament(long tournamentId)
+    [HttpGet("match-day/{matchDayId}")]
+    public async Task<IActionResult> GetLogicNodesByMatchDay(long matchDayId)
     {
-        var responses = await logicNodeService.GetLogicNodesByTournamentAsync(tournamentId);
+        var responses = await logicNodeService.GetLogicNodesByMatchDayAsync(matchDayId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, responses);
     }
 

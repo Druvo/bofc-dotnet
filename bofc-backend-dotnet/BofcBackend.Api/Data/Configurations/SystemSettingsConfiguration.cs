@@ -21,8 +21,8 @@ public class SystemSettingsConfiguration : IEntityTypeConfiguration<SystemSettin
         builder.Property(s => s.SmtpFromName).HasColumnName("smtp_from_name").HasMaxLength(150);
         builder.Property(s => s.SmtpUseSsl).HasColumnName("smtp_use_ssl").IsRequired();
 
-        builder.Property(s => s.NotifyTournamentReminderEnabled).HasColumnName("notify_tournament_reminder_enabled").IsRequired();
-        builder.Property(s => s.TournamentReminderDaysBefore).HasColumnName("tournament_reminder_days_before").IsRequired();
+        builder.Property(s => s.NotifyMatchDayReminderEnabled).HasColumnName("notify_match_day_reminder_enabled").IsRequired();
+        builder.Property(s => s.MatchDayReminderDaysBefore).HasColumnName("match_day_reminder_days_before").IsRequired();
 
         builder.Property(s => s.NotifyPaymentDueEnabled).HasColumnName("notify_payment_due_enabled").IsRequired();
         builder.Property(s => s.PaymentDueReminderDayOfMonth).HasColumnName("payment_due_reminder_day_of_month").IsRequired();

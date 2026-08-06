@@ -20,16 +20,16 @@ import Dashboard from "../Dashboard/DashboardComponent";
 import Player from "../Player/Player";
 import Players from "../Player/Players";
 import PlayerStatistics from "../Player/PlayerStatistics";
-import JoinTournament from "../Tournaments/JoinTournament";
-import SingleTournament from "../Tournaments/SingleTournament";
-import TournamentsPage from "../Tournaments/TournamentsPage";
+import JoinMatchDay from "../MatchDays/JoinMatchDay";
+import SingleMatchDay from "../MatchDays/SingleMatchDay";
+import MatchDaysPage from "../MatchDays/MatchDaysPage";
 import Venue from "../Venue/Venue";
 import ContentOutlet from "./ContentOutlet";
 import { useAppShell } from "../layout/AppShellContext";
 import ClubRules from "../ClubRules/ClubRules";
 import GlobalSettingsPage from "../Settings/SettingsPage";
 import MatchDayPage from "../MatchDay/MatchDayPage";
-import MatchDetailsPage from "../Tournaments/Fixtures/MatchDetailsPage";
+import MatchDetailsPage from "../MatchDays/Fixtures/MatchDetailsPage";
 import {
   AuctionHubPage,
   AuctionRegistrationPage,
@@ -40,7 +40,7 @@ import {
   LiveAuctionPage,
   AuctionResultsPage,
 } from "../Auction";
-import TournamentViewerPage from "../TournamentViewer/TournamentViewerPage";
+import MatchDayViewerPage from "../MatchDayViewer/MatchDayViewerPage";
 import NotificationsPage from "../Notifications/NotificationsPage";
 import AppFooter from "../CommonAtoms/AppFooter";
 import MobileTabBar from "./MobileTabBar";
@@ -128,16 +128,16 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                         <Route path="/" element={<ContentOutlet />}>
                             <Route index element={<Dashboard isDarkMode={isDarkMode} />} />
                             <Route
-                                path="/tournament-viewer"
-                                element={<TournamentViewerPage />}
+                                path="/match-day-viewer"
+                                element={<MatchDayViewerPage />}
                             />
                             <Route
-                                path="/tournament-viewer/:tournamentId"
-                                element={<TournamentViewerPage />}
+                                path="/match-day-viewer/:matchDayId"
+                                element={<MatchDayViewerPage />}
                             />
                             <Route
-                                path="/tournament-viewer/:tournamentId/:tab"
-                                element={<TournamentViewerPage />}
+                                path="/match-day-viewer/:matchDayId/:tab"
+                                element={<MatchDayViewerPage />}
                             />
                             <Route
                                 path="/dashboard"
@@ -157,16 +157,16 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                             <Route path="/players" element={<Players />} />
                             <Route path="/player-statistics" element={<PlayerStatistics />} />
                             <Route
-                                path="/tournaments"
-                                element={<TournamentsPage />}
+                                path="/match-days"
+                                element={<MatchDaysPage />}
                             />
                             <Route
-                                path="/tournaments/team-building/:id"
-                                element={<SingleTournament />}
+                                path="/match-days/team-building/:id"
+                                element={<SingleMatchDay />}
                             />
                             <Route
-                                path="/tournaments/join-tournament/:id"
-                                element={<JoinTournament />}
+                                path="/match-days/join-match-day/:id"
+                                element={<JoinMatchDay />}
                             />
                             <Route
                                 path="/fixtures/:matchId"
@@ -214,13 +214,13 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
 
                             {/* Auction Routes */}
                             <Route path="auction" element={<AuctionHubPage />} />
-                            <Route path="auction/register/:tournamentId" element={<AuctionRegistrationPage />} />
-                            <Route path="auction/registrations/:tournamentId" element={<AuctionAdminApprovalPage />} />
-                            <Route path="auction/settings/:tournamentId" element={<AuctionSettingsPage />} />
-                            <Route path="auction/players/:tournamentId" element={<AuctionPlayerPoolPage />} />
-                            <Route path="auction/team-budgets/:tournamentId" element={<AuctionTeamBudgetsPage />} />
-                            <Route path="auction/live/:tournamentId" element={<LiveAuctionPage />} />
-                            <Route path="auction/results/:tournamentId" element={<AuctionResultsPage />} />
+                            <Route path="auction/register/:matchDayId" element={<AuctionRegistrationPage />} />
+                            <Route path="auction/registrations/:matchDayId" element={<AuctionAdminApprovalPage />} />
+                            <Route path="auction/settings/:matchDayId" element={<AuctionSettingsPage />} />
+                            <Route path="auction/players/:matchDayId" element={<AuctionPlayerPoolPage />} />
+                            <Route path="auction/team-budgets/:matchDayId" element={<AuctionTeamBudgetsPage />} />
+                            <Route path="auction/live/:matchDayId" element={<LiveAuctionPage />} />
+                            <Route path="auction/results/:matchDayId" element={<AuctionResultsPage />} />
                         </Route>
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>

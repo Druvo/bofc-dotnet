@@ -1,22 +1,22 @@
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useGetLatestTournamentWithUserStatusQuery } from "../../state/features/tournaments/tournamentsSlice";
+import { useGetLatestMatchDayWithUserStatusQuery } from "../../state/features/matchDays/matchDaysSlice";
 import { useGetFixturesQuery } from "../../state/features/fixtures/fixturesSlice";
 
 /**
  * Small header pill that surfaces "there's a live match right now" from
  * anywhere in the app — added so an admin buried in Finance work doesn't
  * have to navigate away to notice. Renders nothing when there's no active
- * tournament or no match currently ONGOING/PAUSED.
+ * matchDay or no match currently ONGOING/PAUSED.
  */
 export default function LiveMatchIndicator({ isMobile }: { isMobile: boolean }) {
   const navigate = useNavigate();
-  const { data: latest } = useGetLatestTournamentWithUserStatusQuery();
-  const tournamentId = latest?.content?.tournament?.id;
+  const { data: latest } = useGetLatestMatchDayWithUserStatusQuery();
+  const matchDayId = latest?.content?.matchDay?.id;
 
   const { data: fixturesResponse } = useGetFixturesQuery(
-    { tournamentId: tournamentId as number },
-    { skip: !tournamentId }
+    { matchDayId: matchDayId as number },
+    { skip: !matchDayId }
   );
 
   const hasLiveMatch = useMemo(
@@ -32,7 +32,7 @@ export default function LiveMatchIndicator({ isMobile }: { isMobile: boolean }) 
   return (
     <button
       type="button"
-      onClick={() => navigate("/tournament-viewer")}
+      onClick={() => navigate("/match-day-viewer")}
       title="A match is live right now"
       className="relative flex h-16 items-center"
       style={{ padding: isMobile ? "0 10px" : "0 14px" }}

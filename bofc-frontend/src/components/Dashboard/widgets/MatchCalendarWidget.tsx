@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { CalendarOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useGetTournamentsQuery } from "../../../state/features/tournaments/tournamentsSlice";
-import { getEffectiveTournamentStatus } from "../../../utils/utils";
+import { useGetMatchDaysQuery } from "../../../state/features/matchDays/matchDaysSlice";
+import { getEffectiveMatchDayStatus } from "../../../utils/utils";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -17,22 +17,22 @@ const localDateKey = (date: Date) =>
 const MatchCalendarWidget: React.FC = () => {
   const navigate = useNavigate();
   const [cursor, setCursor] = useState(() => new Date());
-  const { data } = useGetTournamentsQuery({
+  const { data } = useGetMatchDaysQuery({
     offSet: 0,
     pageSize: 50,
-    sortedBy: "tournamentDate",
+    sortedBy: "matchDayDate",
     sortDirection: "ASC",
   });
 
   const byDate = useMemo(() => {
     const map = new Map<string, { id: number; name: string }[]>();
-    (data?.content?.tournaments || [])
+    (data?.content?.matchDays || [])
       .filter((t) => {
-        const status = getEffectiveTournamentStatus(t.tournamentStatus, t.tournamentDate, t.durationMinutes);
+        const status = getEffectiveMatchDayStatus(t.matchDayStatus, t.matchDayDate, t.durationMinutes);
         return status === "UPCOMING" || status === "ONGOING";
       })
       .forEach((t) => {
-        const key = localDateKey(new Date(t.tournamentDate));
+        const key = localDateKey(new Date(t.matchDayDate));
         const list = map.get(key) || [];
         list.push({ id: t.id, name: t.name });
         map.set(key, list);
@@ -92,7 +92,7 @@ const MatchCalendarWidget: React.FC = () => {
               type="button"
               disabled={!matches?.length}
               title={matches?.map((m) => m.name).join(", ")}
-              onClick={() => matches?.length && navigate(`/tournaments/join-tournament/${matches[0].id}`)}
+              onClick={() => matches?.length && navigate(`/match-days/join-match-day/${matches[0].id}`)}
               className={`mx-auto flex h-7 w-7 flex-col items-center justify-center rounded-full text-theme-xs ${
                 isToday(d) ? "bg-brand-500 text-white" : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"
               } ${matches?.length ? "cursor-pointer font-semibold" : "cursor-default"}`}

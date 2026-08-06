@@ -19,7 +19,7 @@ interface VenueLinkProps {
 // Opens the venue's location in Google Maps, in a new tab — mobile OS/browsers
 // hand `google.com/maps` links off to the native Maps app on their own.
 // `stopPropagation` matters here: this is almost always rendered inside a
-// clickable card/row (tournament card, fixture row), and without it, clicking
+// clickable card/row (matchDay card, fixture row), and without it, clicking
 // the venue link would also fire the card's own onClick navigation.
 const VenueLink: React.FC<VenueLinkProps> = ({
   name,

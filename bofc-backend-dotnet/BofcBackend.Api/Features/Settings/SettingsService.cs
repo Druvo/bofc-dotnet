@@ -33,8 +33,8 @@ public class SettingsService(
         settings.SmtpFromName = request.SmtpFromName?.Trim();
         settings.SmtpUseSsl = request.SmtpUseSsl;
 
-        settings.NotifyTournamentReminderEnabled = request.NotifyTournamentReminderEnabled;
-        settings.TournamentReminderDaysBefore = request.TournamentReminderDaysBefore;
+        settings.NotifyMatchDayReminderEnabled = request.NotifyMatchDayReminderEnabled;
+        settings.MatchDayReminderDaysBefore = request.MatchDayReminderDaysBefore;
         settings.NotifyPaymentDueEnabled = request.NotifyPaymentDueEnabled;
         settings.PaymentDueReminderDayOfMonth = request.PaymentDueReminderDayOfMonth;
         settings.NotifyCustomEmailEnabled = request.NotifyCustomEmailEnabled;
@@ -140,8 +140,8 @@ public class SettingsService(
             SmtpFromEmail = s.SmtpFromEmail,
             SmtpFromName = s.SmtpFromName,
             SmtpUseSsl = s.SmtpUseSsl,
-            NotifyTournamentReminderEnabled = s.NotifyTournamentReminderEnabled,
-            TournamentReminderDaysBefore = s.TournamentReminderDaysBefore,
+            NotifyMatchDayReminderEnabled = s.NotifyMatchDayReminderEnabled,
+            MatchDayReminderDaysBefore = s.MatchDayReminderDaysBefore,
             NotifyPaymentDueEnabled = s.NotifyPaymentDueEnabled,
             PaymentDueReminderDayOfMonth = s.PaymentDueReminderDayOfMonth,
             NotifyCustomEmailEnabled = s.NotifyCustomEmailEnabled,

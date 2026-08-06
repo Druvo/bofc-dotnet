@@ -1,17 +1,17 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { CalendarOutlined } from "@ant-design/icons";
-import { useGetNextActiveTournamentQuery } from "../../state/features/tournaments/tournamentsSlice";
+import { useGetNextActiveMatchDayQuery } from "../../state/features/matchDays/matchDaysSlice";
 import Loader from "../ui/loader";
 
 // Same "next active" pick as the Dashboard's Next Match card (any upcoming/
-// not-stale-ongoing tournament, not just the auto-created weekly Match Day) —
-// otherwise a manually created tournament dated sooner than the recurring
+// not-stale-ongoing matchDay, not just the auto-created weekly Match Day) —
+// otherwise a manually created matchDay dated sooner than the recurring
 // Match Day never shows up here, and once the weekly one's date passes this
 // page falls back to displaying it stale/concluded instead of whatever's
 // actually next.
 export default function MatchDayPage() {
-  const { data, isLoading } = useGetNextActiveTournamentQuery();
+  const { data, isLoading } = useGetNextActiveMatchDayQuery();
 
   if (isLoading) {
     return <Loader className="py-16" />;
@@ -32,5 +32,5 @@ export default function MatchDayPage() {
     );
   }
 
-  return <Navigate to={`/tournament-viewer/${matchDay.id}`} replace />;
+  return <Navigate to={`/match-day-viewer/${matchDay.id}`} replace />;
 }

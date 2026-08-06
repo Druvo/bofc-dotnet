@@ -13,22 +13,22 @@ public class LiveMatchUpdatePublisher : ILiveMatchUpdatePublisher
 
     private readonly ConcurrentDictionary<long, ConcurrentDictionary<Guid, Channel<string>>> _subscribers = new();
 
-    public (Guid SubscriptionId, ChannelReader<string> Frames) Subscribe(long tournamentId)
+    public (Guid SubscriptionId, ChannelReader<string> Frames) Subscribe(long matchDayId)
     {
         var channel = Channel.CreateUnbounded<string>(new UnboundedChannelOptions { SingleReader = true });
         var id = Guid.NewGuid();
-        var bucket = _subscribers.GetOrAdd(tournamentId, _ => new ConcurrentDictionary<Guid, Channel<string>>());
+        var bucket = _subscribers.GetOrAdd(matchDayId, _ => new ConcurrentDictionary<Guid, Channel<string>>());
         bucket[id] = channel;
 
-        var initial = new LiveMatchUpdateEvent { TournamentId = tournamentId, EventType = "CONNECTED", Timestamp = NowMillis() };
+        var initial = new LiveMatchUpdateEvent { MatchDayId = matchDayId, EventType = "CONNECTED", Timestamp = NowMillis() };
         channel.Writer.TryWrite(FormatEvent(EventName, initial.Timestamp.ToString(), initial));
 
         return (id, channel.Reader);
     }
 
-    public void Unsubscribe(long tournamentId, Guid subscriptionId)
+    public void Unsubscribe(long matchDayId, Guid subscriptionId)
     {
-        if (!_subscribers.TryGetValue(tournamentId, out var bucket))
+        if (!_subscribers.TryGetValue(matchDayId, out var bucket))
         {
             return;
         }
@@ -38,20 +38,20 @@ public class LiveMatchUpdatePublisher : ILiveMatchUpdatePublisher
         }
         if (bucket.IsEmpty)
         {
-            _subscribers.TryRemove(tournamentId, out _);
+            _subscribers.TryRemove(matchDayId, out _);
         }
     }
 
-    public void PublishMatchUpdate(long? tournamentId, long? matchId, string eventType)
+    public void PublishMatchUpdate(long? matchDayId, long? matchId, string eventType)
     {
-        if (tournamentId is null || !_subscribers.TryGetValue(tournamentId.Value, out var bucket) || bucket.IsEmpty)
+        if (matchDayId is null || !_subscribers.TryGetValue(matchDayId.Value, out var bucket) || bucket.IsEmpty)
         {
             return;
         }
 
         var payload = new LiveMatchUpdateEvent
         {
-            TournamentId = tournamentId.Value,
+            MatchDayId = matchDayId.Value,
             MatchId = matchId,
             EventType = eventType,
             Timestamp = NowMillis(),
@@ -62,7 +62,7 @@ public class LiveMatchUpdatePublisher : ILiveMatchUpdatePublisher
         {
             if (!channel.Writer.TryWrite(frame))
             {
-                Unsubscribe(tournamentId.Value, id);
+                Unsubscribe(matchDayId.Value, id);
             }
         }
     }
@@ -75,13 +75,13 @@ public class LiveMatchUpdatePublisher : ILiveMatchUpdatePublisher
         }
 
         var frame = FormatComment(HeartbeatEventName, "ping");
-        foreach (var (tournamentId, bucket) in _subscribers)
+        foreach (var (matchDayId, bucket) in _subscribers)
         {
             foreach (var (id, channel) in bucket)
             {
                 if (!channel.Writer.TryWrite(frame))
                 {
-                    Unsubscribe(tournamentId, id);
+                    Unsubscribe(matchDayId, id);
                 }
             }
         }

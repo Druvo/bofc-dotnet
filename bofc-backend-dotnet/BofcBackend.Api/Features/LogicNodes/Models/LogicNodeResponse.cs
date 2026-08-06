@@ -4,8 +4,8 @@ namespace BofcBackend.Api.Features.LogicNodes.Models;
 public class LogicNodeResponse
 {
     public long Id { get; set; }
-    public long TournamentId { get; set; }
-    public string? TournamentName { get; set; }
+    public long MatchDayId { get; set; }
+    public string? MatchDayName { get; set; }
     public string NodeName { get; set; } = string.Empty;
     public string NodeType { get; set; } = string.Empty;
     public long? SourceRoundId { get; set; }

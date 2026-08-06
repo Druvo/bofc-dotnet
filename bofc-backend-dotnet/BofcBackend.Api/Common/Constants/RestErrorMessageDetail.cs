@@ -34,7 +34,7 @@ public static class RestErrorMessageDetail
 
     public const string VenueIsNotFound = "Venue is not Found";
     public const string VenueAlreadyExists = "This Venue with this name already exists";
-    public const string TournamentIsNotFound = "Tournament is not Found";
+    public const string MatchDayIsNotFound = "MatchDay is not Found";
     public const string TeamIsNotFound = "Team is not Found";
     public const string CostTypeAlreadyExists = "Already a cost type is exists";
     public const string CostTypeIsNotFound = "Cost Type is not found";
@@ -48,13 +48,13 @@ public static class RestErrorMessageDetail
 
     public const string ParticipantNotFound = "Participant is not Found";
     public const string AlreadyParticipant = "Already given vote for participant";
-    public const string TournamentDateCannotBePastDate = "This Tournament is already past";
-    public const string NoUpcomingTournament = "No upcoming Tournament";
-    public const string PlayerIsNotParticipantYet = "Player is not a confirmed participant in the tournament";
+    public const string MatchDayDateCannotBePastDate = "This MatchDay is already past";
+    public const string NoUpcomingMatchDay = "No upcoming MatchDay";
+    public const string PlayerIsNotParticipantYet = "Player is not a confirmed participant in the MatchDay";
     public const string PlayerAlreadyAddedAnotherTeam = "This player is already added another team";
     public const string PlayerIsNotPartOfThisTeam = "Player is not part of the specified team";
 
-    public const string RoundNumberAlreadyExists = "A round with this round number already exists in the tournament";
+    public const string RoundNumberAlreadyExists = "A round with this round number already exists in the MatchDay";
     public const string RoundHasMatches = "Cannot delete round with existing matches";
     public const string RoundNotCompleted = "Round is not completed yet";
     public const string InvalidRoundSequence = "Invalid round sequence order";
@@ -69,9 +69,9 @@ public static class RestErrorMessageDetail
     public const string AdvancementRuleNotFound = "Advancement rule is not found";
     public const string LogicNodeIsNotFound = "Logic node is not found";
 
-    public const string FixturesAlreadyExist = "Scheduled fixtures already exist for this tournament";
+    public const string FixturesAlreadyExist = "Scheduled fixtures already exist for this MatchDay";
     public const string NoScheduledFixtures = "No scheduled fixtures found to clear";
-    public const string InsufficientTeams = "Insufficient teams for this tournament type";
+    public const string InsufficientTeams = "Insufficient teams for this MatchDay type";
 
     public const string AcVoucherTypeNotFound = "Voucher type is not found!";
     public const string AcChartNotFound = "Chart of Account is not found!";

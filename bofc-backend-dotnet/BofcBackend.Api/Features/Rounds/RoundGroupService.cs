@@ -15,7 +15,7 @@ public class RoundGroupService(BofcDbContext db) : IRoundGroupService
 {
     public async Task<RoundGroupResponse> CreateGroupAsync(RoundGroupRequest request)
     {
-        var round = await db.TournamentRounds.Include(r => r.Tournament).FirstOrDefaultAsync(r => r.Id == request.RoundId)
+        var round = await db.MatchDayRounds.Include(r => r.MatchDay).FirstOrDefaultAsync(r => r.Id == request.RoundId)
             ?? throw new RoundServiceException(RestErrorMessageDetail.RoundIsNotFound, HttpStatusCode.NotFound);
 
         if (await db.RoundGroups.AnyAsync(g => g.RoundId == request.RoundId && g.GroupName == request.GroupName))
@@ -260,7 +260,7 @@ public class RoundGroupService(BofcDbContext db) : IRoundGroupService
 
     public async Task<List<MatchResponse>> GenerateGroupMatchesAsync(long groupId, GroupMatchGenerationRequest request)
     {
-        var group = await db.RoundGroups.Include(g => g.Round).ThenInclude(r => r.Tournament)
+        var group = await db.RoundGroups.Include(g => g.Round).ThenInclude(r => r.MatchDay)
             .FirstOrDefaultAsync(g => g.Id == groupId)
             ?? throw new RoundServiceException(RestErrorMessageDetail.GroupIsNotFound, HttpStatusCode.NotFound);
 
@@ -328,7 +328,7 @@ public class RoundGroupService(BofcDbContext db) : IRoundGroupService
         }
 
         var matches = await db.Matches
-            .Include(m => m.Tournament).Include(m => m.HomeTeam).Include(m => m.AwayTeam)
+            .Include(m => m.MatchDay).Include(m => m.HomeTeam).Include(m => m.AwayTeam)
             .Include(m => m.Venue).Include(m => m.Round).Include(m => m.Group)
             .Where(m => m.GroupId == groupId).ToListAsync();
 
@@ -665,8 +665,8 @@ public class RoundGroupService(BofcDbContext db) : IRoundGroupService
         var round = group.Round;
         return new Match
         {
-            TournamentId = round.TournamentId,
-            Tournament = round.Tournament,
+            MatchDayId = round.MatchDayId,
+            MatchDay = round.MatchDay,
             RoundId = round.Id,
             Round = round,
             GroupId = group.Id,
@@ -698,8 +698,8 @@ public class RoundGroupService(BofcDbContext db) : IRoundGroupService
         return new MatchResponse
         {
             Id = match.Id,
-            TournamentId = match.TournamentId,
-            TournamentName = match.Tournament?.Name ?? string.Empty,
+            MatchDayId = match.MatchDayId,
+            MatchDayName = match.MatchDay?.Name ?? string.Empty,
             HomeTeamId = match.HomeTeamId,
             HomeTeamName = match.HomeTeam?.TeamName ?? string.Empty,
             AwayTeamId = match.AwayTeamId,

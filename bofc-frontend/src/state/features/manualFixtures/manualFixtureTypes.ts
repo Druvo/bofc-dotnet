@@ -88,9 +88,9 @@ export interface RoundGroupRequest {
 }
 
 // ===== Round Related Types =====
-export interface TournamentRoundResponse {
+export interface MatchDayRoundResponse {
   id: number;
-  tournamentId: number;
+  matchDayId: number;
   roundNumber: number;
   roundName: string;
   roundType: RoundType;
@@ -111,8 +111,8 @@ export interface TournamentRoundResponse {
   sourceRoundIds?: number[];
 }
 
-export interface TournamentRoundRequest {
-  tournamentId: number;
+export interface MatchDayRoundRequest {
+  matchDayId: number;
   roundNumber: number;
   roundName: string;
   roundType: string;
@@ -122,14 +122,14 @@ export interface TournamentRoundRequest {
   endDate?: string;
 }
 
-// ===== Tournament Structure Types =====
-export interface TournamentStructureResponse {
-  tournamentId: number;
-  tournamentName: string;
+// ===== MatchDay Structure Types =====
+export interface MatchDayStructureResponse {
+  matchDayId: number;
+  matchDayName: string;
   sportType: string;
-  tournamentType: string;
+  matchDayType: string;
   status: string;
-  rounds: TournamentRoundResponse[];
+  rounds: MatchDayRoundResponse[];
   totalRounds: number;
   totalMatches: number;
   completedMatches: number;
@@ -182,15 +182,15 @@ export interface ApiResponse<T> {
 }
 
 // ===== API Request/Response Types =====
-export type GetRoundByIdResponse = ApiResponse<TournamentRoundResponse>;
-export type GetRoundsByTournamentResponse = ApiResponse<TournamentRoundResponse[]>;
-export type GetTournamentStructureResponse = ApiResponse<TournamentStructureResponse>;
-export type CreateRoundResponse = ApiResponse<TournamentRoundResponse>;
-export type UpdateRoundResponse = ApiResponse<TournamentRoundResponse>;
+export type GetRoundByIdResponse = ApiResponse<MatchDayRoundResponse>;
+export type GetRoundsByMatchDayResponse = ApiResponse<MatchDayRoundResponse[]>;
+export type GetMatchDayStructureResponse = ApiResponse<MatchDayStructureResponse>;
+export type CreateRoundResponse = ApiResponse<MatchDayRoundResponse>;
+export type UpdateRoundResponse = ApiResponse<MatchDayRoundResponse>;
 export type DeleteRoundResponse = ApiResponse<null>;
 export type CompleteRoundResponse = ApiResponse<AdvancedTeamsResponse>;
-export type GetNextRoundResponse = ApiResponse<TournamentRoundResponse>;
-export type GetPreviousRoundResponse = ApiResponse<TournamentRoundResponse>;
+export type GetNextRoundResponse = ApiResponse<MatchDayRoundResponse>;
+export type GetPreviousRoundResponse = ApiResponse<MatchDayRoundResponse>;
 
 export type GetGroupByIdResponse = ApiResponse<RoundGroupResponse>;
 export type GetGroupsByRoundResponse = ApiResponse<RoundGroupResponse[]>;
@@ -226,8 +226,8 @@ export type GenerateRoundMatchesResponse = ApiResponse<IMatch[]>;
 // ===== Match Related Types (for group fixtures) =====
 export interface IMatch {
   id: number;
-  tournamentId: number;
-  tournamentName: string;
+  matchDayId: number;
+  matchDayName: string;
   homeTeamId: number;
   homeTeamName: string;
   awayTeamId: number;

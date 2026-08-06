@@ -4,7 +4,7 @@ public class PlayerMatchHistoryResponse
 {
     public long MatchId { get; set; }
     public DateTime MatchDate { get; set; }
-    public string? TournamentName { get; set; }
+    public string? MatchDayName { get; set; }
 
     public long? TeamId { get; set; }
     public string? TeamName { get; set; }

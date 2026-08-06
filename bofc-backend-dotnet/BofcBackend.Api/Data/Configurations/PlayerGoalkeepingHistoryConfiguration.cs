@@ -12,7 +12,7 @@ public class PlayerGoalkeepingHistoryConfiguration : IEntityTypeConfiguration<Pl
         builder.HasKey(h => h.Id);
         builder.Property(h => h.Id).HasColumnName("id").ValueGeneratedOnAdd();
         builder.Property(h => h.PlayerId).HasColumnName("player_id").IsRequired();
-        builder.Property(h => h.TournamentId).HasColumnName("tournament_id").IsRequired();
+        builder.Property(h => h.MatchDayId).HasColumnName("match_day_id").IsRequired();
         builder.Property(h => h.RoundNumber).HasColumnName("round_number").IsRequired();
         builder.Property(h => h.PlayedDate).HasColumnName("played_date").IsRequired();
 
@@ -22,6 +22,6 @@ public class PlayerGoalkeepingHistoryConfiguration : IEntityTypeConfiguration<Pl
         builder.Property(h => h.UpdatedDate).HasColumnName("updated_date");
 
         builder.HasOne(h => h.Player).WithMany().HasForeignKey(h => h.PlayerId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne(h => h.Tournament).WithMany().HasForeignKey(h => h.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(h => h.MatchDay).WithMany().HasForeignKey(h => h.MatchDayId).OnDelete(DeleteBehavior.Restrict);
     }
 }

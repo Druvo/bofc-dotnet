@@ -7,8 +7,8 @@ public class AuctionPlayerRegistration : AuditableEntity
 {
     public long Id { get; set; }
 
-    public long TournamentId { get; set; }
-    public Tournament Tournament { get; set; } = null!;
+    public long MatchDayId { get; set; }
+    public MatchDay MatchDay { get; set; } = null!;
 
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;

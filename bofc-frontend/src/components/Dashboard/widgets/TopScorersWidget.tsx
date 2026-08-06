@@ -1,6 +1,6 @@
 import React from "react";
 import { TrophyOutlined } from "@ant-design/icons";
-import { useGetLatestTournamentWithUserStatusQuery } from "../../../state/features/tournaments/tournamentsSlice";
+import { useGetLatestMatchDayWithUserStatusQuery } from "../../../state/features/matchDays/matchDaysSlice";
 import { useGetTopScorersQuery } from "../../../state/features/statistics/statisticsSlice";
 import Loader, { Spinner } from "../../ui/loader";
 import Avatar from "../../CommonAtoms/Avatar";
@@ -8,12 +8,12 @@ import Avatar from "../../CommonAtoms/Avatar";
 const MEDAL_COLOR = ["text-[#D4AF37]", "text-[#B8B8B8]", "text-[#B87333]"]; // gold/silver/bronze — universal medal convention, not a status color
 
 const TopScorersWidget: React.FC = () => {
-  const { data: latest } = useGetLatestTournamentWithUserStatusQuery();
-  const tournamentId = latest?.content?.tournament?.id;
+  const { data: latest } = useGetLatestMatchDayWithUserStatusQuery();
+  const matchDayId = latest?.content?.matchDay?.id;
 
   const { data, isLoading } = useGetTopScorersQuery(
-    { tournamentId: tournamentId as number, limit: 5 },
-    { skip: !tournamentId }
+    { matchDayId: matchDayId as number, limit: 5 },
+    { skip: !matchDayId }
   );
   const scorers = data?.content || [];
 
@@ -23,7 +23,7 @@ const TopScorersWidget: React.FC = () => {
         <TrophyOutlined /> Top Scorers
       </div>
 
-      {!tournamentId ? (
+      {!matchDayId ? (
         <p className="my-3 text-theme-xs text-gray-400 dark:text-gray-500">No active MatchDay</p>
       ) : isLoading ? (
         <Spinner className="my-3 text-gray-400" />

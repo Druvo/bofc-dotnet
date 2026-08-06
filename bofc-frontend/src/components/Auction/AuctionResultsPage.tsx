@@ -85,8 +85,8 @@ const TeamSquadCard: React.FC<{ squad: TeamSquadResponse }> = ({ squad }) => {
 
 const AuctionResultsPage: React.FC = () => {
   const tones = useStatTones();
-  const { tournamentId } = useParams<{ tournamentId: string }>();
-  const tid = Number(tournamentId);
+  const { matchDayId } = useParams<{ matchDayId: string }>();
+  const tid = Number(matchDayId);
   const { data: results, isLoading } = useGetAuctionResultsQuery(tid);
   const { data: session } = useGetAuctionSessionQuery(tid);
   const isInProgress = session && session.status !== "COMPLETED" && session.status !== "NOT_STARTED";
@@ -106,7 +106,7 @@ const AuctionResultsPage: React.FC = () => {
     <AuctionPage>
       <AuctionHeader
         icon={<TrophyOutlined />}
-        title={`Auction Results — ${results.tournamentName}`}
+        title={`Auction Results — ${results.matchDayName}`}
         backTo="/auction"
         actions={session?.status ? <StatusPill status={session.status} /> : undefined}
       />

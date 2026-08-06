@@ -13,22 +13,22 @@ public class AuctionRegistrationController(AuctionRegistrationService registrati
     private const string AdminSuperAdmin = PlayerRoleNames.AdminOrSuperAdmin;
 
     [AllowAnonymous]
-    [HttpPost("tournaments/{tournamentId}/register")]
-    public async Task<IActionResult> Register(long tournamentId, [FromBody] AuctionRegistrationRequest request)
+    [HttpPost("match-days/{matchDayId}/register")]
+    public async Task<IActionResult> Register(long matchDayId, [FromBody] AuctionRegistrationRequest request)
     {
-        request.TournamentId = tournamentId;
+        request.MatchDayId = matchDayId;
         return StatusCode(StatusCodes.Status201Created, await registrationService.RegisterAsync(request));
     }
 
     [Authorize]
-    [HttpPost("tournaments/{tournamentId}/quick-register")]
-    public async Task<IActionResult> QuickRegister(long tournamentId) =>
-        StatusCode(StatusCodes.Status201Created, await registrationService.QuickRegisterExistingPlayerAsync(tournamentId));
+    [HttpPost("match-days/{matchDayId}/quick-register")]
+    public async Task<IActionResult> QuickRegister(long matchDayId) =>
+        StatusCode(StatusCodes.Status201Created, await registrationService.QuickRegisterExistingPlayerAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpGet("registrations")]
-    public async Task<IActionResult> GetRegistrations([FromQuery] long? tournamentId, [FromQuery] string? status) =>
-        Ok(await registrationService.GetRegistrationsAsync(tournamentId, status));
+    public async Task<IActionResult> GetRegistrations([FromQuery] long? matchDayId, [FromQuery] string? status) =>
+        Ok(await registrationService.GetRegistrationsAsync(matchDayId, status));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpGet("registrations/{id}")]

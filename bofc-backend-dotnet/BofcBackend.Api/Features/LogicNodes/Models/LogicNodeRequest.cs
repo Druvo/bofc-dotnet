@@ -5,8 +5,8 @@ namespace BofcBackend.Api.Features.LogicNodes.Models;
 /// <summary>Port of model/LogicNodeRequest.java.</summary>
 public class LogicNodeRequest
 {
-    [Required(ErrorMessage = "Tournament ID is required")]
-    public long? TournamentId { get; set; }
+    [Required(ErrorMessage = "MatchDay ID is required")]
+    public long? MatchDayId { get; set; }
 
     [Required(ErrorMessage = "Node name is required")]
     public string? NodeName { get; set; }

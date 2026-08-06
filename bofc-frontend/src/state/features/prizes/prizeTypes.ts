@@ -16,7 +16,7 @@ export enum PrizeCategory {
   TOP_SCORER = "TOP_SCORER",
   GOLDEN_BOOT = "GOLDEN_BOOT",
   BEST_PLAYER = "BEST_PLAYER",
-  PLAYER_OF_TOURNAMENT = "PLAYER_OF_TOURNAMENT",
+  PLAYER_OF_MATCH_DAY = "PLAYER_OF_MATCH_DAY",
   TOP_ASSIST_PROVIDER = "TOP_ASSIST_PROVIDER",
   BEST_GOALKEEPER = "BEST_GOALKEEPER",
   BEST_DEFENDER = "BEST_DEFENDER",
@@ -26,10 +26,10 @@ export enum PrizeCategory {
   CUSTOM = "CUSTOM",
 }
 
-export interface TournamentPrize {
+export interface MatchDayPrize {
   id: number;
-  tournamentId: number;
-  tournamentName: string;
+  matchDayId: number;
+  matchDayName: string;
   prizeType: PrizeType;
 
   // Team info (if team prize)
@@ -51,8 +51,8 @@ export interface TournamentPrize {
   updatedDate?: string;
 }
 
-export interface TournamentPrizeRequest {
-  tournamentId: number;
+export interface MatchDayPrizeRequest {
+  matchDayId: number;
   prizeType: PrizeType;
   teamId?: number;
   playerId?: number;
@@ -63,12 +63,12 @@ export interface TournamentPrizeRequest {
   imageLinks?: string[];
 }
 
-export interface GetTournamentPrizesResponse extends BasicResType {
-  content: TournamentPrize[];
+export interface GetMatchDayPrizesResponse extends BasicResType {
+  content: MatchDayPrize[];
 }
 
-export interface GetTournamentPrizeResponse extends BasicResType {
-  content: TournamentPrize;
+export interface GetMatchDayPrizeResponse extends BasicResType {
+  content: MatchDayPrize;
 }
 
 // Helper type for form data

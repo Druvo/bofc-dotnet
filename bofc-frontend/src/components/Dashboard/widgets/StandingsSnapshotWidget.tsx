@@ -1,23 +1,23 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { TableOutlined } from "@ant-design/icons";
-import { useGetLatestTournamentWithUserStatusQuery, useGetTournamentSummaryQuery } from "../../../state/features/tournaments/tournamentsSlice";
-import { useGetTournamentStandingsQuery } from "../../../state/features/statistics/statisticsSlice";
+import { useGetLatestMatchDayWithUserStatusQuery, useGetMatchDaySummaryQuery } from "../../../state/features/matchDays/matchDaysSlice";
+import { useGetMatchDayStandingsQuery } from "../../../state/features/statistics/statisticsSlice";
 import { TeamIdentityCell } from "../../CommonAtoms/StandingsRow";
 import { Spinner } from "../../ui/loader";
 
 const StandingsSnapshotWidget: React.FC = () => {
   const navigate = useNavigate();
-  const { data: latest } = useGetLatestTournamentWithUserStatusQuery();
-  const tournamentId = latest?.content?.tournament?.id;
+  const { data: latest } = useGetLatestMatchDayWithUserStatusQuery();
+  const matchDayId = latest?.content?.matchDay?.id;
 
-  const { data, isLoading } = useGetTournamentStandingsQuery(
-    { tournamentId: tournamentId as number },
-    { skip: !tournamentId }
+  const { data, isLoading } = useGetMatchDayStandingsQuery(
+    { matchDayId: matchDayId as number },
+    { skip: !matchDayId }
   );
-  const { data: tournamentSummary } = useGetTournamentSummaryQuery(
-    { tournamentId: tournamentId as number },
-    { skip: !tournamentId }
+  const { data: matchDaySummary } = useGetMatchDaySummaryQuery(
+    { matchDayId: matchDayId as number },
+    { skip: !matchDayId }
   );
   const standings = [...(data?.content || [])]
     .sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference)
@@ -25,14 +25,14 @@ const StandingsSnapshotWidget: React.FC = () => {
 
   return (
     <div
-      onClick={() => tournamentId && navigate(`/tournament-viewer/${tournamentId}/table`)}
-      className={`h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] ${tournamentId ? "cursor-pointer" : ""}`}
+      onClick={() => matchDayId && navigate(`/match-day-viewer/${matchDayId}/table`)}
+      className={`h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] ${matchDayId ? "cursor-pointer" : ""}`}
     >
       <div className="mb-3 flex items-center gap-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         <TableOutlined /> Standings
       </div>
 
-      {!tournamentId ? (
+      {!matchDayId ? (
         <p className="my-3 text-theme-xs text-gray-400 dark:text-gray-500">No active MatchDay</p>
       ) : isLoading ? (
         <Spinner className="my-3 text-gray-400" />
@@ -56,7 +56,7 @@ const StandingsSnapshotWidget: React.FC = () => {
                     rank={i + 1}
                     teamId={s.teamId}
                     teamName={s.teamName}
-                    tournamentSummary={tournamentSummary}
+                    matchDaySummary={matchDaySummary}
                     size="small"
                   />
                 </td>

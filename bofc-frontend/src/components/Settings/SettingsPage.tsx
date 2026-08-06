@@ -230,8 +230,8 @@ function SettingsPage() {
     const [smtpFromName, setSmtpFromName] = useState("");
     const [smtpUseSsl, setSmtpUseSsl] = useState(true);
 
-    const [notifyTournamentReminderEnabled, setNotifyTournamentReminderEnabled] = useState(false);
-    const [tournamentReminderDaysBefore, setTournamentReminderDaysBefore] = useState(3);
+    const [notifyMatchDayReminderEnabled, setNotifyMatchDayReminderEnabled] = useState(false);
+    const [matchDayReminderDaysBefore, setMatchDayReminderDaysBefore] = useState(3);
     const [notifyPaymentDueEnabled, setNotifyPaymentDueEnabled] = useState(false);
     const [paymentDueReminderDayOfMonth, setPaymentDueReminderDayOfMonth] = useState(25);
     const [notifyCustomEmailEnabled, setNotifyCustomEmailEnabled] = useState(false);
@@ -269,8 +269,8 @@ function SettingsPage() {
         setSmtpFromEmail(s.smtpFromEmail || "");
         setSmtpFromName(s.smtpFromName || "");
         setSmtpUseSsl(s.smtpUseSsl);
-        setNotifyTournamentReminderEnabled(s.notifyTournamentReminderEnabled);
-        setTournamentReminderDaysBefore(s.tournamentReminderDaysBefore);
+        setNotifyMatchDayReminderEnabled(s.notifyMatchDayReminderEnabled);
+        setMatchDayReminderDaysBefore(s.matchDayReminderDaysBefore);
         setNotifyPaymentDueEnabled(s.notifyPaymentDueEnabled);
         setPaymentDueReminderDayOfMonth(s.paymentDueReminderDayOfMonth);
         setNotifyCustomEmailEnabled(s.notifyCustomEmailEnabled);
@@ -306,8 +306,8 @@ function SettingsPage() {
                 smtpFromEmail: smtpFromEmail.trim(),
                 smtpFromName: smtpFromName.trim(),
                 smtpUseSsl,
-                notifyTournamentReminderEnabled,
-                tournamentReminderDaysBefore,
+                notifyMatchDayReminderEnabled,
+                matchDayReminderDaysBefore,
                 notifyPaymentDueEnabled,
                 paymentDueReminderDayOfMonth,
                 notifyCustomEmailEnabled,
@@ -424,7 +424,7 @@ function SettingsPage() {
                 <div className="flex flex-col gap-5">
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 p-4 dark:border-gray-800">
                         <div>
-                            <FormSwitch label="Upcoming MatchDay reminder" checked={notifyTournamentReminderEnabled} onChange={setNotifyTournamentReminderEnabled} />
+                            <FormSwitch label="Upcoming MatchDay reminder" checked={notifyMatchDayReminderEnabled} onChange={setNotifyMatchDayReminderEnabled} />
                             <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">Notifies every player before a MatchDay starts.</p>
                         </div>
                         <div className="w-40">
@@ -433,9 +433,9 @@ function SettingsPage() {
                                 type="number"
                                 min={1}
                                 max={30}
-                                value={tournamentReminderDaysBefore}
-                                onChange={(e) => setTournamentReminderDaysBefore(Number(e.target.value) || 1)}
-                                disabled={!notifyTournamentReminderEnabled}
+                                value={matchDayReminderDaysBefore}
+                                onChange={(e) => setMatchDayReminderDaysBefore(Number(e.target.value) || 1)}
+                                disabled={!notifyMatchDayReminderEnabled}
                             />
                         </div>
                     </div>

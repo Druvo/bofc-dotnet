@@ -11,7 +11,7 @@ public class LogicNodeConfiguration : IEntityTypeConfiguration<LogicNode>
         builder.ToTable("logic_node");
         builder.HasKey(ln => ln.Id);
         builder.Property(ln => ln.Id).HasColumnName("id").ValueGeneratedOnAdd();
-        builder.Property(ln => ln.TournamentId).HasColumnName("tournament_id").IsRequired();
+        builder.Property(ln => ln.MatchDayId).HasColumnName("match_day_id").IsRequired();
         builder.Property(ln => ln.NodeName).HasColumnName("node_name").HasMaxLength(100).IsRequired();
         builder.Property(ln => ln.NodeType).HasColumnName("node_type").HasConversion<string>().HasMaxLength(50).IsRequired();
         builder.Property(ln => ln.SourceRoundId).HasColumnName("source_round_id");
@@ -29,7 +29,7 @@ public class LogicNodeConfiguration : IEntityTypeConfiguration<LogicNode>
         builder.Property(ln => ln.LastModifiedBy).HasColumnName("last_modified_by");
         builder.Property(ln => ln.UpdatedDate).HasColumnName("updated_date");
 
-        builder.HasOne(ln => ln.Tournament).WithMany().HasForeignKey(ln => ln.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(ln => ln.MatchDay).WithMany().HasForeignKey(ln => ln.MatchDayId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(ln => ln.SourceGroup).WithMany().HasForeignKey(ln => ln.SourceGroupId).OnDelete(DeleteBehavior.Restrict);
     }
 }

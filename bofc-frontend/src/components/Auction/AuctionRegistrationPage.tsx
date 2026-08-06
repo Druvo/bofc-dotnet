@@ -56,7 +56,7 @@ const emptyForm: FormState = {
 };
 
 const AuctionRegistrationPage: React.FC = () => {
-  const { tournamentId } = useParams<{ tournamentId: string }>();
+  const { matchDayId } = useParams<{ matchDayId: string }>();
   const [form, setForm] = useState<FormState>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [registered, setRegistered] = useState(false);
@@ -66,7 +66,7 @@ const AuctionRegistrationPage: React.FC = () => {
   const [quickRegister, { isLoading: isQuickLoading }] = useQuickRegisterForAuctionMutation();
   const loginInfo = useSelector(selectLoginInfo);
   const isLoggedIn = !!loginInfo?.token;
-  const { data: session } = useGetAuctionSessionQuery(Number(tournamentId), { skip: !tournamentId });
+  const { data: session } = useGetAuctionSessionQuery(Number(matchDayId), { skip: !matchDayId });
   const isRegistrationClosed = session?.status === "COMPLETED";
 
   const setField = (key: keyof FormState, value: string) => setForm((f) => ({ ...f, [key]: value }));
@@ -87,7 +87,7 @@ const AuctionRegistrationPage: React.FC = () => {
     try {
       const request: AuctionRegistrationRequest = {
         ...form,
-        tournamentId: Number(tournamentId),
+        matchDayId: Number(matchDayId),
       } as AuctionRegistrationRequest;
       await register(request).unwrap();
       setRegistered(true);
@@ -99,7 +99,7 @@ const AuctionRegistrationPage: React.FC = () => {
 
   const handleQuickRegister = async () => {
     try {
-      await quickRegister(Number(tournamentId)).unwrap();
+      await quickRegister(Number(matchDayId)).unwrap();
       setRegistered(true);
       toast.success("You have been registered for the auction!");
     } catch (err: any) {
@@ -211,7 +211,7 @@ const AuctionRegistrationPage: React.FC = () => {
           Player Auction Registration
         </h3>
         <p className="mt-1.5 text-theme-sm text-gray-500 dark:text-gray-400">
-          Register yourself to be part of the player auction for MatchDay #{tournamentId}.
+          Register yourself to be part of the player auction for MatchDay #{matchDayId}.
           After admin approval, teams will bid for you during the live auction.
         </p>
         <GoldDivider style={{ margin: "12px 0 16px" }} />
@@ -222,7 +222,7 @@ const AuctionRegistrationPage: React.FC = () => {
 
         {isRegistrationClosed && (
           <Alert variant="warning" title="Auction registration is closed" className="mb-4">
-            This tournament auction is already completed, so new registrations are not accepted.
+            This matchDay auction is already completed, so new registrations are not accepted.
           </Alert>
         )}
 

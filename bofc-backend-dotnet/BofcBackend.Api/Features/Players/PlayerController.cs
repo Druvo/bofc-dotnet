@@ -94,9 +94,9 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("goalkeeper-queue")]
-    public async Task<IActionResult> GetGoalKeeperPriorityQueue([FromQuery] long tournamentId)
+    public async Task<IActionResult> GetGoalKeeperPriorityQueue([FromQuery] long matchDayId)
     {
-        var response = await playerService.GetGoalKeeperPriorityQueueAsync(tournamentId);
+        var response = await playerService.GetGoalKeeperPriorityQueueAsync(matchDayId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
     }
 }

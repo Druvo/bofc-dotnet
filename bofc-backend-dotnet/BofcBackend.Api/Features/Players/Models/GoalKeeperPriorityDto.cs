@@ -10,15 +10,15 @@ public class GoalKeeperPriorityDto
     /// <summary>Format: dd-MM-yy (e.g., "15-11-25").</summary>
     public List<string> PlayAsGkDates { get; set; } = [];
 
-    public int TotalTournamentParticipations { get; set; }
-    public int ActiveTournamentCount { get; set; }
+    public int TotalMatchDayParticipations { get; set; }
+    public int ActiveMatchDayCount { get; set; }
 
-    /// <summary>%: (totalParticipations / activeTournamentCount) * 100.</summary>
+    /// <summary>%: (totalParticipations / activeMatchDayCount) * 100.</summary>
     public double ParticipationFrequency { get; set; }
 
-    public int TotalGoalKeeperTournaments { get; set; }
+    public int TotalGoalKeeperMatchDays { get; set; }
     public DateTime? LastGoalKeeperDate { get; set; }
 
-    /// <summary>Format: dd-MM-yy. Last tournament participation date (excluding current).</summary>
-    public string? LastPlayedTournamentDate { get; set; }
+    /// <summary>Format: dd-MM-yy. Last MatchDay participation date (excluding current).</summary>
+    public string? LastPlayedMatchDayDate { get; set; }
 }

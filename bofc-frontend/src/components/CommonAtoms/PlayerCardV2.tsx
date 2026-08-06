@@ -38,7 +38,7 @@ const roleTagTone: Record<string, React.CSSProperties> = {
  * Read-only, visually-forward player card — a real card (photo, name,
  * position, role badges as pills) rather than the compact single-line row
  * ViewerPlayersTab previously rendered inline. Does not touch
- * Tournaments/Atoms/PlayerCard.tsx, which stays the row-style atom the
+ * MatchDays/Atoms/PlayerCard.tsx, which stays the row-style atom the
  * drag-drop team-builder depends on.
  */
 export default function PlayerCardV2({ player, size = "default" }: PlayerCardV2Props) {

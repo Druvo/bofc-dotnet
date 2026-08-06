@@ -44,8 +44,8 @@ const defaultForm: FormState = {
 };
 
 const AuctionSettingsPage: React.FC = () => {
-  const { tournamentId } = useParams<{ tournamentId: string }>();
-  const tid = Number(tournamentId);
+  const { matchDayId } = useParams<{ matchDayId: string }>();
+  const tid = Number(matchDayId);
   const [form, setForm] = useState<FormState>(defaultForm);
 
   const { data: settings, isLoading } = useGetAuctionSettingsQuery(tid);
@@ -77,10 +77,10 @@ const AuctionSettingsPage: React.FC = () => {
     } as any;
     try {
       if (settings) {
-        await updateSettings({ tournamentId: tid, body }).unwrap();
+        await updateSettings({ matchDayId: tid, body }).unwrap();
         toast.success("Settings updated");
       } else {
-        await createSettings({ tournamentId: tid, body }).unwrap();
+        await createSettings({ matchDayId: tid, body }).unwrap();
         toast.success("Settings created");
       }
     } catch (err: any) {

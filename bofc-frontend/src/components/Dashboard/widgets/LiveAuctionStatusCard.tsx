@@ -1,30 +1,30 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FireOutlined, ThunderboltOutlined } from "@ant-design/icons";
-import { useGetLatestTournamentWithUserStatusQuery } from "../../../state/features/tournaments/tournamentsSlice";
+import { useGetLatestMatchDayWithUserStatusQuery } from "../../../state/features/matchDays/matchDaysSlice";
 import { useGetAuctionSessionQuery } from "../../../state/features/auction/auctionSlice";
 
-// Only renders anything when the latest tournament's auction is actually
+// Only renders anything when the latest matchDay's auction is actually
 // RUNNING or PAUSED — stays invisible otherwise rather than showing an empty
 // "no auction" card, since that's the common case and not worth a whole tile.
 const LiveAuctionStatusCard: React.FC = () => {
   const navigate = useNavigate();
-  const { data: latest } = useGetLatestTournamentWithUserStatusQuery();
-  const tournamentId = latest?.content?.tournament?.id;
+  const { data: latest } = useGetLatestMatchDayWithUserStatusQuery();
+  const matchDayId = latest?.content?.matchDay?.id;
 
-  const { data: session } = useGetAuctionSessionQuery(tournamentId as number, {
-    skip: !tournamentId,
+  const { data: session } = useGetAuctionSessionQuery(matchDayId as number, {
+    skip: !matchDayId,
     pollingInterval: 30000,
   });
 
   const isLive = session?.status === "RUNNING" || session?.status === "PAUSED";
-  if (!tournamentId || !isLive) return null;
+  if (!matchDayId || !isLive) return null;
 
   const paused = session?.status === "PAUSED";
 
   return (
     <div
-      onClick={() => navigate(`/auction/live/${tournamentId}`)}
+      onClick={() => navigate(`/auction/live/${matchDayId}`)}
       className={`relative mb-6 cursor-pointer overflow-hidden rounded-2xl border bg-white p-4 dark:bg-white/[0.03] ${
         paused ? "border-gray-200 dark:border-gray-800" : "border-error-500/40"
       }`}
@@ -46,7 +46,7 @@ const LiveAuctionStatusCard: React.FC = () => {
               {paused ? "Auction Paused" : "Live Auction"}
             </div>
             <div className="text-theme-sm font-bold text-gray-800 dark:text-white/90">
-              {latest?.content?.tournament?.name}
+              {latest?.content?.matchDay?.name}
             </div>
           </div>
         </div>

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BofcBackend.Api.Features.PaymentAccounts;
 
 /// <summary>
-/// Bank/bKash details players use to send tournament dues. Any logged-in
+/// Bank/bKash details players use to send MatchDay dues. Any logged-in
 /// user can read the active list; only admins can manage the full list.
 /// </summary>
 [ApiController]

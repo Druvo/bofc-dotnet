@@ -246,76 +246,76 @@ public class PlayerService(
         }).ToList();
     }
 
-    public async Task<GoalKeeperQueueResponseDto> GetGoalKeeperPriorityQueueAsync(long tournamentId)
+    public async Task<GoalKeeperQueueResponseDto> GetGoalKeeperPriorityQueueAsync(long matchDayId)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new PlayerServiceException("Tournament not found", HttpStatusCode.NotFound);
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new PlayerServiceException("MatchDay not found", HttpStatusCode.NotFound);
 
-        var mostRecentTournament = await db.Tournaments
-            .Where(t => t.TournamentDate < tournament.TournamentDate)
-            .OrderByDescending(t => t.TournamentDate)
+        var mostRecentMatchDay = await db.MatchDays
+            .Where(t => t.MatchDayDate < matchDay.MatchDayDate)
+            .OrderByDescending(t => t.MatchDayDate)
             .FirstOrDefaultAsync();
 
-        var participants = await db.TournamentParticipants.Include(p => p.Player)
-            .Where(p => p.TournamentId == tournamentId && p.ParticipationStatus)
+        var participants = await db.MatchDayParticipants.Include(p => p.Player)
+            .Where(p => p.MatchDayId == matchDayId && p.ParticipationStatus)
             .ToListAsync();
 
         if (participants.Count == 0)
         {
             return new GoalKeeperQueueResponseDto
             {
-                TournamentId = tournamentId,
-                TournamentName = tournament.Name,
-                TournamentDate = tournament.TournamentDate,
+                MatchDayId = matchDayId,
+                MatchDayName = matchDay.Name,
+                MatchDayDate = matchDay.MatchDayDate,
                 GoalKeeperPriorityQueue = [],
             };
         }
 
-        // Total active tournaments for frequency calculation (prevent division by zero).
-        var activeTournamentCount = await db.Tournaments.CountAsync(t => t.IsActive);
-        if (activeTournamentCount == 0)
+        // Total active MatchDays for frequency calculation (prevent division by zero).
+        var activeMatchDayCount = await db.MatchDays.CountAsync(t => t.IsActive);
+        if (activeMatchDayCount == 0)
         {
-            activeTournamentCount = 1;
+            activeMatchDayCount = 1;
         }
 
-        var playersWithMetadata = new List<(GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedTournaments)>();
+        var playersWithMetadata = new List<(GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedMatchDays)>();
 
         foreach (var participant in participants)
         {
             var player = participant.Player;
 
-            var totalGkTournaments = await db.PlayerGoalkeepingHistories
-                .CountAsync(h => h.PlayerId == player.Id && h.TournamentId != tournamentId);
+            var totalGkMatchDays = await db.PlayerGoalkeepingHistories
+                .CountAsync(h => h.PlayerId == player.Id && h.MatchDayId != matchDayId);
 
-            var totalTournamentParticipations = await db.TournamentParticipants
+            var totalMatchDayParticipations = await db.MatchDayParticipants
                 .Where(p => p.PlayerId == player.Id && p.ParticipationStatus)
-                .Select(p => p.TournamentId).Distinct().CountAsync();
+                .Select(p => p.MatchDayId).Distinct().CountAsync();
 
             var lastGoalKeeperDate = await db.PlayerGoalkeepingHistories
                 .Where(h => h.PlayerId == player.Id).MaxAsync(h => (DateTime?)h.PlayedDate);
 
-            var consecutiveMissedTournaments = await CountConsecutiveMissedTournamentsBeforeCurrentAsync(player.Id, tournamentId);
+            var consecutiveMissedMatchDays = await CountConsecutiveMissedMatchDaysBeforeCurrentAsync(player.Id, matchDayId);
 
-            // All GK dates for display, excluding the current tournament and any future ones
-            // relative to it — only past tournaments count.
+            // All GK dates for display, excluding the current MatchDay and any future ones
+            // relative to it — only past MatchDays count.
             var allGoalKeeperDates = await db.PlayerGoalkeepingHistories
-                .Where(h => h.PlayerId == player.Id && h.TournamentId != tournamentId && h.PlayedDate < tournament.TournamentDate)
+                .Where(h => h.PlayerId == player.Id && h.MatchDayId != matchDayId && h.PlayedDate < matchDay.MatchDayDate)
                 .OrderByDescending(h => h.PlayedDate)
                 .Select(h => h.PlayedDate)
                 .ToListAsync();
             var formattedGoalKeeperDates = allGoalKeeperDates.Select(d => d.ToString("dd-MM-yy")).ToList();
 
-            var wasGkInMostRecent = mostRecentTournament != null && await db.PlayerGoalkeepingHistories
-                .AnyAsync(h => h.PlayerId == player.Id && h.TournamentId == mostRecentTournament.Id);
+            var wasGkInMostRecent = mostRecentMatchDay != null && await db.PlayerGoalkeepingHistories
+                .AnyAsync(h => h.PlayerId == player.Id && h.MatchDayId == mostRecentMatchDay.Id);
 
-            var lastParticipationDate = await db.TournamentParticipants
-                .Where(p => p.PlayerId == player.Id && p.ParticipationStatus && p.TournamentId != tournamentId
-                    && p.Tournament.TournamentDate < tournament.TournamentDate)
-                .MaxAsync(p => (DateTime?)p.Tournament.TournamentDate);
-            var lastPlayedTournamentDate = lastParticipationDate?.ToString("dd-MM-yy");
+            var lastParticipationDate = await db.MatchDayParticipants
+                .Where(p => p.PlayerId == player.Id && p.ParticipationStatus && p.MatchDayId != matchDayId
+                    && p.MatchDay.MatchDayDate < matchDay.MatchDayDate)
+                .MaxAsync(p => (DateTime?)p.MatchDay.MatchDayDate);
+            var lastPlayedMatchDayDate = lastParticipationDate?.ToString("dd-MM-yy");
 
-            var participationFrequency = activeTournamentCount > 0
-                ? totalTournamentParticipations * 100.0 / activeTournamentCount
+            var participationFrequency = activeMatchDayCount > 0
+                ? totalMatchDayParticipations * 100.0 / activeMatchDayCount
                 : 0.0;
 
             var dto = new GoalKeeperPriorityDto
@@ -324,29 +324,29 @@ public class PlayerService(
                 PlayerName = player.Name,
                 EmployeeId = player.EmployeeId,
                 PlayAsGkDates = formattedGoalKeeperDates,
-                TotalTournamentParticipations = totalTournamentParticipations,
-                ActiveTournamentCount = activeTournamentCount,
+                TotalMatchDayParticipations = totalMatchDayParticipations,
+                ActiveMatchDayCount = activeMatchDayCount,
                 ParticipationFrequency = Math.Round(participationFrequency, 2),
-                LastPlayedTournamentDate = lastPlayedTournamentDate,
-                TotalGoalKeeperTournaments = totalGkTournaments,
+                LastPlayedMatchDayDate = lastPlayedMatchDayDate,
+                TotalGoalKeeperMatchDays = totalGkMatchDays,
                 LastGoalKeeperDate = lastGoalKeeperDate,
             };
 
-            playersWithMetadata.Add((dto, wasGkInMostRecent, consecutiveMissedTournaments));
+            playersWithMetadata.Add((dto, wasGkInMostRecent, consecutiveMissedMatchDays));
         }
 
         // Category-based ordering.
-        var regularPlayers = new List<(GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedTournaments)>();
-        var lastTournamentGk = new List<(GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedTournaments)>();
-        var brandNewPlayers = new List<(GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedTournaments)>();
+        var regularPlayers = new List<(GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedMatchDays)>();
+        var lastMatchDayGk = new List<(GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedMatchDays)>();
+        var brandNewPlayers = new List<(GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedMatchDays)>();
 
         foreach (var metadata in playersWithMetadata)
         {
-            // Brand new: participating in the current tournament AND never participated before
-            // in any tournament (totalParticipations == 1 means only the current one;
-            // consecutiveMissed == activeCount - 1 means every prior tournament was missed).
-            var isBrandNew = metadata.Dto.TotalTournamentParticipations == 1
-                && metadata.ConsecutiveMissedTournaments == metadata.Dto.ActiveTournamentCount - 1;
+            // Brand new: participating in the current MatchDay AND never participated before
+            // in any MatchDay (totalParticipations == 1 means only the current one;
+            // consecutiveMissed == activeCount - 1 means every prior MatchDay was missed).
+            var isBrandNew = metadata.Dto.TotalMatchDayParticipations == 1
+                && metadata.ConsecutiveMissedMatchDays == metadata.Dto.ActiveMatchDayCount - 1;
 
             if (isBrandNew)
             {
@@ -354,7 +354,7 @@ public class PlayerService(
             }
             else if (metadata.WasGkInMostRecent)
             {
-                lastTournamentGk.Add(metadata);
+                lastMatchDayGk.Add(metadata);
             }
             else
             {
@@ -362,42 +362,42 @@ public class PlayerService(
             }
         }
 
-        // Regular-player ordering: never-GK first, then fewer consecutive missed tournaments
+        // Regular-player ordering: never-GK first, then fewer consecutive missed MatchDays
         // (more regular attendance), then fewer total GK times (fair burden distribution), then
         // older lastGoalKeeperDate, then playerId as a tiebreaker.
         int RegularComparer(
-            (GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedTournaments) a,
-            (GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedTournaments) b)
+            (GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedMatchDays) a,
+            (GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedMatchDays) b)
         {
             var cmp = (a.Dto.LastGoalKeeperDate == null ? 0 : 1).CompareTo(b.Dto.LastGoalKeeperDate == null ? 0 : 1);
             if (cmp != 0) return cmp;
-            cmp = a.ConsecutiveMissedTournaments.CompareTo(b.ConsecutiveMissedTournaments);
+            cmp = a.ConsecutiveMissedMatchDays.CompareTo(b.ConsecutiveMissedMatchDays);
             if (cmp != 0) return cmp;
-            cmp = a.Dto.TotalGoalKeeperTournaments.CompareTo(b.Dto.TotalGoalKeeperTournaments);
+            cmp = a.Dto.TotalGoalKeeperMatchDays.CompareTo(b.Dto.TotalGoalKeeperMatchDays);
             if (cmp != 0) return cmp;
             cmp = CompareNullsLastAscending(a.Dto.LastGoalKeeperDate, b.Dto.LastGoalKeeperDate);
             return cmp != 0 ? cmp : a.Dto.PlayerId.CompareTo(b.Dto.PlayerId);
         }
 
-        // Last-tournament-GK ordering: prioritize LESS experienced GKs first (fewer times
+        // Last-MatchDay-GK ordering: prioritize LESS experienced GKs first (fewer times
         // played), then older lastGoalKeeperDate, then playerId.
         int LastGkComparer(
-            (GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedTournaments) a,
-            (GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedTournaments) b)
+            (GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedMatchDays) a,
+            (GoalKeeperPriorityDto Dto, bool WasGkInMostRecent, int ConsecutiveMissedMatchDays) b)
         {
-            var cmp = a.Dto.TotalGoalKeeperTournaments.CompareTo(b.Dto.TotalGoalKeeperTournaments);
+            var cmp = a.Dto.TotalGoalKeeperMatchDays.CompareTo(b.Dto.TotalGoalKeeperMatchDays);
             if (cmp != 0) return cmp;
             cmp = CompareNullsLastAscending(a.Dto.LastGoalKeeperDate, b.Dto.LastGoalKeeperDate);
             return cmp != 0 ? cmp : a.Dto.PlayerId.CompareTo(b.Dto.PlayerId);
         }
 
         regularPlayers.Sort(RegularComparer);
-        lastTournamentGk.Sort(LastGkComparer);
+        lastMatchDayGk.Sort(LastGkComparer);
         brandNewPlayers.Sort(RegularComparer); // treated like regular players (placed last anyway)
 
         var finalQueue = new List<GoalKeeperPriorityDto>();
         finalQueue.AddRange(regularPlayers.Select(m => m.Dto));
-        finalQueue.AddRange(lastTournamentGk.Select(m => m.Dto));
+        finalQueue.AddRange(lastMatchDayGk.Select(m => m.Dto));
         finalQueue.AddRange(brandNewPlayers.Select(m => m.Dto));
 
         var priority = 1;
@@ -408,9 +408,9 @@ public class PlayerService(
 
         return new GoalKeeperQueueResponseDto
         {
-            TournamentId = tournamentId,
-            TournamentName = tournament.Name,
-            TournamentDate = tournament.TournamentDate,
+            MatchDayId = matchDayId,
+            MatchDayName = matchDay.Name,
+            MatchDayDate = matchDay.MatchDayDate,
             GoalKeeperPriorityQueue = finalQueue,
         };
     }
@@ -424,20 +424,20 @@ public class PlayerService(
     }
 
     /// <summary>
-    /// Port of TournamentParticipantRepository.countConsecutiveMissedTournamentsBeforeCurrent —
+    /// Port of MatchDayParticipantRepository.countConsecutiveMissedMatchDaysBeforeCurrent —
     /// Java's one native-SQL query. No rewrite needed: the target DB stays MySQL (never moved
     /// to SQL Server), so DATE_SUB/NOW() work as-is via Pomelo/MySqlConnector.
     /// </summary>
-    private async Task<int> CountConsecutiveMissedTournamentsBeforeCurrentAsync(long playerId, long currentTournamentId)
+    private async Task<int> CountConsecutiveMissedMatchDaysBeforeCurrentAsync(long playerId, long currentMatchDayId)
     {
         var rows = await db.Database.SqlQuery<int>($"""
-            SELECT COUNT(*) AS Value FROM tournament t
-            WHERE t.id != {currentTournamentId}
-            AND t.tournament_date < (SELECT tournament_date FROM tournament WHERE id = {currentTournamentId})
-            AND NOT EXISTS (SELECT 1 FROM tournament_participant tp WHERE tp.tournament_id = t.id AND tp.player_id = {playerId} AND tp.participation_status = true)
-            AND t.tournament_date > (SELECT COALESCE(MAX(t2.tournament_date), DATE_SUB(NOW(), INTERVAL 1000 DAY))
-                FROM tournament t2 WHERE EXISTS (SELECT 1 FROM tournament_participant tp2 WHERE tp2.tournament_id = t2.id AND tp2.player_id = {playerId} AND tp2.participation_status = true)
-                AND t2.tournament_date < (SELECT tournament_date FROM tournament WHERE id = {currentTournamentId}))
+            SELECT COUNT(*) AS Value FROM match_day t
+            WHERE t.id != {currentMatchDayId}
+            AND t.match_day_date < (SELECT match_day_date FROM match_day WHERE id = {currentMatchDayId})
+            AND NOT EXISTS (SELECT 1 FROM match_day_participant tp WHERE tp.match_day_id = t.id AND tp.player_id = {playerId} AND tp.participation_status = true)
+            AND t.match_day_date > (SELECT COALESCE(MAX(t2.match_day_date), DATE_SUB(NOW(), INTERVAL 1000 DAY))
+                FROM match_day t2 WHERE EXISTS (SELECT 1 FROM match_day_participant tp2 WHERE tp2.match_day_id = t2.id AND tp2.player_id = {playerId} AND tp2.participation_status = true)
+                AND t2.match_day_date < (SELECT match_day_date FROM match_day WHERE id = {currentMatchDayId}))
             """).ToListAsync();
         return rows.FirstOrDefault();
     }

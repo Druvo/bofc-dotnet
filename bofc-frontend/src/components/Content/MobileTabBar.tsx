@@ -20,7 +20,7 @@ interface TabItem {
 
 const TABS: TabItem[] = [
   { key: "dashboard", label: "Dashboard", icon: <DashboardOutlined />, path: "/dashboard" },
-  { key: "match-center", label: "Match Center", icon: <EyeOutlined />, path: "/tournament-viewer" },
+  { key: "match-center", label: "Match Center", icon: <EyeOutlined />, path: "/match-day-viewer" },
   { key: "players", label: "Players", icon: <TeamOutlined />, path: "/players" },
   { key: "more", label: "More", icon: <MenuOutlined /> },
 ];

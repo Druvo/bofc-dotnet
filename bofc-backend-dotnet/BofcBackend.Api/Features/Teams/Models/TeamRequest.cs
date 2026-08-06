@@ -10,8 +10,8 @@ public class TeamRequest
     [Required(ErrorMessage = "Team name is required")]
     public string? TeamName { get; set; }
 
-    [Required(ErrorMessage = "Tournament ID is required")]
-    public long? TournamentId { get; set; }
+    [Required(ErrorMessage = "MatchDay ID is required")]
+    public long? MatchDayId { get; set; }
 
     public string? LogoKey { get; set; }
 }

@@ -11,6 +11,6 @@ namespace BofcBackend.Api.Features.Auction.Models;
 public class AuctionWebSocketMessage
 {
     public string Type { get; set; } = string.Empty;
-    public long TournamentId { get; set; }
+    public long MatchDayId { get; set; }
     public object? Payload { get; set; }
 }

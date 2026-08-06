@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BofcBackend.Api.Features.Teams;
 
-/// <summary>Port of controller/TournamentManagementController.java (route "/teams").</summary>
+/// <summary>Port of controller/MatchDayManagementController.java (route "/teams").</summary>
 [ApiController]
 [Route("teams")]
 [Authorize(Roles = PlayerRoleNames.Admin + "," + PlayerRoleNames.SuperAdmin + "," + PlayerRoleNames.Coordinator)]

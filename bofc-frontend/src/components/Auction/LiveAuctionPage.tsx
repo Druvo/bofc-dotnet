@@ -61,8 +61,8 @@ const REMAINING_PAGE_SIZE = 12;
 
 const LiveAuctionPage: React.FC = () => {
   const tones = useStatTones();
-  const { tournamentId } = useParams<{ tournamentId: string }>();
-  const tid = Number(tournamentId);
+  const { matchDayId } = useParams<{ matchDayId: string }>();
+  const tid = Number(matchDayId);
   const loginInfo = useSelector(selectLoginInfo);
   const isAdmin = hasRole(loginInfo.roles, "ADMIN") || hasRole(loginInfo.roles, "SUPERADMIN");
   const isTeamOwner = hasRole(loginInfo.roles, "TEAM_OWNER") || isAdmin;
@@ -181,7 +181,7 @@ const LiveAuctionPage: React.FC = () => {
     }
   }, [refetchDashboard, refetchPlayers]);
   useEffect(() => () => { if (refetchTimer.current) clearTimeout(refetchTimer.current); }, []);
-  const { connected } = useAuctionWebSocket({ tournamentId: tid, onMessage: onWsMessage, enabled: true });
+  const { connected } = useAuctionWebSocket({ matchDayId: tid, onMessage: onWsMessage, enabled: true });
 
   // --- Mutations ---
   const [startAuction, { isLoading: starting }] = useStartAuctionMutation();
@@ -211,7 +211,7 @@ const LiveAuctionPage: React.FC = () => {
   const handleBid = async (amount: number) => {
     if (!myTeam || !currentPlayer) return;
     await run(
-      () => placeBid({ tournamentId: tid, body: { auctionPlayerId: currentPlayer.id, teamId: myTeam.teamId, bidAmount: amount } }).unwrap(),
+      () => placeBid({ matchDayId: tid, body: { auctionPlayerId: currentPlayer.id, teamId: myTeam.teamId, bidAmount: amount } }).unwrap(),
       `Bid ${fmt(amount)} placed!`
     );
   };
@@ -705,7 +705,7 @@ const LiveAuctionPage: React.FC = () => {
                             className="!px-2.5 !py-1.5 text-theme-xs"
                             onClick={async () => {
                               await run(
-                                () => selectPlayerForAuction({ tournamentId: tid, playerId: r.id }).unwrap(),
+                                () => selectPlayerForAuction({ matchDayId: tid, playerId: r.id }).unwrap(),
                                 `${r.playerName} selected for auction!`
                               );
                               setRemainingModal(false);
@@ -765,7 +765,7 @@ const LiveAuctionPage: React.FC = () => {
                           className="!px-2.5 !py-1.5 text-theme-xs"
                           onClick={async () => {
                             await run(
-                              () => selectPlayerForAuction({ tournamentId: tid, playerId: record.id }).unwrap(),
+                              () => selectPlayerForAuction({ matchDayId: tid, playerId: record.id }).unwrap(),
                               `${record.playerName} selected for auction!`
                             );
                             setUnsoldModal(false);

@@ -14,8 +14,8 @@ export interface SystemSettings {
     smtpFromEmail?: string | null;
     smtpFromName?: string | null;
     smtpUseSsl: boolean;
-    notifyTournamentReminderEnabled: boolean;
-    tournamentReminderDaysBefore: number;
+    notifyMatchDayReminderEnabled: boolean;
+    matchDayReminderDaysBefore: number;
     notifyPaymentDueEnabled: boolean;
     paymentDueReminderDayOfMonth: number;
     notifyCustomEmailEnabled: boolean;
@@ -54,8 +54,8 @@ export interface UpdateSystemSettingsRequest {
     smtpFromEmail?: string;
     smtpFromName?: string;
     smtpUseSsl: boolean;
-    notifyTournamentReminderEnabled: boolean;
-    tournamentReminderDaysBefore: number;
+    notifyMatchDayReminderEnabled: boolean;
+    matchDayReminderDaysBefore: number;
     notifyPaymentDueEnabled: boolean;
     paymentDueReminderDayOfMonth: number;
     notifyCustomEmailEnabled: boolean;

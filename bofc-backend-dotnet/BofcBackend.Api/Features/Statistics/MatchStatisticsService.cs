@@ -16,7 +16,7 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
     {
         var stats = await db.MatchStatistics.Include(s => s.Player).Include(s => s.Team)
             .FirstOrDefaultAsync(s => s.MatchId == matchId && s.PlayerId == playerId)
-            ?? throw new TournamentServiceException("Statistics not found", HttpStatusCode.NotFound);
+            ?? throw new MatchDayServiceException("Statistics not found", HttpStatusCode.NotFound);
         return ToResponse(stats);
     }
 
@@ -34,10 +34,10 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         return stats.Select(ToResponse).ToList();
     }
 
-    public async Task<List<MatchStatisticsResponse>> GetPlayerTournamentStatisticsAsync(long tournamentId, long playerId)
+    public async Task<List<MatchStatisticsResponse>> GetPlayerMatchDayStatisticsAsync(long matchDayId, long playerId)
     {
         var stats = await db.MatchStatistics.Include(s => s.Player).Include(s => s.Team).Include(s => s.Match)
-            .Where(s => s.Match.TournamentId == tournamentId && s.PlayerId == playerId)
+            .Where(s => s.Match.MatchDayId == matchDayId && s.PlayerId == playerId)
             .OrderBy(s => s.Match.MatchDate).ToListAsync();
         return stats.Select(ToResponse).ToList();
     }
@@ -48,7 +48,7 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         // falling back to all of his stat rows if he has no roster entries at all — matches
         // Java's findPlayerMatchHistory query exactly.
         var rows = await db.MatchStatistics
-            .Include(s => s.Match).ThenInclude(m => m.Tournament)
+            .Include(s => s.Match).ThenInclude(m => m.MatchDay)
             .Include(s => s.Match).ThenInclude(m => m.HomeTeam)
             .Include(s => s.Match).ThenInclude(m => m.AwayTeam)
             .Include(s => s.Team)
@@ -119,33 +119,33 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         return history;
     }
 
-    public async Task<List<MatchStatisticsResponse>> GetTopScorersByTournamentAsync(long tournamentId)
+    public async Task<List<MatchStatisticsResponse>> GetTopScorersByMatchDayAsync(long matchDayId)
     {
-        var aggregated = await AggregateByTournamentAsync(tournamentId);
+        var aggregated = await AggregateByMatchDayAsync(matchDayId);
         return aggregated.OrderByDescending(r => r.GoalsScored).ToList();
     }
 
-    public async Task<List<MatchStatisticsResponse>> GetTopAssistProvidersByTournamentAsync(long tournamentId)
+    public async Task<List<MatchStatisticsResponse>> GetTopAssistProvidersByMatchDayAsync(long matchDayId)
     {
-        var aggregated = await AggregateByTournamentAsync(tournamentId);
+        var aggregated = await AggregateByMatchDayAsync(matchDayId);
         return aggregated.OrderByDescending(r => r.Assists).ToList();
     }
 
-    public async Task<List<MatchStatisticsResponse>> GetTopCardReceiversByTournamentAsync(long tournamentId)
+    public async Task<List<MatchStatisticsResponse>> GetTopCardReceiversByMatchDayAsync(long matchDayId)
     {
-        var aggregated = await AggregateByTournamentAsync(tournamentId);
+        var aggregated = await AggregateByMatchDayAsync(matchDayId);
         return aggregated.OrderByDescending(r => r.RedCards + r.YellowCards).ToList();
     }
 
     /// <summary>
     /// Aggregates raw MatchStatistics rows by player (first-seen row supplies player/team
     /// context — matches Java's Map-based aggregation exactly, including the quirk that a
-    /// player who played for multiple teams in the tournament shows only the first team seen).
+    /// player who played for multiple teams in the MatchDay shows only the first team seen).
     /// </summary>
-    private async Task<List<MatchStatisticsResponse>> AggregateByTournamentAsync(long tournamentId)
+    private async Task<List<MatchStatisticsResponse>> AggregateByMatchDayAsync(long matchDayId)
     {
         var stats = await db.MatchStatistics.Include(s => s.Player).Include(s => s.Team).Include(s => s.Match)
-            .Where(s => s.Match.TournamentId == tournamentId).ToListAsync();
+            .Where(s => s.Match.MatchDayId == matchDayId).ToListAsync();
 
         var aggregated = new Dictionary<long, MatchStatisticsResponse>();
         foreach (var stat in stats)
@@ -166,14 +166,14 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         return aggregated.Values.ToList();
     }
 
-    public async Task<List<TournamentStandingResponse>> GetTournamentStandingsAsync(long tournamentId)
+    public async Task<List<MatchDayStandingResponse>> GetMatchDayStandingsAsync(long matchDayId)
     {
         var matches = await db.Matches
-            .Where(m => m.TournamentId == tournamentId && m.MatchStatus == MatchStatus.COMPLETED)
+            .Where(m => m.MatchDayId == matchDayId && m.MatchStatus == MatchStatus.COMPLETED)
             .ToListAsync();
-        var teams = await db.Teams.Where(t => t.TournamentId == tournamentId).ToListAsync();
+        var teams = await db.Teams.Where(t => t.MatchDayId == matchDayId).ToListAsync();
 
-        var standings = teams.ToDictionary(t => t.Id, t => new TournamentStandingResponse
+        var standings = teams.ToDictionary(t => t.Id, t => new MatchDayStandingResponse
         {
             TeamId = t.Id,
             TeamName = t.TeamName,
@@ -228,7 +228,7 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
     public async Task AggregateMatchStatisticsAsync(long matchId)
     {
         var match = await db.Matches.FirstOrDefaultAsync(m => m.Id == matchId)
-            ?? throw new TournamentServiceException("Match not found", HttpStatusCode.NotFound);
+            ?? throw new MatchDayServiceException("Match not found", HttpStatusCode.NotFound);
 
         var matchEvents = await db.MatchEvents.Where(e => e.MatchId == matchId).ToListAsync();
         var playerStats = new Dictionary<long, MatchStatistics>();
@@ -311,13 +311,13 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         await db.SaveChangesAsync();
     }
 
-    public async Task<long> GetTeamTotalGoalsInTournamentAsync(long tournamentId, long teamId) =>
-        await db.MatchStatistics.Where(s => s.Match.TournamentId == tournamentId && s.TeamId == teamId)
+    public async Task<long> GetTeamTotalGoalsInMatchDayAsync(long matchDayId, long teamId) =>
+        await db.MatchStatistics.Where(s => s.Match.MatchDayId == matchDayId && s.TeamId == teamId)
             .SumAsync(s => (long)s.GoalsScored);
 
-    public async Task<int> GetPlayerTotalDisciplinaryCardsInTournamentAsync(long tournamentId, long playerId)
+    public async Task<int> GetPlayerTotalDisciplinaryCardsInMatchDayAsync(long matchDayId, long playerId)
     {
-        var query = db.MatchStatistics.Where(s => s.Match.TournamentId == tournamentId && s.PlayerId == playerId);
+        var query = db.MatchStatistics.Where(s => s.Match.MatchDayId == matchDayId && s.PlayerId == playerId);
         var redCards = await query.SumAsync(s => (int?)s.RedCards) ?? 0;
         var yellowCards = await query.SumAsync(s => (int?)s.YellowCards) ?? 0;
         return redCards + yellowCards;
@@ -357,7 +357,7 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         {
             MatchId = match.Id,
             MatchDate = match.MatchDate,
-            TournamentName = match.Tournament?.Name,
+            MatchDayName = match.MatchDay?.Name,
             TeamId = playerTeam.Id,
             TeamName = playerTeam.TeamName,
             OpponentTeamName = opponent.TeamName,

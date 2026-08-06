@@ -7,9 +7,9 @@ namespace BofcBackend.Api.Features.Statistics;
 
 /// <summary>
 /// Port of service/PlayerStatisticsServiceImpl.java. The two backing JPQL queries in Java
-/// (MatchEventRepository.findAggregatedPlayerStatisticsFromEvents /findTopScorersByTournament)
+/// (MatchEventRepository.findAggregatedPlayerStatisticsFromEvents /findTopScorersByMatchDay)
 /// use a LEFT JOIN with a non-equality ON clause (player OR relatedPlayer, further ANDed with
-/// an optional tournament filter) plus a correlated COUNT(DISTINCT) subquery — that shape has
+/// an optional MatchDay filter) plus a correlated COUNT(DISTINCT) subquery — that shape has
 /// no direct LINQ equivalent (EF Core LEFT JOINs key off equality). Restructured here as one
 /// independent correlated subquery per metric instead of a single combined join+GROUP BY;
 /// this is semantically identical (each metric already summed a mutually-exclusive per-row
@@ -32,28 +32,28 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
 
     public async Task<List<PlayerStatisticsResponse>> GetPlayerStatisticsAsync(PlayerStatisticsFilterRequest filter)
     {
-        var tournamentId = filter.TournamentId;
+        var matchDayId = filter.MatchDayId;
 
-        // Normalize both scoping modes (single tournament / season-cumulative Match Days) into
+        // Normalize both scoping modes (single MatchDay / season-cumulative Match Days) into
         // one nullable Id list: null = no restriction, non-null = must be one of these. A local
         // C# method wouldn't translate into SQL here, so this "resolve once, then only ever use
         // captured-variable null-checks + List.Contains" shape is what keeps every query below
         // translatable by EF Core.
         List<long>? scopeIds = null;
-        if (tournamentId != null)
+        if (matchDayId != null)
         {
-            scopeIds = [tournamentId.Value];
+            scopeIds = [matchDayId.Value];
         }
         else if (filter.WeeklyMatchDaysOnly)
         {
-            scopeIds = await db.Tournaments.Where(t => t.IsWeeklyMatchDay).Select(t => t.Id).ToListAsync();
+            scopeIds = await db.MatchDays.Where(t => t.IsWeeklyMatchDay).Select(t => t.Id).ToListAsync();
         }
 
         var playerQuery = db.Players.AsQueryable();
         if (scopeIds != null)
         {
             playerQuery = playerQuery.Where(p =>
-                db.TeamPlayers.Any(tp => tp.PlayerId == p.Id && scopeIds.Contains(tp.Team.TournamentId)));
+                db.TeamPlayers.Any(tp => tp.PlayerId == p.Id && scopeIds.Contains(tp.Team.MatchDayId)));
         }
 
         var aggregated = await playerQuery.Select(p => new Aggregate
@@ -62,17 +62,17 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
             PlayerName = p.Name,
             Position = p.Position,
             GoalsScored = db.MatchEvents.Count(me => me.EventType == MatchEventType.GOAL && me.PlayerId == p.Id
-                && (scopeIds == null || scopeIds.Contains(me.Match.TournamentId))),
+                && (scopeIds == null || scopeIds.Contains(me.Match.MatchDayId))),
             Assists = db.MatchEvents.Count(me => me.EventType == MatchEventType.GOAL && me.RelatedPlayerId == p.Id
-                && (scopeIds == null || scopeIds.Contains(me.Match.TournamentId))),
+                && (scopeIds == null || scopeIds.Contains(me.Match.MatchDayId))),
             MatchesPlayed = db.Matches
-                .Where(m => m.MatchStatus == MatchStatus.COMPLETED && (scopeIds == null || scopeIds.Contains(m.TournamentId))
+                .Where(m => m.MatchStatus == MatchStatus.COMPLETED && (scopeIds == null || scopeIds.Contains(m.MatchDayId))
                     && db.TeamPlayers.Any(tp2 => tp2.PlayerId == p.Id && (tp2.TeamId == m.HomeTeamId || tp2.TeamId == m.AwayTeamId)))
                 .Select(m => m.Id).Distinct().Count(),
             YellowCards = db.MatchEvents.Count(me => me.EventType == MatchEventType.YELLOW_CARD && me.PlayerId == p.Id
-                && (scopeIds == null || scopeIds.Contains(me.Match.TournamentId))),
+                && (scopeIds == null || scopeIds.Contains(me.Match.MatchDayId))),
             RedCards = db.MatchEvents.Count(me => me.EventType == MatchEventType.RED_CARD && me.PlayerId == p.Id
-                && (scopeIds == null || scopeIds.Contains(me.Match.TournamentId))),
+                && (scopeIds == null || scopeIds.Contains(me.Match.MatchDayId))),
         }).ToListAsync();
 
         if (filter.Position != null)
@@ -85,11 +85,11 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
         return ApplyPagination(responses, filter.Offset, filter.Limit);
     }
 
-    public async Task<List<TournamentTopScorerResponse>> GetTopScorersByTournamentAsync(long tournamentId, int limit)
+    public async Task<List<MatchDayTopScorerResponse>> GetTopScorersByMatchDayAsync(long matchDayId, int limit)
     {
         var rows = await db.TeamPlayers
-            .Where(tp => tp.Team.TournamentId == tournamentId)
-            .Select(tp => new TournamentTopScorerResponse
+            .Where(tp => tp.Team.MatchDayId == matchDayId)
+            .Select(tp => new MatchDayTopScorerResponse
             {
                 PlayerId = tp.PlayerId,
                 PlayerName = tp.Player.Name,
@@ -97,16 +97,16 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
                 TeamName = tp.Team.TeamName,
                 Position = tp.PlayingPosition.ToString(),
                 GoalsScored = db.MatchEvents.Count(me => me.EventType == MatchEventType.GOAL
-                    && me.PlayerId == tp.PlayerId && me.Match.TournamentId == tournamentId),
+                    && me.PlayerId == tp.PlayerId && me.Match.MatchDayId == matchDayId),
                 Assists = db.MatchEvents.Count(me => me.EventType == MatchEventType.GOAL
-                    && me.RelatedPlayerId == tp.PlayerId && me.Match.TournamentId == tournamentId),
-                // Team's total completed matches in the tournament — not scoped to matches the
+                    && me.RelatedPlayerId == tp.PlayerId && me.Match.MatchDayId == matchDayId),
+                // Team's total completed matches in the MatchDay — not scoped to matches the
                 // player personally appeared in. This mirrors a quirk already present in the
                 // Java query (matchesPlayed here is team-wide, unlike the per-player subquery
                 // used in the other aggregation method above); not this port's place to fix it.
                 MatchesPlayed = db.Matches
                     .Where(m => (m.HomeTeamId == tp.TeamId || m.AwayTeamId == tp.TeamId)
-                        && m.MatchStatus == MatchStatus.COMPLETED && m.TournamentId == tournamentId)
+                        && m.MatchStatus == MatchStatus.COMPLETED && m.MatchDayId == matchDayId)
                     .Select(m => m.Id).Distinct().Count(),
             })
             .OrderByDescending(r => r.GoalsScored)

@@ -43,8 +43,8 @@ const money = (v?: number) => (v != null ? `৳${v.toLocaleString()}` : "—");
 
 const AuctionAdminApprovalPage: React.FC = () => {
   const tones = useStatTones();
-  const { tournamentId } = useParams<{ tournamentId: string }>();
-  const tid = Number(tournamentId);
+  const { matchDayId } = useParams<{ matchDayId: string }>();
+  const tid = Number(matchDayId);
 
   const [tab, setTab] = useState<string>("ALL");
   const [rowStates, setRowStates] = useState<Record<number, RowState>>({});
@@ -52,7 +52,7 @@ const AuctionAdminApprovalPage: React.FC = () => {
   const [rejectReason, setRejectReason] = useState("");
 
   const statusParam = tab === "ALL" ? undefined : tab;
-  const { data: registrations = [], isLoading } = useGetAuctionRegistrationsQuery({ tournamentId: tid, status: statusParam });
+  const { data: registrations = [], isLoading } = useGetAuctionRegistrationsQuery({ matchDayId: tid, status: statusParam });
 
   const [approve, { isLoading: approving }] = useApproveRegistrationMutation();
   const [reject, { isLoading: rejecting }] = useRejectRegistrationMutation();
@@ -85,7 +85,7 @@ const AuctionAdminApprovalPage: React.FC = () => {
   const handleAddToPool = async (reg: AuctionRegistrationResponse) => {
     const state = getRowState(reg.id);
     try {
-      await addToPool({ tournamentId: tid, registrationId: reg.id, body: { category: state.category, basePrice: state.basePrice } }).unwrap();
+      await addToPool({ matchDayId: tid, registrationId: reg.id, body: { category: state.category, basePrice: state.basePrice } }).unwrap();
       toast.success(`${reg.name} added to pool!`);
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to add to pool");

@@ -7,7 +7,7 @@ import "./App.css";
 import "./styles/toastStyles.css";
 import ContentComponent from "./components/Content/ContentComponent";
 import DefaultLayout from "./components/layout/DefaultLayout";
-import TournamentViewerPage from "./components/TournamentViewer/TournamentViewerPage";
+import MatchDayViewerPage from "./components/MatchDayViewer/MatchDayViewerPage";
 import { useAuthHook } from "./hooks/useAuthHook";
 import { checkTockenValidity } from "./utils/utils";
 import LoginPage from "./components/authPages/LoginPage";
@@ -124,7 +124,7 @@ function App() {
             >
                 <div className={isDarkMode ? "dark-mode" : "light-mode"} style={{ minHeight: "100vh" }}>
                     <Routes>
-                        <Route path="auction/register/:tournamentId" element={<AuctionRegistrationPage />} />
+                        <Route path="auction/register/:matchDayId" element={<AuctionRegistrationPage />} />
                     </Routes>
                 </div>
             </ConfigProvider>
@@ -172,9 +172,9 @@ function App() {
                     <div style={{ flex: 1 }}>
                         <Routes>
                             <Route path="/login" element={<LoginPage />} />
-                            <Route path="/tournament-viewer" element={<TournamentViewerPage hasHeader={false} />} />
-                            <Route path="/tournament-viewer/:tournamentId" element={<TournamentViewerPage hasHeader={false} />} />
-                            <Route path="/tournament-viewer/:tournamentId/:tab" element={<TournamentViewerPage hasHeader={false} />} />
+                            <Route path="/match-day-viewer" element={<MatchDayViewerPage hasHeader={false} />} />
+                            <Route path="/match-day-viewer/:matchDayId" element={<MatchDayViewerPage hasHeader={false} />} />
+                            <Route path="/match-day-viewer/:matchDayId/:tab" element={<MatchDayViewerPage hasHeader={false} />} />
                             <Route path="*" element={<Navigate to="/login" replace />} />
                         </Routes>
                     </div>

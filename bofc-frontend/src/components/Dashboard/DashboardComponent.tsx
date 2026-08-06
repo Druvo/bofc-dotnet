@@ -4,7 +4,7 @@ import { useGetAccountSummaryQuery } from "../../state/features/account/accountS
 
 // Import components
 import PlayerCollectionMetrics from "./PlayerCollectionMetricsTable";
-import LatestTournamentCard from "./LatestTournamentCard";
+import LatestMatchDayCard from "./LatestMatchDayCard";
 import LiveAuctionStatusCard from "./widgets/LiveAuctionStatusCard";
 import UpcomingDuesWidget from "./widgets/UpcomingDuesWidget";
 import MatchCalendarWidget from "./widgets/MatchCalendarWidget";
@@ -53,9 +53,9 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           renders null. */}
       <LiveAuctionStatusCard />
 
-      {/* Latest Tournament Section */}
+      {/* Latest MatchDay Section */}
       <div className="mb-10">
-        <LatestTournamentCard />
+        <LatestMatchDayCard />
       </div>
 
       {/* Payments due + your own contributions + Match calendar */}

@@ -19,54 +19,54 @@ public class FixtureGenerationService(
     ICurrentUserService currentUserService)
     : IFixtureGenerationService
 {
-    public async Task<List<Match>> GenerateFixturesAsync(long tournamentId, FixtureGenerationRequest request)
+    public async Task<List<Match>> GenerateFixturesAsync(long matchDayId, FixtureGenerationRequest request)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new TournamentServiceException(RestErrorMessageDetail.TournamentIsNotFound, HttpStatusCode.NotFound);
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
 
-        if (await db.Matches.AnyAsync(m => m.TournamentId == tournamentId && m.MatchStatus == MatchStatus.SCHEDULED))
+        if (await db.Matches.AnyAsync(m => m.MatchDayId == matchDayId && m.MatchStatus == MatchStatus.SCHEDULED))
         {
-            throw new TournamentServiceException(
+            throw new MatchDayServiceException(
                 $"{RestErrorMessageDetail.FixturesAlreadyExist}. Use the clear fixtures endpoint first or contact administrator.",
                 HttpStatusCode.Conflict);
         }
 
-        var allTeams = await db.Teams.Include(t => t.TeamPlayers).Where(t => t.TournamentId == tournamentId).ToListAsync();
+        var allTeams = await db.Teams.Include(t => t.TeamPlayers).Where(t => t.MatchDayId == matchDayId).ToListAsync();
 
         if (allTeams.Count == 0)
         {
-            throw new TournamentServiceException("No teams found in tournament", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("No teams found in MatchDay", HttpStatusCode.BadRequest);
         }
 
         if (allTeams.Count < 2)
         {
-            throw new TournamentServiceException($"{RestErrorMessageDetail.InsufficientTeams}. Minimum 2 teams required.", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException($"{RestErrorMessageDetail.InsufficientTeams}. Minimum 2 teams required.", HttpStatusCode.BadRequest);
         }
 
         if (request.TeamIds == null || request.TeamIds.Count == 0)
         {
-            throw new TournamentServiceException("Team IDs are required for fixture generation", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("Team IDs are required for fixture generation", HttpStatusCode.BadRequest);
         }
 
         if (request.MatchDates == null || request.MatchDates.Count == 0)
         {
-            throw new TournamentServiceException("At least one match date is required", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("At least one match date is required", HttpStatusCode.BadRequest);
         }
 
         var venue = request.VenueId != null
             ? await db.Venues.FirstOrDefaultAsync(v => v.Id == request.VenueId)
-            : await db.Venues.FirstOrDefaultAsync(v => v.Id == tournament.VenueId);
+            : await db.Venues.FirstOrDefaultAsync(v => v.Id == matchDay.VenueId);
 
         var selectedTeams = allTeams.Where(t => request.TeamIds.Contains(t.Id)).ToList();
 
         if (selectedTeams.Count == 0)
         {
-            throw new TournamentServiceException("None of the provided team IDs exist in tournament", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("None of the provided team IDs exist in MatchDay", HttpStatusCode.BadRequest);
         }
 
         if (selectedTeams.Count < 2)
         {
-            throw new TournamentServiceException($"{RestErrorMessageDetail.InsufficientTeams}. At least 2 teams must be selected.", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException($"{RestErrorMessageDetail.InsufficientTeams}. At least 2 teams must be selected.", HttpStatusCode.BadRequest);
         }
 
         var timeGapMinutes = request.TimeGapMinutes ?? 120;
@@ -109,8 +109,8 @@ public class FixtureGenerationService(
 
                 matches.Add(new Match
                 {
-                    TournamentId = tournament.Id,
-                    Tournament = tournament,
+                    MatchDayId = matchDay.Id,
+                    MatchDay = matchDay,
                     HomeTeamId = selectedTeams[i].Id,
                     HomeTeam = selectedTeams[i],
                     AwayTeamId = selectedTeams[j].Id,
@@ -132,38 +132,38 @@ public class FixtureGenerationService(
 
         db.Matches.AddRange(matches);
         await db.SaveChangesAsync();
-        liveMatchUpdatePublisher.PublishMatchUpdate(tournamentId, null, "FIXTURES_GENERATED");
+        liveMatchUpdatePublisher.PublishMatchUpdate(matchDayId, null, "FIXTURES_GENERATED");
         return matches;
     }
 
-    public async Task ClearFixturesAsync(long tournamentId)
+    public async Task ClearFixturesAsync(long matchDayId)
     {
         var scheduledMatches = await db.Matches
-            .Where(m => m.TournamentId == tournamentId && m.MatchStatus == MatchStatus.SCHEDULED)
+            .Where(m => m.MatchDayId == matchDayId && m.MatchStatus == MatchStatus.SCHEDULED)
             .ToListAsync();
 
         if (scheduledMatches.Count == 0)
         {
-            throw new TournamentServiceException(RestErrorMessageDetail.NoScheduledFixtures, HttpStatusCode.NotFound);
+            throw new MatchDayServiceException(RestErrorMessageDetail.NoScheduledFixtures, HttpStatusCode.NotFound);
         }
 
         db.Matches.RemoveRange(scheduledMatches);
         await db.SaveChangesAsync();
-        liveMatchUpdatePublisher.PublishMatchUpdate(tournamentId, null, "FIXTURES_CLEARED");
+        liveMatchUpdatePublisher.PublishMatchUpdate(matchDayId, null, "FIXTURES_CLEARED");
     }
 
     public async Task<Match> UpdateMatchFixtureAsync(long matchId, MatchFixtureUpdateRequest request)
     {
-        var match = await db.Matches.Include(m => m.Tournament).Include(m => m.Venue)
+        var match = await db.Matches.Include(m => m.MatchDay).Include(m => m.Venue)
             .Include(m => m.HomeTeam).Include(m => m.AwayTeam).Include(m => m.Round)
             .Include(m => m.Group).Include(m => m.MatchEvents)
             .FirstOrDefaultAsync(m => m.Id == matchId)
-            ?? throw new TournamentServiceException(RestErrorMessageDetail.MatchIsNotFound, HttpStatusCode.NotFound);
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchIsNotFound, HttpStatusCode.NotFound);
 
         var isSuperAdmin = currentUserService.IsInRole(PlayerRoleNames.SuperAdmin);
         if (!isSuperAdmin && match.MatchStatus != MatchStatus.SCHEDULED)
         {
-            throw new TournamentServiceException("Cannot update match fixture details once match has started", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("Cannot update match fixture details once match has started", HttpStatusCode.BadRequest);
         }
 
         if (request.MatchDate != null)
@@ -174,7 +174,7 @@ public class FixtureGenerationService(
         if (request.VenueId != null)
         {
             var venue = await db.Venues.FirstOrDefaultAsync(v => v.Id == request.VenueId)
-                ?? throw new TournamentServiceException(RestErrorMessageDetail.VenueIsNotFound, HttpStatusCode.NotFound);
+                ?? throw new MatchDayServiceException(RestErrorMessageDetail.VenueIsNotFound, HttpStatusCode.NotFound);
             match.VenueId = venue.Id;
             match.Venue = venue;
         }
@@ -190,7 +190,7 @@ public class FixtureGenerationService(
         }
 
         await db.SaveChangesAsync();
-        liveMatchUpdatePublisher.PublishMatchUpdate(match.TournamentId, match.Id, "FIXTURE_UPDATED");
+        liveMatchUpdatePublisher.PublishMatchUpdate(match.MatchDayId, match.Id, "FIXTURE_UPDATED");
         return match;
     }
 }

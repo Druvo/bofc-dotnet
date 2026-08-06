@@ -47,11 +47,11 @@ public class AuctionTimerBackgroundService(IServiceScopeFactory scopeFactory, IL
             {
                 try
                 {
-                    await sessionService.NotifyTimerExpiredAsync(session.TournamentId);
+                    await sessionService.NotifyTimerExpiredAsync(session.MatchDayId);
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, "Failed to notify timer expiry for tournament {TournamentId}", session.TournamentId);
+                    logger.LogError(e, "Failed to notify timer expiry for MatchDay {MatchDayId}", session.MatchDayId);
                 }
             }
         }

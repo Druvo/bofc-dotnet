@@ -18,29 +18,29 @@ public class AuctionRegistrationService(
 {
     public async Task<AuctionRegistrationResponse> RegisterAsync(AuctionRegistrationRequest request)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == request.TournamentId)
-            ?? throw new ResourceNotFoundException($"Tournament not found: {request.TournamentId}");
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == request.MatchDayId)
+            ?? throw new ResourceNotFoundException($"MatchDay not found: {request.MatchDayId}");
 
-        if (!tournament.AuctionMode)
+        if (!matchDay.AuctionMode)
         {
-            throw new InvalidOperationException("Tournament is not in auction mode");
+            throw new InvalidOperationException("MatchDay is not in auction mode");
         }
 
-        await EnsureRegistrationOpenAsync(request.TournamentId!.Value);
+        await EnsureRegistrationOpenAsync(request.MatchDayId!.Value);
 
-        if (await db.AuctionPlayerRegistrations.AnyAsync(r => r.Email == request.Email && r.TournamentId == request.TournamentId))
+        if (await db.AuctionPlayerRegistrations.AnyAsync(r => r.Email == request.Email && r.MatchDayId == request.MatchDayId))
         {
-            throw new InvalidOperationException("Already registered with this email for this tournament");
+            throw new InvalidOperationException("Already registered with this email for this MatchDay");
         }
 
-        if (await db.AuctionPlayerRegistrations.AnyAsync(r => r.EmployeeId == request.EmployeeId && r.TournamentId == request.TournamentId))
+        if (await db.AuctionPlayerRegistrations.AnyAsync(r => r.EmployeeId == request.EmployeeId && r.MatchDayId == request.MatchDayId))
         {
-            throw new InvalidOperationException("Already registered with this employee ID for this tournament");
+            throw new InvalidOperationException("Already registered with this employee ID for this MatchDay");
         }
 
         var registration = new AuctionPlayerRegistration
         {
-            TournamentId = tournament.Id,
+            MatchDayId = matchDay.Id,
             Name = request.Name!,
             Email = request.Email!,
             EmployeeId = request.EmployeeId!,
@@ -62,30 +62,30 @@ public class AuctionRegistrationService(
         return await MapToResponseByIdAsync(registration.Id);
     }
 
-    public async Task<AuctionRegistrationResponse> QuickRegisterExistingPlayerAsync(long tournamentId)
+    public async Task<AuctionRegistrationResponse> QuickRegisterExistingPlayerAsync(long matchDayId)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new ResourceNotFoundException($"Tournament not found: {tournamentId}");
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new ResourceNotFoundException($"MatchDay not found: {matchDayId}");
 
-        if (!tournament.AuctionMode)
+        if (!matchDay.AuctionMode)
         {
-            throw new InvalidOperationException("Tournament is not in auction mode");
+            throw new InvalidOperationException("MatchDay is not in auction mode");
         }
 
-        await EnsureRegistrationOpenAsync(tournamentId);
+        await EnsureRegistrationOpenAsync(matchDayId);
 
         var currentUserId = currentUserService.GetPlayerId();
         var player = await db.Players.FirstOrDefaultAsync(p => p.Id == currentUserId)
             ?? throw new ResourceNotFoundException("Player not found");
 
-        if (await db.AuctionPlayerRegistrations.AnyAsync(r => r.Email == player.Email && r.TournamentId == tournamentId))
+        if (await db.AuctionPlayerRegistrations.AnyAsync(r => r.Email == player.Email && r.MatchDayId == matchDayId))
         {
             throw new InvalidOperationException("You are already registered for this auction");
         }
 
         var registration = new AuctionPlayerRegistration
         {
-            TournamentId = tournament.Id,
+            MatchDayId = matchDay.Id,
             Name = player.Name,
             Email = player.Email,
             EmployeeId = player.EmployeeId,
@@ -104,27 +104,27 @@ public class AuctionRegistrationService(
         return await MapToResponseByIdAsync(registration.Id);
     }
 
-    private async Task EnsureRegistrationOpenAsync(long tournamentId)
+    private async Task EnsureRegistrationOpenAsync(long matchDayId)
     {
-        var session = await db.AuctionSessions.FirstOrDefaultAsync(s => s.TournamentId == tournamentId);
+        var session = await db.AuctionSessions.FirstOrDefaultAsync(s => s.MatchDayId == matchDayId);
         if (session?.Status == AuctionSessionStatus.COMPLETED)
         {
-            throw new InvalidOperationException("Auction registration is closed for this tournament");
+            throw new InvalidOperationException("Auction registration is closed for this MatchDay");
         }
     }
 
-    public async Task<List<AuctionRegistrationResponse>> GetRegistrationsAsync(long? tournamentId, string? status)
+    public async Task<List<AuctionRegistrationResponse>> GetRegistrationsAsync(long? matchDayId, string? status)
     {
         var query = LoadQuery();
 
-        if (tournamentId != null && status != null)
+        if (matchDayId != null && status != null)
         {
             var approvalStatus = Enum.Parse<ApprovalStatus>(status);
-            query = query.Where(r => r.TournamentId == tournamentId && r.ApprovalStatus == approvalStatus);
+            query = query.Where(r => r.MatchDayId == matchDayId && r.ApprovalStatus == approvalStatus);
         }
-        else if (tournamentId != null)
+        else if (matchDayId != null)
         {
-            query = query.Where(r => r.TournamentId == tournamentId);
+            query = query.Where(r => r.MatchDayId == matchDayId);
         }
         else if (status != null)
         {
@@ -219,7 +219,7 @@ public class AuctionRegistrationService(
             .FirstOrDefaultAsync(r => r.Id == id)
             ?? throw new ResourceNotFoundException($"Registration not found: {id}");
 
-        var tournamentId = registration.TournamentId;
+        var matchDayId = registration.MatchDayId;
 
         if (registration.ApprovalStatus == ApprovalStatus.REJECTED)
         {
@@ -251,7 +251,7 @@ public class AuctionRegistrationService(
         var player = registration.CreatedPlayer
             ?? throw new InvalidOperationException("No player record found for this registration");
 
-        if (!await db.AuctionPlayers.AnyAsync(p => p.TournamentId == tournamentId && p.PlayerId == player.Id))
+        if (!await db.AuctionPlayers.AnyAsync(p => p.MatchDayId == matchDayId && p.PlayerId == player.Id))
         {
             // Java: playerType = registration.getApprovedBy() != null ? OUTSIDE : EXISTING — replicated
             // as-is even though this reads oddly (ApprovedBy is set on nearly every approval path).
@@ -259,7 +259,7 @@ public class AuctionRegistrationService(
 
             db.AuctionPlayers.Add(new AuctionPlayer
             {
-                TournamentId = tournamentId,
+                MatchDayId = matchDayId,
                 PlayerId = player.Id,
                 PlayerType = playerType,
                 Category = category,
@@ -309,7 +309,7 @@ public class AuctionRegistrationService(
     }
 
     private IQueryable<AuctionPlayerRegistration> LoadQuery() => db.AuctionPlayerRegistrations
-        .Include(r => r.Tournament)
+        .Include(r => r.MatchDay)
         .Include(r => r.ApprovedBy)
         .Include(r => r.CreatedPlayer);
 
@@ -320,13 +320,13 @@ public class AuctionRegistrationService(
     {
         var createdPlayerId = reg.CreatedPlayer?.Id;
         var inPool = createdPlayerId != null && await db.AuctionPlayers.AnyAsync(
-            p => p.TournamentId == reg.TournamentId && p.PlayerId == createdPlayerId && p.Status != AuctionPlayerStatus.WITHDRAWN);
+            p => p.MatchDayId == reg.MatchDayId && p.PlayerId == createdPlayerId && p.Status != AuctionPlayerStatus.WITHDRAWN);
 
         return new AuctionRegistrationResponse
         {
             Id = reg.Id,
-            TournamentId = reg.TournamentId,
-            TournamentName = reg.Tournament.Name,
+            MatchDayId = reg.MatchDayId,
+            MatchDayName = reg.MatchDay.Name,
             Name = reg.Name,
             Email = reg.Email,
             EmployeeId = reg.EmployeeId,

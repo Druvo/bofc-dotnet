@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { TournamentRoundResponse } from "./manualFixtureTypes";
+import { MatchDayRoundResponse } from "./manualFixtureTypes";
 
 // Types for UI state
 export type SelectedNode = {
@@ -26,7 +26,7 @@ interface ManualFixturesUIState {
   isEditModalVisible: boolean;
 
   // Round completion
-  roundToComplete: TournamentRoundResponse | null;
+  roundToComplete: MatchDayRoundResponse | null;
 
   // Editing fixture
   editingFixture: any | null;
@@ -132,7 +132,7 @@ const manualFixturesUISlice = createSlice({
     },
 
     // Round completion
-    setRoundToComplete: (state, action: PayloadAction<TournamentRoundResponse | null>) => {
+    setRoundToComplete: (state, action: PayloadAction<MatchDayRoundResponse | null>) => {
       state.roundToComplete = action.payload;
     },
 

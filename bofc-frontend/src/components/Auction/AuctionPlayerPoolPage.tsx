@@ -57,8 +57,8 @@ interface ExistingForm {
 }
 
 const AuctionPlayerPoolPage: React.FC = () => {
-  const { tournamentId } = useParams<{ tournamentId: string }>();
-  const tid = Number(tournamentId);
+  const { matchDayId } = useParams<{ matchDayId: string }>();
+  const tid = Number(matchDayId);
 
   // Track category/price state per registration
   const [playerStates, setPlayerStates] = useState<Record<number, PlayerAddState>>({});
@@ -73,7 +73,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
   const [existingErrors, setExistingErrors] = useState<Record<string, string>>({});
 
   const { data: players, isLoading } = useGetAuctionPlayersQuery(tid);
-  const { data: registrations } = useGetAuctionRegistrationsQuery({ tournamentId: tid, status: "APPROVED" });
+  const { data: registrations } = useGetAuctionRegistrationsQuery({ matchDayId: tid, status: "APPROVED" });
   const { data: playersData } = useGetPlayersQuery();
   const [addFromReg, { isLoading: addingReg }] = useAddFromRegistrationMutation();
   const [addExisting, { isLoading: addingExisting }] = useAddExistingPlayerMutation();
@@ -110,7 +110,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
     const state = getState(reg.id);
     try {
       await addFromReg({
-        tournamentId: tid,
+        matchDayId: tid,
         registrationId: reg.id,
         body: { category: state.category, basePrice: state.basePrice },
       }).unwrap();
@@ -126,7 +126,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
       const state = getState(reg.id);
       try {
         await addFromReg({
-          tournamentId: tid,
+          matchDayId: tid,
           registrationId: reg.id,
           body: { category: state.category, basePrice: state.basePrice },
         }).unwrap();
@@ -140,7 +140,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
 
   const handleRemove = async (auctionPlayerId: number) => {
     try {
-      await removePlayer({ tournamentId: tid, auctionPlayerId }).unwrap();
+      await removePlayer({ matchDayId: tid, auctionPlayerId }).unwrap();
       toast.success("Player withdrawn from pool");
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to remove");
@@ -151,7 +151,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
 
   const handleRestore = async (auctionPlayerId: number) => {
     try {
-      await restorePlayer({ tournamentId: tid, auctionPlayerId }).unwrap();
+      await restorePlayer({ matchDayId: tid, auctionPlayerId }).unwrap();
       toast.success("Player restored to pool");
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to restore");
@@ -180,7 +180,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
 
     try {
       await addExisting({
-        tournamentId: tid,
+        matchDayId: tid,
         body: { playerId: existingForm.playerId as number, category: existingForm.category, basePrice: existingForm.basePrice },
       }).unwrap();
       toast.success("Player added to the pool!");

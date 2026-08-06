@@ -14,7 +14,7 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
         builder.ToTable("match");
         builder.HasKey(m => m.Id);
         builder.Property(m => m.Id).HasColumnName("id").ValueGeneratedOnAdd();
-        builder.Property(m => m.TournamentId).HasColumnName("tournament_id").IsRequired();
+        builder.Property(m => m.MatchDayId).HasColumnName("match_day_id").IsRequired();
         builder.Property(m => m.RoundId).HasColumnName("round_id");
         builder.Property(m => m.GroupId).HasColumnName("group_id");
         builder.Property(m => m.HomeTeamId).HasColumnName("home_team_id").IsRequired();
@@ -43,7 +43,7 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
         builder.Property(m => m.LastModifiedBy).HasColumnName("last_modified_by");
         builder.Property(m => m.UpdatedDate).HasColumnName("updated_date");
 
-        builder.HasOne(m => m.Tournament).WithMany().HasForeignKey(m => m.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(m => m.MatchDay).WithMany().HasForeignKey(m => m.MatchDayId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(m => m.HomeTeam).WithMany().HasForeignKey(m => m.HomeTeamId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(m => m.AwayTeam).WithMany().HasForeignKey(m => m.AwayTeamId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(m => m.Venue).WithMany().HasForeignKey(m => m.VenueId).OnDelete(DeleteBehavior.Restrict);

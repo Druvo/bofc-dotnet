@@ -7,8 +7,8 @@ public class Team : AuditableEntity
     public string TeamName { get; set; } = string.Empty;
     public string? LogoKey { get; set; }
 
-    public long TournamentId { get; set; }
-    public Tournament Tournament { get; set; } = null!;
+    public long MatchDayId { get; set; }
+    public MatchDay MatchDay { get; set; } = null!;
 
     public ICollection<TeamPlayer> TeamPlayers { get; set; } = new List<TeamPlayer>();
 }

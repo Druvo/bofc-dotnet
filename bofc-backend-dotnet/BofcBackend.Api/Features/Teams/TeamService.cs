@@ -19,18 +19,18 @@ public class TeamService(
 {
     public async Task<TeamResponse> CreateOrUpdateTeamAsync(TeamRequest request)
     {
-        var tournament = await GetTournamentOrThrowAsync(request.TournamentId!.Value);
+        var matchDay = await GetMatchDayOrThrowAsync(request.MatchDayId!.Value);
 
         string? oldLogoKeyToDelete = null;
         Team team;
         if (request.Id == null)
         {
-            team = new Team { TeamName = request.TeamName!, LogoKey = request.LogoKey, TournamentId = tournament.Id, Tournament = tournament };
+            team = new Team { TeamName = request.TeamName!, LogoKey = request.LogoKey, MatchDayId = matchDay.Id, MatchDay = matchDay };
             db.Teams.Add(team);
         }
         else
         {
-            (team, oldLogoKeyToDelete) = await UpdateExistingTeamAsync(request, tournament);
+            (team, oldLogoKeyToDelete) = await UpdateExistingTeamAsync(request, matchDay);
         }
 
         await db.SaveChangesAsync();
@@ -42,10 +42,10 @@ public class TeamService(
             await TryAsync(() => teamLogoStorageProvider.DeleteAsync(oldLogoKeyToDelete), "delete replaced team logo");
         }
 
-        return ConvertToTeamResponse(team, tournament.Name);
+        return ConvertToTeamResponse(team, matchDay.Name);
     }
 
-    private async Task<(Team Team, string? OldLogoKeyToDelete)> UpdateExistingTeamAsync(TeamRequest request, Tournament tournament)
+    private async Task<(Team Team, string? OldLogoKeyToDelete)> UpdateExistingTeamAsync(TeamRequest request, MatchDay matchDay)
     {
         var team = await GetTeamOrThrowAsync(request.Id!.Value);
         var previousLogoKey = team.LogoKey;
@@ -56,8 +56,8 @@ public class TeamService(
             team.LogoKey = request.LogoKey;
         }
 
-        team.TournamentId = tournament.Id;
-        team.Tournament = tournament;
+        team.MatchDayId = matchDay.Id;
+        team.MatchDay = matchDay;
 
         var currentLogoKey = team.LogoKey;
         var oldLogoKeyToDelete = !string.IsNullOrWhiteSpace(previousLogoKey)
@@ -72,7 +72,7 @@ public class TeamService(
     public async Task DeleteTeamAsync(long teamId)
     {
         var team = await GetTeamOrThrowAsync(teamId);
-        await ValidateTournamentDateAsync(team.TournamentId);
+        await ValidateMatchDayDateAsync(team.MatchDayId);
 
         var teamMatches = await db.Matches.Where(m => m.HomeTeamId == teamId || m.AwayTeamId == teamId).ToListAsync();
         if (teamMatches.Count > 0)
@@ -127,18 +127,18 @@ public class TeamService(
         var player = await GetPlayerOrThrowAsync(request.PlayerId!.Value);
 
         var teamPlayer = await db.TeamPlayers.FirstOrDefaultAsync(tp => tp.TeamId == request.TeamId && tp.PlayerId == request.PlayerId)
-            ?? throw new TournamentServiceException(RestErrorMessageDetail.PlayerIsNotPartOfThisTeam, HttpStatusCode.NotFound);
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.PlayerIsNotPartOfThisTeam, HttpStatusCode.NotFound);
 
         var previousPosition = teamPlayer.PlayingPosition;
         var newPosition = FootballPositionExtensions.GetPositionOrDefault(request.PlayingPosition);
 
         if (previousPosition == FootballPosition.GOALKEEPER && newPosition != FootballPosition.GOALKEEPER)
         {
-            await RemoveGoalKeeperRoundAsync(player.Id, team.TournamentId);
+            await RemoveGoalKeeperRoundAsync(player.Id, team.MatchDayId);
         }
         else if (previousPosition != FootballPosition.GOALKEEPER && newPosition == FootballPosition.GOALKEEPER)
         {
-            await TrackGoalKeeperRoundAsync(player.Id, team.TournamentId);
+            await TrackGoalKeeperRoundAsync(player.Id, team.MatchDayId);
         }
 
         if (request.IsCaptain == true)
@@ -160,66 +160,66 @@ public class TeamService(
     public async Task RemovePlayerFromTeamAsync(TeamPlayerRemoveRequest request)
     {
         var team = await GetTeamOrThrowAsync(request.TeamId!.Value);
-        await ValidateTournamentDateAsync(team.TournamentId);
+        await ValidateMatchDayDateAsync(team.MatchDayId);
         var player = await GetPlayerOrThrowAsync(request.PlayerId!.Value);
-        await RemoveGoalKeeperRoundAsync(player.Id, team.TournamentId);
+        await RemoveGoalKeeperRoundAsync(player.Id, team.MatchDayId);
 
         var teamPlayer = await db.TeamPlayers.FirstOrDefaultAsync(tp => tp.TeamId == request.TeamId && tp.PlayerId == request.PlayerId)
-            ?? throw new TournamentServiceException(RestErrorMessageDetail.PlayerIsNotPartOfThisTeam, HttpStatusCode.NotFound);
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.PlayerIsNotPartOfThisTeam, HttpStatusCode.NotFound);
 
         db.TeamPlayers.Remove(teamPlayer);
         await db.SaveChangesAsync();
     }
 
-    public async Task<List<TournamentWithTeamsResponse>> GetTournamentsSummaryAsync(long? tournamentId)
+    public async Task<List<MatchDayWithTeamsResponse>> GetMatchDaysSummaryAsync(long? matchDayId)
     {
-        if (tournamentId != null)
+        if (matchDayId != null)
         {
-            return [await GetTournamentWithTeamsAndPlayersAsync(tournamentId.Value)];
+            return [await GetMatchDayWithTeamsAndPlayersAsync(matchDayId.Value)];
         }
 
-        var tournaments = await db.Tournaments.Include(t => t.Venue).ToListAsync();
-        var result = new List<TournamentWithTeamsResponse>();
-        foreach (var tournament in tournaments)
+        var matchDays = await db.MatchDays.Include(t => t.Venue).ToListAsync();
+        var result = new List<MatchDayWithTeamsResponse>();
+        foreach (var matchDay in matchDays)
         {
-            result.Add(await BuildTournamentWithTeamsResponseAsync(tournament));
+            result.Add(await BuildMatchDayWithTeamsResponseAsync(matchDay));
         }
 
         return result;
     }
 
-    private async Task<TournamentWithTeamsResponse> GetTournamentWithTeamsAndPlayersAsync(long tournamentId)
+    private async Task<MatchDayWithTeamsResponse> GetMatchDayWithTeamsAndPlayersAsync(long matchDayId)
     {
-        var tournament = await db.Tournaments.Include(t => t.Venue).FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new TournamentServiceException(RestErrorMessageDetail.TournamentIsNotFound, HttpStatusCode.NotFound);
-        return await BuildTournamentWithTeamsResponseAsync(tournament);
+        var matchDay = await db.MatchDays.Include(t => t.Venue).FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
+        return await BuildMatchDayWithTeamsResponseAsync(matchDay);
     }
 
-    private async Task<TournamentWithTeamsResponse> BuildTournamentWithTeamsResponseAsync(Tournament tournament)
+    private async Task<MatchDayWithTeamsResponse> BuildMatchDayWithTeamsResponseAsync(MatchDay matchDay)
     {
         var teams = await db.Teams
             .Include(t => t.TeamPlayers).ThenInclude(tp => tp.Player)
-            .Where(t => t.TournamentId == tournament.Id)
+            .Where(t => t.MatchDayId == matchDay.Id)
             .ToListAsync();
 
-        return new TournamentWithTeamsResponse
+        return new MatchDayWithTeamsResponse
         {
-            Id = tournament.Id,
-            Name = tournament.Name,
-            Title = tournament.Title,
-            Season = tournament.Season,
-            Description = tournament.Description,
-            Rules = tournament.Rules,
-            TournamentDate = tournament.TournamentDate,
-            VenueName = tournament.Venue.Name,
-            VenueMapLink = tournament.Venue.MapLink,
-            ActiveStatus = tournament.IsActive,
-            IsWeeklyMatchDay = tournament.IsWeeklyMatchDay,
-            Teams = teams.Select(ConvertToTournamentTeamResponse).ToList(),
+            Id = matchDay.Id,
+            Name = matchDay.Name,
+            Title = matchDay.Title,
+            Season = matchDay.Season,
+            Description = matchDay.Description,
+            Rules = matchDay.Rules,
+            MatchDayDate = matchDay.MatchDayDate,
+            VenueName = matchDay.Venue.Name,
+            VenueMapLink = matchDay.Venue.MapLink,
+            ActiveStatus = matchDay.IsActive,
+            IsWeeklyMatchDay = matchDay.IsWeeklyMatchDay,
+            Teams = teams.Select(ConvertToMatchDayTeamResponse).ToList(),
         };
     }
 
-    private TournamentTeamResponse ConvertToTournamentTeamResponse(Team team) => new()
+    private MatchDayTeamResponse ConvertToMatchDayTeamResponse(Team team) => new()
     {
         TeamId = team.Id,
         TeamName = team.TeamName,
@@ -241,15 +241,15 @@ public class TeamService(
         }).ToList(),
     };
 
-    private async Task<bool> IsPlayerAssignedToAnyTeamInTournamentAsync(long tournamentId, long playerId)
+    private async Task<bool> IsPlayerAssignedToAnyTeamInMatchDayAsync(long matchDayId, long playerId)
     {
-        var teamIds = await db.Teams.Where(t => t.TournamentId == tournamentId).Select(t => t.Id).ToListAsync();
+        var teamIds = await db.Teams.Where(t => t.MatchDayId == matchDayId).Select(t => t.Id).ToListAsync();
         return await db.TeamPlayers.AnyAsync(tp => teamIds.Contains(tp.TeamId) && tp.PlayerId == playerId);
     }
 
-    private async Task<Tournament> GetTournamentOrThrowAsync(long tournamentId) =>
-        await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new TournamentServiceException(RestErrorMessageDetail.TournamentIsNotFound, HttpStatusCode.NotFound);
+    private async Task<MatchDay> GetMatchDayOrThrowAsync(long matchDayId) =>
+        await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
 
     private async Task<Team> GetTeamOrThrowAsync(long teamId) =>
         await db.Teams.FirstOrDefaultAsync(t => t.Id == teamId)
@@ -259,28 +259,28 @@ public class TeamService(
         await db.Players.FirstOrDefaultAsync(p => p.Id == playerId)
             ?? throw new PlayerServiceException(RestErrorMessageDetail.PlayerIsNotFound, HttpStatusCode.NotFound);
 
-    private async Task ValidateTournamentDateAsync(long tournamentId)
+    private async Task ValidateMatchDayDateAsync(long matchDayId)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new TournamentServiceException(RestErrorMessageDetail.TournamentIsNotFound, HttpStatusCode.NotFound);
-        if (tournament.TournamentDate < DateTime.Now)
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
+        if (matchDay.MatchDayDate < DateTime.Now)
         {
-            throw new TournamentServiceException(RestErrorMessageDetail.TournamentDateCannotBePastDate, HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayDateCannotBePastDate, HttpStatusCode.BadRequest);
         }
     }
 
     private async Task<TeamPlayer> CreateTeamPlayerAsync(TeamPlayerRequest request, Team team, Player player)
     {
-        await ValidateTournamentDateAsync(team.TournamentId);
+        await ValidateMatchDayDateAsync(team.MatchDayId);
 
-        var isParticipant = await db.TournamentParticipants.AnyAsync(
-            tp => tp.TournamentId == team.TournamentId && tp.PlayerId == player.Id && tp.ParticipationStatus);
+        var isParticipant = await db.MatchDayParticipants.AnyAsync(
+            tp => tp.MatchDayId == team.MatchDayId && tp.PlayerId == player.Id && tp.ParticipationStatus);
         if (!isParticipant)
         {
             throw new PlayerServiceException(RestErrorMessageDetail.PlayerIsNotParticipantYet, HttpStatusCode.BadRequest);
         }
 
-        if (await IsPlayerAssignedToAnyTeamInTournamentAsync(team.TournamentId, player.Id))
+        if (await IsPlayerAssignedToAnyTeamInMatchDayAsync(team.MatchDayId, player.Id))
         {
             throw new TeamServiceException(RestErrorMessageDetail.PlayerAlreadyAddedAnotherTeam, HttpStatusCode.Conflict);
         }
@@ -307,7 +307,7 @@ public class TeamService(
 
         if (position == FootballPosition.GOALKEEPER)
         {
-            await TrackGoalKeeperRoundAsync(player.Id, team.TournamentId);
+            await TrackGoalKeeperRoundAsync(player.Id, team.MatchDayId);
         }
 
         return teamPlayer;
@@ -323,11 +323,11 @@ public class TeamService(
 
         if (previousPosition == FootballPosition.GOALKEEPER && newPosition != FootballPosition.GOALKEEPER)
         {
-            await RemoveGoalKeeperRoundAsync(player.Id, team.TournamentId);
+            await RemoveGoalKeeperRoundAsync(player.Id, team.MatchDayId);
         }
         else if (previousPosition != FootballPosition.GOALKEEPER && newPosition == FootballPosition.GOALKEEPER)
         {
-            await TrackGoalKeeperRoundAsync(player.Id, team.TournamentId);
+            await TrackGoalKeeperRoundAsync(player.Id, team.MatchDayId);
         }
 
         if (request.IsCaptain == true)
@@ -349,14 +349,14 @@ public class TeamService(
         return teamPlayer;
     }
 
-    private TeamResponse ConvertToTeamResponse(Team team, string tournamentName) => new()
+    private TeamResponse ConvertToTeamResponse(Team team, string matchDayName) => new()
     {
         TeamId = team.Id,
         TeamName = team.TeamName,
         LogoKey = team.LogoKey,
         LogoUrl = BuildTeamLogoUrl(team.LogoKey),
-        TournamentId = team.TournamentId,
-        TournamentName = tournamentName,
+        MatchDayId = team.MatchDayId,
+        MatchDayName = matchDayName,
     };
 
     private static string? BuildTeamLogoUrl(string? logoKey) =>
@@ -380,29 +380,29 @@ public class TeamService(
     private static string? BuildPlayerPhotoUrl(string? photoKey) =>
         string.IsNullOrWhiteSpace(photoKey) ? null : $"/files/player-photos/{photoKey}";
 
-    private async Task TrackGoalKeeperRoundAsync(long playerId, long tournamentId)
+    private async Task TrackGoalKeeperRoundAsync(long playerId, long matchDayId)
     {
-        var lastRoundInPreviousTournaments = await db.PlayerGoalkeepingHistories
+        var lastRoundInPreviousMatchDays = await db.PlayerGoalkeepingHistories
             .Where(h => h.PlayerId == playerId)
             .Select(h => (int?)h.RoundNumber)
             .MaxAsync() ?? 0;
 
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new TournamentServiceException(RestErrorMessageDetail.TournamentIsNotFound, HttpStatusCode.NotFound);
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
 
         db.PlayerGoalkeepingHistories.Add(new PlayerGoalkeepingHistory
         {
             PlayerId = playerId,
-            TournamentId = tournamentId,
-            RoundNumber = lastRoundInPreviousTournaments + 1,
-            PlayedDate = tournament.TournamentDate,
+            MatchDayId = matchDayId,
+            RoundNumber = lastRoundInPreviousMatchDays + 1,
+            PlayedDate = matchDay.MatchDayDate,
         });
     }
 
-    private async Task RemoveGoalKeeperRoundAsync(long playerId, long tournamentId)
+    private async Task RemoveGoalKeeperRoundAsync(long playerId, long matchDayId)
     {
         var histories = await db.PlayerGoalkeepingHistories
-            .Where(h => h.PlayerId == playerId && h.TournamentId == tournamentId)
+            .Where(h => h.PlayerId == playerId && h.MatchDayId == matchDayId)
             .ToListAsync();
         db.PlayerGoalkeepingHistories.RemoveRange(histories);
     }

@@ -12,7 +12,7 @@ namespace BofcBackend.Api.Features.Auction;
 
 /// <summary>
 /// Port of service/auction/AuctionSessionServiceImpl.java — the auction state machine.
-/// Java's pessimistic row locking (findByIdForUpdate / findByTournamentIdAndTeamIdForUpdate via
+/// Java's pessimistic row locking (findByIdForUpdate / findByMatchDayIdAndTeamIdForUpdate via
 /// @Lock(PESSIMISTIC_WRITE)) has no declarative EF Core equivalent, so PlaceBidAsync and
 /// ExecuteSaleAsync run inside an explicit transaction wrapping a raw "SELECT ... FOR UPDATE"
 /// (MySQL row lock held until commit), matching Java's behavior instead of EF's default
@@ -20,25 +20,25 @@ namespace BofcBackend.Api.Features.Auction;
 /// </summary>
 public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadcaster)
 {
-    public async Task<AuctionSessionResponse> GetSessionAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> GetSessionAsync(long matchDayId)
     {
-        var session = await LoadSessionQuery().FirstOrDefaultAsync(s => s.TournamentId == tournamentId);
+        var session = await LoadSessionQuery().FirstOrDefaultAsync(s => s.MatchDayId == matchDayId);
         return session != null
             ? MapSessionToResponse(session)
-            : new AuctionSessionResponse { TournamentId = tournamentId, Status = AuctionSessionStatus.NOT_STARTED };
+            : new AuctionSessionResponse { MatchDayId = matchDayId, Status = AuctionSessionStatus.NOT_STARTED };
     }
 
-    public async Task<AuctionSessionResponse> StartAuctionAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> StartAuctionAsync(long matchDayId)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new ResourceNotFoundException($"Tournament not found: {tournamentId}");
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new ResourceNotFoundException($"MatchDay not found: {matchDayId}");
 
-        if (!tournament.AuctionMode)
+        if (!matchDay.AuctionMode)
         {
-            throw new InvalidOperationException("Tournament is not in auction mode");
+            throw new InvalidOperationException("MatchDay is not in auction mode");
         }
 
-        var existing = await db.AuctionSessions.FirstOrDefaultAsync(s => s.TournamentId == tournamentId);
+        var existing = await db.AuctionSessions.FirstOrDefaultAsync(s => s.MatchDayId == matchDayId);
         if (existing?.Status == AuctionSessionStatus.RUNNING)
         {
             throw new InvalidOperationException("Auction is already running");
@@ -55,7 +55,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         {
             session = new AuctionSession
             {
-                TournamentId = tournament.Id,
+                MatchDayId = matchDay.Id,
                 Status = AuctionSessionStatus.RUNNING,
                 RoundNumber = 1,
                 StartedAt = DateTime.Now,
@@ -65,25 +65,25 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
 
         await db.SaveChangesAsync();
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(tournamentId, "AUCTION_STARTED", response);
+        await broadcaster.BroadcastAsync(matchDayId, "AUCTION_STARTED", response);
         return response;
     }
 
-    public async Task<AuctionSessionResponse> PauseAuctionAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> PauseAuctionAsync(long matchDayId)
     {
-        var session = await GetRunningSessionAsync(tournamentId);
+        var session = await GetRunningSessionAsync(matchDayId);
         session.Status = AuctionSessionStatus.PAUSED;
         session.PausedAt = DateTime.Now;
         await db.SaveChangesAsync();
 
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(tournamentId, "AUCTION_PAUSED", response);
+        await broadcaster.BroadcastAsync(matchDayId, "AUCTION_PAUSED", response);
         return response;
     }
 
-    public async Task<AuctionSessionResponse> ResumeAuctionAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> ResumeAuctionAsync(long matchDayId)
     {
-        var session = await db.AuctionSessions.FirstOrDefaultAsync(s => s.TournamentId == tournamentId)
+        var session = await db.AuctionSessions.FirstOrDefaultAsync(s => s.MatchDayId == matchDayId)
             ?? throw new ResourceNotFoundException("Session not found");
 
         if (session.Status != AuctionSessionStatus.PAUSED)
@@ -103,14 +103,14 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         await db.SaveChangesAsync();
 
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(tournamentId, "AUCTION_RESUMED", response);
+        await broadcaster.BroadcastAsync(matchDayId, "AUCTION_RESUMED", response);
         return response;
     }
 
-    public async Task<AuctionSessionResponse> EndAuctionAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> EndAuctionAsync(long matchDayId)
     {
         var session = await db.AuctionSessions.Include(s => s.CurrentAuctionPlayer)
-            .FirstOrDefaultAsync(s => s.TournamentId == tournamentId)
+            .FirstOrDefaultAsync(s => s.MatchDayId == matchDayId)
             ?? throw new ResourceNotFoundException("Session not found");
 
         if (session.CurrentAuctionPlayer is { Status: AuctionPlayerStatus.ON_AUCTION } current)
@@ -121,7 +121,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         }
 
         var stillAvailable = await db.AuctionPlayers
-            .Where(p => p.TournamentId == tournamentId && p.Status == AuctionPlayerStatus.AVAILABLE)
+            .Where(p => p.MatchDayId == matchDayId && p.Status == AuctionPlayerStatus.AVAILABLE)
             .ToListAsync();
         foreach (var player in stillAvailable)
         {
@@ -137,18 +137,18 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         await db.SaveChangesAsync();
 
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(tournamentId, "AUCTION_ENDED", response);
+        await broadcaster.BroadcastAsync(matchDayId, "AUCTION_ENDED", response);
         return response;
     }
 
-    public async Task<AuctionSessionResponse> NextPlayerAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> NextPlayerAsync(long matchDayId)
     {
-        var session = await GetRunningSessionAsync(tournamentId);
-        var settings = await GetOrCreateDefaultSettingsAsync(tournamentId);
-        await ResetOrphanedOnAuctionPlayersAsync(session, tournamentId);
+        var session = await GetRunningSessionAsync(matchDayId);
+        var settings = await GetOrCreateDefaultSettingsAsync(matchDayId);
+        await ResetOrphanedOnAuctionPlayersAsync(session, matchDayId);
 
         var nextPlayer = await db.AuctionPlayers
-            .Where(p => p.TournamentId == tournamentId && p.Status == AuctionPlayerStatus.AVAILABLE)
+            .Where(p => p.MatchDayId == matchDayId && p.Status == AuctionPlayerStatus.AVAILABLE)
             .OrderBy(p => p.SequenceOrder)
             .FirstOrDefaultAsync()
             ?? throw new InvalidOperationException("No more available players in the pool");
@@ -156,14 +156,14 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         return await PutPlayerOnAuctionAsync(session, nextPlayer, settings);
     }
 
-    public async Task<AuctionSessionResponse> NextPlayerRandomAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> NextPlayerRandomAsync(long matchDayId)
     {
-        var session = await GetRunningSessionAsync(tournamentId);
-        var settings = await GetOrCreateDefaultSettingsAsync(tournamentId);
-        await ResetOrphanedOnAuctionPlayersAsync(session, tournamentId);
+        var session = await GetRunningSessionAsync(matchDayId);
+        var settings = await GetOrCreateDefaultSettingsAsync(matchDayId);
+        await ResetOrphanedOnAuctionPlayersAsync(session, matchDayId);
 
         var available = await db.AuctionPlayers
-            .Where(p => p.TournamentId == tournamentId && p.Status == AuctionPlayerStatus.AVAILABLE)
+            .Where(p => p.MatchDayId == matchDayId && p.Status == AuctionPlayerStatus.AVAILABLE)
             .ToListAsync();
 
         if (available.Count == 0)
@@ -175,9 +175,9 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         return await PutPlayerOnAuctionAsync(session, randomPlayer, settings);
     }
 
-    public async Task<AuctionSessionResponse> SkipPlayerAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> SkipPlayerAsync(long matchDayId)
     {
-        var session = await GetRunningSessionAsync(tournamentId);
+        var session = await GetRunningSessionAsync(matchDayId);
 
         if (session.CurrentAuctionPlayerId == null)
         {
@@ -194,13 +194,13 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         await db.SaveChangesAsync();
 
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(tournamentId, "PLAYER_SKIPPED", response);
+        await broadcaster.BroadcastAsync(matchDayId, "PLAYER_SKIPPED", response);
         return response;
     }
 
-    public async Task<AuctionSessionResponse> MarkSoldAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> MarkSoldAsync(long matchDayId)
     {
-        var session = await GetRunningSessionAsync(tournamentId);
+        var session = await GetRunningSessionAsync(matchDayId);
 
         if (session.CurrentAuctionPlayerId == null)
         {
@@ -214,12 +214,12 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
             throw new InvalidOperationException("No bids placed for this player");
         }
 
-        return await ExecuteSaleAsync(session, auctionPlayer, tournamentId);
+        return await ExecuteSaleAsync(session, auctionPlayer, matchDayId);
     }
 
-    public async Task<AuctionSessionResponse> MarkUnsoldAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> MarkUnsoldAsync(long matchDayId)
     {
-        var session = await GetRunningSessionAsync(tournamentId);
+        var session = await GetRunningSessionAsync(matchDayId);
 
         if (session.CurrentAuctionPlayerId == null)
         {
@@ -236,14 +236,14 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         await db.SaveChangesAsync();
 
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(tournamentId, "PLAYER_UNSOLD", await BuildPlayerResponseByIdAsync(auctionPlayer.Id));
+        await broadcaster.BroadcastAsync(matchDayId, "PLAYER_UNSOLD", await BuildPlayerResponseByIdAsync(auctionPlayer.Id));
         return response;
     }
 
-    public async Task<AuctionSessionResponse> UndoLastSaleAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> UndoLastSaleAsync(long matchDayId)
     {
         var winningBid = await db.AuctionBids
-            .Where(b => b.TournamentId == tournamentId && b.IsWinning)
+            .Where(b => b.MatchDayId == matchDayId && b.IsWinning)
             .OrderByDescending(b => b.BidTime)
             .Include(b => b.AuctionPlayer)
             .Include(b => b.Team)
@@ -253,7 +253,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         var auctionPlayer = winningBid.AuctionPlayer;
         var team = winningBid.Team;
 
-        var budget = await db.TeamBudgets.FirstOrDefaultAsync(b => b.TournamentId == tournamentId && b.TeamId == team.Id)
+        var budget = await db.TeamBudgets.FirstOrDefaultAsync(b => b.MatchDayId == matchDayId && b.TeamId == team.Id)
             ?? throw new ResourceNotFoundException("Budget not found");
         budget.RemainingBudget += winningBid.BidAmount;
         budget.TotalSpent -= winningBid.BidAmount;
@@ -275,17 +275,17 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
 
         await db.SaveChangesAsync();
 
-        var session = await db.AuctionSessions.FirstOrDefaultAsync(s => s.TournamentId == tournamentId)
+        var session = await db.AuctionSessions.FirstOrDefaultAsync(s => s.MatchDayId == matchDayId)
             ?? throw new ResourceNotFoundException("Session not found");
 
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(tournamentId, "SALE_UNDONE", await BuildPlayerResponseByIdAsync(auctionPlayer.Id));
+        await broadcaster.BroadcastAsync(matchDayId, "SALE_UNDONE", await BuildPlayerResponseByIdAsync(auctionPlayer.Id));
         return response;
     }
 
-    public async Task<AuctionSessionResponse> RestartBiddingAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> RestartBiddingAsync(long matchDayId)
     {
-        var session = await GetRunningSessionAsync(tournamentId);
+        var session = await GetRunningSessionAsync(matchDayId);
 
         if (session.CurrentAuctionPlayerId == null)
         {
@@ -296,19 +296,19 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         auctionPlayer.CurrentBid = null;
         auctionPlayer.CurrentHighestTeamId = null;
 
-        var settings = await GetOrCreateDefaultSettingsAsync(tournamentId);
+        var settings = await GetOrCreateDefaultSettingsAsync(matchDayId);
         session.CurrentTimerEndsAt = DateTime.Now.AddSeconds(settings.AuctionTimerSeconds);
         await db.SaveChangesAsync();
 
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(tournamentId, "BIDDING_RESTARTED", response);
+        await broadcaster.BroadcastAsync(matchDayId, "BIDDING_RESTARTED", response);
         return response;
     }
 
-    public async Task<AuctionSessionResponse> StartUnsoldRoundAsync(long tournamentId)
+    public async Task<AuctionSessionResponse> StartUnsoldRoundAsync(long matchDayId)
     {
         var session = await db.AuctionSessions.Include(s => s.CurrentAuctionPlayer)
-            .FirstOrDefaultAsync(s => s.TournamentId == tournamentId)
+            .FirstOrDefaultAsync(s => s.MatchDayId == matchDayId)
             ?? throw new ResourceNotFoundException("Session not found");
 
         if (session.CurrentAuctionPlayer is { Status: AuctionPlayerStatus.ON_AUCTION } current)
@@ -319,7 +319,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         }
 
         var unsoldPlayers = await db.AuctionPlayers
-            .Where(p => p.TournamentId == tournamentId && p.Status == AuctionPlayerStatus.UNSOLD)
+            .Where(p => p.MatchDayId == matchDayId && p.Status == AuctionPlayerStatus.UNSOLD)
             .ToListAsync();
 
         if (unsoldPlayers.Count == 0)
@@ -341,14 +341,14 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         await db.SaveChangesAsync();
 
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(tournamentId, "UNSOLD_ROUND_STARTED", response);
+        await broadcaster.BroadcastAsync(matchDayId, "UNSOLD_ROUND_STARTED", response);
         return response;
     }
 
-    public async Task<BidResponse> PlaceBidAsync(long tournamentId, BidRequest request, long bidderUserId)
+    public async Task<BidResponse> PlaceBidAsync(long matchDayId, BidRequest request, long bidderUserId)
     {
-        var session = await GetRunningSessionAsync(tournamentId);
-        var settings = await GetOrCreateDefaultSettingsAsync(tournamentId);
+        var session = await GetRunningSessionAsync(matchDayId);
+        var settings = await GetOrCreateDefaultSettingsAsync(matchDayId);
 
         if (session.CurrentAuctionPlayerId == null)
         {
@@ -369,7 +369,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
             throw new InvalidOperationException("Player is not currently on auction");
         }
 
-        var budget = await LockTeamBudgetAsync(tournamentId, request.TeamId!.Value);
+        var budget = await LockTeamBudgetAsync(matchDayId, request.TeamId!.Value);
 
         var bidder = await db.Players.Include(p => p.Roles).FirstOrDefaultAsync(p => p.Id == bidderUserId)
             ?? throw new ResourceNotFoundException("Bidder not found");
@@ -403,7 +403,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         var bid = new AuctionBid
         {
             AuctionSessionId = session.Id,
-            TournamentId = session.TournamentId,
+            MatchDayId = session.MatchDayId,
             AuctionPlayerId = auctionPlayer.Id,
             TeamId = team.Id,
             BidderUserId = bidder.Id,
@@ -430,7 +430,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
 
         var bidResponse = MapBidToResponse(bid, team.TeamName, bidder.Name);
 
-        await broadcaster.BroadcastAsync(tournamentId, "NEW_BID", new Dictionary<string, object?>
+        await broadcaster.BroadcastAsync(matchDayId, "NEW_BID", new Dictionary<string, object?>
         {
             ["bid"] = bidResponse,
             ["remainingSeconds"] = CalculateRemainingSeconds(session),
@@ -439,26 +439,26 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         return bidResponse;
     }
 
-    public async Task<List<BidResponse>> GetBidsForPlayerAsync(long tournamentId, long auctionPlayerId)
+    public async Task<List<BidResponse>> GetBidsForPlayerAsync(long matchDayId, long auctionPlayerId)
     {
         var bids = await LoadBidsQuery().Where(b => b.AuctionPlayerId == auctionPlayerId)
             .OrderBy(b => b.BidTime).ToListAsync();
         return bids.Select(b => MapBidToResponse(b, b.Team.TeamName, b.BidderUser.Name)).ToList();
     }
 
-    public async Task<List<BidResponse>> GetAllBidsAsync(long tournamentId)
+    public async Task<List<BidResponse>> GetAllBidsAsync(long matchDayId)
     {
-        var bids = await LoadBidsQuery().Where(b => b.TournamentId == tournamentId)
+        var bids = await LoadBidsQuery().Where(b => b.MatchDayId == matchDayId)
             .OrderByDescending(b => b.BidTime).ToListAsync();
         return bids.Select(b => MapBidToResponse(b, b.Team.TeamName, b.BidderUser.Name)).ToList();
     }
 
-    public async Task<AuctionDashboardResponse> GetDashboardAsync(long tournamentId)
+    public async Task<AuctionDashboardResponse> GetDashboardAsync(long matchDayId)
     {
-        var session = await LoadSessionQuery().FirstOrDefaultAsync(s => s.TournamentId == tournamentId);
+        var session = await LoadSessionQuery().FirstOrDefaultAsync(s => s.MatchDayId == matchDayId);
 
         var allPlayers = await AuctionPlayerPoolServiceQuery()
-            .Where(p => p.TournamentId == tournamentId).OrderBy(p => p.SequenceOrder).ToListAsync();
+            .Where(p => p.MatchDayId == matchDayId).OrderBy(p => p.SequenceOrder).ToListAsync();
         var soldPlayers = allPlayers.Where(p => p.Status == AuctionPlayerStatus.SOLD).ToList();
         var unsoldPlayers = allPlayers.Where(p => p.Status == AuctionPlayerStatus.UNSOLD).ToList();
         var availablePlayers = allPlayers.Where(p => p.Status == AuctionPlayerStatus.AVAILABLE).ToList();
@@ -474,7 +474,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         }
 
         var teamBudgets = await db.TeamBudgets.Include(b => b.Team).Include(b => b.Owner)
-            .Where(b => b.TournamentId == tournamentId).ToListAsync();
+            .Where(b => b.MatchDayId == matchDayId).ToListAsync();
 
         return new AuctionDashboardResponse
         {
@@ -492,15 +492,15 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         };
     }
 
-    public async Task<AuctionResultResponse> GetResultsAsync(long tournamentId)
+    public async Task<AuctionResultResponse> GetResultsAsync(long matchDayId)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new ResourceNotFoundException("Tournament not found");
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new ResourceNotFoundException("MatchDay not found");
 
         var budgets = await db.TeamBudgets.Include(b => b.Team).Include(b => b.Owner)
-            .Where(b => b.TournamentId == tournamentId).ToListAsync();
+            .Where(b => b.MatchDayId == matchDayId).ToListAsync();
         var allPlayers = await AuctionPlayerPoolServiceQuery()
-            .Where(p => p.TournamentId == tournamentId).OrderBy(p => p.SequenceOrder).ToListAsync();
+            .Where(p => p.MatchDayId == matchDayId).OrderBy(p => p.SequenceOrder).ToListAsync();
 
         var teamSquads = budgets.Select(budget =>
         {
@@ -523,18 +523,18 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
 
         return new AuctionResultResponse
         {
-            TournamentId = tournamentId,
-            TournamentName = tournament.Name,
+            MatchDayId = matchDayId,
+            MatchDayName = matchDay.Name,
             TeamSquads = teamSquads,
             UnsoldPlayers = unsold.Select(AuctionPlayerPoolService.MapToResponse).ToList(),
             Statistics = CalculateStats(sold),
         };
     }
 
-    public async Task NotifyTimerExpiredAsync(long tournamentId)
+    public async Task NotifyTimerExpiredAsync(long matchDayId)
     {
         var session = await db.AuctionSessions.Include(s => s.CurrentAuctionPlayer)
-            .FirstOrDefaultAsync(s => s.TournamentId == tournamentId && s.Status == AuctionSessionStatus.RUNNING);
+            .FirstOrDefaultAsync(s => s.MatchDayId == matchDayId && s.Status == AuctionSessionStatus.RUNNING);
         if (session == null || session.CurrentTimerEndsAt == null || session.CurrentAuctionPlayerId == null)
         {
             return;
@@ -548,13 +548,13 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         session.CurrentTimerEndsAt = null;
         await db.SaveChangesAsync();
 
-        await broadcaster.BroadcastAsync(tournamentId, "TIMER_EXPIRED", await BuildPlayerResponseByIdAsync(session.CurrentAuctionPlayerId.Value));
+        await broadcaster.BroadcastAsync(matchDayId, "TIMER_EXPIRED", await BuildPlayerResponseByIdAsync(session.CurrentAuctionPlayerId.Value));
     }
 
-    public async Task<AuctionSessionResponse> SelectPlayerForAuctionAsync(long tournamentId, long playerId)
+    public async Task<AuctionSessionResponse> SelectPlayerForAuctionAsync(long matchDayId, long playerId)
     {
-        var session = await GetRunningSessionAsync(tournamentId);
-        var settings = await GetOrCreateDefaultSettingsAsync(tournamentId);
+        var session = await GetRunningSessionAsync(matchDayId);
+        var settings = await GetOrCreateDefaultSettingsAsync(matchDayId);
 
         var player = await db.AuctionPlayers.FirstOrDefaultAsync(p => p.Id == playerId)
             ?? throw new ResourceNotFoundException("Player not found");
@@ -564,26 +564,26 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
             throw new InvalidOperationException("Player is not available for auction");
         }
 
-        await ResetOrphanedOnAuctionPlayersAsync(session, tournamentId);
+        await ResetOrphanedOnAuctionPlayersAsync(session, matchDayId);
         return await PutPlayerOnAuctionAsync(session, player, settings);
     }
 
     // === Private helpers ===
 
-    private async Task<AuctionSettings> GetOrCreateDefaultSettingsAsync(long tournamentId)
+    private async Task<AuctionSettings> GetOrCreateDefaultSettingsAsync(long matchDayId)
     {
-        var settings = await db.AuctionSettingsSet.FirstOrDefaultAsync(s => s.TournamentId == tournamentId);
+        var settings = await db.AuctionSettingsSet.FirstOrDefaultAsync(s => s.MatchDayId == matchDayId);
         if (settings != null)
         {
             return settings;
         }
 
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new ResourceNotFoundException($"Tournament not found: {tournamentId}");
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new ResourceNotFoundException($"MatchDay not found: {matchDayId}");
 
         settings = new AuctionSettings
         {
-            TournamentId = tournament.Id,
+            MatchDayId = matchDay.Id,
             TeamBudget = 100000,
             MinSquadSize = 7,
             MaxSquadSize = 11,
@@ -599,9 +599,9 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         return settings;
     }
 
-    private async Task<AuctionSession> GetRunningSessionAsync(long tournamentId)
+    private async Task<AuctionSession> GetRunningSessionAsync(long matchDayId)
     {
-        var session = await db.AuctionSessions.FirstOrDefaultAsync(s => s.TournamentId == tournamentId)
+        var session = await db.AuctionSessions.FirstOrDefaultAsync(s => s.MatchDayId == matchDayId)
             ?? throw new ResourceNotFoundException("Session not found");
         if (session.Status != AuctionSessionStatus.RUNNING)
         {
@@ -611,10 +611,10 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         return session;
     }
 
-    private async Task ResetOrphanedOnAuctionPlayersAsync(AuctionSession session, long tournamentId)
+    private async Task ResetOrphanedOnAuctionPlayersAsync(AuctionSession session, long matchDayId)
     {
         var onAuction = await db.AuctionPlayers
-            .Where(p => p.TournamentId == tournamentId && p.Status == AuctionPlayerStatus.ON_AUCTION)
+            .Where(p => p.MatchDayId == matchDayId && p.Status == AuctionPlayerStatus.ON_AUCTION)
             .ToListAsync();
 
         foreach (var orphan in onAuction.Where(o => o.Id != session.CurrentAuctionPlayerId))
@@ -652,11 +652,11 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         await db.SaveChangesAsync();
 
         var response = await MapSessionToResponseByIdAsync(session.Id);
-        await broadcaster.BroadcastAsync(session.TournamentId, "NEXT_PLAYER", await BuildPlayerResponseByIdAsync(player.Id));
+        await broadcaster.BroadcastAsync(session.MatchDayId, "NEXT_PLAYER", await BuildPlayerResponseByIdAsync(player.Id));
         return response;
     }
 
-    private async Task<AuctionSessionResponse> ExecuteSaleAsync(AuctionSession session, AuctionPlayer auctionPlayer, long tournamentId)
+    private async Task<AuctionSessionResponse> ExecuteSaleAsync(AuctionSession session, AuctionPlayer auctionPlayer, long matchDayId)
     {
         var winningTeamId = auctionPlayer.CurrentHighestTeamId!.Value;
         var finalPrice = auctionPlayer.CurrentBid!.Value;
@@ -667,7 +667,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
 
         await using var tx = await db.Database.BeginTransactionAsync();
 
-        var budget = await LockTeamBudgetAsync(tournamentId, winningTeamId);
+        var budget = await LockTeamBudgetAsync(matchDayId, winningTeamId);
         budget.RemainingBudget -= finalPrice;
         budget.TotalSpent += finalPrice;
         budget.PlayersBought += 1;
@@ -696,7 +696,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
         await tx.CommitAsync();
 
         var team = await db.Teams.FirstAsync(t => t.Id == winningTeamId);
-        await broadcaster.BroadcastAsync(tournamentId, "PLAYER_SOLD", new Dictionary<string, object?>
+        await broadcaster.BroadcastAsync(matchDayId, "PLAYER_SOLD", new Dictionary<string, object?>
         {
             ["player"] = await BuildPlayerResponseByIdAsync(auctionPlayer.Id),
             ["teamName"] = team.TeamName,
@@ -722,10 +722,10 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
     }
 
     /// <summary>Acquires a MySQL row lock (SELECT ... FOR UPDATE) that is held until the ambient transaction commits.</summary>
-    private async Task<TeamBudget> LockTeamBudgetAsync(long tournamentId, long teamId)
+    private async Task<TeamBudget> LockTeamBudgetAsync(long matchDayId, long teamId)
     {
         var locked = await db.TeamBudgets
-            .FromSqlInterpolated($"SELECT * FROM team_budgets WHERE tournament_id = {tournamentId} AND team_id = {teamId} FOR UPDATE")
+            .FromSqlInterpolated($"SELECT * FROM team_budgets WHERE match_day_id = {matchDayId} AND team_id = {teamId} FOR UPDATE")
             .ToListAsync();
         if (locked.Count == 0)
         {
@@ -770,7 +770,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
     }
 
     private IQueryable<AuctionSession> LoadSessionQuery() => db.AuctionSessions
-        .Include(s => s.Tournament)
+        .Include(s => s.MatchDay)
         .Include(s => s.CurrentAuctionPlayer).ThenInclude(p => p!.Player)
         .Include(s => s.CurrentAuctionPlayer).ThenInclude(p => p!.CurrentHighestTeam)
         .Include(s => s.CurrentAuctionPlayer).ThenInclude(p => p!.SoldToTeam);
@@ -789,7 +789,7 @@ public class AuctionSessionService(BofcDbContext db, IAuctionBroadcaster broadca
     private AuctionSessionResponse MapSessionToResponse(AuctionSession session) => new()
     {
         Id = session.Id,
-        TournamentId = session.TournamentId,
+        MatchDayId = session.MatchDayId,
         Status = session.Status,
         CurrentPlayer = session.CurrentAuctionPlayer != null ? AuctionPlayerPoolService.MapToResponse(session.CurrentAuctionPlayer) : null,
         RoundNumber = session.RoundNumber,

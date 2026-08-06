@@ -5,8 +5,8 @@ public class TeamBudget : AuditableEntity
 {
     public long Id { get; set; }
 
-    public long TournamentId { get; set; }
-    public Tournament Tournament { get; set; } = null!;
+    public long MatchDayId { get; set; }
+    public MatchDay MatchDay { get; set; } = null!;
 
     public long TeamId { get; set; }
     public Team Team { get; set; } = null!;

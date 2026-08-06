@@ -34,8 +34,8 @@ const emptyBudgetForm: BudgetFormState = { teamId: "", ownerId: "", totalBudget:
 
 const AuctionTeamBudgetsPage: React.FC = () => {
   const tones = useStatTones();
-  const { tournamentId } = useParams<{ tournamentId: string }>();
-  const tid = Number(tournamentId);
+  const { matchDayId } = useParams<{ matchDayId: string }>();
+  const tid = Number(matchDayId);
   const [modal, setModal] = useState<{ visible: boolean; editing?: TeamBudgetResponse }>({ visible: false });
   const [budgetForm, setBudgetForm] = useState<BudgetFormState>(emptyBudgetForm);
   const [budgetErrors, setBudgetErrors] = useState<Record<string, string>>({});
@@ -77,10 +77,10 @@ const AuctionTeamBudgetsPage: React.FC = () => {
     try {
       const body = { teamId: Number(budgetForm.teamId), ownerId: Number(budgetForm.ownerId), totalBudget: budgetForm.totalBudget };
       if (modal.editing) {
-        await update({ tournamentId: tid, id: modal.editing.id, body }).unwrap();
+        await update({ matchDayId: tid, id: modal.editing.id, body }).unwrap();
         toast.success("Budget updated");
       } else {
-        await create({ tournamentId: tid, body }).unwrap();
+        await create({ matchDayId: tid, body }).unwrap();
         toast.success("Team budget created successfully!");
       }
       setModal({ visible: false });
@@ -95,7 +95,7 @@ const AuctionTeamBudgetsPage: React.FC = () => {
       return;
     }
     try {
-      await createTeam({ tournamentId: tid, teamName: newTeamName.trim() }).unwrap();
+      await createTeam({ matchDayId: tid, teamName: newTeamName.trim() }).unwrap();
       toast.success(`Team "${newTeamName}" created!`);
       setNewTeamName("");
       setNewTeamModal(false);
@@ -107,7 +107,7 @@ const AuctionTeamBudgetsPage: React.FC = () => {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await deleteTeamBudget({ tournamentId: tid, id: deleteTarget.id }).unwrap();
+      await deleteTeamBudget({ matchDayId: tid, id: deleteTarget.id }).unwrap();
       toast.success("Team budget deleted");
     } catch (err: any) {
       toast.error(err?.data?.message || "Failed to delete");

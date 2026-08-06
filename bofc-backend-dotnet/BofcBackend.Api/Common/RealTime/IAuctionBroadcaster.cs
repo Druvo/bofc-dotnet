@@ -1,7 +1,7 @@
 namespace BofcBackend.Api.Common.RealTime;
 
-/// <summary>Port of AuctionSessionServiceImpl.broadcastState — publishes to /topic/auction/{tournamentId}.</summary>
+/// <summary>Port of AuctionSessionServiceImpl.broadcastState — publishes to /topic/auction/{matchDayId}.</summary>
 public interface IAuctionBroadcaster
 {
-    Task BroadcastAsync(long tournamentId, string type, object? payload);
+    Task BroadcastAsync(long matchDayId, string type, object? payload);
 }

@@ -4,7 +4,7 @@ namespace BofcBackend.Api.Domain.Entities;
 
 /// <summary>
 /// Admin-managed bank/bKash details shown to all users so they know where to
-/// send tournament dues and other club payments.
+/// send MatchDay dues and other club payments.
 /// </summary>
 public class PaymentAccount : AuditableEntity
 {

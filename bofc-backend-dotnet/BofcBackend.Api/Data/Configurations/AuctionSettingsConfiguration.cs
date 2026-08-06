@@ -11,8 +11,8 @@ public class AuctionSettingsConfiguration : IEntityTypeConfiguration<AuctionSett
         builder.ToTable("auction_settings");
         builder.HasKey(s => s.Id);
         builder.Property(s => s.Id).HasColumnName("id").ValueGeneratedOnAdd();
-        builder.Property(s => s.TournamentId).HasColumnName("tournament_id").IsRequired();
-        builder.HasIndex(s => s.TournamentId).IsUnique();
+        builder.Property(s => s.MatchDayId).HasColumnName("match_day_id").IsRequired();
+        builder.HasIndex(s => s.MatchDayId).IsUnique();
         builder.Property(s => s.TeamBudget).HasColumnName("team_budget").IsRequired();
         builder.Property(s => s.MinSquadSize).HasColumnName("min_squad_size").IsRequired();
         builder.Property(s => s.MaxSquadSize).HasColumnName("max_squad_size").IsRequired();
@@ -30,6 +30,6 @@ public class AuctionSettingsConfiguration : IEntityTypeConfiguration<AuctionSett
         builder.Property(s => s.LastModifiedBy).HasColumnName("last_modified_by");
         builder.Property(s => s.UpdatedDate).HasColumnName("updated_date");
 
-        builder.HasOne(s => s.Tournament).WithOne().HasForeignKey<AuctionSettings>(s => s.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(s => s.MatchDay).WithOne().HasForeignKey<AuctionSettings>(s => s.MatchDayId).OnDelete(DeleteBehavior.Restrict);
     }
 }

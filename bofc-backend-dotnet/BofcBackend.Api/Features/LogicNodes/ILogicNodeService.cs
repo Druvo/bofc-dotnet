@@ -9,7 +9,7 @@ public interface ILogicNodeService
     Task<LogicNodeResponse> UpdateLogicNodeAsync(long nodeId, LogicNodeRequest request);
     Task DeleteLogicNodeAsync(long nodeId);
     Task<LogicNodeResponse> GetLogicNodeByIdAsync(long nodeId);
-    Task<List<LogicNodeResponse>> GetLogicNodesByTournamentAsync(long tournamentId);
+    Task<List<LogicNodeResponse>> GetLogicNodesByMatchDayAsync(long matchDayId);
     Task<LogicNodeResponse> ExecuteLogicNodeAsync(long nodeId);
     Task ExecuteLogicNodesForRoundAsync(long roundId);
     Task ExecuteLogicNodesForGroupAsync(long groupId);

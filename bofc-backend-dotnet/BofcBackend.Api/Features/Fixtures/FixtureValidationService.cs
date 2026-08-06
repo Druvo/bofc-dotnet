@@ -12,12 +12,12 @@ public class FixtureValidationService
     {
         if (teams == null || teams.Count == 0)
         {
-            throw new TournamentServiceException("No teams found in tournament", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("No teams found in MatchDay", HttpStatusCode.BadRequest);
         }
 
         if (teams.Count < 2)
         {
-            throw new TournamentServiceException("Minimum 2 teams required for fixture generation", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("Minimum 2 teams required for fixture generation", HttpStatusCode.BadRequest);
         }
 
         switch (type.ToUpperInvariant())
@@ -39,7 +39,7 @@ public class FixtureValidationService
     {
         if (teamCount < 2)
         {
-            throw new TournamentServiceException("Elimination tournaments require minimum 2 teams", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("Elimination MatchDays require minimum 2 teams", HttpStatusCode.BadRequest);
         }
     }
 
@@ -47,7 +47,7 @@ public class FixtureValidationService
     {
         if (teamCount < 4)
         {
-            throw new TournamentServiceException("Group stage tournaments require minimum 4 teams", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("Group stage MatchDays require minimum 4 teams", HttpStatusCode.BadRequest);
         }
     }
 
@@ -55,7 +55,7 @@ public class FixtureValidationService
     {
         if (teamCount < 2)
         {
-            throw new TournamentServiceException("Round-robin tournaments require minimum 2 teams", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("Round-robin MatchDays require minimum 2 teams", HttpStatusCode.BadRequest);
         }
     }
 
@@ -66,17 +66,17 @@ public class FixtureValidationService
             case MatchStatus.ONGOING:
                 if (match.MatchStatus != MatchStatus.SCHEDULED)
                 {
-                    throw new TournamentServiceException("Only scheduled matches can be started", HttpStatusCode.Conflict);
+                    throw new MatchDayServiceException("Only scheduled matches can be started", HttpStatusCode.Conflict);
                 }
                 break;
             case MatchStatus.COMPLETED:
                 if (match.MatchStatus != MatchStatus.ONGOING)
                 {
-                    throw new TournamentServiceException("Only ongoing matches can be completed", HttpStatusCode.Conflict);
+                    throw new MatchDayServiceException("Only ongoing matches can be completed", HttpStatusCode.Conflict);
                 }
                 break;
             case MatchStatus.SCHEDULED:
-                throw new TournamentServiceException("Cannot transition to scheduled status", HttpStatusCode.BadRequest);
+                throw new MatchDayServiceException("Cannot transition to scheduled status", HttpStatusCode.BadRequest);
         }
     }
 
@@ -84,7 +84,7 @@ public class FixtureValidationService
     {
         if (playerId == null || teamId == null || matchId == null)
         {
-            throw new TournamentServiceException("Player ID, Team ID, and Match ID are required", HttpStatusCode.BadRequest);
+            throw new MatchDayServiceException("Player ID, Team ID, and Match ID are required", HttpStatusCode.BadRequest);
         }
     }
 }

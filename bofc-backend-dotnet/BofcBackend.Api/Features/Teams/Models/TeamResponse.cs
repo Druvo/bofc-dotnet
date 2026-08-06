@@ -7,6 +7,6 @@ public class TeamResponse
     public string TeamName { get; set; } = string.Empty;
     public string? LogoKey { get; set; }
     public string? LogoUrl { get; set; }
-    public long TournamentId { get; set; }
-    public string? TournamentName { get; set; }
+    public long MatchDayId { get; set; }
+    public string? MatchDayName { get; set; }
 }

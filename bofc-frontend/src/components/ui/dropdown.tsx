@@ -7,7 +7,7 @@ import ReactDOM from "react-dom";
  *
  * Menu is portaled to <body> and positioned from the trigger's own rect
  * instead of being an in-flow `absolute` descendant. List items (e.g.
- * tournament cards) each carry an active `transform` and so are their own
+ * matchDay cards) each carry an active `transform` and so are their own
  * stacking context; a later sibling card paints over an earlier card's
  * overflowing absolute menu regardless of z-index, since that only ranks
  * within the originating card's own context.

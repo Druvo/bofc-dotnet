@@ -37,19 +37,36 @@ Read this first in a new session to pick up exactly where this one left off.
 
 7. **Added Tournament duration + real-time effective status**: "Create MatchDay" form had no way to specify how long it runs, so a tournament whose date had passed still showed "UPCOMING" (the only auto-correction that existed was a slow 3x/day cron job with day-granularity, `TournamentStatusSchedulerBackgroundService`). Added `Tournament.DurationMinutes` (migration `AddDurationMinutesToTournament`, nullable, defaults to 90 when unset), added a Duration input to `CreateTournamentModal.tsx`, and rewrote `utils/utils.ts`'s `getEffectiveTournamentStatus(status, tournamentDate, durationMinutes)` to derive UPCOMING/ONGOING/CONCLUDED in real time from `now` vs `[start, start+duration)`, instead of trusting the raw DB field (CONCLUDED is still treated as a terminal, manually-set state). Updated all 4 call sites (`TournamentsPage`, `TournamentViewerPage`, `MatchCalendarWidget`, `LatestTournamentCard`) to pass the new field through.
 
-Live test data created/left in the DB (via direct `sqlcmd`, not through the app):
-- Tournament id **7** "Match Day — Aug 7, 2026" — 3 teams (Team A=26, B=27, C=28), match id 8 = old completed test match, matches **11/12/13** = freshly regenerated with the FIXED formula (13min duration/2min gap): 06:30–06:43, 06:45–06:58, 07:00–07:13.
-- A tournament called "test" also exists, dated earlier (Aug 5 night) — became the real "next active" one at one point during testing.
+Live test data created/left in the DB (via direct `sqlcmd`, not through the app) — table names below are POST-rename (see next section):
+- MatchDay id **7** "Match Day — Aug 7, 2026" — 3 teams (Team A=26, B=27, C=28), match id 8 = old completed test match, matches **11/12/13** = freshly regenerated with the FIXED formula (13min duration/2min gap): 06:30–06:43, 06:45–06:58, 07:00–07:13.
+- A match day called "test" also exists, dated earlier (Aug 5 night) — became the real "next active" one at one point during testing.
 
-## In progress / NOT started yet — approved plan waiting to execute
+## DONE this session — Tournament → MatchDay rename (fully executed, needs manual click-through)
+
+**User request**: rename **"Tournament" → "MatchDay"** (and "Tournaments" → "MatchDays") EVERYWHERE — C# backend classes/files/namespaces, DB tables/columns, TypeScript frontend components/types/files/routes, literally everything. User explicitly chose (via AskUserQuestion):
+- **Full rename including the physical DB schema** (not just code) — tables/columns get renamed via a real EF Core migration, not just C# mapped-under-the-hood.
+- **One continuous pass**, no phased checkpoints back to the user mid-work.
+
+Executed in full, following the plan below almost exactly, with landmines discovered along the way that the plan didn't anticipate:
+
+1. **Backend**: bulk `Tournament`→`MatchDay`/`tournament`→`matchDay` two-substitution rename across ~143 files + `git mv` for every file/folder with "Tournament" in the name. Manually fixed: EF `.ToTable()`/`.HasColumnName()` string literals to snake_case, `[Route]`/`[Http*]` attributes to kebab-case, raw SQL in `PlayerService.CountConsecutiveMissedMatchDaysBeforeCurrentAsync` and `AuctionSessionService.LockTeamBudgetAsync` (`FromSqlInterpolated`) to snake_case table/column names, a `sortedBy.ToLowerInvariant()` switch in `MatchDayService.ApplySort` that the bulk pass broke (was comparing against now-wrong-case literals), and a bare `PLAYER_OF_TOURNAMENT` enum member in `PrizeCategory.cs` (all-caps, case-sensitive bulk pass doesn't touch `TOURNAMENT`) → `PLAYER_OF_MATCH_DAY`.
+   - **Real bug caused and fixed mid-session**: an overly broad regex pass meant to capitalize prose ("in the tournament" → "in the MatchDay") also matched and corrupted ~17 files' worth of **local variable/parameter names** (`var tournament` → `var MatchDay`, colliding with the `MatchDay` type name — e.g. `var MatchDay = new MatchDay {...}`). Caught it by rebuilding (`dotnet build`) after every mechanical pass and hand-fixing every file back to `var matchDay`. **Lesson: word-boundary regex across a whole file does not distinguish code identifiers from string-literal prose — never re-run a "capitalize this word" pass over full source files again without scoping it to string/comment content only.**
+   - `dotnet build` clean after all fixes.
+2. **EF Core migration** (`RenameTournamentToMatchDay`, applied): `dotnet ef migrations add` auto-scaffolded `DropTable`+`CreateTable` for the 5 renamed tables — would have **silently destroyed** all live rows (9 tournaments, 135 participants, 2 rounds — confirmed via `sqlcmd` row counts before touching anything). Hand-rewrote the migration to use `RenameTable`/`RenameColumn`/`sp_rename` (PK constraints) instead, verified via `dotnet ef migrations script` before applying. **Landmine the plan didn't anticipate**: `tournament_participant_players` is not a real table — it's a hand-written SQL **VIEW** (created directly via `sqlcmd` outside migrations, joining `tournament`+`tournament_participant`+`players`) whose body hardcodes the old table/column names. A plain rename would have left it pointing at objects that no longer exist; instead the migration `DROP VIEW`s it early and `CREATE VIEW match_day_participant_players` with updated names once the underlying tables/columns exist. Applied successfully; `dotnet ef migrations has-pending-model-changes` confirms the DB now matches the C# model exactly. All data confirmed intact post-migration (row counts + tournament id 7's row, now under `match_day`, spot-checked directly).
+3. **Frontend**: same two-substitution bulk pass across ~108 files + folder/file `git mv`s. Landmines from the plan, all resolved as specified: `components/Tournaments/tournamentTypes.ts` (stale, unrelated `Player`/`Team`/`DropResult` types) → `teamBuilderTypes.ts`; real domain types → `state/features/matchDays/matchDayTypes.ts`; `authSlice.ts`'s copy-paste `tournamentsApi` → `authApi` (was colliding post-rename with the real `matchDaysApi` in `matchDaysSlice.ts` — both slices had literally exported the same name); deleted the stray `.tmp` file; `components/Tournaments/`→`components/MatchDays/` (plural) alongside the pre-existing `components/MatchDay/` (singular, redirect-only) — no collision. Fixed RTK Query URL templates + React Router paths + CSS class selectors to kebab-case throughout (`/matchDays`→`/match-days`, `/matchDay-viewer`→`/match-day-viewer`, `matchDays/join-matchDay/:id`→`match-days/join-match-day/:id`, etc.) — **except** CSS Modules files (`.module.css`), which correctly stayed camelCase since their classes are consumed as JS object properties (`styles.matchDayName`), not string literals. Added a one-time fallback in the one `localStorage.getItem('currentMatchDayId')` read site to also check the old `currentTournamentId` key (this specific code path — `components/Dashboard/Dashboard.tsx` + `ManualPlayerSelection.tsx` — turned out to be orphaned/never-imported dead code, but fixed for consistency anyway per the plan). Also fixed the same `PLAYER_OF_TOURNAMENT`→`PLAYER_OF_MATCH_DAY` enum rename in 3 frontend files (`prizeTypes.ts`, `CreatePrizeModal.tsx`, `PrizeCard.tsx`) to match the backend.
+   - `npx react-scripts build` compiles clean (only pre-existing lint warnings unrelated to this change — unused vars, missing hook deps — same ones that existed before).
+4. **Both servers restarted** via `preview_start` — backend logs show clean queries against the renamed tables (`match_day`, `match_day_participant`, etc.), no startup errors. Frontend compiles, login page renders, no console errors.
+
+**Not done — needs the user, since I still can't log in**: click through MatchDays list page, MatchDay Viewer, Team Building, Dashboard's Next Match card, and Settings, confirming nothing 404s and no leftover "Tournament" text/errors appear anywhere in the UI. A whole-repo case-insensitive grep for `tournament` outside `Migrations/` is clean on both frontend and backend (only remaining hit is the intentional `currentTournamentId` fallback-read).
+
+<details>
+<summary>Original approved plan (for reference — followed closely, see landmines noted above for where reality diverged)</summary>
 
 **Latest user request**: rename **"Tournament" → "MatchDay"** (and "Tournaments" → "MatchDays") EVERYWHERE — C# backend classes/files/namespaces, DB tables/columns, TypeScript frontend components/types/files/routes, literally everything. User explicitly chose (via AskUserQuestion):
 - **Full rename including the physical DB schema** (not just code) — tables/columns get renamed via a real EF Core migration, not just C# mapped-under-the-hood.
 - **One continuous pass**, no phased checkpoints back to the user mid-work.
 
-I ran two Explore agents to build a full inventory (~143 backend files, ~117 frontend files) before this got interrupted. **The full approved plan — inventory, landmines, mechanical strategy, order of operations, verification steps — is saved at `C:\Users\DELL\.claude\plans\delightful-wibbling-hammock.md`.** That path may not be visible from a different login/account, so the complete plan text is reproduced below verbatim so it's self-contained.
-
-Nothing has been changed yet for this rename — no files touched, no migration created. This is the very next thing to do.
+(Historical note from when this plan was written, before execution: two Explore agents built the inventory below, ~143 backend files / ~117 frontend files, saved at `C:\Users\DELL\.claude\plans\delightful-wibbling-hammock.md` — that path may not be visible from a different login/account, hence reproduced verbatim below.)
 
 <details>
 <summary>Full approved rename plan (click to expand)</summary>
@@ -202,6 +219,7 @@ done alongside the content edits in the same pass — not a separate step.
    page, MatchDay Viewer, Team Building, Dashboard's Next Match card, and Settings —
    confirm nothing 404s and no leftover "Tournament" text/errors appear.
 
+</details>
 </details>
 
 ## Other notes / preferences observed this session

@@ -22,7 +22,7 @@ export interface AuctionSettingsRequest {
 }
 
 export interface AuctionRegistrationRequest {
-  tournamentId: number;
+  matchDayId: number;
   name: string;
   email: string;
   employeeId: string;
@@ -60,7 +60,7 @@ export interface BidRequest {
 // === Response Types ===
 export interface AuctionSettingsResponse {
   id: number;
-  tournamentId: number;
+  matchDayId: number;
   teamBudget: number;
   minSquadSize: number;
   maxSquadSize: number;
@@ -76,8 +76,8 @@ export interface AuctionSettingsResponse {
 
 export interface AuctionRegistrationResponse {
   id: number;
-  tournamentId: number;
-  tournamentName: string;
+  matchDayId: number;
+  matchDayName: string;
   name: string;
   email: string;
   employeeId: string;
@@ -102,7 +102,7 @@ export interface AuctionRegistrationResponse {
 
 export interface AuctionPlayerResponse {
   id: number;
-  tournamentId: number;
+  matchDayId: number;
   playerId: number;
   playerName: string;
   playerEmail?: string;
@@ -125,7 +125,7 @@ export interface AuctionPlayerResponse {
 
 export interface TeamBudgetResponse {
   id: number;
-  tournamentId: number;
+  matchDayId: number;
   teamId: number;
   teamName: string;
   ownerId: number;
@@ -151,7 +151,7 @@ export interface BidResponse {
 
 export interface AuctionSessionResponse {
   id: number;
-  tournamentId: number;
+  matchDayId: number;
   status: AuctionSessionStatus;
   currentPlayer?: AuctionPlayerResponse;
   roundNumber: number;
@@ -187,8 +187,8 @@ export interface AuctionDashboardResponse {
 }
 
 export interface AuctionResultResponse {
-  tournamentId: number;
-  tournamentName: string;
+  matchDayId: number;
+  matchDayName: string;
   teamSquads: TeamSquadResponse[];
   unsoldPlayers: AuctionPlayerResponse[];
   stats: AuctionStatsResponse;
@@ -206,6 +206,6 @@ export interface TeamSquadResponse {
 // === WebSocket Message ===
 export interface AuctionWebSocketMessage {
   type: 'BID_PLACED' | 'PLAYER_SOLD' | 'PLAYER_UNSOLD' | 'NEXT_PLAYER' | 'AUCTION_STARTED' | 'AUCTION_PAUSED' | 'AUCTION_RESUMED' | 'AUCTION_ENDED' | 'TIMER_UPDATE' | 'PLAYER_SKIPPED' | 'BIDDING_RESTARTED' | 'SALE_UNDONE' | 'UNSOLD_ROUND_STARTED';
-  tournamentId: number;
+  matchDayId: number;
   payload: any;
 }

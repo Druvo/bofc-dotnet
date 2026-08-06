@@ -5,13 +5,13 @@ import { AuctionWebSocketMessage } from "../state/features/auction/auctionTypes"
 import { API_URL } from "../settings";
 
 interface UseAuctionWebSocketOptions {
-  tournamentId: number;
+  matchDayId: number;
   onMessage?: (message: AuctionWebSocketMessage) => void;
   enabled?: boolean;
 }
 
 export const useAuctionWebSocket = ({
-  tournamentId,
+  matchDayId,
   onMessage,
   enabled = true,
 }: UseAuctionWebSocketOptions) => {
@@ -27,7 +27,7 @@ export const useAuctionWebSocket = ({
   }, []);
 
   useEffect(() => {
-    if (!enabled || !tournamentId) return;
+    if (!enabled || !matchDayId) return;
 
     const wsUrl = API_URL.replace(/\/api$/, "").replace(/\/$/, "") + "/ws/auction";
 
@@ -38,7 +38,7 @@ export const useAuctionWebSocket = ({
       heartbeatOutgoing: 4000,
       onConnect: () => {
         setConnected(true);
-        client.subscribe(`/topic/auction/${tournamentId}`, (message: IMessage) => {
+        client.subscribe(`/topic/auction/${matchDayId}`, (message: IMessage) => {
           try {
             const parsed: AuctionWebSocketMessage = JSON.parse(message.body);
             onMessage?.(parsed);
@@ -59,7 +59,7 @@ export const useAuctionWebSocket = ({
     return () => {
       disconnect();
     };
-  }, [tournamentId, enabled, disconnect, onMessage]);
+  }, [matchDayId, enabled, disconnect, onMessage]);
 
   return { connected, disconnect };
 };

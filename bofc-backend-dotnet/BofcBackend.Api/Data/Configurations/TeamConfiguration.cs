@@ -13,7 +13,7 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
         builder.Property(t => t.Id).HasColumnName("id").ValueGeneratedOnAdd();
         builder.Property(t => t.TeamName).HasColumnName("team_name").IsRequired();
         builder.Property(t => t.LogoKey).HasColumnName("logo_key");
-        builder.Property(t => t.TournamentId).HasColumnName("tournament_id").IsRequired();
+        builder.Property(t => t.MatchDayId).HasColumnName("match_day_id").IsRequired();
 
         builder.Property(t => t.CreatedBy).HasColumnName("created_by").IsRequired();
         builder.Property(t => t.CreatedDate).HasColumnName("created_date").IsRequired();

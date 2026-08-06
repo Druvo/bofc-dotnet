@@ -1,11 +1,11 @@
 import apiSlice from "../../api/apiSlice";
 import {
-  IGetTournamentStandingsResponse,
+  IGetMatchDayStandingsResponse,
   IGetTopScorersResponse,
   IGetTopAssistsResponse,
   IGetTopCardsResponse,
   IGetMatchStatisticsResponse,
-  IGetPlayerTournamentStatisticsResponse,
+  IGetPlayerMatchDayStatisticsResponse,
   IGetPlayerStatisticsResponse,
   IGetPlayerMatchHistoryResponse,
 } from "./statisticsTypes";
@@ -17,32 +17,32 @@ const apiWithTags = apiSlice.enhanceEndpoints({
 export const statisticsApi = apiWithTags.injectEndpoints({
   endpoints: (builder) => ({
     /**
-     * Get tournament standings (teams ranked by points, goal difference, etc.)
+     * Get matchDay standings (teams ranked by points, goal difference, etc.)
      */
-    getTournamentStandings: builder.query<
-      IGetTournamentStandingsResponse,
-      { tournamentId: number }
+    getMatchDayStandings: builder.query<
+      IGetMatchDayStandingsResponse,
+      { matchDayId: number }
     >({
-      query: ({ tournamentId }) => ({
-        url: `/statistics/tournaments/${tournamentId}/standings`,
+      query: ({ matchDayId }) => ({
+        url: `/statistics/match-days/${matchDayId}/standings`,
         method: "GET",
       }),
       providesTags: ["statistics"],
     }),
 
     /**
-     * Get top scorers in a tournament
+     * Get top scorers in a matchDay
      */
     getTopScorers: builder.query<
       IGetTopScorersResponse,
-      { tournamentId: number; limit?: number }
+      { matchDayId: number; limit?: number }
     >({
-      query: ({ tournamentId, limit }) => {
+      query: ({ matchDayId, limit }) => {
         const queryParams = new URLSearchParams();
         if (limit) queryParams.append('limit', limit.toString());
 
         return {
-          url: `/player-statistics/tournament/${tournamentId}/top-scorers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`,
+          url: `/player-statistics/match-day/${matchDayId}/top-scorers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`,
           method: "GET",
         };
       },
@@ -50,28 +50,28 @@ export const statisticsApi = apiWithTags.injectEndpoints({
     }),
 
     /**
-     * Get top assist providers in a tournament
+     * Get top assist providers in a matchDay
      */
     getTopAssists: builder.query<
       IGetTopAssistsResponse,
-      { tournamentId: number }
+      { matchDayId: number }
     >({
-      query: ({ tournamentId}) => ({
-        url: `/statistics/tournaments/${tournamentId}/top-assists`,
+      query: ({ matchDayId}) => ({
+        url: `/statistics/match-days/${matchDayId}/top-assists`,
         method: "GET",
       }),
       providesTags: ["statistics"],
     }),
 
     /**
-     * Get players with most disciplinary cards in a tournament
+     * Get players with most disciplinary cards in a matchDay
      */
     getTopCards: builder.query<
       IGetTopCardsResponse,
-      { tournamentId: number }
+      { matchDayId: number }
     >({
-      query: ({ tournamentId }) => ({
-        url: `/statistics/tournaments/${tournamentId}/top-cards`,
+      query: ({ matchDayId }) => ({
+        url: `/statistics/match-days/${matchDayId}/top-cards`,
         method: "GET",
       }),
       providesTags: ["statistics"],
@@ -92,14 +92,14 @@ export const statisticsApi = apiWithTags.injectEndpoints({
     }),
 
     /**
-     * Get all statistics for a player across all matches in a tournament
+     * Get all statistics for a player across all matches in a matchDay
      */
-    getPlayerTournamentStatistics: builder.query<
-      IGetPlayerTournamentStatisticsResponse,
-      { tournamentId: number; playerId: number }
+    getPlayerMatchDayStatistics: builder.query<
+      IGetPlayerMatchDayStatisticsResponse,
+      { matchDayId: number; playerId: number }
     >({
-      query: ({ tournamentId, playerId }) => ({
-        url: `/statistics/tournaments/${tournamentId}/players/${playerId}`,
+      query: ({ matchDayId, playerId }) => ({
+        url: `/statistics/match-days/${matchDayId}/players/${playerId}`,
         method: "GET",
       }),
       providesTags: ["statistics"],
@@ -108,12 +108,12 @@ export const statisticsApi = apiWithTags.injectEndpoints({
     /**
      * Get player statistics with optional filters
      */
-    aggregateTournamentStatistics: builder.mutation<
+    aggregateMatchDayStatistics: builder.mutation<
       { status: string; message: string },
-      { tournamentId: number }
+      { matchDayId: number }
     >({
-      query: ({ tournamentId }) => ({
-        url: `/statistics/tournaments/${tournamentId}/aggregate`,
+      query: ({ matchDayId }) => ({
+        url: `/statistics/match-days/${matchDayId}/aggregate`,
         method: "POST",
       }),
       invalidatesTags: ["statistics"],
@@ -122,7 +122,7 @@ export const statisticsApi = apiWithTags.injectEndpoints({
     getPlayerStatistics: builder.query<
       IGetPlayerStatisticsResponse,
       {
-        tournamentId?: number;
+        matchDayId?: number;
         position?: string;
         sortBy?: string;
         sortOrder?: string;
@@ -133,7 +133,7 @@ export const statisticsApi = apiWithTags.injectEndpoints({
     >({
       query: (params) => {
         const queryParams = new URLSearchParams();
-        if (params.tournamentId) queryParams.append('tournamentId', params.tournamentId.toString());
+        if (params.matchDayId) queryParams.append('matchDayId', params.matchDayId.toString());
         if (params.position) queryParams.append('position', params.position);
         if (params.sortBy) queryParams.append('sortBy', params.sortBy);
         if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
@@ -150,7 +150,7 @@ export const statisticsApi = apiWithTags.injectEndpoints({
     }),
 
     /**
-     * A player's full match-by-match history across all tournaments (newest first)
+     * A player's full match-by-match history across all matchDays (newest first)
      */
     getPlayerMatchHistory: builder.query<
       IGetPlayerMatchHistoryResponse,
@@ -166,13 +166,13 @@ export const statisticsApi = apiWithTags.injectEndpoints({
 });
 
 export const {
-  useGetTournamentStandingsQuery,
+  useGetMatchDayStandingsQuery,
   useGetTopScorersQuery,
   useGetTopAssistsQuery,
   useGetTopCardsQuery,
   useGetMatchPlayerStatisticsQuery,
-  useGetPlayerTournamentStatisticsQuery,
+  useGetPlayerMatchDayStatisticsQuery,
   useGetPlayerStatisticsQuery,
   useGetPlayerMatchHistoryQuery,
-  useAggregateTournamentStatisticsMutation,
+  useAggregateMatchDayStatisticsMutation,
 } = statisticsApi;

@@ -8,8 +8,8 @@ public class AuctionBid : AuditableEntity
     public long AuctionSessionId { get; set; }
     public AuctionSession AuctionSession { get; set; } = null!;
 
-    public long TournamentId { get; set; }
-    public Tournament Tournament { get; set; } = null!;
+    public long MatchDayId { get; set; }
+    public MatchDay MatchDay { get; set; } = null!;
 
     public long AuctionPlayerId { get; set; }
     public AuctionPlayer AuctionPlayer { get; set; } = null!;

@@ -14,10 +14,10 @@ public class LogicNodeService(BofcDbContext db, LogicNodeExecutor logicNodeExecu
 {
     public async Task<LogicNodeResponse> CreateLogicNodeAsync(LogicNodeRequest request)
     {
-        logger.LogInformation("Creating logic node: {Name} for tournament ID: {TournamentId}", request.NodeName, request.TournamentId);
+        logger.LogInformation("Creating logic node: {Name} for MatchDay ID: {MatchDayId}", request.NodeName, request.MatchDayId);
 
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == request.TournamentId)
-            ?? throw new TournamentServiceException(RestErrorMessageDetail.TournamentIsNotFound, HttpStatusCode.NotFound);
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == request.MatchDayId)
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
 
         if (request.SourceRoundId == null && request.SourceGroupId == null)
         {
@@ -33,11 +33,11 @@ public class LogicNodeService(BofcDbContext db, LogicNodeExecutor logicNodeExecu
                 HttpStatusCode.BadRequest);
         }
 
-        TournamentRound? sourceRound = null;
+        MatchDayRound? sourceRound = null;
         RoundGroup? sourceGroup = null;
         if (request.SourceRoundId != null)
         {
-            sourceRound = await db.TournamentRounds.FirstOrDefaultAsync(r => r.Id == request.SourceRoundId)
+            sourceRound = await db.MatchDayRounds.FirstOrDefaultAsync(r => r.Id == request.SourceRoundId)
                 ?? throw new RoundServiceException(RestErrorMessageDetail.RoundIsNotFound, HttpStatusCode.NotFound);
         }
         else
@@ -46,7 +46,7 @@ public class LogicNodeService(BofcDbContext db, LogicNodeExecutor logicNodeExecu
                 ?? throw new RoundServiceException(RestErrorMessageDetail.GroupIsNotFound, HttpStatusCode.NotFound);
         }
 
-        var targetRound = await db.TournamentRounds.FirstOrDefaultAsync(r => r.Id == request.TargetRoundId)
+        var targetRound = await db.MatchDayRounds.FirstOrDefaultAsync(r => r.Id == request.TargetRoundId)
             ?? throw new RoundServiceException(RestErrorMessageDetail.RoundIsNotFound, HttpStatusCode.NotFound);
 
         if (!Enum.TryParse<LogicNodeType>(request.NodeType, out var nodeType))
@@ -56,7 +56,7 @@ public class LogicNodeService(BofcDbContext db, LogicNodeExecutor logicNodeExecu
 
         var logicNode = new LogicNode
         {
-            TournamentId = tournament.Id,
+            MatchDayId = matchDay.Id,
             NodeName = request.NodeName!,
             NodeType = nodeType,
             SourceRoundId = sourceRound?.Id,
@@ -120,7 +120,7 @@ public class LogicNodeService(BofcDbContext db, LogicNodeExecutor logicNodeExecu
 
         if (request.SourceRoundId != null)
         {
-            var sourceRound = await db.TournamentRounds.FirstOrDefaultAsync(r => r.Id == request.SourceRoundId)
+            var sourceRound = await db.MatchDayRounds.FirstOrDefaultAsync(r => r.Id == request.SourceRoundId)
                 ?? throw new RoundServiceException(RestErrorMessageDetail.RoundIsNotFound, HttpStatusCode.NotFound);
             logicNode.SourceRoundId = sourceRound.Id;
             logicNode.SourceGroupId = null;
@@ -135,7 +135,7 @@ public class LogicNodeService(BofcDbContext db, LogicNodeExecutor logicNodeExecu
 
         if (request.TargetRoundId != null)
         {
-            var targetRound = await db.TournamentRounds.FirstOrDefaultAsync(r => r.Id == request.TargetRoundId)
+            var targetRound = await db.MatchDayRounds.FirstOrDefaultAsync(r => r.Id == request.TargetRoundId)
                 ?? throw new RoundServiceException(RestErrorMessageDetail.RoundIsNotFound, HttpStatusCode.NotFound);
             logicNode.TargetRoundId = targetRound.Id;
         }
@@ -166,10 +166,10 @@ public class LogicNodeService(BofcDbContext db, LogicNodeExecutor logicNodeExecu
         return await ConvertToResponseAsync(logicNode);
     }
 
-    public async Task<List<LogicNodeResponse>> GetLogicNodesByTournamentAsync(long tournamentId)
+    public async Task<List<LogicNodeResponse>> GetLogicNodesByMatchDayAsync(long matchDayId)
     {
         var logicNodes = await db.LogicNodes
-            .Where(n => n.TournamentId == tournamentId)
+            .Where(n => n.MatchDayId == matchDayId)
             .OrderBy(n => n.PriorityOrder == null)
             .ThenBy(n => n.PriorityOrder)
             .ThenBy(n => n.Id)
@@ -258,20 +258,20 @@ public class LogicNodeService(BofcDbContext db, LogicNodeExecutor logicNodeExecu
 
     private async Task<LogicNodeResponse> ConvertToResponseAsync(LogicNode logicNode)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == logicNode.TournamentId);
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == logicNode.MatchDayId);
         var sourceRound = logicNode.SourceRoundId != null
-            ? await db.TournamentRounds.FirstOrDefaultAsync(r => r.Id == logicNode.SourceRoundId)
+            ? await db.MatchDayRounds.FirstOrDefaultAsync(r => r.Id == logicNode.SourceRoundId)
             : null;
         var sourceGroup = logicNode.SourceGroupId != null
             ? await db.RoundGroups.FirstOrDefaultAsync(g => g.Id == logicNode.SourceGroupId)
             : null;
-        var targetRound = await db.TournamentRounds.FirstOrDefaultAsync(r => r.Id == logicNode.TargetRoundId);
+        var targetRound = await db.MatchDayRounds.FirstOrDefaultAsync(r => r.Id == logicNode.TargetRoundId);
 
         return new LogicNodeResponse
         {
             Id = logicNode.Id,
-            TournamentId = logicNode.TournamentId,
-            TournamentName = tournament?.Name,
+            MatchDayId = logicNode.MatchDayId,
+            MatchDayName = matchDay?.Name,
             NodeName = logicNode.NodeName,
             NodeType = logicNode.NodeType.ToString(),
             SourceRoundId = sourceRound?.Id,

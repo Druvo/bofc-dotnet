@@ -6,8 +6,8 @@ namespace BofcBackend.Api.Features.Auction.Models;
 public class AuctionRegistrationResponse
 {
     public long Id { get; set; }
-    public long TournamentId { get; set; }
-    public string TournamentName { get; set; } = string.Empty;
+    public long MatchDayId { get; set; }
+    public string MatchDayName { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string EmployeeId { get; set; } = string.Empty;

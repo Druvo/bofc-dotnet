@@ -9,16 +9,16 @@ namespace BofcBackend.Api.Features.Auction;
 /// <summary>Port of service/auction/TeamBudgetServiceImpl.java.</summary>
 public class TeamBudgetService(BofcDbContext db)
 {
-    public async Task<List<TeamBudgetResponse>> GetTeamBudgetsAsync(long tournamentId)
+    public async Task<List<TeamBudgetResponse>> GetTeamBudgetsAsync(long matchDayId)
     {
-        var budgets = await LoadQuery().Where(b => b.TournamentId == tournamentId).ToListAsync();
+        var budgets = await LoadQuery().Where(b => b.MatchDayId == matchDayId).ToListAsync();
         return budgets.Select(MapToResponse).ToList();
     }
 
-    public async Task<TeamBudgetResponse> CreateTeamBudgetAsync(long tournamentId, TeamBudgetRequest request)
+    public async Task<TeamBudgetResponse> CreateTeamBudgetAsync(long matchDayId, TeamBudgetRequest request)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new ResourceNotFoundException($"Tournament not found: {tournamentId}");
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new ResourceNotFoundException($"MatchDay not found: {matchDayId}");
 
         var team = await db.Teams.FirstOrDefaultAsync(t => t.Id == request.TeamId)
             ?? throw new ResourceNotFoundException($"Team not found: {request.TeamId}");
@@ -26,14 +26,14 @@ public class TeamBudgetService(BofcDbContext db)
         var owner = await db.Players.FirstOrDefaultAsync(p => p.Id == request.OwnerId)
             ?? throw new ResourceNotFoundException($"Owner not found: {request.OwnerId}");
 
-        if (await db.TeamBudgets.AnyAsync(b => b.TournamentId == tournamentId && b.TeamId == request.TeamId))
+        if (await db.TeamBudgets.AnyAsync(b => b.MatchDayId == matchDayId && b.TeamId == request.TeamId))
         {
-            throw new InvalidOperationException("Budget already exists for this team in this tournament");
+            throw new InvalidOperationException("Budget already exists for this team in this MatchDay");
         }
 
         var budget = new TeamBudget
         {
-            TournamentId = tournament.Id,
+            MatchDayId = matchDay.Id,
             TeamId = team.Id,
             OwnerId = owner.Id,
             TotalBudget = request.TotalBudget!.Value,
@@ -47,14 +47,14 @@ public class TeamBudgetService(BofcDbContext db)
         return await MapToResponseByIdAsync(budget.Id);
     }
 
-    public async Task<TeamBudgetResponse> UpdateTeamBudgetAsync(long tournamentId, long id, TeamBudgetRequest request)
+    public async Task<TeamBudgetResponse> UpdateTeamBudgetAsync(long matchDayId, long id, TeamBudgetRequest request)
     {
         var budget = await db.TeamBudgets.FirstOrDefaultAsync(b => b.Id == id)
             ?? throw new ResourceNotFoundException($"Team budget not found: {id}");
 
-        if (budget.TournamentId != tournamentId)
+        if (budget.MatchDayId != matchDayId)
         {
-            throw new InvalidOperationException("Budget does not belong to this tournament");
+            throw new InvalidOperationException("Budget does not belong to this MatchDay");
         }
 
         if (request.TotalBudget != null)
@@ -75,14 +75,14 @@ public class TeamBudgetService(BofcDbContext db)
         return await MapToResponseByIdAsync(budget.Id);
     }
 
-    public async Task DeleteTeamBudgetAsync(long tournamentId, long id)
+    public async Task DeleteTeamBudgetAsync(long matchDayId, long id)
     {
         var budget = await db.TeamBudgets.FirstOrDefaultAsync(b => b.Id == id)
             ?? throw new ResourceNotFoundException($"Team budget not found: {id}");
 
-        if (budget.TournamentId != tournamentId)
+        if (budget.MatchDayId != matchDayId)
         {
-            throw new InvalidOperationException("Budget does not belong to this tournament");
+            throw new InvalidOperationException("Budget does not belong to this MatchDay");
         }
 
         if (budget.PlayersBought > 0)
@@ -102,7 +102,7 @@ public class TeamBudgetService(BofcDbContext db)
     public static TeamBudgetResponse MapToResponse(TeamBudget budget) => new()
     {
         Id = budget.Id,
-        TournamentId = budget.TournamentId,
+        MatchDayId = budget.MatchDayId,
         TeamId = budget.Team.Id,
         TeamName = budget.Team.TeamName,
         OwnerId = budget.Owner.Id,

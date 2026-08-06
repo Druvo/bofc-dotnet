@@ -29,8 +29,8 @@ using BofcBackend.Api.Features.Rounds;
 using BofcBackend.Api.Features.Settings;
 using BofcBackend.Api.Features.Statistics;
 using BofcBackend.Api.Features.Teams;
-using BofcBackend.Api.Features.TournamentParticipants;
-using BofcBackend.Api.Features.Tournaments;
+using BofcBackend.Api.Features.MatchDayParticipants;
+using BofcBackend.Api.Features.MatchDays;
 using BofcBackend.Api.Features.Venues;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -80,7 +80,7 @@ builder.Services.Configure<VapidOptions>(builder.Configuration.GetSection("Vapid
 builder.Services.AddDataProtection();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
-builder.Services.AddHostedService<TournamentReminderBackgroundService>();
+builder.Services.AddHostedService<MatchDayReminderBackgroundService>();
 builder.Services.AddHostedService<PaymentDueReminderBackgroundService>();
 builder.Services.AddHostedService<MatchDaySchedulerBackgroundService>();
 
@@ -91,18 +91,18 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IClubRuleService, ClubRuleService>();
-builder.Services.AddScoped<ITournamentService, TournamentService>();
+builder.Services.AddScoped<IMatchDayService, MatchDayService>();
 builder.Services.AddSingleton<FixtureValidationService>();
-builder.Services.AddScoped<ITournamentPrizeService, TournamentPrizeService>();
+builder.Services.AddScoped<IMatchDayPrizeService, MatchDayPrizeService>();
 builder.Services.AddScoped<IPlayerStatisticsService, PlayerStatisticsService>();
 builder.Services.Configure<PlayerOptions>(builder.Configuration.GetSection("Player"));
 builder.Services.Configure<AccountingOptions>(builder.Configuration.GetSection("Accounting"));
 builder.Services.AddScoped<IPlayerService, PlayerService>();
-builder.Services.AddScoped<ITournamentParticipantService, TournamentParticipantService>();
-builder.Services.AddScoped<ITournamentParticipantPlayerService, TournamentParticipantPlayerService>();
+builder.Services.AddScoped<IMatchDayParticipantService, MatchDayParticipantService>();
+builder.Services.AddScoped<IMatchDayParticipantPlayerService, MatchDayParticipantPlayerService>();
 
-// Port of TournamentSchedulerService.java's @Scheduled cron job (Asia/Dhaka 00:00/08:00/11:00).
-builder.Services.AddHostedService<TournamentStatusSchedulerBackgroundService>();
+// Port of MatchDaySchedulerService.java's @Scheduled cron job (Asia/Dhaka 00:00/08:00/11:00).
+builder.Services.AddHostedService<MatchDayStatusSchedulerBackgroundService>();
 
 // --- Match domain (live updates over SSE, not the auction's WebSocket/STOMP).
 builder.Services.AddSingleton<ILiveMatchUpdatePublisher, LiveMatchUpdatePublisher>();
@@ -110,7 +110,7 @@ builder.Services.AddHostedService<MatchHeartbeatBackgroundService>();
 builder.Services.AddScoped<IMatchManagementService, MatchManagementService>();
 
 builder.Services.AddScoped<IRoundGroupService, RoundGroupService>();
-builder.Services.AddScoped<ITournamentRoundService, TournamentRoundService>();
+builder.Services.AddScoped<IMatchDayRoundService, MatchDayRoundService>();
 
 builder.Services.AddScoped<IMatchStatisticsService, MatchStatisticsService>();
 

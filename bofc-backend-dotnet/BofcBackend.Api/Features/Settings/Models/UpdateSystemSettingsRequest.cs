@@ -27,10 +27,10 @@ public class UpdateSystemSettingsRequest
 
     public bool SmtpUseSsl { get; set; } = true;
 
-    public bool NotifyTournamentReminderEnabled { get; set; }
+    public bool NotifyMatchDayReminderEnabled { get; set; }
 
     [Range(1, 30)]
-    public int TournamentReminderDaysBefore { get; set; } = 3;
+    public int MatchDayReminderDaysBefore { get; set; } = 3;
 
     public bool NotifyPaymentDueEnabled { get; set; }
 

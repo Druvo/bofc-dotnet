@@ -14,28 +14,28 @@ import {
   DownOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useGetTournamentsQuery } from "../../state/features/tournaments/tournamentsSlice";
+import { useGetMatchDaysQuery } from "../../state/features/matchDays/matchDaysSlice";
 import { useGetAuctionSessionQuery, useGetAuctionSettingsQuery, useGetAuctionDashboardQuery } from "../../state/features/auction/auctionSlice";
 import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
-import { IoTournamentSingleSummaryType } from "../../state/features/tournaments/tournamentTypes";
+import { IoMatchDaySingleSummaryType } from "../../state/features/matchDays/matchDayTypes";
 import { AuctionPage, AuctionHeader, PanelCard, StatusPill, ac } from "./AuctionAtoms";
 import Button from "../ui/button";
 import Loader from "../ui/loader";
 import { Dropdown, DropdownItem } from "../ui/dropdown";
 import VenueLink from "../CommonAtoms/VenueLink";
 
-const TournamentAuctionCard: React.FC<{ tournament: IoTournamentSingleSummaryType; isAdmin: boolean }> = ({
-  tournament,
+const MatchDayAuctionCard: React.FC<{ matchDay: IoMatchDaySingleSummaryType; isAdmin: boolean }> = ({
+  matchDay,
   isAdmin,
 }) => {
   const navigate = useNavigate();
   // Poll the session so the hub reflects live state without a manual refresh.
-  const { data: session } = useGetAuctionSessionQuery(tournament.id, { pollingInterval: 15000 });
-  const { data: settings } = useGetAuctionSettingsQuery(tournament.id);
+  const { data: session } = useGetAuctionSessionQuery(matchDay.id, { pollingInterval: 15000 });
+  const { data: settings } = useGetAuctionSettingsQuery(matchDay.id);
   const isLive = session?.status === "RUNNING" || session?.status === "PAUSED";
   // Only pull live counts while the auction is actually running.
-  const { data: dashboard } = useGetAuctionDashboardQuery(tournament.id, {
+  const { data: dashboard } = useGetAuctionDashboardQuery(matchDay.id, {
     skip: !isLive,
     pollingInterval: isLive ? 10000 : 0,
   });
@@ -57,7 +57,7 @@ const TournamentAuctionCard: React.FC<{ tournament: IoTournamentSingleSummaryTyp
       {/* Status row + admin menu */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5">
-          <StatusPill status={tournament.tournamentStatus || "UPCOMING"} />
+          <StatusPill status={matchDay.matchDayStatus || "UPCOMING"} />
           {session?.status === "RUNNING" ? (
             <span className="auction-live-chip">Live</span>
           ) : (
@@ -87,7 +87,7 @@ const TournamentAuctionCard: React.FC<{ tournament: IoTournamentSingleSummaryTyp
                     key={item.key}
                     onClick={() => {
                       close();
-                      navigate(`/auction/${item.key}/${tournament.id}`);
+                      navigate(`/auction/${item.key}/${matchDay.id}`);
                     }}
                   >
                     {item.icon}
@@ -104,17 +104,17 @@ const TournamentAuctionCard: React.FC<{ tournament: IoTournamentSingleSummaryTyp
       <div
         className="truncate text-[17px] font-semibold leading-tight"
         style={{ color: ac.textPrimary }}
-        title={tournament.name}
+        title={matchDay.name}
       >
-        {tournament.name}
+        {matchDay.name}
       </div>
 
       {/* Venue */}
       <div className="flex items-center gap-2">
-        {tournament.venueName ? (
+        {matchDay.venueName ? (
           <VenueLink
-            name={tournament.venueName}
-            mapLink={tournament.venueMapLink}
+            name={matchDay.venueName}
+            mapLink={matchDay.venueMapLink}
             iconClassName="text-[13px]"
             style={{ color: ac.textMuted }}
             className="truncate text-[12.5px] hover:underline"
@@ -151,7 +151,7 @@ const TournamentAuctionCard: React.FC<{ tournament: IoTournamentSingleSummaryTyp
         <Button
           size="sm"
           startIcon={<PlayCircleOutlined />}
-          onClick={() => navigate(`/auction/live/${tournament.id}`)}
+          onClick={() => navigate(`/auction/live/${matchDay.id}`)}
           className={isLive ? "!bg-[var(--pitch,#2f9e63)]" : undefined}
           style={isLive ? { background: ac.pitch, borderColor: ac.pitch } : undefined}
         >
@@ -162,13 +162,13 @@ const TournamentAuctionCard: React.FC<{ tournament: IoTournamentSingleSummaryTyp
             size="sm"
             variant="outline"
             startIcon={<UserAddOutlined />}
-            onClick={() => navigate(`/auction/register/${tournament.id}`)}
+            onClick={() => navigate(`/auction/register/${matchDay.id}`)}
             disabled={registrationClosed}
           >
             Register
           </Button>
         </span>
-        <Button size="sm" variant="outline" startIcon={<TrophyOutlined />} onClick={() => navigate(`/auction/results/${tournament.id}`)}>
+        <Button size="sm" variant="outline" startIcon={<TrophyOutlined />} onClick={() => navigate(`/auction/results/${matchDay.id}`)}>
           Results
         </Button>
       </div>
@@ -181,15 +181,15 @@ const AuctionHubPage: React.FC = () => {
   const isAdmin = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN");
   const [guideOpen, setGuideOpen] = useState(false);
 
-  const { data: tournamentsData, isLoading } = useGetTournamentsQuery({
+  const { data: matchDaysData, isLoading } = useGetMatchDaysQuery({
     offSet: 0,
     pageSize: 50,
-    sortedBy: "tournamentDate",
+    sortedBy: "matchDayDate",
     sortDirection: "DESC",
   });
 
-  const auctionTournaments =
-    tournamentsData?.content?.tournaments?.filter((t: IoTournamentSingleSummaryType) => t.auctionMode) || [];
+  const auctionMatchDays =
+    matchDaysData?.content?.matchDays?.filter((t: IoMatchDaySingleSummaryType) => t.auctionMode) || [];
 
   const guideSteps = [
     { title: "Create MatchDay", description: "Toggle 'Auction Mode' ON when creating" },
@@ -210,8 +210,8 @@ const AuctionHubPage: React.FC = () => {
         subtitle="Select a MatchDay to manage or participate in its player auction."
       />
 
-      {/* Tournaments first — the primary content */}
-      {auctionTournaments.length === 0 ? (
+      {/* MatchDays first — the primary content */}
+      {auctionMatchDays.length === 0 ? (
         <PanelCard>
           <div className="py-10 text-center text-theme-sm" style={{ color: ac.textMuted }}>
             <FireOutlined className="mb-2 block text-3xl" style={{ opacity: 0.4 }} />
@@ -220,8 +220,8 @@ const AuctionHubPage: React.FC = () => {
         </PanelCard>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {auctionTournaments.map((tournament: IoTournamentSingleSummaryType) => (
-            <TournamentAuctionCard key={tournament.id} tournament={tournament} isAdmin={isAdmin} />
+          {auctionMatchDays.map((matchDay: IoMatchDaySingleSummaryType) => (
+            <MatchDayAuctionCard key={matchDay.id} matchDay={matchDay} isAdmin={isAdmin} />
           ))}
         </div>
       )}

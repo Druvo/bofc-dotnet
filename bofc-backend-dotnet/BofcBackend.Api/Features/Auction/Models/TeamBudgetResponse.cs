@@ -4,7 +4,7 @@ namespace BofcBackend.Api.Features.Auction.Models;
 public class TeamBudgetResponse
 {
     public long Id { get; set; }
-    public long TournamentId { get; set; }
+    public long MatchDayId { get; set; }
     public long TeamId { get; set; }
     public string TeamName { get; set; } = string.Empty;
     public long OwnerId { get; set; }

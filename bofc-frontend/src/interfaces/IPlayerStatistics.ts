@@ -15,7 +15,7 @@ export interface PlayerStatisticsResponse {
 }
 
 export interface PlayerStatisticsFilterRequest {
-    tournamentId?: number;
+    matchDayId?: number;
     position?: string;
     sortBy?: string;
     sortOrder?: string;

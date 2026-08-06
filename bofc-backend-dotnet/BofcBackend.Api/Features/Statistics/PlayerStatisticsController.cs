@@ -16,7 +16,7 @@ public class PlayerStatisticsController(IPlayerStatisticsService playerStatistic
 {
     [HttpGet]
     public async Task<IActionResult> GetPlayerStatistics(
-        [FromQuery] long? tournamentId,
+        [FromQuery] long? matchDayId,
         [FromQuery] bool weeklyMatchDaysOnly = false,
         [FromQuery] FootballPosition? position = null,
         [FromQuery] string sortBy = "goalsAssists",
@@ -26,7 +26,7 @@ public class PlayerStatisticsController(IPlayerStatisticsService playerStatistic
     {
         var filter = new PlayerStatisticsFilterRequest
         {
-            TournamentId = tournamentId,
+            MatchDayId = matchDayId,
             WeeklyMatchDaysOnly = weeklyMatchDaysOnly,
             Position = position,
             SortBy = sortBy,
@@ -39,10 +39,10 @@ public class PlayerStatisticsController(IPlayerStatisticsService playerStatistic
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
     }
 
-    [HttpGet("tournament/{tournamentId}/top-scorers")]
-    public async Task<IActionResult> GetTopScorersByTournament(long tournamentId, [FromQuery] int limit = 1)
+    [HttpGet("match-day/{matchDayId}/top-scorers")]
+    public async Task<IActionResult> GetTopScorersByMatchDay(long matchDayId, [FromQuery] int limit = 1)
     {
-        var response = await playerStatisticsService.GetTopScorersByTournamentAsync(tournamentId, limit);
+        var response = await playerStatisticsService.GetTopScorersByMatchDayAsync(matchDayId, limit);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
     }
 }

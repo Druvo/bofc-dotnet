@@ -23,8 +23,8 @@ public class SystemSettings : AuditableEntity
     public string? SmtpFromName { get; set; }
     public bool SmtpUseSsl { get; set; } = true;
 
-    public bool NotifyTournamentReminderEnabled { get; set; }
-    public int TournamentReminderDaysBefore { get; set; } = 3;
+    public bool NotifyMatchDayReminderEnabled { get; set; }
+    public int MatchDayReminderDaysBefore { get; set; } = 3;
 
     public bool NotifyPaymentDueEnabled { get; set; }
     public int PaymentDueReminderDayOfMonth { get; set; } = 25;
@@ -41,13 +41,13 @@ public class SystemSettings : AuditableEntity
     /// <summary>"yyyy-MM" of the last month the payment-due reminder actually ran — guards against re-sending twice in one month.</summary>
     public string? LastPaymentReminderSentMonth { get; set; }
 
-    // --- Match Day: drives MatchDaySchedulerBackgroundService, which auto-creates a Tournament
+    // --- Match Day: drives MatchDaySchedulerBackgroundService, which auto-creates a MatchDay
     // (IsWeeklyMatchDay=true) every week from these settings — day/time/venue/sport are the
-    // tournament's own date/venue/sport-type; duration + time-gap drive the sequential match
+    // MatchDay's own date/venue/sport-type; duration + time-gap drive the sequential match
     // time-slotting when generating that day's round-robin fixtures.
     public bool WeeklyMatchEnabled { get; set; }
 
-    /// <summary>Prefix used when naming each auto-created weekly tournament: "{prefix} — {date}", e.g. "Next Match — Aug 7, 2026".</summary>
+    /// <summary>Prefix used when naming each auto-created weekly MatchDay: "{prefix} — {date}", e.g. "Next Match — Aug 7, 2026".</summary>
     public string WeeklyMatchNamePrefix { get; set; } = "Next Match";
 
     public DayOfWeek WeeklyMatchDayOfWeek { get; set; } = DayOfWeek.Friday;

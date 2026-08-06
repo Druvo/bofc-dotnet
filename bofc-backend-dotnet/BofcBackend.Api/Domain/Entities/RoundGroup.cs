@@ -8,7 +8,7 @@ public class RoundGroup : AuditableEntity
     public long Id { get; set; }
 
     public long RoundId { get; set; }
-    public TournamentRound Round { get; set; } = null!;
+    public MatchDayRound Round { get; set; } = null!;
 
     public long? ParentGroupId { get; set; }
     public RoundGroup? ParentGroup { get; set; }

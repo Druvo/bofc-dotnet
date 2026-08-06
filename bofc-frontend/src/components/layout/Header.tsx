@@ -14,7 +14,7 @@ import {
   useMarkNotificationReadMutation,
   useMarkAllNotificationsReadMutation,
 } from "../../state/features/notifications/notificationSlice";
-import { useGetTournamentsQuery } from "../../state/features/tournaments/tournamentsSlice";
+import { useGetMatchDaysQuery } from "../../state/features/matchDays/matchDaysSlice";
 import { useGetVanuesQuery } from "../../state/features/vanues/vanuesSlice";
 
 const NOTIF_PREVIEW_LIMIT = 5;
@@ -28,7 +28,7 @@ const NOTIF_PREVIEW_LIMIT = 5;
  *
  * The search box was TailAdmin's own decorative demo data (readOnly input,
  * no backend to query) — now does a real client-side search across players,
- * tournaments, and venues using the same list queries those pages already
+ * matchDays, and venues using the same list queries those pages already
  * fetch (RTK Query cache means this doesn't cost an extra round-trip once
  * the user's visited any of them). The notification bell is wired to the
  * real in-app log (browserNotifications.ts); its dropdown shows a recent
@@ -73,10 +73,10 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
   const searchBoxRef = useRef<HTMLDivElement>(null);
 
   const { data: playersData } = useGetPlayersQuery();
-  const { data: tournamentsData } = useGetTournamentsQuery({
+  const { data: matchDaysData } = useGetMatchDaysQuery({
     offSet: 0,
     pageSize: 200,
-    sortedBy: "tournamentDate",
+    sortedBy: "matchDayDate",
     sortDirection: "DESC",
   });
   const { data: venuesData } = useGetVanuesQuery();
@@ -97,14 +97,14 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
     [playersData, trimmedQuery]
   );
 
-  const matchedTournaments = useMemo(
+  const matchedMatchDays = useMemo(
     () =>
       !trimmedQuery
         ? []
-        : (tournamentsData?.content?.tournaments ?? [])
+        : (matchDaysData?.content?.matchDays ?? [])
             .filter((t) => t.name?.toLowerCase().includes(trimmedQuery))
             .slice(0, SEARCH_RESULT_LIMIT),
-    [tournamentsData, trimmedQuery]
+    [matchDaysData, trimmedQuery]
   );
 
   const matchedVenues = useMemo(
@@ -121,7 +121,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
     [venuesData, trimmedQuery]
   );
 
-  const hasSearchResults = matchedPlayers.length > 0 || matchedTournaments.length > 0 || matchedVenues.length > 0;
+  const hasSearchResults = matchedPlayers.length > 0 || matchedMatchDays.length > 0 || matchedVenues.length > 0;
 
   useEffect(() => {
     if (!searchOpen) return;
@@ -232,15 +232,15 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                           ))}
                         </div>
                       )}
-                      {matchedTournaments.length > 0 && (
+                      {matchedMatchDays.length > 0 && (
                         <div className="mb-1">
                           <span className="block px-3 py-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">MatchDays</span>
-                          {matchedTournaments.map((t) => (
+                          {matchedMatchDays.map((t) => (
                             <button
                               key={t.id}
                               type="button"
                               onClick={() => {
-                                navigate(`/tournament-viewer/${t.id}`);
+                                navigate(`/match-day-viewer/${t.id}`);
                                 closeSearch();
                               }}
                               className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-theme-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"

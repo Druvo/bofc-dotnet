@@ -19,7 +19,7 @@ export enum MatchEventType {
   MATCH_COMPLETED = "MATCH_COMPLETED",
 }
 
-export enum TournamentType {
+export enum MatchDayType {
   ROUND_ROBIN = "ROUND_ROBIN",
   DOUBLE_ROUND_ROBIN = "DOUBLE_ROUND_ROBIN",
   GROUP_STAGE = "GROUP_STAGE",
@@ -29,8 +29,8 @@ export enum TournamentType {
 // Fixture/Match Types
 export interface IFixture {
   id: number;
-  tournamentId: number;
-  tournamentName: string;
+  matchDayId: number;
+  matchDayName: string;
   homeTeamId: number;
   homeTeamName: string;
   awayTeamId: number;
@@ -74,13 +74,13 @@ export interface IGetMatchResponse extends BasicResType {
 
 // Fixture Generation Request - Simplified API
 export interface IFixtureGenerationRequest {
-  tournamentId: number;
+  matchDayId: number;
   teamIds: number[];
   matchDates: string[];
   timeGapMinutes?: number;
   matchDurationMinutes?: number;
   venueId?: number;
-  tournamentType?: TournamentType;
+  matchDayType?: MatchDayType;
   /** 1-based match number after which a one-time break is inserted. */
   breakAfterMatchNumber?: number;
   /** Length of that one-time break, in minutes. Ignored unless breakAfterMatchNumber is set. */
@@ -229,7 +229,7 @@ export interface IDeleteEventResponse extends BasicResType {}
 
 // Create Match Request
 export interface ICreateMatchRequest {
-  tournamentId: number;
+  matchDayId: number;
   roundId?: number;
   groupId?: number;
   homeTeamId: number;

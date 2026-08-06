@@ -4,10 +4,10 @@ namespace BofcBackend.Api.Features.Statistics.Models;
 
 public class PlayerStatisticsFilterRequest
 {
-    /// <summary>Filter by tournament participation (null = all players; provided = only players in teams for that tournament).</summary>
-    public long? TournamentId { get; set; }
+    /// <summary>Filter by MatchDay participation (null = all players; provided = only players in teams for that MatchDay).</summary>
+    public long? MatchDayId { get; set; }
 
-    /// <summary>Season-cumulative leaderboard across every auto-created Match Day (IsWeeklyMatchDay=true), ignoring TournamentId. Mutually exclusive with TournamentId in practice — if both are set, TournamentId wins.</summary>
+    /// <summary>Season-cumulative leaderboard across every auto-created Match Day (IsWeeklyMatchDay=true), ignoring MatchDayId. Mutually exclusive with MatchDayId in practice — if both are set, MatchDayId wins.</summary>
     public bool WeeklyMatchDaysOnly { get; set; }
 
     public FootballPosition? Position { get; set; }

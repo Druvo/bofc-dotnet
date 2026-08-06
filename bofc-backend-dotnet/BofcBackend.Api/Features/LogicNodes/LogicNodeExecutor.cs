@@ -29,7 +29,7 @@ public class LogicNodeExecutor(BofcDbContext db, ILogger<LogicNodeExecutor> logg
 
             if (logicNode.SourceRoundId != null)
             {
-                var sourceRound = await db.TournamentRounds.FirstOrDefaultAsync(r => r.Id == logicNode.SourceRoundId)
+                var sourceRound = await db.MatchDayRounds.FirstOrDefaultAsync(r => r.Id == logicNode.SourceRoundId)
                     ?? throw new RoundServiceException("Round is not found", HttpStatusCode.NotFound);
                 sourceRoundId = sourceRound.Id;
                 sourceRoundName = sourceRound.RoundName;
@@ -54,7 +54,7 @@ public class LogicNodeExecutor(BofcDbContext db, ILogger<LogicNodeExecutor> logg
                 return null;
             }
 
-            var targetRound = await db.TournamentRounds.FirstOrDefaultAsync(r => r.Id == logicNode.TargetRoundId)
+            var targetRound = await db.MatchDayRounds.FirstOrDefaultAsync(r => r.Id == logicNode.TargetRoundId)
                 ?? throw new RoundServiceException("Round is not found", HttpStatusCode.NotFound);
 
             var advancedTeams = await AssignTeamsToTargetRoundAsync(teamsToAdvance, targetRound, logicNode);
@@ -81,7 +81,7 @@ public class LogicNodeExecutor(BofcDbContext db, ILogger<LogicNodeExecutor> logg
         }
     }
 
-    private async Task<List<Team>> GetTeamsFromRoundAsync(TournamentRound sourceRound, string ruleType, int topN, JsonElement ruleConfig)
+    private async Task<List<Team>> GetTeamsFromRoundAsync(MatchDayRound sourceRound, string ruleType, int topN, JsonElement ruleConfig)
     {
         var teams = new List<Team>();
 
@@ -203,7 +203,7 @@ public class LogicNodeExecutor(BofcDbContext db, ILogger<LogicNodeExecutor> logg
     }
 
     private async Task<List<AdvancedTeamsResponse.TeamAdvancementInfo>> AssignTeamsToTargetRoundAsync(
-        List<Team> teams, TournamentRound targetRound, LogicNode logicNode)
+        List<Team> teams, MatchDayRound targetRound, LogicNode logicNode)
     {
         var advancedTeams = new List<AdvancedTeamsResponse.TeamAdvancementInfo>();
 

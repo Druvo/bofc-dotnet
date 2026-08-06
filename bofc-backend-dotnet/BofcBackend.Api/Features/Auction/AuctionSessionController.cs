@@ -13,7 +13,7 @@ namespace BofcBackend.Api.Features.Auction;
 /// auction slice reads the response body as the DTO itself, not response.data.content.
 /// </summary>
 [ApiController]
-[Route("tournaments/{tournamentId}/auction")]
+[Route("match-days/{matchDayId}/auction")]
 public class AuctionSessionController(AuctionSessionService sessionService, ICurrentUserService currentUserService) : ControllerBase
 {
     private const string AdminSuperAdmin = PlayerRoleNames.AdminOrSuperAdmin;
@@ -21,83 +21,83 @@ public class AuctionSessionController(AuctionSessionService sessionService, ICur
 
     [AllowAnonymous]
     [HttpGet("session")]
-    public async Task<IActionResult> GetSession(long tournamentId) => Ok(await sessionService.GetSessionAsync(tournamentId));
+    public async Task<IActionResult> GetSession(long matchDayId) => Ok(await sessionService.GetSessionAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/start")]
-    public async Task<IActionResult> StartAuction(long tournamentId) => Ok(await sessionService.StartAuctionAsync(tournamentId));
+    public async Task<IActionResult> StartAuction(long matchDayId) => Ok(await sessionService.StartAuctionAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/pause")]
-    public async Task<IActionResult> PauseAuction(long tournamentId) => Ok(await sessionService.PauseAuctionAsync(tournamentId));
+    public async Task<IActionResult> PauseAuction(long matchDayId) => Ok(await sessionService.PauseAuctionAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/resume")]
-    public async Task<IActionResult> ResumeAuction(long tournamentId) => Ok(await sessionService.ResumeAuctionAsync(tournamentId));
+    public async Task<IActionResult> ResumeAuction(long matchDayId) => Ok(await sessionService.ResumeAuctionAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/end")]
-    public async Task<IActionResult> EndAuction(long tournamentId) => Ok(await sessionService.EndAuctionAsync(tournamentId));
+    public async Task<IActionResult> EndAuction(long matchDayId) => Ok(await sessionService.EndAuctionAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/next-player")]
-    public async Task<IActionResult> NextPlayer(long tournamentId) => Ok(await sessionService.NextPlayerAsync(tournamentId));
+    public async Task<IActionResult> NextPlayer(long matchDayId) => Ok(await sessionService.NextPlayerAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/next-player/random")]
-    public async Task<IActionResult> NextPlayerRandom(long tournamentId) => Ok(await sessionService.NextPlayerRandomAsync(tournamentId));
+    public async Task<IActionResult> NextPlayerRandom(long matchDayId) => Ok(await sessionService.NextPlayerRandomAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/skip-player")]
-    public async Task<IActionResult> SkipPlayer(long tournamentId) => Ok(await sessionService.SkipPlayerAsync(tournamentId));
+    public async Task<IActionResult> SkipPlayer(long matchDayId) => Ok(await sessionService.SkipPlayerAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/mark-sold")]
-    public async Task<IActionResult> MarkSold(long tournamentId) => Ok(await sessionService.MarkSoldAsync(tournamentId));
+    public async Task<IActionResult> MarkSold(long matchDayId) => Ok(await sessionService.MarkSoldAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/mark-unsold")]
-    public async Task<IActionResult> MarkUnsold(long tournamentId) => Ok(await sessionService.MarkUnsoldAsync(tournamentId));
+    public async Task<IActionResult> MarkUnsold(long matchDayId) => Ok(await sessionService.MarkUnsoldAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/undo-last-sale")]
-    public async Task<IActionResult> UndoLastSale(long tournamentId) => Ok(await sessionService.UndoLastSaleAsync(tournamentId));
+    public async Task<IActionResult> UndoLastSale(long matchDayId) => Ok(await sessionService.UndoLastSaleAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/restart-bidding")]
-    public async Task<IActionResult> RestartBidding(long tournamentId) => Ok(await sessionService.RestartBiddingAsync(tournamentId));
+    public async Task<IActionResult> RestartBidding(long matchDayId) => Ok(await sessionService.RestartBiddingAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/start-unsold-round")]
-    public async Task<IActionResult> StartUnsoldRound(long tournamentId) => Ok(await sessionService.StartUnsoldRoundAsync(tournamentId));
+    public async Task<IActionResult> StartUnsoldRound(long matchDayId) => Ok(await sessionService.StartUnsoldRoundAsync(matchDayId));
 
     [Authorize(Roles = AdminSuperAdmin)]
     [HttpPost("session/select-player/{playerId}")]
-    public async Task<IActionResult> SelectPlayerForAuction(long tournamentId, long playerId) =>
-        Ok(await sessionService.SelectPlayerForAuctionAsync(tournamentId, playerId));
+    public async Task<IActionResult> SelectPlayerForAuction(long matchDayId, long playerId) =>
+        Ok(await sessionService.SelectPlayerForAuctionAsync(matchDayId, playerId));
 
     [Authorize(Roles = BidderRoles)]
     [HttpPost("bids")]
-    public async Task<IActionResult> PlaceBid(long tournamentId, [FromBody] BidRequest request)
+    public async Task<IActionResult> PlaceBid(long matchDayId, [FromBody] BidRequest request)
     {
         var userId = currentUserService.GetPlayerId();
-        return Ok(await sessionService.PlaceBidAsync(tournamentId, request, userId));
+        return Ok(await sessionService.PlaceBidAsync(matchDayId, request, userId));
     }
 
     [AllowAnonymous]
     [HttpGet("bids")]
-    public async Task<IActionResult> GetAllBids(long tournamentId) => Ok(await sessionService.GetAllBidsAsync(tournamentId));
+    public async Task<IActionResult> GetAllBids(long matchDayId) => Ok(await sessionService.GetAllBidsAsync(matchDayId));
 
     [AllowAnonymous]
     [HttpGet("players/{auctionPlayerId}/bids")]
-    public async Task<IActionResult> GetBidsForPlayer(long tournamentId, long auctionPlayerId) =>
-        Ok(await sessionService.GetBidsForPlayerAsync(tournamentId, auctionPlayerId));
+    public async Task<IActionResult> GetBidsForPlayer(long matchDayId, long auctionPlayerId) =>
+        Ok(await sessionService.GetBidsForPlayerAsync(matchDayId, auctionPlayerId));
 
     [AllowAnonymous]
     [HttpGet("dashboard")]
-    public async Task<IActionResult> GetDashboard(long tournamentId) => Ok(await sessionService.GetDashboardAsync(tournamentId));
+    public async Task<IActionResult> GetDashboard(long matchDayId) => Ok(await sessionService.GetDashboardAsync(matchDayId));
 
     [AllowAnonymous]
     [HttpGet("results")]
-    public async Task<IActionResult> GetResults(long tournamentId) => Ok(await sessionService.GetResultsAsync(tournamentId));
+    public async Task<IActionResult> GetResults(long matchDayId) => Ok(await sessionService.GetResultsAsync(matchDayId));
 }

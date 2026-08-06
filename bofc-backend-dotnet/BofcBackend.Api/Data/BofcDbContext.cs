@@ -10,7 +10,7 @@ namespace BofcBackend.Api.Data;
 /// Database.Migrate()/EnsureCreated() calls anywhere. DbSets are added domain-by-domain
 /// as each phase of the migration lands — Phase 2 (core/shared) adds Player/Role here;
 /// Team/Venue/ClubRule and the storage-backed entities follow once their FK dependencies
-/// (Tournament, in Phase 3) exist.
+/// (MatchDay, in Phase 3) exist.
 /// </summary>
 public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUserService currentUserService)
     : DbContext(options)
@@ -19,12 +19,12 @@ public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUser
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Venue> Venues => Set<Venue>();
     public DbSet<ClubRule> ClubRules => Set<ClubRule>();
-    public DbSet<Tournament> Tournaments => Set<Tournament>();
+    public DbSet<MatchDay> MatchDays => Set<MatchDay>();
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamPlayer> TeamPlayers => Set<TeamPlayer>();
 
-    // Phase 3 — tournament/bracket engine
-    public DbSet<TournamentRound> TournamentRounds => Set<TournamentRound>();
+    // Phase 3 — match day/bracket engine
+    public DbSet<MatchDayRound> MatchDayRounds => Set<MatchDayRound>();
     public DbSet<RoundGroup> RoundGroups => Set<RoundGroup>();
     public DbSet<RoundTeam> RoundTeams => Set<RoundTeam>();
     public DbSet<RoundGroupTeam> RoundGroupTeams => Set<RoundGroupTeam>();
@@ -34,10 +34,10 @@ public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUser
     public DbSet<Match> Matches => Set<Match>();
     public DbSet<MatchEvent> MatchEvents => Set<MatchEvent>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
-    public DbSet<TournamentPrize> TournamentPrizes => Set<TournamentPrize>();
+    public DbSet<MatchDayPrize> MatchDayPrizes => Set<MatchDayPrize>();
     public DbSet<PlayerGoalkeepingHistory> PlayerGoalkeepingHistories => Set<PlayerGoalkeepingHistory>();
-    public DbSet<TournamentParticipant> TournamentParticipants => Set<TournamentParticipant>();
-    public DbSet<TournamentParticipantPlayer> TournamentParticipantPlayers => Set<TournamentParticipantPlayer>();
+    public DbSet<MatchDayParticipant> MatchDayParticipants => Set<MatchDayParticipant>();
+    public DbSet<MatchDayParticipantPlayer> MatchDayParticipantPlayers => Set<MatchDayParticipantPlayer>();
 
     // Phase 4 — accounting/ledger domain
     public DbSet<CostType> CostTypes => Set<CostType>();

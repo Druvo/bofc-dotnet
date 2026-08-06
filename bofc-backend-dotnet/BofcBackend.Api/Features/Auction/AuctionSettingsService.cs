@@ -10,25 +10,25 @@ namespace BofcBackend.Api.Features.Auction;
 /// <summary>Port of service/auction/AuctionSettingsServiceImpl.java.</summary>
 public class AuctionSettingsService(BofcDbContext db)
 {
-    public async Task<AuctionSettingsResponse?> GetSettingsAsync(long tournamentId)
+    public async Task<AuctionSettingsResponse?> GetSettingsAsync(long matchDayId)
     {
-        var settings = await db.AuctionSettingsSet.FirstOrDefaultAsync(s => s.TournamentId == tournamentId);
+        var settings = await db.AuctionSettingsSet.FirstOrDefaultAsync(s => s.MatchDayId == matchDayId);
         return settings == null ? null : MapToResponse(settings);
     }
 
-    public async Task<AuctionSettingsResponse> CreateSettingsAsync(long tournamentId, AuctionSettingsRequest request)
+    public async Task<AuctionSettingsResponse> CreateSettingsAsync(long matchDayId, AuctionSettingsRequest request)
     {
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new ResourceNotFoundException($"Tournament not found: {tournamentId}");
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new ResourceNotFoundException($"MatchDay not found: {matchDayId}");
 
-        if (await db.AuctionSettingsSet.AnyAsync(s => s.TournamentId == tournamentId))
+        if (await db.AuctionSettingsSet.AnyAsync(s => s.MatchDayId == matchDayId))
         {
-            throw new InvalidOperationException("Auction settings already exist for this tournament");
+            throw new InvalidOperationException("Auction settings already exist for this MatchDay");
         }
 
         var settings = new AuctionSettings
         {
-            TournamentId = tournament.Id,
+            MatchDayId = matchDay.Id,
             TeamBudget = request.TeamBudget!.Value,
             MinSquadSize = request.MinSquadSize!.Value,
             MaxSquadSize = request.MaxSquadSize!.Value,
@@ -47,10 +47,10 @@ public class AuctionSettingsService(BofcDbContext db)
         return MapToResponse(settings);
     }
 
-    public async Task<AuctionSettingsResponse> UpdateSettingsAsync(long tournamentId, AuctionSettingsRequest request)
+    public async Task<AuctionSettingsResponse> UpdateSettingsAsync(long matchDayId, AuctionSettingsRequest request)
     {
-        var settings = await db.AuctionSettingsSet.FirstOrDefaultAsync(s => s.TournamentId == tournamentId)
-            ?? throw new ResourceNotFoundException($"Auction settings not found for tournament: {tournamentId}");
+        var settings = await db.AuctionSettingsSet.FirstOrDefaultAsync(s => s.MatchDayId == matchDayId)
+            ?? throw new ResourceNotFoundException($"Auction settings not found for MatchDay: {matchDayId}");
 
         settings.TeamBudget = request.TeamBudget!.Value;
         settings.MinSquadSize = request.MinSquadSize!.Value;
@@ -83,7 +83,7 @@ public class AuctionSettingsService(BofcDbContext db)
     private static AuctionSettingsResponse MapToResponse(AuctionSettings settings) => new()
     {
         Id = settings.Id,
-        TournamentId = settings.TournamentId,
+        MatchDayId = settings.MatchDayId,
         TeamBudget = settings.TeamBudget,
         MinSquadSize = settings.MinSquadSize,
         MaxSquadSize = settings.MaxSquadSize,

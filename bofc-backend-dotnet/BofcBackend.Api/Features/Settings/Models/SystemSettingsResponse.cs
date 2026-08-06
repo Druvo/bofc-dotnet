@@ -14,8 +14,8 @@ public class SystemSettingsResponse
     public string? SmtpFromName { get; set; }
     public bool SmtpUseSsl { get; set; }
 
-    public bool NotifyTournamentReminderEnabled { get; set; }
-    public int TournamentReminderDaysBefore { get; set; }
+    public bool NotifyMatchDayReminderEnabled { get; set; }
+    public int MatchDayReminderDaysBefore { get; set; }
 
     public bool NotifyPaymentDueEnabled { get; set; }
     public int PaymentDueReminderDayOfMonth { get; set; }

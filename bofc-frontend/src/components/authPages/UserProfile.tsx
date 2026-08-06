@@ -298,7 +298,7 @@ export default function UserProfile() {
 
                             <div className="mt-2 flex flex-wrap items-center justify-between gap-2.5 pl-[42px]">
                                 <span className="text-theme-xs text-gray-400">
-                                    {m.tournamentName ? `${m.tournamentName} · ` : ""}
+                                    {m.matchDayName ? `${m.matchDayName} · ` : ""}
                                     {showBdLocalTime(m.matchDate)}
                                 </span>
                                 {contrib.length > 0 && (

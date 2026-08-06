@@ -5,7 +5,7 @@ import {
     useGetPlayerStatisticsQuery,
     useGetPlayerMatchHistoryQuery,
 } from "../../state/features/statistics/statisticsSlice";
-import { useGetTournamentSessionsQuery, useGetTournamentsByYearQuery } from "../../state/features/tournaments/tournamentsSlice";
+import { useGetMatchDaySessionsQuery, useGetMatchDaysByYearQuery } from "../../state/features/matchDays/matchDaysSlice";
 import { useGetPlayersQuery } from "../../state/features/player/playerSlice";
 import { API_URL } from "../../settings";
 import Button from "../ui/button";
@@ -128,7 +128,7 @@ type SortKey = "goalsScored" | "assists" | "goalsAndAssists" | "matchesPlayed" |
 
 const PlayerStatistics: React.FC = () => {
     const [selectedSeason, setSelectedSeason] = useState<string | undefined>(undefined);
-    const [selectedTournament, setSelectedTournament] = useState<number | undefined>(undefined);
+    const [selectedMatchDay, setSelectedMatchDay] = useState<number | undefined>(undefined);
     const [position, setPosition] = useState<string | undefined>(undefined);
     const isMobile = useIsMobile(576);
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -137,15 +137,15 @@ const PlayerStatistics: React.FC = () => {
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [sortKey, setSortKey] = useState<SortKey>("goalsScored");
 
-    const { data: sessionsData, isLoading: sessionsLoading } = useGetTournamentSessionsQuery();
+    const { data: sessionsData, isLoading: sessionsLoading } = useGetMatchDaySessionsQuery();
 
-    const { data: tournamentsData, isLoading: tournamentsLoading } = useGetTournamentsByYearQuery(
+    const { data: matchDaysData, isLoading: matchDaysLoading } = useGetMatchDaysByYearQuery(
         { year: selectedSeason || "" },
         { skip: !selectedSeason }
     );
 
     const { data, isLoading, refetch } = useGetPlayerStatisticsQuery({
-        tournamentId: selectedTournament,
+        matchDayId: selectedMatchDay,
         position,
         limit: 100,
     });
@@ -265,7 +265,7 @@ const PlayerStatistics: React.FC = () => {
 
     const handleReset = () => {
         setSelectedSeason(undefined);
-        setSelectedTournament(undefined);
+        setSelectedMatchDay(undefined);
         setPosition(undefined);
         setCurrentPage(1);
         refetch();
@@ -273,7 +273,7 @@ const PlayerStatistics: React.FC = () => {
 
     const handleSeasonChange = (value: string) => {
         setSelectedSeason(value || undefined);
-        setSelectedTournament(undefined);
+        setSelectedMatchDay(undefined);
     };
 
     return (
@@ -334,10 +334,10 @@ const PlayerStatistics: React.FC = () => {
                     <FormSelect
                         className={`!h-10 ${isMobile ? "w-full" : "w-[200px]"}`}
                         placeholder="Select MatchDay"
-                        value={selectedTournament ?? ""}
-                        disabled={!selectedSeason || tournamentsLoading}
-                        onChange={(e) => setSelectedTournament(e.target.value ? Number(e.target.value) : undefined)}
-                        options={[{ value: "", label: "All" }, ...(tournamentsData?.content?.map((t) => ({ value: t.id, label: t.name })) || [])]}
+                        value={selectedMatchDay ?? ""}
+                        disabled={!selectedSeason || matchDaysLoading}
+                        onChange={(e) => setSelectedMatchDay(e.target.value ? Number(e.target.value) : undefined)}
+                        options={[{ value: "", label: "All" }, ...(matchDaysData?.content?.map((t) => ({ value: t.id, label: t.name })) || [])]}
                     />
 
                     <FormSelect

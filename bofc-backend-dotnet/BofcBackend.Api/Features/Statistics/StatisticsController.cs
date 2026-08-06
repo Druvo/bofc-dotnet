@@ -14,49 +14,49 @@ namespace BofcBackend.Api.Features.Statistics;
 /// Port of controller/StatisticsController.java. [AllowAnonymous] is applied per-action
 /// (not at the controller level) because ASP.NET Core's AllowAnonymous always wins over
 /// Authorize regardless of scope — a controller-level AllowAnonymous would silently disable
-/// the auth gate on the one admin-only action (AggregateTournamentStatistics) below.
+/// the auth gate on the one admin-only action (AggregateMatchDayStatistics) below.
 /// </summary>
 [ApiController]
 [Route("statistics")]
 public class StatisticsController(IMatchStatisticsService matchStatisticsService, BofcDbContext db) : ControllerBase
 {
     [AllowAnonymous]
-    [HttpGet("tournaments/{tournamentId}/standings")]
-    public async Task<IActionResult> GetTournamentStandings(long tournamentId)
+    [HttpGet("match-days/{matchDayId}/standings")]
+    public async Task<IActionResult> GetMatchDayStandings(long matchDayId)
     {
-        var standings = await matchStatisticsService.GetTournamentStandingsAsync(tournamentId);
+        var standings = await matchStatisticsService.GetMatchDayStandingsAsync(matchDayId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, standings);
     }
 
     [AllowAnonymous]
-    [HttpGet("tournaments/{tournamentId}/top-scorers")]
-    public async Task<IActionResult> GetTopScorers(long tournamentId)
+    [HttpGet("match-days/{matchDayId}/top-scorers")]
+    public async Task<IActionResult> GetTopScorers(long matchDayId)
     {
-        var topScorers = await matchStatisticsService.GetTopScorersByTournamentAsync(tournamentId);
+        var topScorers = await matchStatisticsService.GetTopScorersByMatchDayAsync(matchDayId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, topScorers);
     }
 
     [AllowAnonymous]
-    [HttpGet("tournaments/{tournamentId}/top-assists")]
-    public async Task<IActionResult> GetTopAssists(long tournamentId)
+    [HttpGet("match-days/{matchDayId}/top-assists")]
+    public async Task<IActionResult> GetTopAssists(long matchDayId)
     {
-        var topAssists = await matchStatisticsService.GetTopAssistProvidersByTournamentAsync(tournamentId);
+        var topAssists = await matchStatisticsService.GetTopAssistProvidersByMatchDayAsync(matchDayId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, topAssists);
     }
 
     [AllowAnonymous]
-    [HttpGet("tournaments/{tournamentId}/top-cards")]
-    public async Task<IActionResult> GetTopCards(long tournamentId)
+    [HttpGet("match-days/{matchDayId}/top-cards")]
+    public async Task<IActionResult> GetTopCards(long matchDayId)
     {
-        var topCards = await matchStatisticsService.GetTopCardReceiversByTournamentAsync(tournamentId);
+        var topCards = await matchStatisticsService.GetTopCardReceiversByMatchDayAsync(matchDayId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, topCards);
     }
 
     [AllowAnonymous]
-    [HttpGet("tournaments/{tournamentId}/players/{playerId}")]
-    public async Task<IActionResult> GetPlayerTournamentStatistics(long tournamentId, long playerId)
+    [HttpGet("match-days/{matchDayId}/players/{playerId}")]
+    public async Task<IActionResult> GetPlayerMatchDayStatistics(long matchDayId, long playerId)
     {
-        var statistics = await matchStatisticsService.GetPlayerTournamentStatisticsAsync(tournamentId, playerId);
+        var statistics = await matchStatisticsService.GetPlayerMatchDayStatisticsAsync(matchDayId, playerId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, statistics);
     }
 
@@ -93,18 +93,18 @@ public class StatisticsController(IMatchStatisticsService matchStatisticsService
     }
 
     [AllowAnonymous]
-    [HttpGet("tournaments/{tournamentId}/teams/{teamId}/goals")]
-    public async Task<IActionResult> GetTeamTotalGoals(long tournamentId, long teamId)
+    [HttpGet("match-days/{matchDayId}/teams/{teamId}/goals")]
+    public async Task<IActionResult> GetTeamTotalGoals(long matchDayId, long teamId)
     {
-        var totalGoals = await matchStatisticsService.GetTeamTotalGoalsInTournamentAsync(tournamentId, teamId);
+        var totalGoals = await matchStatisticsService.GetTeamTotalGoalsInMatchDayAsync(matchDayId, teamId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, totalGoals);
     }
 
     [AllowAnonymous]
-    [HttpGet("tournaments/{tournamentId}/players/{playerId}/cards")]
-    public async Task<IActionResult> GetPlayerTotalCards(long tournamentId, long playerId)
+    [HttpGet("match-days/{matchDayId}/players/{playerId}/cards")]
+    public async Task<IActionResult> GetPlayerTotalCards(long matchDayId, long playerId)
     {
-        var totalCards = await matchStatisticsService.GetPlayerTotalDisciplinaryCardsInTournamentAsync(tournamentId, playerId);
+        var totalCards = await matchStatisticsService.GetPlayerTotalDisciplinaryCardsInMatchDayAsync(matchDayId, playerId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, totalCards);
     }
 
@@ -112,10 +112,10 @@ public class StatisticsController(IMatchStatisticsService matchStatisticsService
     /// Utility endpoint to (re)process existing matches that don't have statistics yet.
     /// </summary>
     [Authorize(Roles = PlayerRoleNames.Admin + "," + PlayerRoleNames.SuperAdmin + "," + PlayerRoleNames.Coordinator)]
-    [HttpPost("tournaments/{tournamentId}/aggregate")]
-    public async Task<IActionResult> AggregateTournamentStatistics(long tournamentId)
+    [HttpPost("match-days/{matchDayId}/aggregate")]
+    public async Task<IActionResult> AggregateMatchDayStatistics(long matchDayId)
     {
-        var matchIds = await db.Matches.Where(m => m.TournamentId == tournamentId).Select(m => m.Id).ToListAsync();
+        var matchIds = await db.Matches.Where(m => m.MatchDayId == matchDayId).Select(m => m.Id).ToListAsync();
 
         var successCount = 0;
         var errorCount = 0;

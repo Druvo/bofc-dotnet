@@ -1,7 +1,10 @@
 import ManualPlayerSelection from './Auction/ManualPlayerSelection';
 
 const Dashboard = () => {
-    const currentTournamentId: number = parseInt(localStorage.getItem('currentTournamentId') || '0', 10);
+    const currentMatchDayId: number = parseInt(
+        localStorage.getItem('currentMatchDayId') || localStorage.getItem('currentTournamentId') || '0',
+        10,
+    );
 
     const handlePlayerSelected = () => {
         console.log('Player selected for auction. Refreshing data...');
@@ -13,7 +16,7 @@ const Dashboard = () => {
 
             <h2>Manual Player Selection</h2>
             <ManualPlayerSelection 
-                tournamentId={currentTournamentId} 
+                matchDayId={currentMatchDayId} 
                 onPlayerSelected={handlePlayerSelected} 
             />
 

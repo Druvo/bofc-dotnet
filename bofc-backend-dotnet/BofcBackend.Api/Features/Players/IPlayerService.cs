@@ -18,7 +18,7 @@ public interface IPlayerService
     Task<Dictionary<int, List<GoalKeeperHistoryDto>>> GoalKeepingHistoryAsync();
     Task<List<GoalKeeperHistoryDto>> GetGoalKeeperHistoryByLoggedInUserAsync();
     Task<List<GoalKeeperHistoryDto>> GetGoalKeeperHistoryByPlayerIdAsync(long playerId);
-    Task<GoalKeeperQueueResponseDto> GetGoalKeeperPriorityQueueAsync(long tournamentId);
+    Task<GoalKeeperQueueResponseDto> GetGoalKeeperPriorityQueueAsync(long matchDayId);
 
     /// <summary>Port of PlayerService.getPlayerEntity(Long) — used by other domains (e.g. accounting) that need the raw entity.</summary>
     Task<Player> GetPlayerEntityAsync(long id);

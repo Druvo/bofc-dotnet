@@ -10,8 +10,8 @@ namespace BofcBackend.Api.Features.Fixtures.Models;
 /// </summary>
 public class FixtureGenerationRequest
 {
-    [Required(ErrorMessage = "Tournament ID is mandatory")]
-    public long? TournamentId { get; set; }
+    [Required(ErrorMessage = "MatchDay ID is mandatory")]
+    public long? MatchDayId { get; set; }
 
     public List<long>? TeamIds { get; set; }
     public List<DateTime>? MatchDates { get; set; }

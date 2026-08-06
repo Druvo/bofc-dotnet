@@ -10,14 +10,14 @@ namespace BofcBackend.Api.Features.Auction;
 /// <summary>Port of service/auction/AuctionPlayerPoolServiceImpl.java.</summary>
 public class AuctionPlayerPoolService(BofcDbContext db)
 {
-    public async Task<List<AuctionPlayerResponse>> GetPlayerPoolAsync(long tournamentId)
+    public async Task<List<AuctionPlayerResponse>> GetPlayerPoolAsync(long matchDayId)
     {
-        var players = await LoadQuery().Where(p => p.TournamentId == tournamentId)
+        var players = await LoadQuery().Where(p => p.MatchDayId == matchDayId)
             .OrderBy(p => p.SequenceOrder).ToListAsync();
         return players.Select(MapToResponse).ToList();
     }
 
-    public async Task<AuctionPlayerResponse> AddExistingPlayerAsync(long tournamentId, AuctionPlayerRequest request)
+    public async Task<AuctionPlayerResponse> AddExistingPlayerAsync(long matchDayId, AuctionPlayerRequest request)
     {
         if (request.PlayerId == null)
         {
@@ -29,25 +29,25 @@ public class AuctionPlayerPoolService(BofcDbContext db)
             throw new InvalidOperationException("basePrice is required");
         }
 
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new ResourceNotFoundException($"Tournament not found: {tournamentId}");
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new ResourceNotFoundException($"MatchDay not found: {matchDayId}");
 
-        if (!tournament.AuctionMode)
+        if (!matchDay.AuctionMode)
         {
-            throw new InvalidOperationException("Tournament is not in auction mode");
+            throw new InvalidOperationException("MatchDay is not in auction mode");
         }
 
         var player = await db.Players.FirstOrDefaultAsync(p => p.Id == request.PlayerId)
             ?? throw new ResourceNotFoundException($"Player not found: {request.PlayerId}");
 
-        if (await db.AuctionPlayers.AnyAsync(p => p.TournamentId == tournamentId && p.PlayerId == request.PlayerId))
+        if (await db.AuctionPlayers.AnyAsync(p => p.MatchDayId == matchDayId && p.PlayerId == request.PlayerId))
         {
-            throw new InvalidOperationException("Player already in auction pool for this tournament");
+            throw new InvalidOperationException("Player already in auction pool for this MatchDay");
         }
 
         var auctionPlayer = new AuctionPlayer
         {
-            TournamentId = tournament.Id,
+            MatchDayId = matchDay.Id,
             PlayerId = player.Id,
             PlayerType = AuctionPlayerType.EXISTING,
             Category = request.Category,
@@ -62,15 +62,15 @@ public class AuctionPlayerPoolService(BofcDbContext db)
         return await MapToResponseByIdAsync(auctionPlayer.Id);
     }
 
-    public async Task<AuctionPlayerResponse> AddFromRegistrationAsync(long tournamentId, long registrationId, AuctionPlayerRequest request)
+    public async Task<AuctionPlayerResponse> AddFromRegistrationAsync(long matchDayId, long registrationId, AuctionPlayerRequest request)
     {
         if (request.BasePrice == null)
         {
             throw new InvalidOperationException("basePrice is required");
         }
 
-        var tournament = await db.Tournaments.FirstOrDefaultAsync(t => t.Id == tournamentId)
-            ?? throw new ResourceNotFoundException($"Tournament not found: {tournamentId}");
+        var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
+            ?? throw new ResourceNotFoundException($"MatchDay not found: {matchDayId}");
 
         var registration = await db.AuctionPlayerRegistrations.Include(r => r.CreatedPlayer)
             .FirstOrDefaultAsync(r => r.Id == registrationId)
@@ -88,14 +88,14 @@ public class AuctionPlayerPoolService(BofcDbContext db)
 
         var player = registration.CreatedPlayer;
 
-        if (await db.AuctionPlayers.AnyAsync(p => p.TournamentId == tournamentId && p.PlayerId == player.Id))
+        if (await db.AuctionPlayers.AnyAsync(p => p.MatchDayId == matchDayId && p.PlayerId == player.Id))
         {
             throw new InvalidOperationException("Player already in auction pool");
         }
 
         var auctionPlayer = new AuctionPlayer
         {
-            TournamentId = tournament.Id,
+            MatchDayId = matchDay.Id,
             PlayerId = player.Id,
             PlayerType = AuctionPlayerType.OUTSIDE,
             Category = request.Category,
@@ -110,14 +110,14 @@ public class AuctionPlayerPoolService(BofcDbContext db)
         return await MapToResponseByIdAsync(auctionPlayer.Id);
     }
 
-    public async Task<AuctionPlayerResponse> UpdatePlayerAsync(long tournamentId, long auctionPlayerId, AuctionPlayerRequest request)
+    public async Task<AuctionPlayerResponse> UpdatePlayerAsync(long matchDayId, long auctionPlayerId, AuctionPlayerRequest request)
     {
         var auctionPlayer = await db.AuctionPlayers.FirstOrDefaultAsync(p => p.Id == auctionPlayerId)
             ?? throw new ResourceNotFoundException($"Auction player not found: {auctionPlayerId}");
 
-        if (auctionPlayer.TournamentId != tournamentId)
+        if (auctionPlayer.MatchDayId != matchDayId)
         {
-            throw new InvalidOperationException("Player does not belong to this tournament");
+            throw new InvalidOperationException("Player does not belong to this MatchDay");
         }
 
         if (auctionPlayer.Status == AuctionPlayerStatus.SOLD)
@@ -144,14 +144,14 @@ public class AuctionPlayerPoolService(BofcDbContext db)
         return await MapToResponseByIdAsync(auctionPlayer.Id);
     }
 
-    public async Task RemovePlayerAsync(long tournamentId, long auctionPlayerId)
+    public async Task RemovePlayerAsync(long matchDayId, long auctionPlayerId)
     {
         var auctionPlayer = await db.AuctionPlayers.FirstOrDefaultAsync(p => p.Id == auctionPlayerId)
             ?? throw new ResourceNotFoundException($"Auction player not found: {auctionPlayerId}");
 
-        if (auctionPlayer.TournamentId != tournamentId)
+        if (auctionPlayer.MatchDayId != matchDayId)
         {
-            throw new InvalidOperationException("Player does not belong to this tournament");
+            throw new InvalidOperationException("Player does not belong to this MatchDay");
         }
 
         if (auctionPlayer.Status == AuctionPlayerStatus.SOLD)
@@ -163,14 +163,14 @@ public class AuctionPlayerPoolService(BofcDbContext db)
         await db.SaveChangesAsync();
     }
 
-    public async Task<AuctionPlayerResponse> RestorePlayerAsync(long tournamentId, long auctionPlayerId)
+    public async Task<AuctionPlayerResponse> RestorePlayerAsync(long matchDayId, long auctionPlayerId)
     {
         var auctionPlayer = await db.AuctionPlayers.FirstOrDefaultAsync(p => p.Id == auctionPlayerId)
             ?? throw new ResourceNotFoundException($"Auction player not found: {auctionPlayerId}");
 
-        if (auctionPlayer.TournamentId != tournamentId)
+        if (auctionPlayer.MatchDayId != matchDayId)
         {
-            throw new InvalidOperationException("Player does not belong to this tournament");
+            throw new InvalidOperationException("Player does not belong to this MatchDay");
         }
 
         if (auctionPlayer.Status != AuctionPlayerStatus.WITHDRAWN)
@@ -194,7 +194,7 @@ public class AuctionPlayerPoolService(BofcDbContext db)
     public static AuctionPlayerResponse MapToResponse(AuctionPlayer ap) => new()
     {
         Id = ap.Id,
-        TournamentId = ap.TournamentId,
+        MatchDayId = ap.MatchDayId,
         PlayerId = ap.Player.Id,
         PlayerName = ap.Player.Name,
         PlayerEmail = ap.Player.Email,

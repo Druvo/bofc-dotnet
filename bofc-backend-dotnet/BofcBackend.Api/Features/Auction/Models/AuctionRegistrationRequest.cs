@@ -6,7 +6,7 @@ namespace BofcBackend.Api.Features.Auction.Models;
 /// <summary>Port of model/auction/AuctionRegistrationRequest.java.</summary>
 public class AuctionRegistrationRequest
 {
-    public long? TournamentId { get; set; }
+    public long? MatchDayId { get; set; }
 
     [Required]
     public string? Name { get; set; }

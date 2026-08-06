@@ -11,7 +11,7 @@ public class AuctionPlayerConfiguration : IEntityTypeConfiguration<AuctionPlayer
         builder.ToTable("auction_players");
         builder.HasKey(p => p.Id);
         builder.Property(p => p.Id).HasColumnName("id").ValueGeneratedOnAdd();
-        builder.Property(p => p.TournamentId).HasColumnName("tournament_id").IsRequired();
+        builder.Property(p => p.MatchDayId).HasColumnName("match_day_id").IsRequired();
         builder.Property(p => p.PlayerId).HasColumnName("player_id").IsRequired();
         builder.Property(p => p.PlayerType).HasColumnName("player_type").HasConversion<string>().IsRequired();
         builder.Property(p => p.Category).HasColumnName("category").HasConversion<string>();
@@ -26,14 +26,14 @@ public class AuctionPlayerConfiguration : IEntityTypeConfiguration<AuctionPlayer
         builder.Property(p => p.SequenceOrder).HasColumnName("sequence_order");
         builder.Property(p => p.Version).HasColumnName("version");
 
-        builder.HasIndex(p => new { p.TournamentId, p.PlayerId }).IsUnique();
+        builder.HasIndex(p => new { p.MatchDayId, p.PlayerId }).IsUnique();
 
         builder.Property(p => p.CreatedBy).HasColumnName("created_by").IsRequired();
         builder.Property(p => p.CreatedDate).HasColumnName("created_date").IsRequired();
         builder.Property(p => p.LastModifiedBy).HasColumnName("last_modified_by");
         builder.Property(p => p.UpdatedDate).HasColumnName("updated_date");
 
-        builder.HasOne(p => p.Tournament).WithMany().HasForeignKey(p => p.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(p => p.MatchDay).WithMany().HasForeignKey(p => p.MatchDayId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(p => p.Player).WithMany().HasForeignKey(p => p.PlayerId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(p => p.CurrentHighestTeam).WithMany().HasForeignKey(p => p.CurrentHighestTeamId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(p => p.SoldToTeam).WithMany().HasForeignKey(p => p.SoldToTeamId).OnDelete(DeleteBehavior.Restrict);

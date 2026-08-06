@@ -1,7 +1,7 @@
 import apiSlice from "../../api/apiSlice";
 import {
-  TournamentRoundRequest,
-  TournamentRoundResponse,
+  MatchDayRoundRequest,
+  MatchDayRoundResponse,
   RoundGroupRequest,
   RoundGroupResponse,
   TeamAssignmentRequest,
@@ -9,8 +9,8 @@ import {
   RoundCompletionRequest,
   GroupStandingResponse,
   GetRoundByIdResponse,
-  GetRoundsByTournamentResponse,
-  GetTournamentStructureResponse,
+  GetRoundsByMatchDayResponse,
+  GetMatchDayStructureResponse,
   CreateRoundResponse,
   UpdateRoundResponse,
   DeleteRoundResponse,
@@ -37,24 +37,24 @@ import {
 } from "./manualFixtureTypes";
 
 const apiWithTags = apiSlice.enhanceEndpoints({
-  addTagTypes: ["rounds", "groups", "standings", "tournament-structure"],
+  addTagTypes: ["rounds", "groups", "standings", "matchDay-structure"],
 });
 
 export const manualFixturesApi = apiWithTags.injectEndpoints({
   endpoints: (builder) => ({
-    // ===== Tournament Round Management Endpoints =====
+    // ===== MatchDay Round Management Endpoints =====
 
     /**
      * Create a new round
      * POST /api/rounds
      */
-    createRound: builder.mutation<CreateRoundResponse, TournamentRoundRequest>({
+    createRound: builder.mutation<CreateRoundResponse, MatchDayRoundRequest>({
       query: (body) => ({
         url: `/rounds`,
         method: "POST",
         body,
       }),
-      invalidatesTags: ["rounds", "tournament-structure"],
+      invalidatesTags: ["rounds", "matchDay-structure"],
     }),
 
     /**
@@ -63,7 +63,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
      */
     updateRound: builder.mutation<
       UpdateRoundResponse,
-      { roundId: number } & TournamentRoundRequest
+      { roundId: number } & MatchDayRoundRequest
     >({
       query: ({ roundId, ...body }) => ({
         url: `/rounds/${roundId}`,
@@ -72,7 +72,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       }),
       invalidatesTags: (result, error, { roundId }) => [
         { type: "rounds", id: roundId },
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -87,7 +87,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       }),
       invalidatesTags: (result, error, { roundId }) => [
         "rounds",
-        "tournament-structure",
+        "matchDay-structure",
         { type: "rounds", id: roundId }, // Invalidate specific round cache
       ],
     }),
@@ -107,33 +107,33 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
     }),
 
     /**
-     * Get all rounds for a tournament
-     * GET /api/rounds/tournament/{tournamentId}
+     * Get all rounds for a matchDay
+     * GET /api/rounds/matchDay/{matchDayId}
      */
-    getRoundsByTournament: builder.query<
-      GetRoundsByTournamentResponse,
-      { tournamentId: number }
+    getRoundsByMatchDay: builder.query<
+      GetRoundsByMatchDayResponse,
+      { matchDayId: number }
     >({
-      query: ({ tournamentId }) => ({
-        url: `/rounds/tournament/${tournamentId}`,
+      query: ({ matchDayId }) => ({
+        url: `/rounds/match-day/${matchDayId}`,
         method: "GET",
       }),
       providesTags: ["rounds"],
     }),
 
     /**
-     * Get complete tournament structure
-     * GET /api/rounds/tournament/{tournamentId}/structure
+     * Get complete matchDay structure
+     * GET /api/rounds/matchDay/{matchDayId}/structure
      */
-    getTournamentStructure: builder.query<
-      GetTournamentStructureResponse,
-      { tournamentId: number }
+    getMatchDayStructure: builder.query<
+      GetMatchDayStructureResponse,
+      { matchDayId: number }
     >({
-      query: ({ tournamentId }) => ({
-        url: `/rounds/tournament/${tournamentId}/structure`,
+      query: ({ matchDayId }) => ({
+        url: `/rounds/match-day/${matchDayId}/structure`,
         method: "GET",
       }),
-      providesTags: ["tournament-structure"],
+      providesTags: ["matchDay-structure"],
     }),
 
     /**
@@ -148,7 +148,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
         url: `/rounds/${roundId}/start`,
         method: "POST",
       }),
-      invalidatesTags: ["rounds", "tournament-structure"],
+      invalidatesTags: ["rounds", "matchDay-structure"],
     }),
 
     /**
@@ -161,19 +161,19 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["rounds", "groups", "standings", "tournament-structure"],
+      invalidatesTags: ["rounds", "groups", "standings", "matchDay-structure"],
     }),
 
     /**
      * Get next round in sequence
-     * GET /api/rounds/tournament/{tournamentId}/next?currentSequenceOrder={order}
+     * GET /api/rounds/matchDay/{matchDayId}/next?currentSequenceOrder={order}
      */
     getNextRound: builder.query<
       GetNextRoundResponse,
-      { tournamentId: number; currentSequenceOrder: number }
+      { matchDayId: number; currentSequenceOrder: number }
     >({
-      query: ({ tournamentId, currentSequenceOrder }) => ({
-        url: `/rounds/tournament/${tournamentId}/next?currentSequenceOrder=${currentSequenceOrder}`,
+      query: ({ matchDayId, currentSequenceOrder }) => ({
+        url: `/rounds/match-day/${matchDayId}/next?currentSequenceOrder=${currentSequenceOrder}`,
         method: "GET",
       }),
       providesTags: ["rounds"],
@@ -181,14 +181,14 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
 
     /**
      * Get previous round in sequence
-     * GET /api/rounds/tournament/{tournamentId}/previous?currentSequenceOrder={order}
+     * GET /api/rounds/matchDay/{matchDayId}/previous?currentSequenceOrder={order}
      */
     getPreviousRound: builder.query<
       GetPreviousRoundResponse,
-      { tournamentId: number; currentSequenceOrder: number }
+      { matchDayId: number; currentSequenceOrder: number }
     >({
-      query: ({ tournamentId, currentSequenceOrder }) => ({
-        url: `/rounds/tournament/${tournamentId}/previous?currentSequenceOrder=${currentSequenceOrder}`,
+      query: ({ matchDayId, currentSequenceOrder }) => ({
+        url: `/rounds/match-day/${matchDayId}/previous?currentSequenceOrder=${currentSequenceOrder}`,
         method: "GET",
       }),
       providesTags: ["rounds"],
@@ -206,7 +206,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["groups", "tournament-structure"],
+      invalidatesTags: ["groups", "matchDay-structure"],
     }),
 
     /**
@@ -224,7 +224,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       }),
       invalidatesTags: (result, error, { groupId }) => [
         { type: "groups", id: groupId },
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -240,7 +240,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { groupId }) => [
         { type: "groups", id: groupId },
         "groups",
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -286,7 +286,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { groupId }) => [
         { type: "groups", id: groupId },
         "standings",
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -305,7 +305,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       }),
       invalidatesTags: (result, error, { roundId }) => [
         { type: "rounds", id: roundId },
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -323,7 +323,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       }),
       invalidatesTags: (result, error, { roundId }) => [
         { type: "rounds", id: roundId },
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -340,7 +340,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["groups", "tournament-structure"],
+      invalidatesTags: ["groups", "matchDay-structure"],
     }),
 
     /**
@@ -358,7 +358,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { groupId }) => [
         { type: "groups", id: groupId },
         "standings",
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -413,7 +413,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { groupId }) => [
         { type: "standings", id: groupId },
         { type: "groups", id: groupId },
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -432,7 +432,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       }),
       invalidatesTags: (result, error, { groupId }) => [
         { type: "groups", id: groupId },
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -451,7 +451,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       }),
       invalidatesTags: (result, error, { roundId }) => [
         { type: "rounds", id: roundId },
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
 
@@ -486,7 +486,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       }),
       invalidatesTags: (result, error, { groupId }) => [
         { type: "groups", id: groupId },
-        "tournament-structure",
+        "matchDay-structure",
       ],
     }),
   }),
@@ -502,8 +502,8 @@ export const {
 
   // Round queries
   useGetRoundByIdQuery,
-  useGetRoundsByTournamentQuery,
-  useGetTournamentStructureQuery,
+  useGetRoundsByMatchDayQuery,
+  useGetMatchDayStructureQuery,
   useGetNextRoundQuery,
   useGetPreviousRoundQuery,
 

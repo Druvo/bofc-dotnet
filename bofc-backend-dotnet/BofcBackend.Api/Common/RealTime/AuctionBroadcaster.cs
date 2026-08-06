@@ -7,10 +7,10 @@ namespace BofcBackend.Api.Common.RealTime;
 
 public class AuctionBroadcaster(AuctionStompHub hub) : IAuctionBroadcaster
 {
-    public Task BroadcastAsync(long tournamentId, string type, object? payload)
+    public Task BroadcastAsync(long matchDayId, string type, object? payload)
     {
-        var message = new AuctionWebSocketMessage { Type = type, TournamentId = tournamentId, Payload = payload };
+        var message = new AuctionWebSocketMessage { Type = type, MatchDayId = matchDayId, Payload = payload };
         var json = JsonSerializer.Serialize(message, JsonDefaults.Options);
-        return hub.PublishAsync($"/topic/auction/{tournamentId}", json);
+        return hub.PublishAsync($"/topic/auction/{matchDayId}", json);
     }
 }

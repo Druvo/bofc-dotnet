@@ -6,7 +6,7 @@ namespace BofcBackend.Api.Features.Auction.Models;
 public class AuctionSettingsResponse
 {
     public long Id { get; set; }
-    public long TournamentId { get; set; }
+    public long MatchDayId { get; set; }
     public int TeamBudget { get; set; }
     public int MinSquadSize { get; set; }
     public int MaxSquadSize { get; set; }

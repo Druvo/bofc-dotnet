@@ -3,8 +3,8 @@ namespace BofcBackend.Api.Features.Matches.Models;
 public class MatchResponse
 {
     public long Id { get; set; }
-    public long TournamentId { get; set; }
-    public string TournamentName { get; set; } = string.Empty;
+    public long MatchDayId { get; set; }
+    public string MatchDayName { get; set; } = string.Empty;
     public long HomeTeamId { get; set; }
     public string HomeTeamName { get; set; } = string.Empty;
     public long AwayTeamId { get; set; }
@@ -22,7 +22,7 @@ public class MatchResponse
     /// <summary>Legacy round field.</summary>
     public int? Round { get; set; }
 
-    /// <summary>Round number from TournamentRound (manual fixture system) or LegacyRound fallback.</summary>
+    /// <summary>Round number from MatchDayRound (manual fixture system) or LegacyRound fallback.</summary>
     public int? RoundNumber { get; set; }
 
     public string? GroupName { get; set; }

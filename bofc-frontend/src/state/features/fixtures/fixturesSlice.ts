@@ -53,22 +53,22 @@ export const fixturesApi = apiWithTags.injectEndpoints({
     }),
 
     /**
-     * Get all fixtures for a tournament
+     * Get all fixtures for a matchDay
      */
-    getFixtures: builder.query<IGetFixturesResponse, { tournamentId: number }>({
-      query: ({ tournamentId }) => ({
-        url: `/fixtures/tournament/${tournamentId}`,
+    getFixtures: builder.query<IGetFixturesResponse, { matchDayId: number }>({
+      query: ({ matchDayId }) => ({
+        url: `/fixtures/match-day/${matchDayId}`,
         method: "GET",
       }),
       providesTags: ["fixtures"],
     }),
 
     /**
-     * Clear all fixtures for a tournament
+     * Clear all fixtures for a matchDay
      */
-    clearFixtures: builder.mutation<IClearFixturesResponse, { tournamentId: number }>({
-      query: ({ tournamentId }) => ({
-        url: `/fixtures/tournament/${tournamentId}`,
+    clearFixtures: builder.mutation<IClearFixturesResponse, { matchDayId: number }>({
+      query: ({ matchDayId }) => ({
+        url: `/fixtures/match-day/${matchDayId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["fixtures"],

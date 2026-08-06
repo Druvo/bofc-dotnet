@@ -4,8 +4,8 @@ namespace BofcBackend.Api.Features.Matches.Models;
 
 public class MatchCreateRequest
 {
-    [Required(ErrorMessage = "Tournament ID is required")]
-    public long? TournamentId { get; set; }
+    [Required(ErrorMessage = "MatchDay ID is required")]
+    public long? MatchDayId { get; set; }
 
     public long? RoundId { get; set; }
     public long? GroupId { get; set; }

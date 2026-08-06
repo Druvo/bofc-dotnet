@@ -11,7 +11,7 @@ public class AuctionSessionConfiguration : IEntityTypeConfiguration<AuctionSessi
         builder.ToTable("auction_sessions");
         builder.HasKey(s => s.Id);
         builder.Property(s => s.Id).HasColumnName("id").ValueGeneratedOnAdd();
-        builder.Property(s => s.TournamentId).HasColumnName("tournament_id").IsRequired();
+        builder.Property(s => s.MatchDayId).HasColumnName("match_day_id").IsRequired();
         builder.Property(s => s.Status).HasColumnName("status").HasConversion<string>().IsRequired();
         builder.Property(s => s.CurrentAuctionPlayerId).HasColumnName("current_auction_player_id");
         builder.Property(s => s.RoundNumber).HasColumnName("round_number").IsRequired();
@@ -25,7 +25,7 @@ public class AuctionSessionConfiguration : IEntityTypeConfiguration<AuctionSessi
         builder.Property(s => s.LastModifiedBy).HasColumnName("last_modified_by");
         builder.Property(s => s.UpdatedDate).HasColumnName("updated_date");
 
-        builder.HasOne(s => s.Tournament).WithMany().HasForeignKey(s => s.TournamentId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(s => s.MatchDay).WithMany().HasForeignKey(s => s.MatchDayId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(s => s.CurrentAuctionPlayer).WithMany().HasForeignKey(s => s.CurrentAuctionPlayerId).OnDelete(DeleteBehavior.Restrict);
     }
 }

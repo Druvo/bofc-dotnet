@@ -30,7 +30,7 @@ public class PlayerServiceException(string message, HttpStatusCode statusCode) :
 
 public class TeamServiceException(string message, HttpStatusCode statusCode) : AppException(message, statusCode);
 
-public class TournamentServiceException(string message, HttpStatusCode statusCode) : AppException(message, statusCode);
+public class MatchDayServiceException(string message, HttpStatusCode statusCode) : AppException(message, statusCode);
 
 public class CostTypeServiceException(string message, HttpStatusCode statusCode) : AppException(message, statusCode);
 

@@ -11,15 +11,15 @@ namespace BofcBackend.Api.Features.Matches;
 [AllowAnonymous]
 public class LiveMatchStreamController(ILiveMatchUpdatePublisher publisher) : ControllerBase
 {
-    [HttpGet("tournaments/{tournamentId}/stream")]
-    public async Task StreamTournamentMatchUpdates(long tournamentId, CancellationToken cancellationToken)
+    [HttpGet("match-days/{matchDayId}/stream")]
+    public async Task StreamMatchDayMatchUpdates(long matchDayId, CancellationToken cancellationToken)
     {
         Response.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
         Response.Headers["X-Accel-Buffering"] = "no"; // disable nginx response buffering in front of this proxy
         await Response.Body.FlushAsync(cancellationToken);
 
-        var (subscriptionId, frames) = publisher.Subscribe(tournamentId);
+        var (subscriptionId, frames) = publisher.Subscribe(matchDayId);
         try
         {
             await foreach (var frame in frames.ReadAllAsync(cancellationToken))
@@ -34,7 +34,7 @@ public class LiveMatchStreamController(ILiveMatchUpdatePublisher publisher) : Co
         }
         finally
         {
-            publisher.Unsubscribe(tournamentId, subscriptionId);
+            publisher.Unsubscribe(matchDayId, subscriptionId);
         }
     }
 }

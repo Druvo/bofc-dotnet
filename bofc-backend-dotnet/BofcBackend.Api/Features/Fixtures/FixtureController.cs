@@ -14,7 +14,7 @@ namespace BofcBackend.Api.Features.Fixtures;
 
 /// <summary>
 /// Port of controller/FixtureController.java — the legacy auto-fixture-generation controller.
-/// Marked @deprecated in Java in favor of the manual fixture system (TournamentRoundController /
+/// Marked @deprecated in Java in favor of the manual fixture system (MatchDayRoundController /
 /// RoundGroupController / LogicNodeController) but still live, so ported as-is.
 ///
 /// Has its own convertToResponse (with disciplinary-card counts from MatchEvents) distinct from
@@ -30,30 +30,30 @@ public class FixtureController(IFixtureGenerationService fixtureGenerationServic
     [HttpPost("generate")]
     public async Task<IActionResult> GenerateFixtures([FromBody] FixtureGenerationRequest request)
     {
-        var matches = await fixtureGenerationService.GenerateFixturesAsync(request.TournamentId!.Value, request);
+        var matches = await fixtureGenerationService.GenerateFixturesAsync(request.MatchDayId!.Value, request);
         var responses = matches.Select(ConvertToResponse).ToList();
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.Created, "Fixtures generated successfully", responses);
     }
 
     [AllowAnonymous]
-    [HttpGet("tournament/{tournamentId}")]
-    public async Task<IActionResult> GetFixturesByTournament(long tournamentId)
+    [HttpGet("match-day/{matchDayId}")]
+    public async Task<IActionResult> GetFixturesByMatchDay(long matchDayId)
     {
-        var matches = await LoadMatchesAsync(m => m.TournamentId == tournamentId);
+        var matches = await LoadMatchesAsync(m => m.MatchDayId == matchDayId);
 
         if (matches.Count == 0)
         {
-            return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, "No fixtures found for this tournament", matches.Select(ConvertToResponse).ToList());
+            return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, "No fixtures found for this MatchDay", matches.Select(ConvertToResponse).ToList());
         }
 
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, "Fixtures retrieved successfully", matches.Select(ConvertToResponse).ToList());
     }
 
     [Authorize(Roles = AdminSuperAdminCoordinator)]
-    [HttpDelete("tournament/{tournamentId}")]
-    public async Task<IActionResult> ClearFixtures(long tournamentId)
+    [HttpDelete("match-day/{matchDayId}")]
+    public async Task<IActionResult> ClearFixtures(long matchDayId)
     {
-        await fixtureGenerationService.ClearFixturesAsync(tournamentId);
+        await fixtureGenerationService.ClearFixturesAsync(matchDayId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, "Fixtures cleared successfully");
     }
 
@@ -68,7 +68,7 @@ public class FixtureController(IFixtureGenerationService fixtureGenerationServic
 
     private async Task<List<Match>> LoadMatchesAsync(System.Linq.Expressions.Expression<Func<Match, bool>> predicate) =>
         await db.Matches
-            .Include(m => m.Tournament)
+            .Include(m => m.MatchDay)
             .Include(m => m.HomeTeam)
             .Include(m => m.AwayTeam)
             .Include(m => m.Venue)
@@ -113,8 +113,8 @@ public class FixtureController(IFixtureGenerationService fixtureGenerationServic
         return new MatchResponse
         {
             Id = match.Id,
-            TournamentId = match.Tournament.Id,
-            TournamentName = match.Tournament.Name,
+            MatchDayId = match.MatchDay.Id,
+            MatchDayName = match.MatchDay.Name,
             HomeTeamId = match.HomeTeam.Id,
             HomeTeamName = match.HomeTeam.TeamName,
             AwayTeamId = match.AwayTeam.Id,

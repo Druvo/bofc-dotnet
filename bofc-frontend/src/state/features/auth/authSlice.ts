@@ -21,7 +21,7 @@ export interface PlayerProfileResType extends BasicResType {
     content: IPlayer;
 }
 
-export const tournamentsApi = apiWithTags.injectEndpoints({
+export const authApi = apiWithTags.injectEndpoints({
     endpoints: (build) => ({
         login: build.mutation<
             LoginResType,
@@ -118,4 +118,4 @@ export const {
     useUpdatePlayerDataMutation,
     useResetPlayerPasswordMutation,
     useUpdateThemePreferenceMutation,
-} = tournamentsApi;
+} = authApi;

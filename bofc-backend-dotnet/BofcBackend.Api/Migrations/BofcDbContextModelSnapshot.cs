@@ -602,13 +602,13 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<long>("TeamId")
                         .HasColumnType("bigint")
                         .HasColumnName("team_id");
-
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -622,9 +622,9 @@ namespace BofcBackend.Api.Migrations
 
                     b.HasIndex("BidderUserId");
 
-                    b.HasIndex("TeamId");
+                    b.HasIndex("MatchDayId");
 
-                    b.HasIndex("TournamentId");
+                    b.HasIndex("TeamId");
 
                     b.ToTable("auction_bids", (string)null);
                 });
@@ -674,6 +674,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint")
                         .HasColumnName("player_id");
@@ -700,10 +704,6 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("status");
 
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
@@ -720,7 +720,7 @@ namespace BofcBackend.Api.Migrations
 
                     b.HasIndex("SoldToTeamId");
 
-                    b.HasIndex("TournamentId", "PlayerId")
+                    b.HasIndex("MatchDayId", "PlayerId")
                         .IsUnique();
 
                     b.ToTable("auction_players", (string)null);
@@ -791,6 +791,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<string>("MobileNo")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("mobile_no");
@@ -825,10 +829,6 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("teams_id");
 
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
@@ -839,7 +839,7 @@ namespace BofcBackend.Api.Migrations
 
                     b.HasIndex("CreatedPlayerId");
 
-                    b.HasIndex("TournamentId");
+                    b.HasIndex("MatchDayId");
 
                     b.ToTable("auction_player_registrations", (string)null);
                 });
@@ -877,6 +877,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<DateTime?>("PausedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("paused_at");
@@ -894,10 +898,6 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("status");
 
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
@@ -906,7 +906,7 @@ namespace BofcBackend.Api.Migrations
 
                     b.HasIndex("CurrentAuctionPlayerId");
 
-                    b.HasIndex("TournamentId");
+                    b.HasIndex("MatchDayId");
 
                     b.ToTable("auction_sessions", (string)null);
                 });
@@ -949,6 +949,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<int>("MaxSquadSize")
                         .HasColumnType("int")
                         .HasColumnName("max_squad_size");
@@ -973,10 +977,6 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("int")
                         .HasColumnName("timer_extension_seconds");
 
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
                     b.Property<bool>("UnsoldReauctionEnabled")
                         .HasColumnType("bit")
                         .HasColumnName("unsold_reauction_enabled");
@@ -987,7 +987,7 @@ namespace BofcBackend.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TournamentId")
+                    b.HasIndex("MatchDayId")
                         .IsUnique();
 
                     b.ToTable("auction_settings", (string)null);
@@ -1214,6 +1214,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<string>("NodeName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1246,23 +1250,19 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("target_round_id");
 
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MatchDayId");
+
                     b.HasIndex("SourceGroupId");
 
                     b.HasIndex("SourceRoundId");
 
                     b.HasIndex("TargetRoundId");
-
-                    b.HasIndex("TournamentId");
 
                     b.ToTable("logic_node", (string)null);
                 });
@@ -1347,6 +1347,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("match_date");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<int?>("MatchDurationMinutes")
                         .HasColumnType("int")
                         .HasColumnName("match_duration_minutes");
@@ -1377,10 +1381,6 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("started_at");
 
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
@@ -1397,13 +1397,371 @@ namespace BofcBackend.Api.Migrations
 
                     b.HasIndex("HomeTeamId");
 
-                    b.HasIndex("RoundId");
+                    b.HasIndex("MatchDayId");
 
-                    b.HasIndex("TournamentId");
+                    b.HasIndex("RoundId");
 
                     b.HasIndex("VenueId");
 
                     b.ToTable("match", (string)null);
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDay", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("AuctionMode")
+                        .HasColumnType("bit")
+                        .HasColumnName("auction_mode");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<bool>("DefaultMatchDay")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_default");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasColumnName("description");
+
+                    b.Property<int?>("DurationMinutes")
+                        .HasColumnType("int")
+                        .HasColumnName("duration_minutes");
+
+                    b.Property<int?>("GroupCount")
+                        .HasColumnType("int")
+                        .HasColumnName("group_count");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_active");
+
+                    b.Property<bool>("IsWeeklyMatchDay")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_weekly_match_day");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<DateTime>("MatchDayDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("match_day_date");
+
+                    b.Property<string>("MatchDayStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("match_day_status");
+
+                    b.Property<string>("MatchDayType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("match_day_type");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("ReminderSentAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("reminder_sent_at");
+
+                    b.Property<string>("RoadmapImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("roadmap_image_url");
+
+                    b.Property<string>("Rules")
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasColumnName("rules");
+
+                    b.Property<string>("Season")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("season");
+
+                    b.Property<string>("SportType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sport_type");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("title");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.Property<long>("VenueId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("venue_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VenueId");
+
+                    b.ToTable("match_day", (string)null);
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayParticipant", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Comments")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("comments");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
+                    b.Property<bool>("ParticipationStatus")
+                        .HasColumnType("bit")
+                        .HasColumnName("participation_status");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_id");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("MatchDayId", "PlayerId")
+                        .IsUnique();
+
+                    b.ToTable("match_day_participant", (string)null);
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayParticipantPlayer", b =>
+                {
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_id");
+
+                    b.Property<string>("Comments")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("comments");
+
+                    b.Property<DateTime?>("MatchDayDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("match_day_date");
+
+                    b.Property<string>("MatchDayName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("match_day_name");
+
+                    b.Property<long?>("MatchDayParticipantId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_participant_id");
+
+                    b.Property<bool?>("ParticipationStatus")
+                        .HasColumnType("bit")
+                        .HasColumnName("participation_status");
+
+                    b.Property<string>("PhotoKey")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("photo_key");
+
+                    b.Property<string>("PlayerEmployeeId")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("player_employee_id");
+
+                    b.Property<string>("PlayerName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("player_name");
+
+                    b.HasKey("MatchDayId", "PlayerId");
+
+                    b.ToTable("match_day_participant_players", (string)null);
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayPrize", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ImageLinks")
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasColumnName("image_links");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
+                    b.Property<long?>("PlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_id");
+
+                    b.Property<int>("PositionRank")
+                        .HasColumnType("int")
+                        .HasColumnName("position_rank");
+
+                    b.Property<decimal?>("PrizeAmount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("prize_amount");
+
+                    b.Property<string>("PrizeCategory")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("prize_category");
+
+                    b.Property<string>("PrizeType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("prize_type");
+
+                    b.Property<long?>("TeamId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("team_id");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchDayId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("match_day_prize", (string)null);
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayRound", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AdvancementRuleText")
+                        .HasColumnType("NVARCHAR(MAX)")
+                        .HasColumnName("advancement_rule");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("end_date");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
+                    b.Property<string>("RoundName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("round_name");
+
+                    b.Property<int>("RoundNumber")
+                        .HasColumnType("int")
+                        .HasColumnName("round_number");
+
+                    b.Property<string>("RoundType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("round_type");
+
+                    b.Property<int>("SequenceOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("sequence_order");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("start_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchDayId");
+
+                    b.ToTable("match_day_round", (string)null);
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchEvent", b =>
@@ -1891,6 +2249,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<DateTime>("PlayedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("played_date");
@@ -1903,19 +2265,15 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("int")
                         .HasColumnName("round_number");
 
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlayerId");
+                    b.HasIndex("MatchDayId");
 
-                    b.HasIndex("TournamentId");
+                    b.HasIndex("PlayerId");
 
                     b.ToTable("player_goalkeeping_history", (string)null);
                 });
@@ -2250,17 +2608,21 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(7)")
                         .HasColumnName("last_payment_reminder_sent_month");
 
+                    b.Property<int>("MatchDayReminderDaysBefore")
+                        .HasColumnType("int")
+                        .HasColumnName("match_day_reminder_days_before");
+
                     b.Property<bool>("NotifyCustomEmailEnabled")
                         .HasColumnType("bit")
                         .HasColumnName("notify_custom_email_enabled");
 
+                    b.Property<bool>("NotifyMatchDayReminderEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("notify_match_day_reminder_enabled");
+
                     b.Property<bool>("NotifyPaymentDueEnabled")
                         .HasColumnType("bit")
                         .HasColumnName("notify_payment_due_enabled");
-
-                    b.Property<bool>("NotifyTournamentReminderEnabled")
-                        .HasColumnType("bit")
-                        .HasColumnName("notify_tournament_reminder_enabled");
 
                     b.Property<int>("PaymentDueReminderDayOfMonth")
                         .HasColumnType("int")
@@ -2306,10 +2668,6 @@ namespace BofcBackend.Api.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)")
                         .HasColumnName("smtp_username");
-
-                    b.Property<int>("TournamentReminderDaysBefore")
-                        .HasColumnType("int")
-                        .HasColumnName("tournament_reminder_days_before");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -2383,14 +2741,14 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("logo_key");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<string>("TeamName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("team_name");
-
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -2398,7 +2756,7 @@ namespace BofcBackend.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TournamentId");
+                    b.HasIndex("MatchDayId");
 
                     b.ToTable("team", (string)null);
                 });
@@ -2424,6 +2782,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
 
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
                     b.Property<long>("OwnerId")
                         .HasColumnType("bigint")
                         .HasColumnName("owner_id");
@@ -2448,10 +2810,6 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("int")
                         .HasColumnName("total_spent");
 
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
@@ -2466,7 +2824,7 @@ namespace BofcBackend.Api.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.HasIndex("TournamentId", "TeamId")
+                    b.HasIndex("MatchDayId", "TeamId")
                         .IsUnique();
 
                     b.ToTable("team_budgets", (string)null);
@@ -2530,364 +2888,6 @@ namespace BofcBackend.Api.Migrations
                     b.HasIndex("TeamId");
 
                     b.ToTable("team_player", (string)null);
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Tournament", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<bool>("AuctionMode")
-                        .HasColumnType("bit")
-                        .HasColumnName("auction_mode");
-
-                    b.Property<long>("CreatedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_date");
-
-                    b.Property<bool>("DefaultTournament")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_default");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("NVARCHAR(MAX)")
-                        .HasColumnName("description");
-
-                    b.Property<int?>("DurationMinutes")
-                        .HasColumnType("int")
-                        .HasColumnName("duration_minutes");
-
-                    b.Property<int?>("GroupCount")
-                        .HasColumnType("int")
-                        .HasColumnName("group_count");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
-
-                    b.Property<bool>("IsWeeklyMatchDay")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_weekly_match_day");
-
-                    b.Property<long?>("LastModifiedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("last_modified_by");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("name");
-
-                    b.Property<DateTime?>("ReminderSentAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("reminder_sent_at");
-
-                    b.Property<string>("RoadmapImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("roadmap_image_url");
-
-                    b.Property<string>("Rules")
-                        .HasColumnType("NVARCHAR(MAX)")
-                        .HasColumnName("rules");
-
-                    b.Property<string>("Season")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("season");
-
-                    b.Property<string>("SportType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("sport_type");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("title");
-
-                    b.Property<DateTime>("TournamentDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("tournament_date");
-
-                    b.Property<string>("TournamentStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("tournament_status");
-
-                    b.Property<string>("TournamentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("tournament_type");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_date");
-
-                    b.Property<long>("VenueId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("venue_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VenueId");
-
-                    b.ToTable("tournament", (string)null);
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TournamentParticipant", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Comments")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("comments");
-
-                    b.Property<long>("CreatedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_date");
-
-                    b.Property<long?>("LastModifiedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("last_modified_by");
-
-                    b.Property<bool>("ParticipationStatus")
-                        .HasColumnType("bit")
-                        .HasColumnName("participation_status");
-
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_id");
-
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_date");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId");
-
-                    b.HasIndex("TournamentId", "PlayerId")
-                        .IsUnique();
-
-                    b.ToTable("tournament_participant", (string)null);
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TournamentParticipantPlayer", b =>
-                {
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_id");
-
-                    b.Property<string>("Comments")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("comments");
-
-                    b.Property<bool?>("ParticipationStatus")
-                        .HasColumnType("bit")
-                        .HasColumnName("participation_status");
-
-                    b.Property<string>("PhotoKey")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("photo_key");
-
-                    b.Property<string>("PlayerEmployeeId")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("player_employee_id");
-
-                    b.Property<string>("PlayerName")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("player_name");
-
-                    b.Property<DateTime?>("TournamentDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("tournament_date");
-
-                    b.Property<string>("TournamentName")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("tournament_name");
-
-                    b.Property<long?>("TournamentParticipantId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_participant_id");
-
-                    b.HasKey("TournamentId", "PlayerId");
-
-                    b.ToTable("tournament_participant_players", (string)null);
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TournamentPrize", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("CreatedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_date");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("NVARCHAR(MAX)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("ImageLinks")
-                        .HasColumnType("NVARCHAR(MAX)")
-                        .HasColumnName("image_links");
-
-                    b.Property<long?>("LastModifiedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("last_modified_by");
-
-                    b.Property<long?>("PlayerId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("player_id");
-
-                    b.Property<int>("PositionRank")
-                        .HasColumnType("int")
-                        .HasColumnName("position_rank");
-
-                    b.Property<decimal?>("PrizeAmount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("prize_amount");
-
-                    b.Property<string>("PrizeCategory")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("prize_category");
-
-                    b.Property<string>("PrizeType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("prize_type");
-
-                    b.Property<long?>("TeamId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("team_id");
-
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_date");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId");
-
-                    b.HasIndex("TeamId");
-
-                    b.HasIndex("TournamentId");
-
-                    b.ToTable("tournament_prize", (string)null);
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TournamentRound", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("AdvancementRuleText")
-                        .HasColumnType("NVARCHAR(MAX)")
-                        .HasColumnName("advancement_rule");
-
-                    b.Property<long>("CreatedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("created_by");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_date");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("end_date");
-
-                    b.Property<long?>("LastModifiedBy")
-                        .HasColumnType("bigint")
-                        .HasColumnName("last_modified_by");
-
-                    b.Property<string>("RoundName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("round_name");
-
-                    b.Property<int>("RoundNumber")
-                        .HasColumnType("int")
-                        .HasColumnName("round_number");
-
-                    b.Property<string>("RoundType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("round_type");
-
-                    b.Property<int>("SequenceOrder")
-                        .HasColumnType("int")
-                        .HasColumnName("sequence_order");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("start_date");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("status");
-
-                    b.Property<long>("TournamentId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("tournament_id");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_date");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TournamentId");
-
-                    b.ToTable("tournament_round", (string)null);
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Venue", b =>
@@ -3077,7 +3077,7 @@ namespace BofcBackend.Api.Migrations
                         .HasForeignKey("SourceGroupId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.TournamentRound", "SourceRound")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDayRound", "SourceRound")
                         .WithMany("SourceAdvancementRules")
                         .HasForeignKey("SourceRoundId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -3088,7 +3088,7 @@ namespace BofcBackend.Api.Migrations
                         .HasForeignKey("TargetGroupId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.TournamentRound", "TargetRound")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDayRound", "TargetRound")
                         .WithMany("TargetAdvancementRules")
                         .HasForeignKey("TargetRoundId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -3123,15 +3123,15 @@ namespace BofcBackend.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Team", "Team")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
                         .WithMany()
-                        .HasForeignKey("TeamId")
+                        .HasForeignKey("MatchDayId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Team", "Team")
                         .WithMany()
-                        .HasForeignKey("TournamentId")
+                        .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -3141,9 +3141,9 @@ namespace BofcBackend.Api.Migrations
 
                     b.Navigation("BidderUser");
 
-                    b.Navigation("Team");
+                    b.Navigation("MatchDay");
 
-                    b.Navigation("Tournament");
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.AuctionPlayer", b =>
@@ -3152,6 +3152,12 @@ namespace BofcBackend.Api.Migrations
                         .WithMany()
                         .HasForeignKey("CurrentHighestTeamId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
+                        .WithMany()
+                        .HasForeignKey("MatchDayId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
                         .WithMany()
@@ -3164,19 +3170,13 @@ namespace BofcBackend.Api.Migrations
                         .HasForeignKey("SoldToTeamId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("CurrentHighestTeam");
+
+                    b.Navigation("MatchDay");
 
                     b.Navigation("Player");
 
                     b.Navigation("SoldToTeam");
-
-                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.AuctionPlayerRegistration", b =>
@@ -3191,9 +3191,9 @@ namespace BofcBackend.Api.Migrations
                         .HasForeignKey("CreatedPlayerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
                         .WithMany()
-                        .HasForeignKey("TournamentId")
+                        .HasForeignKey("MatchDayId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -3201,7 +3201,7 @@ namespace BofcBackend.Api.Migrations
 
                     b.Navigation("CreatedPlayer");
 
-                    b.Navigation("Tournament");
+                    b.Navigation("MatchDay");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.AuctionSession", b =>
@@ -3211,26 +3211,26 @@ namespace BofcBackend.Api.Migrations
                         .HasForeignKey("CurrentAuctionPlayerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
                         .WithMany()
-                        .HasForeignKey("TournamentId")
+                        .HasForeignKey("MatchDayId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("CurrentAuctionPlayer");
 
-                    b.Navigation("Tournament");
+                    b.Navigation("MatchDay");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.AuctionSettings", b =>
                 {
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
                         .WithOne()
-                        .HasForeignKey("BofcBackend.Api.Domain.Entities.AuctionSettings", "TournamentId")
+                        .HasForeignKey("BofcBackend.Api.Domain.Entities.AuctionSettings", "MatchDayId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Tournament");
+                    b.Navigation("MatchDay");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.CostType", b =>
@@ -3265,35 +3265,35 @@ namespace BofcBackend.Api.Migrations
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.LogicNode", b =>
                 {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
+                        .WithMany()
+                        .HasForeignKey("MatchDayId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("BofcBackend.Api.Domain.Entities.RoundGroup", "SourceGroup")
                         .WithMany()
                         .HasForeignKey("SourceGroupId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.TournamentRound", "SourceRound")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDayRound", "SourceRound")
                         .WithMany("SourceLogicNodes")
                         .HasForeignKey("SourceRoundId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.TournamentRound", "TargetRound")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDayRound", "TargetRound")
                         .WithMany("TargetLogicNodes")
                         .HasForeignKey("TargetRoundId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("MatchDay");
 
                     b.Navigation("SourceGroup");
 
                     b.Navigation("SourceRound");
 
                     b.Navigation("TargetRound");
-
-                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Match", b =>
@@ -3315,16 +3315,16 @@ namespace BofcBackend.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.TournamentRound", "Round")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
+                        .WithMany()
+                        .HasForeignKey("MatchDayId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDayRound", "Round")
                         .WithMany("Matches")
                         .HasForeignKey("RoundId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
 
                     b.HasOne("BofcBackend.Api.Domain.Entities.Venue", "Venue")
                         .WithMany()
@@ -3337,11 +3337,78 @@ namespace BofcBackend.Api.Migrations
 
                     b.Navigation("HomeTeam");
 
+                    b.Navigation("MatchDay");
+
                     b.Navigation("Round");
 
-                    b.Navigation("Tournament");
+                    b.Navigation("Venue");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDay", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Venue", "Venue")
+                        .WithMany()
+                        .HasForeignKey("VenueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_match_day_venue");
 
                     b.Navigation("Venue");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayParticipant", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
+                        .WithMany()
+                        .HasForeignKey("MatchDayId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MatchDay");
+
+                    b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayPrize", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
+                        .WithMany()
+                        .HasForeignKey("MatchDayId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("MatchDay");
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayRound", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
+                        .WithMany()
+                        .HasForeignKey("MatchDayId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MatchDay");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchEvent", b =>
@@ -3435,21 +3502,21 @@ namespace BofcBackend.Api.Migrations
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.PlayerGoalkeepingHistory", b =>
                 {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
+                        .WithMany()
+                        .HasForeignKey("MatchDayId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
                         .WithMany()
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("MatchDay");
 
                     b.Navigation("Player");
-
-                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.PushSubscription", b =>
@@ -3470,7 +3537,7 @@ namespace BofcBackend.Api.Migrations
                         .HasForeignKey("ParentGroupId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.TournamentRound", "Round")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDayRound", "Round")
                         .WithMany("Groups")
                         .HasForeignKey("RoundId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -3501,7 +3568,7 @@ namespace BofcBackend.Api.Migrations
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.RoundTeam", b =>
                 {
-                    b.HasOne("BofcBackend.Api.Domain.Entities.TournamentRound", "Round")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDayRound", "Round")
                         .WithMany("Teams")
                         .HasForeignKey("RoundId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -3529,17 +3596,23 @@ namespace BofcBackend.Api.Migrations
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Team", b =>
                 {
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
                         .WithMany("Teams")
-                        .HasForeignKey("TournamentId")
+                        .HasForeignKey("MatchDayId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Tournament");
+                    b.Navigation("MatchDay");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TeamBudget", b =>
                 {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
+                        .WithMany()
+                        .HasForeignKey("MatchDayId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId")
@@ -3552,17 +3625,11 @@ namespace BofcBackend.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("MatchDay");
 
                     b.Navigation("Owner");
 
                     b.Navigation("Team");
-
-                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TeamPlayer", b =>
@@ -3582,73 +3649,6 @@ namespace BofcBackend.Api.Migrations
                     b.Navigation("Player");
 
                     b.Navigation("Team");
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Tournament", b =>
-                {
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Venue", "Venue")
-                        .WithMany()
-                        .HasForeignKey("VenueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_tournament_venue");
-
-                    b.Navigation("Venue");
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TournamentParticipant", b =>
-                {
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Player");
-
-                    b.Navigation("Tournament");
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TournamentPrize", b =>
-                {
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Team", "Team")
-                        .WithMany()
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Player");
-
-                    b.Navigation("Team");
-
-                    b.Navigation("Tournament");
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TournamentRound", b =>
-                {
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Tournament", "Tournament")
-                        .WithMany()
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("collection_players", b =>
@@ -3703,6 +3703,28 @@ namespace BofcBackend.Api.Migrations
                     b.Navigation("MatchStatistics");
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDay", b =>
+                {
+                    b.Navigation("Teams");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayRound", b =>
+                {
+                    b.Navigation("Groups");
+
+                    b.Navigation("Matches");
+
+                    b.Navigation("SourceAdvancementRules");
+
+                    b.Navigation("SourceLogicNodes");
+
+                    b.Navigation("TargetAdvancementRules");
+
+                    b.Navigation("TargetLogicNodes");
+
+                    b.Navigation("Teams");
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Notification", b =>
                 {
                     b.Navigation("Recipients");
@@ -3724,28 +3746,6 @@ namespace BofcBackend.Api.Migrations
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Team", b =>
                 {
                     b.Navigation("TeamPlayers");
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Tournament", b =>
-                {
-                    b.Navigation("Teams");
-                });
-
-            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TournamentRound", b =>
-                {
-                    b.Navigation("Groups");
-
-                    b.Navigation("Matches");
-
-                    b.Navigation("SourceAdvancementRules");
-
-                    b.Navigation("SourceLogicNodes");
-
-                    b.Navigation("TargetAdvancementRules");
-
-                    b.Navigation("TargetLogicNodes");
-
-                    b.Navigation("Teams");
                 });
 #pragma warning restore 612, 618
         }

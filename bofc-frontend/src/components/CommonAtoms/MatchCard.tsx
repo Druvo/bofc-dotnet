@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "../TournamentViewer/ViewerFixturesTab.module.css";
+import styles from "../MatchDayViewer/ViewerFixturesTab.module.css";
 
 /**
  * Canonical status→class mapper. ViewerFixturesTab and ViewerResultsTab each
@@ -57,7 +57,7 @@ interface MatchCardShellProps {
 
 /**
  * The outer card wrapper shared verbatim by every match/result card in the
- * tournament viewer — status-driven className, and the mobile/desktop body
+ * matchDay viewer — status-driven className, and the mobile/desktop body
  * padding split. Callers own everything inside (top row, team block, score,
  * event breakdown) since that content differs enough between a fixture and a
  * result to stay bespoke per tab.

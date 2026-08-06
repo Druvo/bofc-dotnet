@@ -10,5 +10,5 @@ public interface ITeamService
     Task<TeamPlayerResponse> SaveOrUpdateTeamPlayerAsync(TeamPlayerRequest request);
     Task<TeamPlayerResponse> UpdateTeamPlayerDetailsAsync(TeamPlayerRequest request);
     Task RemovePlayerFromTeamAsync(TeamPlayerRemoveRequest request);
-    Task<List<TournamentWithTeamsResponse>> GetTournamentsSummaryAsync(long? tournamentId);
+    Task<List<MatchDayWithTeamsResponse>> GetMatchDaysSummaryAsync(long? matchDayId);
 }

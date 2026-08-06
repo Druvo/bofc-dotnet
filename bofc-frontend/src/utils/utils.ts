@@ -2,27 +2,27 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 /**
- * The backend only assigns tournamentStatus once (at creation) and relies on a slow
+ * The backend only assigns matchDayStatus once (at creation) and relies on a slow
  * cron job (3x/day) or an admin manually concluding it to advance it further — so a
- * tournament can sit at stale UPCOMING/ONGOING long past its actual window. Anywhere
+ * matchDay can sit at stale UPCOMING/ONGOING long past its actual window. Anywhere
  * a status is displayed, derive the effective status in real time from the MatchDay's
  * own start + duration instead of trusting the raw field:
  *   now < start           -> UPCOMING
  *   start <= now < end    -> ONGOING
  *   now >= end            -> CONCLUDED
- * CONCLUDED is treated as terminal (an admin's explicit ConcludeTournamentAsync call)
+ * CONCLUDED is treated as terminal (an admin's explicit ConcludeMatchDayAsync call)
  * and never resurrected by date math. durationMinutes defaults to 90 when unset.
  */
-export const getEffectiveTournamentStatus = (
+export const getEffectiveMatchDayStatus = (
     status?: string,
-    tournamentDate?: string,
+    matchDayDate?: string,
     durationMinutes?: number | null
 ): string => {
-    if (!tournamentDate) return status || "";
+    if (!matchDayDate) return status || "";
     if (status === "CONCLUDED") return status;
     if (status !== "UPCOMING" && status !== "ONGOING") return status || "";
 
-    const start = new Date(tournamentDate);
+    const start = new Date(matchDayDate);
     const end = new Date(start.getTime() + (durationMinutes ?? 90) * 60_000);
     const now = new Date();
 

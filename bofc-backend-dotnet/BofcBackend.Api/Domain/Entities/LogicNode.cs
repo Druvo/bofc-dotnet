@@ -7,15 +7,15 @@ public class LogicNode : AuditableEntity
 {
     public long Id { get; set; }
 
-    public long TournamentId { get; set; }
-    public Tournament Tournament { get; set; } = null!;
+    public long MatchDayId { get; set; }
+    public MatchDay MatchDay { get; set; } = null!;
 
     public string NodeName { get; set; } = string.Empty;
     public LogicNodeType NodeType { get; set; }
 
     /// <summary>Nullable — advancement can come from a round instead.</summary>
     public long? SourceRoundId { get; set; }
-    public TournamentRound? SourceRound { get; set; }
+    public MatchDayRound? SourceRound { get; set; }
 
     /// <summary>Nullable — advancement can come from a group instead.</summary>
     public long? SourceGroupId { get; set; }
@@ -23,7 +23,7 @@ public class LogicNode : AuditableEntity
 
     /// <summary>Required — teams always advance to a round.</summary>
     public long TargetRoundId { get; set; }
-    public TournamentRound TargetRound { get; set; } = null!;
+    public MatchDayRound TargetRound { get; set; } = null!;
 
     /// <summary>JSON-ish rule config (topN, tieBreakerRules, etc).</summary>
     public string? RuleConfig { get; set; }

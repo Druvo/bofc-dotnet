@@ -7,8 +7,8 @@ public class AuctionSettings : AuditableEntity
 {
     public long Id { get; set; }
 
-    public long TournamentId { get; set; }
-    public Tournament Tournament { get; set; } = null!;
+    public long MatchDayId { get; set; }
+    public MatchDay MatchDay { get; set; } = null!;
 
     public int TeamBudget { get; set; }
     public int MinSquadSize { get; set; }

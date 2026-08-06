@@ -10,11 +10,11 @@ interface Player {
 }
 
 interface ManualPlayerSelectionProps {
-    tournamentId: number;
+    matchDayId: number;
     onPlayerSelected: () => void;
 }
 
-const ManualPlayerSelection: React.FC<ManualPlayerSelectionProps> = ({ tournamentId, onPlayerSelected }) => {
+const ManualPlayerSelection: React.FC<ManualPlayerSelectionProps> = ({ matchDayId, onPlayerSelected }) => {
     const [players, setPlayers] = useState<Player[]>([]);
     const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
     const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ const ManualPlayerSelection: React.FC<ManualPlayerSelectionProps> = ({ tournamen
         // Fetch available and unsold players
         const fetchPlayers = async () => {
             try {
-                const response = await axios.get(`/api/tournaments/${tournamentId}/players/available-unsold`);
+                const response = await axios.get(`/api/match-days/${matchDayId}/players/available-unsold`);
                 console.log('Fetched players:', response.data); // Debugging log
                 setPlayers(response.data);
             } catch (error) {
@@ -33,7 +33,7 @@ const ManualPlayerSelection: React.FC<ManualPlayerSelectionProps> = ({ tournamen
         };
 
         fetchPlayers();
-    }, [tournamentId]);
+    }, [matchDayId]);
 
     const handlePlayerSelect = (value: number) => {
         console.log('Selected Player ID:', value); // Debugging log
@@ -49,7 +49,7 @@ const ManualPlayerSelection: React.FC<ManualPlayerSelectionProps> = ({ tournamen
         setLoading(true);
         try {
             console.log('Submitting player for auction:', selectedPlayer); // Debugging log
-            await axios.post(`/api/tournaments/${tournamentId}/auction/select-player`, { playerId: selectedPlayer });
+            await axios.post(`/api/match-days/${matchDayId}/auction/select-player`, { playerId: selectedPlayer });
             message.success('Player successfully selected for auction.');
             onPlayerSelected();
         } catch (error) {

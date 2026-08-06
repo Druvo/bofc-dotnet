@@ -1,9 +1,9 @@
 import apiSlice from "../../api/apiSlice";
 import { BasicResType } from "../../responesTypes";
 import {
-  GetTournamentPrizesResponse,
-  GetTournamentPrizeResponse,
-  TournamentPrizeRequest,
+  GetMatchDayPrizesResponse,
+  GetMatchDayPrizeResponse,
+  MatchDayPrizeRequest,
   PrizeType,
 } from "./prizeTypes";
 
@@ -14,14 +14,14 @@ const apiWithTags = apiSlice.enhanceEndpoints({
 export const prizesApi = apiWithTags.injectEndpoints({
   endpoints: (builder) => ({
     /**
-     * Create a new tournament prize
+     * Create a new matchDay prize
      */
-    createTournamentPrize: builder.mutation<
-      GetTournamentPrizeResponse,
-      { tournamentId: number; data: TournamentPrizeRequest }
+    createMatchDayPrize: builder.mutation<
+      GetMatchDayPrizeResponse,
+      { matchDayId: number; data: MatchDayPrizeRequest }
     >({
-      query: ({ tournamentId, data }) => ({
-        url: `tournaments/${tournamentId}/prizes`,
+      query: ({ matchDayId, data }) => ({
+        url: `match-days/${matchDayId}/prizes`,
         method: "POST",
         body: data,
       }),
@@ -31,12 +31,12 @@ export const prizesApi = apiWithTags.injectEndpoints({
     /**
      * Update an existing prize
      */
-    updateTournamentPrize: builder.mutation<
-      GetTournamentPrizeResponse,
-      { tournamentId: number; prizeId: number; data: TournamentPrizeRequest }
+    updateMatchDayPrize: builder.mutation<
+      GetMatchDayPrizeResponse,
+      { matchDayId: number; prizeId: number; data: MatchDayPrizeRequest }
     >({
-      query: ({ tournamentId, prizeId, data }) => ({
-        url: `tournaments/${tournamentId}/prizes/${prizeId}`,
+      query: ({ matchDayId, prizeId, data }) => ({
+        url: `match-days/${matchDayId}/prizes/${prizeId}`,
         method: "PUT",
         body: data,
       }),
@@ -46,26 +46,26 @@ export const prizesApi = apiWithTags.injectEndpoints({
     /**
      * Delete a prize
      */
-    deleteTournamentPrize: builder.mutation<
+    deleteMatchDayPrize: builder.mutation<
       BasicResType,
-      { tournamentId: number; prizeId: number }
+      { matchDayId: number; prizeId: number }
     >({
-      query: ({ tournamentId, prizeId }) => ({
-        url: `tournaments/${tournamentId}/prizes/${prizeId}`,
+      query: ({ matchDayId, prizeId }) => ({
+        url: `match-days/${matchDayId}/prizes/${prizeId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["prizes"],
     }),
 
     /**
-     * Get all prizes for a tournament
+     * Get all prizes for a matchDay
      */
-    getTournamentPrizes: builder.query<
-      GetTournamentPrizesResponse,
-      { tournamentId: number }
+    getMatchDayPrizes: builder.query<
+      GetMatchDayPrizesResponse,
+      { matchDayId: number }
     >({
-      query: ({ tournamentId }) => ({
-        url: `tournaments/${tournamentId}/prizes`,
+      query: ({ matchDayId }) => ({
+        url: `match-days/${matchDayId}/prizes`,
         method: "GET",
       }),
       providesTags: ["prizes"],
@@ -74,12 +74,12 @@ export const prizesApi = apiWithTags.injectEndpoints({
     /**
      * Get prizes by type (TEAM or PLAYER)
      */
-    getTournamentPrizesByType: builder.query<
-      GetTournamentPrizesResponse,
-      { tournamentId: number; prizeType: PrizeType }
+    getMatchDayPrizesByType: builder.query<
+      GetMatchDayPrizesResponse,
+      { matchDayId: number; prizeType: PrizeType }
     >({
-      query: ({ tournamentId, prizeType }) => ({
-        url: `tournaments/${tournamentId}/prizes/by-type?prizeType=${prizeType}`,
+      query: ({ matchDayId, prizeType }) => ({
+        url: `match-days/${matchDayId}/prizes/by-type?prizeType=${prizeType}`,
         method: "GET",
       }),
       providesTags: ["prizes"],
@@ -89,11 +89,11 @@ export const prizesApi = apiWithTags.injectEndpoints({
      * Get prizes for a specific team
      */
     getTeamPrizes: builder.query<
-      GetTournamentPrizesResponse,
-      { tournamentId: number; teamId: number }
+      GetMatchDayPrizesResponse,
+      { matchDayId: number; teamId: number }
     >({
-      query: ({ tournamentId, teamId }) => ({
-        url: `tournaments/${tournamentId}/prizes/team/${teamId}`,
+      query: ({ matchDayId, teamId }) => ({
+        url: `match-days/${matchDayId}/prizes/team/${teamId}`,
         method: "GET",
       }),
       providesTags: ["prizes"],
@@ -103,11 +103,11 @@ export const prizesApi = apiWithTags.injectEndpoints({
      * Get prizes for a specific player
      */
     getPlayerPrizes: builder.query<
-      GetTournamentPrizesResponse,
-      { tournamentId: number; playerId: number }
+      GetMatchDayPrizesResponse,
+      { matchDayId: number; playerId: number }
     >({
-      query: ({ tournamentId, playerId }) => ({
-        url: `tournaments/${tournamentId}/prizes/player/${playerId}`,
+      query: ({ matchDayId, playerId }) => ({
+        url: `match-days/${matchDayId}/prizes/player/${playerId}`,
         method: "GET",
       }),
       providesTags: ["prizes"],
@@ -116,11 +116,11 @@ export const prizesApi = apiWithTags.injectEndpoints({
 });
 
 export const {
-  useCreateTournamentPrizeMutation,
-  useUpdateTournamentPrizeMutation,
-  useDeleteTournamentPrizeMutation,
-  useGetTournamentPrizesQuery,
-  useGetTournamentPrizesByTypeQuery,
+  useCreateMatchDayPrizeMutation,
+  useUpdateMatchDayPrizeMutation,
+  useDeleteMatchDayPrizeMutation,
+  useGetMatchDayPrizesQuery,
+  useGetMatchDayPrizesByTypeQuery,
   useGetTeamPrizesQuery,
   useGetPlayerPrizesQuery,
 } = prizesApi;

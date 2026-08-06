@@ -11,11 +11,11 @@ public class Match : AuditableEntity
 {
     public long Id { get; set; }
 
-    public long TournamentId { get; set; }
-    public Tournament Tournament { get; set; } = null!;
+    public long MatchDayId { get; set; }
+    public MatchDay MatchDay { get; set; } = null!;
 
     public long? RoundId { get; set; }
-    public TournamentRound? Round { get; set; }
+    public MatchDayRound? Round { get; set; }
 
     public long? GroupId { get; set; }
     public RoundGroup? Group { get; set; }

@@ -128,10 +128,10 @@ const SendNotificationModal: React.FC<SendNotificationModalProps> = ({ isOpen, o
             placeholder="Notification message"
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            className={`w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3 dark:bg-gray-900 dark:placeholder:text-white/30 ${
+            className={`w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] dark:placeholder:text-white/30 ${
               errors.body
                 ? "border-error-500 focus:border-error-300 focus:ring-error-500/10 dark:border-error-500"
-                : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800"
+                : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90 dark:focus:border-brand-800"
             }`}
           />
           {errors.body && <p className="mt-1.5 text-theme-xs text-error-500">{errors.body}</p>}
@@ -157,7 +157,7 @@ const SendNotificationModal: React.FC<SendNotificationModalProps> = ({ isOpen, o
                 className={`flex-1 rounded-lg border px-3 py-2 text-theme-sm font-medium transition ${
                   targetMode === opt.key
                     ? "border-brand-500 bg-brand-50 text-brand-500 dark:border-brand-400 dark:bg-brand-500/10 dark:text-brand-400"
-                    : "border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/5"
+                    : "border-gray-300 text-gray-600 hover:bg-gray-50 dark:border-[var(--color-rule)] dark:text-gray-400 dark:hover:bg-white/5"
                 }`}
               >
                 {opt.label}

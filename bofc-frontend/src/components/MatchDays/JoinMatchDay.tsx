@@ -9,7 +9,8 @@ import {
   ClockCircleOutlined, TeamOutlined, StarFilled, CalendarOutlined,
   CheckCircleFilled, TrophyOutlined,
 } from "@ant-design/icons";
-import { showBdLocalTime } from "./../../utils/utils";
+import { showBdLocalTimeRange } from "./../../utils/utils";
+import { canManageTeams } from "../../utils/roleUtils";
 import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import GoalKeeperDrawer from "./Atoms/GoalKeeperDrawer";
@@ -124,8 +125,8 @@ export default function JoinMatchDay() {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]"><Loader className="py-6" /></div>
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]"><Loader className="py-10" /></div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]"><Loader className="py-6" /></div>
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]"><Loader className="py-10" /></div>
       </div>
     );
   }
@@ -142,14 +143,14 @@ export default function JoinMatchDay() {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Card 1: Match Summary */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+        {/* Card 1: Match Day Summary */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
           <div className="mb-3">
-            <div className="mb-0.5 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">⚽ Next Match</div>
+            <div className="mb-0.5 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">⚽ Match Day</div>
             <h4 className="mb-0.5 text-lg font-bold text-gray-800 dark:text-white/90">{nextMatchDay?.matchDayName}</h4>
             <span className="flex items-center gap-1.5 text-theme-xs text-gray-500 dark:text-gray-400">
               <CalendarOutlined className="text-brand-500 dark:text-brand-400" />
-              {nextMatchDay?.matchDayDate && showBdLocalTime(nextMatchDay.matchDayDate)}
+              {nextMatchDay?.matchDayDate && showBdLocalTimeRange(nextMatchDay.matchDayDate, nextMatchDay.durationMinutes)}
             </span>
           </div>
 
@@ -183,7 +184,7 @@ export default function JoinMatchDay() {
 
         {/* Card 2: Your Response */}
         {myParticipation && (
-          <div className="rounded-2xl border border-brand-500/30 bg-white p-4 dark:border-brand-500/30 dark:bg-white/[0.03]">
+          <div className="rounded-2xl border border-brand-500/30 bg-white p-4 dark:border-brand-500/30 dark:bg-[var(--color-paper-3)]">
             <div className="mb-2 flex items-center gap-3">
               <PlayerAvatar src={toAbsolutePlayerPhotoUrl(myParticipation.photoUrl)} size={46} highlight name={myParticipation.playerName} seed={myParticipation.playerId} />
               <div className="min-w-0 flex-1">
@@ -199,7 +200,7 @@ export default function JoinMatchDay() {
               </div>
             </div>
 
-            <div className="my-2.5 h-px bg-gray-100 dark:bg-gray-800" />
+            <div className="my-2.5 h-px bg-gray-100 dark:bg-[var(--color-paper-2)]" />
 
             <div className="mb-2 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">Are you participating?</div>
 
@@ -223,7 +224,7 @@ export default function JoinMatchDay() {
                 className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-theme-sm font-semibold transition disabled:opacity-60 ${
                   myParticipation.participationStatus === false
                     ? "border-error-500 bg-error-500 text-white"
-                    : "border-gray-300 bg-transparent text-gray-500 dark:border-gray-700 dark:text-gray-400"
+                    : "border-gray-300 bg-transparent text-gray-500 dark:border-[var(--color-rule)] dark:text-gray-400"
                 }`}
               >
                 <CloseCircleOutlined /> Can't make it
@@ -244,7 +245,7 @@ export default function JoinMatchDay() {
         )}
 
         {/* Card 3: Your Team */}
-        <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
           <div className="mb-2.5 flex items-center justify-between">
             <span className="flex items-center gap-1.5 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">
               <TrophyOutlined /> Your Team
@@ -272,7 +273,7 @@ export default function JoinMatchDay() {
       </div>
 
       {/* Participants panel */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-5">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <TeamOutlined className="text-brand-500 dark:text-brand-400" />
@@ -290,7 +291,7 @@ export default function JoinMatchDay() {
                 { value: "status", label: "Sort by Status" },
               ]}
             />
-            <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+            <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-[var(--color-rule)]">
               {([
                 { label: "All", value: "all" },
                 { label: "In", value: "participating" },
@@ -319,7 +320,7 @@ export default function JoinMatchDay() {
               placeholder="Search by name or employee ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+              className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
             />
           </div>
           {searchTerm && <span className="text-theme-xs text-gray-400 dark:text-gray-500">{filteredTableData.length} result(s)</span>}
@@ -334,12 +335,14 @@ export default function JoinMatchDay() {
           <div className={`grid grid-cols-1 gap-2.5 ${isMobileTable ? "" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}>
             {filteredTableData.map((r) => {
               const isMe = r.playerId === Number(loginInfo.userId);
-              const canEdit = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN") || isMe;
+              // COORDINATOR manages this MatchDay's teams/lineup/fixtures/prizes elsewhere in the
+              // app — excluding it here was an arbitrary gap for editing another player's RSVP.
+              const canEdit = canManageTeams(loginInfo.roles) || isMe;
               const photoUrl = toAbsolutePlayerPhotoUrl(r.photoUrl);
               return (
                 <div
                   key={r.key}
-                  className={`rounded-xl border bg-gray-50 p-2.5 dark:bg-white/[0.02] ${isMe ? "border-l-[3px] border-l-brand-500" : "border-l-[3px] border-l-warning-500"} border-gray-100 dark:border-gray-800`}
+                  className={`rounded-xl border bg-gray-50 p-2.5 dark:bg-[var(--color-paper-2)] ${isMe ? "border-l-[3px] border-l-brand-500" : "border-l-[3px] border-l-warning-500"} border-gray-100 dark:border-[var(--color-rule)]`}
                 >
                   <div className={`flex items-center gap-2 ${isMobileTable ? "" : "mb-2"}`}>
                     <PlayerAvatar src={photoUrl} size={isMobileTable ? 40 : 34} highlight={isMe} name={r.playerName} seed={r.playerId} />
@@ -416,7 +419,7 @@ export default function JoinMatchDay() {
         ) : (
           <div className="grid max-h-[60vh] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2">
             {selectedPlayers.map((player) => (
-              <div key={player.playerId} className="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2 dark:border-gray-800">
+              <div key={player.playerId} className="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2 dark:border-[var(--color-rule)]">
                 <PlayerAvatar src={toAbsolutePlayerPhotoUrl(player.photoUrl)} size={32} highlight={false} name={player.playerName} seed={player.playerId} />
                 <div className="min-w-0">
                   <div className="truncate text-theme-sm font-semibold text-gray-800 dark:text-white/90">{player.playerName}</div>

@@ -118,9 +118,9 @@
 }
 
 .filterButtonActive {
-  color: var(--color-accent) !important;
+  color: var(--color-gold) !important;
   background: color-mix(in oklch, var(--color-ink) 12%, transparent);
-  border-color: var(--color-accent) !important;
+  border-color: var(--color-gold) !important;
 }
 
 .teamsGrid {

@@ -39,7 +39,16 @@
 }
 
 /* Enhanced Login Page Styles */
+/* Login pins its own accent/theme tokens rather than inheriting whatever
+   .light-mode/.dark-mode class DefaultLayout last left on <html> — that class
+   is never cleaned up on logout (Login renders outside DefaultLayout), so
+   without this the login button/checkbox color used to depend on whichever
+   theme the user was last in as an authenticated user. Login is always one
+   fixed dark theme with a gold accent, independent of the app-wide toggle. */
 .login-page-wrapper {
+    --color-accent: oklch(68.47% 0.1027 86.0);
+    --color-accent-hover: oklch(76% 0.085 86.0);
+    --color-accent-ink: oklch(14% 0.030 145.2);
     background: linear-gradient(135deg, var(--color-paper-3) 0%, var(--color-paper-2) 50%, var(--color-paper) 100%);
     min-height: 100vh;
     display: flex;
@@ -248,6 +257,17 @@
     transform: translateY(-2px);
     background: var(--color-accent-hover) !important;
     box-shadow: 0 12px 25px color-mix(in oklch, var(--color-accent) 40%, transparent);
+}
+
+/* Recolor the shared FormCheckbox's checked state to Login's gold accent
+   (its default is the app's green brand-500) without touching the shared
+   component — every other page keeps its green checkbox. */
+.login-form-container .border-brand-500 {
+    border-color: var(--color-accent) !important;
+}
+
+.login-form-container .bg-brand-500 {
+    background-color: var(--color-accent) !important;
 }
 
 @keyframes slideUp {

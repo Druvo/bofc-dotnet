@@ -120,7 +120,7 @@ export default function PrizeCard({ prize, isAdmin, onEdit }: PrizeCardProps) {
 
   return (
     <div
-      className="prize-card-modern h-full overflow-hidden rounded-2xl border-[3px] bg-white transition dark:bg-gray-900"
+      className="prize-card-modern h-full overflow-hidden rounded-2xl border-[3px] bg-white transition dark:bg-[var(--color-paper-3)]"
       style={{ borderColor: rankStyle.borderColor, boxShadow: rankStyle.shadow }}
     >
       <div className="relative h-[200px] bg-cover bg-center transition-all" style={{ backgroundImage: `url(${backgroundImage})` }}>
@@ -177,7 +177,7 @@ export default function PrizeCard({ prize, isAdmin, onEdit }: PrizeCardProps) {
       </div>
 
       <div className="p-5">
-        <div className="mb-5 rounded-xl border border-gray-100 bg-gray-50 p-4 text-center dark:border-gray-800 dark:bg-white/[0.02]">
+        <div className="mb-5 rounded-xl border border-gray-100 bg-gray-50 p-4 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
           {prize.prizeType === PrizeType.TEAM && prize.teamName && (
             <div className="flex flex-col items-center gap-2">
               <TeamOutlined className="text-2xl" style={{ color: rankStyle.titleColor }} />
@@ -205,9 +205,9 @@ export default function PrizeCard({ prize, isAdmin, onEdit }: PrizeCardProps) {
         {prize.description && (
           <>
             <div className="my-4 flex items-center gap-3 text-theme-xs text-gray-400">
-              <span className="h-px flex-1 bg-gray-100 dark:bg-gray-800" />
+              <span className="h-px flex-1 bg-gray-100 dark:bg-[var(--color-paper-2)]" />
               About
-              <span className="h-px flex-1 bg-gray-100 dark:bg-gray-800" />
+              <span className="h-px flex-1 bg-gray-100 dark:bg-[var(--color-paper-2)]" />
             </div>
             <p className="line-clamp-3 text-theme-sm leading-relaxed text-gray-500 dark:text-gray-400">{prize.description}</p>
           </>
@@ -216,9 +216,9 @@ export default function PrizeCard({ prize, isAdmin, onEdit }: PrizeCardProps) {
         {hasImages && prize.imageLinks && (
           <>
             <div className="my-4 flex items-center gap-2 text-theme-xs text-gray-400">
-              <span className="h-px flex-1 bg-gray-100 dark:bg-gray-800" />
+              <span className="h-px flex-1 bg-gray-100 dark:bg-[var(--color-paper-2)]" />
               <StarFilled className="text-warning-400" /> Gallery ({prize.imageLinks.length})
-              <span className="h-px flex-1 bg-gray-100 dark:bg-gray-800" />
+              <span className="h-px flex-1 bg-gray-100 dark:bg-[var(--color-paper-2)]" />
             </div>
             <div className="grid grid-cols-3 gap-3" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(90px, 1fr))" }}>
               {prize.imageLinks.map((link, index) => (
@@ -237,7 +237,7 @@ export default function PrizeCard({ prize, isAdmin, onEdit }: PrizeCardProps) {
         )}
 
         {isAdmin && (
-          <div className="mt-5 flex items-center gap-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+          <div className="mt-5 flex items-center gap-2 border-t border-gray-100 pt-4 dark:border-[var(--color-rule)]">
             <Button type="button" variant="outline" size="sm" startIcon={<EditOutlined />} onClick={() => onEdit?.(prize)} className="flex-1">
               Edit
             </Button>

@@ -148,6 +148,32 @@ public class PlayerService(
         return ToResponse(player);
     }
 
+    public async Task<int?> GetPlayerRankAsync(long id) => (await GetPlayerEntityAsync(id)).Rank;
+
+    public async Task SetPlayerRankAsync(long id, int? rank)
+    {
+        var player = await GetPlayerEntityAsync(id);
+        player.Rank = rank;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task<List<PlayerRankListItemResponse>> GetPlayerRanksAsync()
+    {
+        var players = await db.Players
+            .OrderBy(p => p.Rank ?? int.MaxValue).ThenBy(p => p.Name)
+            .ToListAsync();
+
+        return players.Select(p => new PlayerRankListItemResponse
+        {
+            PlayerId = p.Id,
+            Name = p.Name,
+            PhotoUrl = p.PhotoKey != null ? $"/files/player-photos/{p.PhotoKey}" : null,
+            JerseyNumber = p.JerseyNumber,
+            IsActive = p.IsActive,
+            Rank = p.Rank,
+        }).ToList();
+    }
+
     public async Task UpdateOwnThemePreferenceAsync(string? themePreference)
     {
         var player = await GetPlayerEntityAsync(currentUser.GetPlayerId());

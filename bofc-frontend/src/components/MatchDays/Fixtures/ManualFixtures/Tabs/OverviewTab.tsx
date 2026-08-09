@@ -67,7 +67,7 @@ function StandingsTable({ rows }: { rows: TeamStanding[] }) {
         <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] border-collapse text-theme-sm">
                 <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                    <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                         <th className="px-2 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Pos</th>
                         <th className="px-2 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Team</th>
                         <th className="px-2 py-2 text-center font-semibold text-gray-500 dark:text-gray-400">P</th>
@@ -528,7 +528,7 @@ export default function OverviewTab({
 
     if (!matchDayStructure || matchDayStructure.rounds.length === 0) {
         return (
-            <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+            <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                 <p className="text-theme-sm text-gray-500 dark:text-gray-400">No MatchDay structure yet.</p>
                 <p className="text-theme-sm text-gray-500 dark:text-gray-400">Create rounds and groups to see standings.</p>
             </div>
@@ -570,7 +570,7 @@ export default function OverviewTab({
 
                     {/* Top 5 Scorers */}
                     {topScorers.length > 0 && (
-                        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-5">
+                        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-5">
                             <div className="mb-4 flex items-center gap-2">
                                 <FireOutlined className="text-error-500" />
                                 <h5 className="text-lg font-bold text-gray-800 dark:text-white/90">Top 5 Scorers</h5>
@@ -578,7 +578,7 @@ export default function OverviewTab({
                             </div>
                             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
                                 {topScorers.map((player: IMatchDayTopScorer, index: number) => {
-                                    const rankColor = index === 0 ? "border-warning-500" : index === 1 ? "border-gray-300" : index === 2 ? "border-orange-400" : "border-gray-200 dark:border-gray-800";
+                                    const rankColor = index === 0 ? "border-warning-500" : index === 1 ? "border-gray-300" : index === 2 ? "border-orange-400" : "border-gray-200 dark:border-[var(--color-rule)]";
                                     const rankBg = index === 0 ? "bg-warning-500" : index === 1 ? "bg-gray-400" : index === 2 ? "bg-orange-400" : "bg-brand-500";
                                     return (
                                         <div key={player.playerId} className={`relative overflow-hidden rounded-xl border-2 p-1.5 transition hover:-translate-y-1 ${rankColor}`}>
@@ -617,7 +617,7 @@ export default function OverviewTab({
 
                     {/* Live Matches */}
                     {ongoingMatches.length > 0 && (
-                        <div className="rounded-2xl border border-success-500/40 bg-white p-4 dark:bg-white/[0.03] md:p-5">
+                        <div className="rounded-2xl border border-success-500/40 bg-white p-4 dark:bg-[var(--color-paper-3)] md:p-5">
                             <div className="mb-3 flex items-center gap-2">
                                 <PlayCircleOutlined className="text-success-500" />
                                 <h5 className="text-lg font-bold text-gray-800 dark:text-white/90">Live Matches</h5>
@@ -661,7 +661,7 @@ export default function OverviewTab({
 
                     {/* Standings by Round and Group */}
                     {Object.keys(standingsByRoundAndGroup).length === 0 ? (
-                        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+                        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                             <p className="text-theme-sm text-gray-500 dark:text-gray-400">No standings available yet.</p>
                             <p className="text-theme-sm text-gray-500 dark:text-gray-400">Complete some matches to see standings.</p>
                         </div>
@@ -674,7 +674,7 @@ export default function OverviewTab({
                                 }
 
                                 return (
-                                    <div key={round.id} className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-5">
+                                    <div key={round.id} className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-5">
                                         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                                             <span className="flex items-center gap-2">
                                                 <TrophyOutlined className="text-brand-500" />
@@ -696,7 +696,7 @@ export default function OverviewTab({
 
                                                           return (
                                                               <div key={groupName}>
-                                                                  <div className="mb-2 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
+                                                                  <div className="mb-2 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-[var(--color-rule)]">
                                                                       <TeamOutlined className="text-gray-400" />
                                                                       <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{groupName}</span>
                                                                       <span className="text-theme-xs text-gray-400">({groupStandings.length} {groupStandings.length === 1 ? 'team' : 'teams'})</span>

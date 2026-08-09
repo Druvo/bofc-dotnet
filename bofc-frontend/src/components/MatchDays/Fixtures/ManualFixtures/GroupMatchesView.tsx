@@ -171,14 +171,19 @@ export default function GroupMatchesView({
       title: "Date & Time",
       dataIndex: "matchDate",
       key: "matchDate",
-      render: (date: string) => (
-        <Space direction="vertical" size={0}>
-          <Text>{dayjs(date).format("MMM DD, YYYY")}</Text>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            {dayjs(date).format("HH:mm")}
-          </Text>
-        </Space>
-      ),
+      render: (date: string, record: { matchDurationMinutes?: number | null }) => {
+        const start = dayjs(date);
+        const end = start.add(record.matchDurationMinutes || 90, "minutes");
+        const sameDay = start.isSame(end, "day");
+        return (
+          <Space direction="vertical" size={0}>
+            <Text>{start.format("MMM DD, YYYY")}</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {start.format("hh:mm A")} – {end.format(sameDay ? "hh:mm A" : "MMM DD, YYYY hh:mm A")}
+            </Text>
+          </Space>
+        );
+      },
     },
     {
       title: "Venue",

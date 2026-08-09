@@ -42,8 +42,7 @@ export default function EditFixtureModal({
   const venues = venuesData?.content || [];
   const jerseyColorOptions = [
     { value: "", label: "Not set" },
-    ...[settingsData?.content.jerseyColorA, settingsData?.content.jerseyColorB]
-      .filter((c): c is string => !!c)
+    ...(settingsData?.content.jerseyColors || [])
       .map((c) => ({ value: c, label: JERSEY_COLOR_PALETTE.find((p) => p.value === c)?.label || c })),
   ];
 
@@ -76,6 +75,15 @@ export default function EditFixtureModal({
     }
 
     const localDateTime = dayjs(`${newDateStr}T${newTimeStr}:00`);
+
+    if (localDateTime.isBefore(dayjs())) {
+      toast.error("Match date/time can't be in the past");
+      return;
+    }
+    if (homeJerseyColor && awayJerseyColor && homeJerseyColor === awayJerseyColor) {
+      toast.error("Away jersey must differ from home jersey");
+      return;
+    }
 
     try {
       await updateFixture({
@@ -134,7 +142,7 @@ export default function EditFixtureModal({
         <Loader className="py-6" />
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl border border-gray-200 p-3 dark:border-gray-800">
+          <div className="rounded-xl border border-gray-200 p-3 dark:border-[var(--color-rule)]">
             <div className="mb-2 flex items-center gap-1.5 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
               <CalendarOutlined /> Current Match Details
             </div>
@@ -142,6 +150,14 @@ export default function EditFixtureModal({
               <div>
                 <div className="text-theme-xs text-gray-400">Current Date & Time:</div>
                 <div className="mt-1 font-semibold text-gray-800 dark:text-white/90">{currentDateTime ? currentDateTime.format("YYYY-MM-DD h:mm A") : "Not set"}</div>
+              </div>
+              <div>
+                <div className="text-theme-xs text-gray-400">Projected End:</div>
+                <div className="mt-1 font-semibold text-gray-800 dark:text-white/90">
+                  {currentDateTime
+                    ? currentDateTime.add(fixture.matchDurationMinutes || 90, "minutes").format("YYYY-MM-DD h:mm A")
+                    : "Not set"}
+                </div>
               </div>
               <div>
                 <div className="text-theme-xs text-gray-400">Current Venue:</div>
@@ -172,7 +188,7 @@ export default function EditFixtureModal({
           </div>
 
           {hasChanges && (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-white/[0.02]">
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
               <div className="mb-2 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Preview Changes</div>
               {hasDateTimeChanges && newDate && newTime && (
                 <div className="mb-2">

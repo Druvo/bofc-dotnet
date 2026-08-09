@@ -1,6 +1,7 @@
 using System.Net;
 using BofcBackend.Api.Common;
 using BofcBackend.Api.Common.Constants;
+using BofcBackend.Api.Common.Scheduling;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Features.Teams.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,7 @@ namespace BofcBackend.Api.Features.Teams;
 [ApiController]
 [Route("teams")]
 [Authorize(Roles = PlayerRoleNames.Admin + "," + PlayerRoleNames.SuperAdmin + "," + PlayerRoleNames.Coordinator)]
-public class TeamController(ITeamService teamService) : ControllerBase
+public class TeamController(ITeamService teamService, WeeklyMatchDayTeamGenerator weeklyMatchDayTeamGenerator) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> CreateOrUpdateTeam([FromBody] TeamRequest request)
@@ -47,5 +48,18 @@ public class TeamController(ITeamService teamService) : ControllerBase
     {
         await teamService.RemovePlayerFromTeamAsync(request);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.DeleteOk);
+    }
+
+    /// <summary>Manual on-demand rank-based team draft from the Team Building page — same
+    /// snake-draft-by-rank logic the weekly scheduler uses (WeeklyMatchDayTeamGenerator), just
+    /// admin-triggered for any MatchDay with an explicit max-players-per-team cap instead of the
+    /// weekly scheduler's global Settings default. The number of teams is derived from confirmed
+    /// participant turnout, not chosen directly. Refuses if the MatchDay already has any teams
+    /// (manual or auto) — same all-or-nothing rule GenerateAsync already enforces.</summary>
+    [HttpPost("matchday/{matchDayId}/generate")]
+    public async Task<IActionResult> GenerateTeamsByRank(long matchDayId, [FromQuery] int maxPlayersPerTeam)
+    {
+        var result = await weeklyMatchDayTeamGenerator.GenerateAsync(matchDayId, maxPlayersPerTeam);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.CreateOk, result);
     }
 }

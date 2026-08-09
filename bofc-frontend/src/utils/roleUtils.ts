@@ -55,6 +55,10 @@ export const canManageFixtures = (userRoles: string[]): boolean => {
   return hasAnyRole(userRoles, ["ADMIN", "SUPERADMIN", "COORDINATOR"]);
 };
 
+export const canManagePrizes = (userRoles: string[]): boolean => {
+  return hasAnyRole(userRoles, ["ADMIN", "SUPERADMIN", "COORDINATOR"]);
+};
+
 export const canManageRoles = (userRoles: string[]): boolean => {
   return isSuperAdmin(userRoles);
 };

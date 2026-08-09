@@ -40,7 +40,7 @@ export default function CompleteMatchModal({
 
   const actualDuration = calculateActualDuration();
   const startedAt = fixture.startedAt
-    ? moment.utc(fixture.startedAt).local().format("YYYY-MM-DD HH:mm:ss")
+    ? moment.utc(fixture.startedAt).local().format("YYYY-MM-DD hh:mm:ss A")
     : null;
 
   return (

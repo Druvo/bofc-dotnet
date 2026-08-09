@@ -25,8 +25,8 @@ const LiveAuctionStatusCard: React.FC = () => {
   return (
     <div
       onClick={() => navigate(`/auction/live/${matchDayId}`)}
-      className={`relative mb-6 cursor-pointer overflow-hidden rounded-2xl border bg-white p-4 dark:bg-white/[0.03] ${
-        paused ? "border-gray-200 dark:border-gray-800" : "border-error-500/40"
+      className={`relative mb-6 cursor-pointer overflow-hidden rounded-2xl border bg-white p-4 dark:bg-[var(--color-paper-3)] ${
+        paused ? "border-gray-200 dark:border-[var(--color-rule)]" : "border-error-500/40"
       }`}
     >
       {!paused && (

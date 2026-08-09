@@ -17,6 +17,7 @@ public class MatchDayWithTeamsResponse
     public string? Rules { get; set; }
     public string? RoadmapImageUrl { get; set; }
     public DateTime MatchDayDate { get; set; }
+    public int? DurationMinutes { get; set; }
     public string? VenueName { get; set; }
     public string? VenueMapLink { get; set; }
     public bool ActiveStatus { get; set; }

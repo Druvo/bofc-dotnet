@@ -14,7 +14,7 @@ interface DebouncedInputProps {
 }
 
 const sharedClasses =
-    "w-full border-0 border-b border-gray-300 bg-transparent px-0 py-1 text-sm text-gray-800 outline-none focus:border-brand-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:text-white/90";
+    "w-full border-0 border-b border-gray-300 bg-transparent px-0 py-1 text-sm text-gray-800 outline-none focus:border-brand-500 disabled:cursor-not-allowed disabled:opacity-60 dark:border-[var(--color-rule)] dark:text-white/90";
 
 const DebouncedInput: React.FC<DebouncedInputProps> = ({
     placeholder = "Enter text...",

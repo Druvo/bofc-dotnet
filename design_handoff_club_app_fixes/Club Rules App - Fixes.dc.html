@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin: 0; background: #0a0f0c; }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-thumb { background: #2a3d31; border-radius: 6px; }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; width: 100%; overflow-x: hidden; box-sizing: border-box; background: #0a0f0c; font-family: Helvetica, Arial, sans-serif; color: #e9ede9;">
+
+  <div style="display: flex; gap: 10px; padding: 16px 24px; border-bottom: 1px solid #1c2b21; align-items: center;">
+    <button onClick="{{ showLogin }}" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #3a5240; background: {{ loginBtnBg }}; color: {{ loginBtnColor }}; font-size: 13px; cursor: pointer;">Login screen (fixed)</button>
+    <button onClick="{{ showDashboard }}" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #3a5240; background: {{ dashBtnBg }}; color: {{ dashBtnColor }}; font-size: 13px; cursor: pointer;">Dashboard (fixed)</button>
+    <button onClick="{{ showNextMatch }}" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #3a5240; background: {{ nmBtnBg }}; color: {{ nmBtnColor }}; font-size: 13px; cursor: pointer;">Next Match (fixed)</button>
+    <sc-for list="{{ extraScreens }}" as="es" hint-placeholder-count="6">
+      <button onClick="{{ es.onClick }}" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #3a5240; background: {{ es.bg }}; color: {{ es.color }}; font-size: 13px; cursor: pointer;">{{ es.label }}</button>
+    </sc-for>
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ toggleTheme }}" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #3a5240; background: transparent; color: #cfe0d4; font-size: 13px; cursor: pointer;">Switch to {{ themeToggleLabel }}</button>
+    </sc-if>
+    <div style="margin-left: auto; font-size: 12px; color: #8fa393;">Single accent (green), consistent icons/labels, no overflow</div>
+  </div>
+
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height: calc(100vh - 61px); background: linear-gradient(135deg, #06120b, #0e2318 60%, #06120b); display: flex; align-items: center; justify-content: center; gap: 80px; padding: 40px 60px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="width: 84px; height: 96px; flex-shrink: 0; background: #16321f; border: 2px solid #c9a24b; border-radius: 12px 12px 30px 30px; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-weight: 700; color: #c9a24b; font-size: 13px; letter-spacing: 1px;">BOFC</div>
+        <div style="width: 1px; height: 60px; background: #3a5240;"></div>
+        <div style="font-family: Georgia, serif; font-size: 26px; line-height: 1.15; color: #cfe0d4; font-weight: 700;">PRIDE.<br/>PASSION.<br/>FOOTBALL.</div>
+      </div>
+
+      <div style="width: 520px; flex-shrink: 0; background: #12241a; border: 1px solid #2a3d31; border-radius: 20px; padding: 44px 48px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+        <h1 style="margin: 0 0 14px; font-size: 30px; font-weight: 800; color: #f2f5f0;">Welcome Back</h1>
+        <div style="display: flex; gap: 10px; margin-bottom: 28px;">
+          <div style="width: 3px; background: #c9a24b; border-radius: 2px;"></div>
+          <p style="margin: 0; color: #9fb3a5; font-size: 14px; line-height: 1.5;">Sign in to access your dashboard and stay on top of the club</p>
+        </div>
+
+        <label style="font-size: 13px; color: #9fb3a5; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">Email Address</label>
+        <div style="font-size: 16px; color: #f2f5f0; border-bottom: 1px solid #34493b; padding-bottom: 10px; margin-bottom: 24px;">zhdruvo@gmail.com</div>
+
+        <label style="font-size: 13px; color: #9fb3a5; display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">Password</label>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #34493b; padding-bottom: 10px; margin-bottom: 24px;">
+          <span style="font-size: 16px; color: #f2f5f0; letter-spacing: 2px;">•••••••••</span>
+          <span style="font-size: 13px; color: #9fb3a5;">show</span>
+        </div>
+
+        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 28px; cursor: pointer;">
+          <input type="checkbox" checked="{{ autoLogin }}" onChange="{{ toggleAutoLogin }}" style="width: 16px; height: 16px; accent-color: #c9a24b;" />
+          <span style="font-size: 14px; color: #9fb3a5;">Enable Auto Login</span>
+        </label>
+
+        <button style="width: 100%; padding: 15px; border: none; border-radius: 10px; background: #c9a24b; color: #1c1406; font-size: 15px; font-weight: 700; cursor: pointer;">Sign In to Dashboard</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ false }}">
+    <div style="width: 100%; box-sizing: border-box; background: {{ t.pageBg }};">
+      <div style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid {{ t.sidebarBorder }}; background: {{ t.sidebarBg }};">
+        <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.menu }}"></span>
+        <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.pie }}"></span>
+        <div style="flex: 1; max-width: 420px; display: flex; align-items: center; gap: 10px; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 10px; padding: 10px 14px;">
+          <span style="width: 16px; height: 16px; color: {{ t.textMuted }}; flex-shrink: 0;" dangerouslySetInnerHTML="{{ topbarIcons.search }}"></span>
+          <span style="font-size: 13px; color: {{ t.textMuted }};">Search players, MatchDays, venues...</span>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+          <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.theme }}"></span>
+          <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.bell }}"></span>
+          <div style="position: relative;">
+            <div onClick="{{ toggleUserMenu }}" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: #2a3d31; flex-shrink: 0;"></div>
+              <span style="font-size: 14px; color: {{ t.textPrimary }}; font-weight: 600;">Zahid Hasan</span>
+              <span style="width: 14px; height: 14px; color: {{ t.textSecondary }}; transform: {{ userMenuChevron }};" dangerouslySetInnerHTML="{{ topbarIcons.chevron }}"></span>
+            </div>
+            <sc-if value="{{ userMenuOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: 40px; right: 0; width: 260px; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); z-index: 10;">
+                <div style="font-size: 15px; font-weight: 700; color: {{ t.textPrimary }}; margin-bottom: 2px;">Zahid Hasan</div>
+                <div style="font-size: 13px; color: {{ t.textMuted }}; margin-bottom: 18px;">zhdruvo@gmail.com</div>
+                <div style="display: flex; flex-direction: column; gap: 16px; font-size: 14px; color: {{ t.textPrimary }}; margin-bottom: 18px;">
+                  <div style="cursor: pointer;">Edit profile</div>
+                  <div style="cursor: pointer;">My Goalkeeping History</div>
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Notifications</span>
+                    <div onClick="{{ toggleNotifications }}" style="width: 38px; height: 22px; border-radius: 12px; background: {{ notifToggleBg }}; position: relative; cursor: pointer; flex-shrink: 0;">
+                      <div style="width: 18px; height: 18px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: {{ notifToggleLeft }}; transition: left 0.15s;"></div>
+                    </div>
+                  </div>
+                </div>
+                <div style="border-top: 1px solid {{ t.cardBorder }}; padding-top: 16px; font-size: 14px; color: {{ t.textPrimary }}; cursor: pointer;">Sign out</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; width: 100%; box-sizing: border-box;">
+      <div style="width: 240px; flex-shrink: 0; background: {{ t.sidebarBg }}; border-right: 1px solid {{ t.sidebarBorder }}; min-height: calc(100vh - 61px); padding: 24px 16px; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 24px; border-bottom: 1px solid {{ t.sidebarBorder }}; margin-bottom: 20px;">
+          <div style="width: 34px; height: 34px; background: #16321f; border: 1px solid #c9a24b; border-radius: 6px 6px 12px 12px;"></div>
+          <span style="font-weight: 800; font-size: 18px; letter-spacing: 0.5px; color: {{ t.textPrimary }};">BOFC</span>
+        </div>
+        <div style="font-size: 11px; letter-spacing: 1px; color: {{ t.textMuted }}; padding: 0 8px 10px;">MENU</div>
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="7">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 11px 10px; border-radius: 8px; margin-bottom: 2px; background: {{ item.active }}; color: {{ item.color }}; font-size: 14px; font-weight: {{ item.weight }};">
+            <span style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;" dangerouslySetInnerHTML="{{ item.iconHtml }}"></span>
+            {{ item.label }}
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="flex: 1; min-width: 0; padding: 24px 32px; box-sizing: border-box;">
+        <div style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 20px; margin-bottom: 20px;">
+          <div style="min-width: 0; grid-row: span 2; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 22px; overflow: hidden;">
+            <div style="font-size: 14px; color: {{ t.textPrimary }}; font-weight: 600; margin-bottom: 4px;">Account Balance</div>
+            <div style="font-size: 12px; color: {{ t.textMuted }}; margin-bottom: 16px;">Overview of the club's current funds</div>
+            <div style="font-size: 34px; font-weight: 800; color: {{ t.textPrimary }}; margin-bottom: 6px;">৳14,000.00</div>
+            <div style="font-size: 12px; color: #e15c47; margin-bottom: 20px;">↓ Collections down 93.8% vs last month</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid {{ t.cardBorder }}; padding-top: 16px;">
+              <div>
+                <div style="font-size: 11px; color: {{ t.textMuted }}; letter-spacing: 0.5px;">PRIMARY ACCOUNT</div>
+                <div style="font-size: 13px; color: {{ t.textSecondary }}; margin-top: 4px;">SCB •••• •••• •••• 4526</div>
+              </div>
+              <button style="background: {{ t.btnGhostBg }}; border: 1px solid {{ t.cardBorder }}; color: {{ t.textPrimary }}; padding: 8px 14px; border-radius: 8px; font-size: 12px; cursor: pointer;">See Details</button>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 14px;">
+              <button style="flex: 1; background: #2f6b45; border: none; color: #fff; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">↓ Collection</button>
+              <button style="flex: 1; background: {{ t.btnGhostBg }}; border: 1px solid {{ t.cardBorder }}; color: {{ t.textPrimary }}; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">↑ Payment</button>
+            </div>
+          </div>
+
+          <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 22px; overflow: hidden;">
+            <div style="font-size: 13px; color: {{ t.textSecondary }}; margin-bottom: 10px;">Total Collections</div>
+            <div style="font-size: 24px; font-weight: 800; color: {{ t.textPrimary }};">৳19,000.00</div>
+          </div>
+          <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 22px; overflow: hidden;">
+            <div style="font-size: 13px; color: {{ t.textSecondary }}; margin-bottom: 10px;">Total Expenses</div>
+            <div style="font-size: 24px; font-weight: 800; color: {{ t.textPrimary }};">৳5,000.00</div>
+          </div>
+          <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 22px; overflow: hidden;">
+            <div style="font-size: 13px; color: {{ t.textSecondary }}; margin-bottom: 10px;">This Month's Collections</div>
+            <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px; color: {{ t.textPrimary }};">৳1,000.00</div>
+            <div style="font-size: 12px; color: {{ t.textMuted }};">August 2026</div>
+          </div>
+          <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-left: 3px solid #d69a2f; border-radius: 14px; padding: 22px; overflow: hidden;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+              <span style="width: 15px; height: 15px; color: #d69a2f;" dangerouslySetInnerHTML="{{ topbarIcons.warn }}"></span>
+              <span style="font-size: 13px; color: {{ t.textSecondary }};">Payment Due</span>
+            </div>
+            <div style="font-size: 24px; font-weight: 800; margin-bottom: 4px; color: #d69a2f;">26 players</div>
+            <div style="font-size: 12px; color: {{ t.textMuted }};">have unpaid dues this month</div>
+          </div>
+        </div>
+
+        <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 24px 28px; display: flex; justify-content: space-between; gap: 40px;">
+          <div style="flex: 1;">
+            <div style="font-size: 11px; letter-spacing: 1px; color: {{ t.textMuted }}; margin-bottom: 6px;">NEXT MATCH</div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <span style="font-size: 20px; font-weight: 800; color: {{ t.textPrimary }};">test</span>
+              <span style="font-size: 11px; background: #2f6b45; color: #d9f0dd; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px;">UPCOMING</span>
+            </div>
+            <div style="font-size: 13px; color: {{ t.textSecondary }}; margin-bottom: 20px;">07/08/2026, 06:00 pm &nbsp;|&nbsp; Chef's Table Courtside</div>
+
+            <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+              <div style="flex: 1; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 10px; padding: 14px; text-align: center;">
+                <div style="font-size: 22px; font-weight: 800; color: {{ t.textPrimary }};">27</div>
+                <div style="font-size: 11px; color: {{ t.textMuted }}; letter-spacing: 0.5px;">TOTAL</div>
+              </div>
+              <div style="flex: 1; background: {{ t.confirmedBg }}; border: 1px solid #2f6b45; border-radius: 10px; padding: 14px; text-align: center;">
+                <div style="font-size: 22px; font-weight: 800; color: #2f8a52;">2</div>
+                <div style="font-size: 11px; color: #2f8a52; letter-spacing: 0.5px;">CONFIRMED</div>
+              </div>
+              <div style="flex: 1; background: {{ t.pendingBg }}; border: 1px solid #b08a2f; border-radius: 10px; padding: 14px; text-align: center;">
+                <div style="font-size: 22px; font-weight: 800; color: #a07a1f;">25</div>
+                <div style="font-size: 11px; color: #a07a1f; letter-spacing: 0.5px;">PENDING</div>
+              </div>
+              <div style="flex: 1; background: {{ t.notJoiningBg }}; border: 1px solid #b0402f; border-radius: 10px; padding: 14px; text-align: center;">
+                <div style="font-size: 22px; font-weight: 800; color: #c04a3a;">0</div>
+                <div style="font-size: 11px; color: #c04a3a; letter-spacing: 0.5px;">NOT JOINING</div>
+              </div>
+            </div>
+
+            <div style="font-size: 11px; color: {{ t.textMuted }}; letter-spacing: 0.5px; margin-bottom: 8px;">SQUAD FILLED &nbsp;2/27 &middot; 7%</div>
+            <div style="height: 8px; background: {{ t.progressTrack }}; border-radius: 6px; overflow: hidden;">
+              <div style="width: 7%; height: 100%; background: #2f8a52;"></div>
+            </div>
+          </div>
+
+          <div style="width: 1px; background: {{ t.cardBorder }};"></div>
+
+          <div style="width: 220px; display: flex; flex-direction: column; gap: 12px;">
+            <div>
+              <div style="font-size: 11px; color: {{ t.textMuted }}; letter-spacing: 0.5px;">KICK-OFF</div>
+              <div style="font-size: 14px; color: {{ t.textSecondary }}; margin-top: 4px;">Starts in <strong style="color: {{ t.textPrimary }};">14 hours</strong></div>
+            </div>
+            <div style="background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 10px; padding: 14px;">
+              <div style="font-size: 12px; color: {{ t.textSecondary }}; margin-bottom: 10px;">Your call for this match</div>
+              <div style="display: flex; gap: 8px;">
+                <button style="flex: 1; background: #2f6b45; border: none; color: #fff; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">✓ Yes</button>
+                <button style="flex: 1; background: transparent; border: 1px solid #b0402f; color: #c04a3a; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">✕ No</button>
+              </div>
+            </div>
+            <button style="background: {{ t.btnGhostBg }}; border: 1px solid {{ t.cardBorder }}; color: {{ t.textPrimary }}; padding: 11px; border-radius: 8px; font-size: 13px; cursor: pointer;">Add to Calendar</button>
+            <button style="background: #c9a24b; border: none; color: #1c1406; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">View Details →</button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 20px; margin-top: 20px;">
+          <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div style="font-size: 12px; letter-spacing: 0.5px; color: {{ t.textMuted }}; font-weight: 700;">PAYMENTS DUE THIS MONTH</div>
+              <div style="font-size: 15px; font-weight: 800; color: #c04a3a;">26</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; max-height: 220px; overflow-y: auto;">
+              <sc-for list="{{ paymentsDue }}" as="p" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="width: 16px; height: 16px; color: {{ t.textMuted }};" dangerouslySetInnerHTML="{{ topbarIcons.user }}"></span>
+                    <span style="font-size: 14px; color: {{ t.textPrimary }};">{{ p.name }}</span>
+                  </div>
+                  <span style="width: 16px; height: 16px; color: #d69a2f;" dangerouslySetInnerHTML="{{ topbarIcons.warn }}"></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.5px; color: {{ t.textMuted }}; font-weight: 700;">
+                <span style="width: 14px; height: 14px;" dangerouslySetInnerHTML="{{ topbarIcons.calSmall }}"></span>
+                MY MONTHLY CONTRIBUTIONS
+              </div>
+              <div style="font-size: 12px; color: {{ t.textMuted }};">2026</div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+              <sc-for list="{{ months }}" as="m" hint-placeholder-count="12">
+                <div style="background: {{ m.bg }}; border: 1px solid {{ m.border }}; border-radius: 8px; padding: 10px; text-align: center;">
+                  <div style="font-size: 10px; letter-spacing: 0.5px; color: {{ m.labelColor }}; margin-bottom: 4px;">{{ m.name }}</div>
+                  <div style="font-size: 13px; font-weight: 700; color: {{ m.amountColor }};">{{ m.amount }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.5px; color: {{ t.textMuted }}; font-weight: 700; white-space: nowrap;">
+                <span style="width: 14px; height: 14px; flex-shrink: 0;" dangerouslySetInnerHTML="{{ topbarIcons.calSmall }}"></span>
+                MATCH CALENDAR
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: {{ t.textPrimary }}; font-weight: 600; white-space: nowrap;">
+                <span style="cursor: pointer; color: {{ t.textMuted }};">‹</span>
+                Aug 2026
+                <span style="cursor: pointer; color: {{ t.textMuted }};">›</span>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;">
+              <sc-for list="{{ calendarDow }}" as="d" hint-placeholder-count="7">
+                <div style="font-size: 11px; color: {{ t.textMuted }}; padding: 4px 0;">{{ d }}</div>
+              </sc-for>
+              <sc-for list="{{ calendarCells }}" as="c" hint-placeholder-count="35">
+                <div style="font-size: 12px; padding: 6px 0; border-radius: 6px; color: {{ c.color }}; background: {{ c.bg }}; position: relative;">
+                  {{ c.day }}
+                  <sc-if value="{{ c.hasMatch }}" hint-placeholder-val="{{ false }}">
+                    <div style="width: 4px; height: 4px; border-radius: 50%; background: #2f6b45; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%);"></div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px 24px; margin-top: 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 3px; height: 20px; background: #2f6b45; border-radius: 2px;"></div>
+              <span style="width: 16px; height: 16px; color: {{ t.textPrimary }};" dangerouslySetInnerHTML="{{ topbarIcons.chart }}"></span>
+              <span style="font-size: 16px; font-weight: 700; color: {{ t.textPrimary }};">Monthly Contributions</span>
+              <span style="background: {{ t.innerBg }}; color: {{ t.textSecondary }}; font-size: 12px; padding: 2px 10px; border-radius: 12px;">27</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; color: {{ t.textPrimary }}; font-size: 13px; padding: 8px 14px; border-radius: 8px;">2026 ⌄</div>
+              <div style="display: flex; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 8px; overflow: hidden;">
+                <div style="padding: 8px 14px; font-size: 13px; color: {{ t.textSecondary }};">All</div>
+                <div style="padding: 8px 14px; font-size: 13px; background: #2f6b45; color: #fff; font-weight: 600;">Active</div>
+                <div style="padding: 8px 14px; font-size: 13px; color: {{ t.textSecondary }};">Inactive</div>
+              </div>
+              <div style="display: flex; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 8px; overflow: hidden;">
+                <div style="padding: 8px 14px; font-size: 13px; color: {{ t.textSecondary }};">Cards</div>
+                <div style="padding: 8px 14px; font-size: 13px; background: #2f6b45; color: #fff; font-weight: 600;">Table</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
+              <thead>
+                <tr>
+                  <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; font-weight: 600; padding: 10px 8px; border-bottom: 1px solid {{ t.cardBorder }};">Name</th>
+                  <sc-for list="{{ tableMonths }}" as="tm" hint-placeholder-count="11">
+                    <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; font-weight: 600; padding: 10px 8px; border-bottom: 1px solid {{ t.cardBorder }};">{{ tm }}</th>
+                  </sc-for>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ contributionRows }}" as="row" hint-placeholder-count="5">
+                  <tr>
+                    <td style="font-size: 14px; font-weight: 600; color: {{ t.textPrimary }}; padding: 12px 8px; border-bottom: 1px solid {{ t.cardBorder }};">{{ row.name }}</td>
+                    <sc-for list="{{ row.cells }}" as="cell" hint-placeholder-count="11">
+                      <td style="font-size: 13px; padding: 12px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: {{ cell.color }}; font-weight: {{ cell.weight }}; background: {{ cell.bg }};">{{ cell.value }}</td>
+                    </sc-for>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isNextMatch }}" hint-placeholder-val="{{ false }}">
+    <div style="width: 100%; box-sizing: border-box; background: {{ t.pageBg }};">
+      <div style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid {{ t.sidebarBorder }}; background: {{ t.sidebarBg }};">
+        <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.menu }}"></span>
+        <div style="flex: 1; max-width: 420px; display: flex; align-items: center; gap: 10px; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 10px; padding: 10px 14px;">
+          <span style="width: 16px; height: 16px; color: {{ t.textMuted }}; flex-shrink: 0;" dangerouslySetInnerHTML="{{ topbarIcons.search }}"></span>
+          <span style="font-size: 13px; color: {{ t.textMuted }};">Search players, MatchDays, venues...</span>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+          <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.theme }}"></span>
+          <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.bell }}"></span>
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #2a3d31; flex-shrink: 0;"></div>
+          <span style="font-size: 14px; color: {{ t.textPrimary }}; font-weight: 600;">Zahid Hasan</span>
+        </div>
+      </div>
+
+      <div style="display: flex; width: 100%; box-sizing: border-box;">
+        <div style="width: 240px; flex-shrink: 0; background: {{ t.sidebarBg }}; border-right: 1px solid {{ t.sidebarBorder }}; min-height: calc(100vh - 61px); padding: 24px 16px; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 24px; border-bottom: 1px solid {{ t.sidebarBorder }}; margin-bottom: 20px;">
+            <div style="width: 34px; height: 34px; background: #16321f; border: 1px solid #c9a24b; border-radius: 6px 6px 12px 12px;"></div>
+            <span style="font-weight: 800; font-size: 18px; letter-spacing: 0.5px; color: {{ t.textPrimary }};">BOFC</span>
+          </div>
+          <div style="font-size: 11px; letter-spacing: 1px; color: {{ t.textMuted }}; padding: 0 8px 10px;">MENU</div>
+          <sc-for list="{{ navItemsNextMatch }}" as="item" hint-placeholder-count="7">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 11px 10px; border-radius: 8px; margin-bottom: 2px; background: {{ item.active }}; color: {{ item.color }}; font-size: 14px; font-weight: {{ item.weight }};">
+              <span style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;" dangerouslySetInnerHTML="{{ item.iconHtml }}"></span>
+              {{ item.label }}
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="flex: 1; min-width: 0; padding: 24px 32px; box-sizing: border-box;">
+          <div style="background: {{ t.cardBg }}; border: 1px solid #2f6b45; border-radius: 14px; padding: 20px 28px; display: flex; align-items: center; gap: 20px; margin-bottom: 4px;">
+            <div style="text-align: center;">
+              <div style="font-size: 30px; font-weight: 800; color: #c9a24b; font-family: Georgia, serif;">3</div>
+              <div style="font-size: 10px; letter-spacing: 1px; color: {{ t.textMuted }};">TEAMS</div>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px; font-weight: 800; color: {{ t.textPrimary }};">Match Day — Aug 7, 2026</span>
+                <span style="font-size: 11px; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }}; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.5px;">CONCLUDED</span>
+              </div>
+              <div style="font-size: 13px; color: {{ t.textSecondary }}; margin-top: 6px;">08/08/2026, 01:00 am &nbsp;|&nbsp; GreenVill</div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: center; gap: 32px; padding: 16px 0; border-bottom: 1px solid {{ t.cardBorder }}; margin-bottom: 24px;">
+            <sc-for list="{{ nmTabs }}" as="tab" hint-placeholder-count="4">
+              <div onClick="{{ tab.onClick }}" style="display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: {{ tab.color }}; cursor: pointer; padding-bottom: 10px; border-bottom: 2px solid {{ tab.underline }};">
+                <span style="width: 15px; height: 15px;" dangerouslySetInnerHTML="{{ tab.iconHtml }}"></span>
+                {{ tab.label }}
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ isNmHome }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+              <span style="width: 18px; height: 18px; color: #c9a24b;" dangerouslySetInnerHTML="{{ topbarIcons.trophy }}"></span>
+              <span style="font-size: 18px; font-weight: 800; color: {{ t.textPrimary }};">Participants</span>
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 24px;">
+              <sc-for list="{{ teamFilters }}" as="f" hint-placeholder-count="4">
+                <div onClick="{{ f.onClick }}" style="padding: 9px 18px; border-radius: 8px; border: 1px solid {{ f.border }}; color: {{ f.color }}; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer;">{{ f.label }}</div>
+              </sc-for>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px;">
+              <sc-for list="{{ visibleTeams }}" as="team" hint-placeholder-count="3">
+                <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px;">
+                  <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid {{ t.cardBorder }}; margin-bottom: 16px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid {{ t.cardBorder }}; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: {{ t.textPrimary }}; flex-shrink: 0;">{{ team.initials }}</div>
+                    <div>
+                      <div style="font-size: 15px; font-weight: 700; color: {{ t.textPrimary }};">{{ team.name }}</div>
+                      <div style="font-size: 12px; color: {{ t.textMuted }};">{{ team.count }} players</div>
+                    </div>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <sc-for list="{{ team.players }}" as="p" hint-placeholder-count="7">
+                      <div style="background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 10px; padding: 14px 8px; text-align: center;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #2a3d31; color: #cfe0d4; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px;">{{ p.initial }}</div>
+                        <div style="font-size: 11px; font-weight: 700; color: {{ t.textPrimary }}; letter-spacing: 0.3px;">{{ p.name }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isNmResults }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; gap: 24px; margin-bottom: 20px;">
+              <div style="font-size: 14px; color: {{ t.textPrimary }}; font-weight: 600; cursor: pointer;">Fixtures</div>
+              <div style="font-size: 14px; color: #2f8a52; font-weight: 600; cursor: pointer; border-bottom: 2px solid #2f8a52; padding-bottom: 6px;">Results</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <span style="font-size: 18px; font-weight: 800; letter-spacing: 0.5px; color: {{ t.textPrimary }};">COMPLETED RESULTS</span>
+              <span style="font-size: 12px; background: {{ t.innerBg }}; color: {{ t.textSecondary }}; padding: 4px 12px; border-radius: 12px;">{{ results.length }} results</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <sc-for list="{{ results }}" as="r" hint-placeholder-count="4">
+                <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px 28px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <span style="font-size: 11px; background: {{ t.confirmedBg }}; color: #2f8a52; padding: 3px 12px; border-radius: 6px; font-weight: 700; letter-spacing: 0.5px;">RESULT</span>
+                    <span style="font-size: 11px; background: {{ t.innerBg }}; color: {{ t.textSecondary }}; padding: 3px 10px; border-radius: 6px;">FT</span>
+                    <span style="font-size: 12px; color: {{ t.textMuted }};">{{ r.date }}</span>
+                  </div>
+                  <div style="display: flex; align-items: center; justify-content: center; gap: 24px;">
+                    <span style="font-size: 16px; font-weight: 700; color: {{ t.textPrimary }};">{{ r.home }}</span>
+                    <div style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid #c9a24b; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #c9a24b;">{{ r.homeInit }}</div>
+                    <div style="background: {{ t.innerBg }}; border-radius: 8px; padding: 10px 24px; font-size: 22px; font-weight: 800; color: {{ t.textPrimary }};">{{ r.homeScore }} - {{ r.awayScore }}</div>
+                    <div style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid #c9a24b; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #c9a24b;">{{ r.awayInit }}</div>
+                    <span style="font-size: 16px; font-weight: 700; color: {{ t.textPrimary }};">{{ r.away }}</span>
+                  </div>
+                  <div style="text-align: center; font-size: 12px; color: {{ t.textMuted }}; margin-top: 12px;">{{ r.venue }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isNmTable }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <div style="font-size: 26px; font-weight: 800; color: {{ t.textPrimary }};">MatchDay Standings</div>
+              <div style="font-size: 12px; letter-spacing: 1px; color: {{ t.textMuted }}; margin-top: 6px;">FINAL LEADERBOARD & RANKINGS</div>
+            </div>
+            <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px 28px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                <span style="font-size: 16px; font-weight: 800; color: {{ t.textPrimary }};">MATCHDAY STAGE</span>
+                <span style="font-size: 11px; background: {{ t.confirmedBg }}; color: #2f8a52; padding: 3px 10px; border-radius: 10px; font-weight: 700;">STANDINGS</span>
+                <span style="margin-left: auto; font-size: 12px; color: {{ t.textMuted }};">ROUND TBD &middot; DIRECT KNOCKOUT</span>
+              </div>
+              <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; min-width: 700px;">
+                  <thead>
+                    <tr>
+                      <sc-for list="{{ standingsHeaders }}" as="h" hint-placeholder-count="11">
+                        <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; font-weight: 600; padding: 10px 8px; border-bottom: 1px solid {{ t.cardBorder }};">{{ h }}</th>
+                      </sc-for>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ standings }}" as="row" hint-placeholder-count="3">
+                      <tr>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }};">
+                          <div style="width: 24px; height: 24px; border-radius: 50%; background: {{ row.rankBg }}; color: {{ row.rankColor }}; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;">{{ row.rank }}</div>
+                        </td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }};">
+                          <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 26px; height: 26px; border-radius: 50%; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; font-size: 11px; font-weight: 700; color: {{ t.textPrimary }}; display: flex; align-items: center; justify-content: center;">{{ row.initials }}</div>
+                            <span style="font-size: 14px; font-weight: 700; color: {{ t.textPrimary }};">{{ row.name }}</span>
+                          </div>
+                        </td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }};">{{ row.p }}</td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }};">{{ row.w }}</td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }};">{{ row.d }}</td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }};">{{ row.l }}</td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: {{ row.gdColor }}; font-weight: 700;">{{ row.gd }}</td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }};">{{ row.gf }}</td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }};">{{ row.ga }}</td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: #d69a2f;">{{ row.y }}</td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: #c04a3a;">{{ row.r }}</td>
+                        <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: #4a90d6; font-weight: 800;">{{ row.pts }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isNmStats }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+              <sc-for list="{{ statBlocks }}" as="block" hint-placeholder-count="2">
+                <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 22px 28px;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                      <div style="width: 44px; height: 44px; border-radius: 50%; background: {{ block.iconBg }}; display: flex; align-items: center; justify-content: center;">
+                        <span style="width: 20px; height: 20px; color: {{ block.iconColor }};" dangerouslySetInnerHTML="{{ block.iconHtml }}"></span>
+                      </div>
+                      <div>
+                        <div style="font-size: 17px; font-weight: 800; color: {{ t.textPrimary }};">{{ block.title }}</div>
+                        <div style="font-size: 13px; color: {{ t.textMuted }};">{{ block.subtitle }}</div>
+                      </div>
+                    </div>
+                    <div style="border: 1px solid {{ t.cardBorder }}; color: {{ t.textPrimary }}; font-size: 13px; padding: 8px 14px; border-radius: 8px; cursor: pointer;">↻ Sync Stats</div>
+                  </div>
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                      <div style="width: 26px; height: 26px; border-radius: 50%; background: #c9a24b; color: #1c1406; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;">{{ block.leader.rank }}</div>
+                      <div style="width: 38px; height: 38px; border-radius: 50%; background: #2a3d31; color: #cfe0d4; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">{{ block.leader.initial }}</div>
+                      <div>
+                        <div style="font-size: 15px; font-weight: 700; color: {{ t.textPrimary }};">{{ block.leader.name }}</div>
+                        <div style="font-size: 12px; color: {{ t.textMuted }};">{{ block.leader.team }}</div>
+                      </div>
+                    </div>
+                    <div style="font-size: 20px; font-weight: 800; color: {{ block.iconColor }};">{{ block.leader.value }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isShellScreen }}" hint-placeholder-val="{{ false }}">
+    <div style="width: 100%; box-sizing: border-box; background: {{ t.pageBg }};">
+      <div style="display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid {{ t.sidebarBorder }}; background: {{ t.sidebarBg }};">
+        <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.menu }}"></span>
+        <div style="flex: 1; max-width: 420px; display: flex; align-items: center; gap: 10px; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 10px; padding: 10px 14px;">
+          <span style="width: 16px; height: 16px; color: {{ t.textMuted }}; flex-shrink: 0;" dangerouslySetInnerHTML="{{ topbarIcons.search }}"></span>
+          <span style="font-size: 13px; color: {{ t.textMuted }};">Search players, MatchDays, venues...</span>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+          <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.theme }}"></span>
+          <span style="width: 20px; height: 20px; color: {{ t.textSecondary }};" dangerouslySetInnerHTML="{{ topbarIcons.bell }}"></span>
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #2a3d31; flex-shrink: 0;"></div>
+          <span style="font-size: 14px; color: {{ t.textPrimary }}; font-weight: 600;">Zahid Hasan</span>
+        </div>
+      </div>
+
+      <div style="display: flex; width: 100%; box-sizing: border-box;">
+        <div style="width: 240px; flex-shrink: 0; background: {{ t.sidebarBg }}; border-right: 1px solid {{ t.sidebarBorder }}; min-height: calc(100vh - 61px); padding: 24px 16px; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px 24px; border-bottom: 1px solid {{ t.sidebarBorder }}; margin-bottom: 20px;">
+            <div style="width: 34px; height: 34px; background: #16321f; border: 1px solid #c9a24b; border-radius: 6px 6px 12px 12px;"></div>
+            <span style="font-weight: 800; font-size: 18px; letter-spacing: 0.5px; color: {{ t.textPrimary }};">BOFC</span>
+          </div>
+          <div style="font-size: 11px; letter-spacing: 1px; color: {{ t.textMuted }}; padding: 0 8px 10px;">MENU</div>
+          <sc-for list="{{ shellNavItems }}" as="item" hint-placeholder-count="10">
+            <div>
+              <div onClick="{{ item.onClick }}" style="display: flex; align-items: center; gap: 12px; padding: 11px 10px; border-radius: 8px; margin-bottom: 2px; background: {{ item.active }}; color: {{ item.color }}; font-size: 14px; font-weight: {{ item.weight }}; cursor: pointer;">
+                <span style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;" dangerouslySetInnerHTML="{{ item.iconHtml }}"></span>
+                {{ item.label }}
+              </div>
+              <sc-if value="{{ item.hasChildren }}" hint-placeholder-val="{{ false }}">
+                <sc-for list="{{ item.children }}" as="child" hint-placeholder-count="3">
+                  <div onClick="{{ child.onClick }}" style="padding: 9px 10px 9px 40px; font-size: 13px; color: {{ child.color }}; background: {{ child.active }}; border-radius: 8px; cursor: pointer; margin-bottom: 2px;">{{ child.label }}</div>
+                </sc-for>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="flex: 1; min-width: 0; padding: 24px 32px; box-sizing: border-box;">
+
+          <sc-if value="{{ isMatchDays }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 20px; height: 20px; color: #2f6b45;" dangerouslySetInnerHTML="{{ topbarIcons.trophy }}"></span>
+                <span style="font-size: 24px; font-weight: 800; color: {{ t.textPrimary }};">MatchDays</span>
+              </div>
+              <button style="background: #2f6b45; border: none; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">+ New MatchDay</button>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 8px; overflow: hidden;">
+                <sc-for list="{{ mdFilters }}" as="f" hint-placeholder-count="3">
+                  <div onClick="{{ f.onClick }}" style="padding: 10px 18px; font-size: 13px; font-weight: 600; color: {{ f.color }}; background: {{ f.bg }}; cursor: pointer;">{{ f.label }}</div>
+                </sc-for>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 8px; padding: 10px 14px; width: 260px;">
+                <span style="width: 15px; height: 15px; color: {{ t.textMuted }};" dangerouslySetInnerHTML="{{ topbarIcons.search }}"></span>
+                <span style="font-size: 13px; color: {{ t.textMuted }};">Search matchDays...</span>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px;">
+              <sc-for list="{{ matchDays }}" as="md" hint-placeholder-count="6">
+                <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ md.borderColor }}; border-radius: 14px; padding: 20px; overflow: hidden;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <span style="font-size: 11px; background: {{ md.badgeBg }}; color: {{ md.badgeColor }}; padding: 4px 12px; border-radius: 20px; font-weight: 700; letter-spacing: 0.5px;">● {{ md.status }}</span>
+                    <span style="color: {{ t.textMuted }}; font-size: 16px; cursor: pointer;">⋮</span>
+                  </div>
+                  <div style="font-size: 17px; font-weight: 700; color: {{ t.textPrimary }}; margin-bottom: 10px;">{{ md.title }}</div>
+                  <div style="font-size: 13px; color: {{ t.textSecondary }}; margin-bottom: 4px;">📅 {{ md.date }}</div>
+                  <div style="font-size: 13px; color: {{ t.textSecondary }};">📍 {{ md.venue }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isVenues }}" hint-placeholder-val="{{ false }}">
+            <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 24px 28px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="width: 20px; height: 20px; color: #2f6b45;" dangerouslySetInnerHTML="{{ topbarIcons.venue }}"></span>
+                  <span style="font-size: 22px; font-weight: 800; color: {{ t.textPrimary }};">Venues</span>
+                </div>
+                <button style="background: #2f6b45; border: none; color: #fff; padding: 11px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">+ Add Venue</button>
+              </div>
+              <div onClick="{{ toggleEmptyVenues }}" style="font-size: 12px; color: {{ t.textMuted }}; text-decoration: underline; cursor: pointer; margin-bottom: 14px; display: inline-block;">Preview empty state</div>
+
+              <sc-if value="{{ showEmptyVenues }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 60px 20px;">
+                  <div style="width: 56px; height: 56px; border-radius: 50%; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                    <span style="width: 26px; height: 26px; color: {{ t.textMuted }};" dangerouslySetInnerHTML="{{ topbarIcons.venue }}"></span>
+                  </div>
+                  <div style="font-size: 16px; font-weight: 700; color: {{ t.textPrimary }}; margin-bottom: 6px;">No venues yet</div>
+                  <div style="font-size: 13px; color: {{ t.textMuted }}; margin-bottom: 20px; max-width: 320px;">Add the grounds your club plays at so MatchDays can be scheduled there.</div>
+                  <button style="background: #2f6b45; border: none; color: #fff; padding: 11px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">+ Add Venue</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ isVenuesNotEmpty }}" hint-placeholder-val="{{ true }}">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; padding: 10px 0; border-bottom: 1px solid {{ t.cardBorder }};">Venue Name</th>
+                      <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; padding: 10px 0; border-bottom: 1px solid {{ t.cardBorder }};">Address</th>
+                      <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; padding: 10px 0; border-bottom: 1px solid {{ t.cardBorder }};">Status</th>
+                      <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; padding: 10px 0; border-bottom: 1px solid {{ t.cardBorder }};">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ venues }}" as="v" hint-placeholder-count="2">
+                      <tr>
+                        <td style="padding: 16px 0; border-bottom: 1px solid {{ t.cardBorder }}; font-size: 14px; font-weight: 700; color: {{ t.textPrimary }};">📍 {{ v.name }}</td>
+                        <td style="padding: 16px 0; border-bottom: 1px solid {{ t.cardBorder }}; font-size: 13px; color: {{ t.textSecondary }};">{{ v.address }}</td>
+                        <td style="padding: 16px 0; border-bottom: 1px solid {{ t.cardBorder }};"><span style="font-size: 12px; background: {{ t.confirmedBg }}; color: #2f8a52; padding: 3px 12px; border-radius: 10px;">● Active</span></td>
+                        <td style="padding: 16px 0; border-bottom: 1px solid {{ t.cardBorder }};"><button style="background: transparent; border: 1px solid {{ t.cardBorder }}; color: {{ t.textPrimary }}; padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer;">✎ Edit</button></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPlayers }}" hint-placeholder-val="{{ false }}">
+            <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 24px 28px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="width: 20px; height: 20px; color: #2f6b45;" dangerouslySetInnerHTML="{{ topbarIcons.user }}"></span>
+                  <span style="font-size: 22px; font-weight: 800; color: {{ t.textPrimary }};">Players</span>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                  <div style="display: flex; align-items: center; gap: 8px; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 8px; padding: 10px 14px;">
+                    <span style="width: 14px; height: 14px; color: {{ t.textMuted }};" dangerouslySetInnerHTML="{{ topbarIcons.search }}"></span>
+                    <span style="font-size: 13px; color: {{ t.textMuted }};">Search players</span>
+                  </div>
+                  <button style="background: #2f6b45; border: none; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">+ Add Player</button>
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <sc-for list="{{ playerFilters }}" as="pf" hint-placeholder-count="3">
+                  <div onClick="{{ pf.onClick }}" style="display: flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 8px; background: {{ pf.bg }}; color: {{ pf.color }}; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    {{ pf.label }}
+                    <span style="background: {{ pf.countBg }}; color: {{ pf.countColor }}; font-size: 11px; padding: 1px 8px; border-radius: 10px; font-weight: 700;">{{ pf.count }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr>
+                    <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; padding: 10px 8px; border-bottom: 1px solid {{ t.cardBorder }};">Player</th>
+                    <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; padding: 10px 8px; border-bottom: 1px solid {{ t.cardBorder }};">Employee ID</th>
+                    <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; padding: 10px 8px; border-bottom: 1px solid {{ t.cardBorder }};">Status</th>
+                    <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; padding: 10px 8px; border-bottom: 1px solid {{ t.cardBorder }};">Roles</th>
+                    <th style="text-align: left; font-size: 12px; color: {{ t.textMuted }}; padding: 10px 8px; border-bottom: 1px solid {{ t.cardBorder }};">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ players }}" as="p" hint-placeholder-count="6">
+                    <tr>
+                      <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }};">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                          <div style="width: 34px; height: 34px; border-radius: 50%; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; color: {{ t.textPrimary }}; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">{{ p.initial }}</div>
+                          <span style="font-size: 14px; font-weight: 700; color: {{ t.textPrimary }};">{{ p.name }}</span>
+                        </div>
+                      </td>
+                      <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }}; font-size: 13px;">{{ p.id }}</td>
+                      <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }};"><span style="font-size: 12px; background: {{ p.statusBg }}; color: {{ p.statusColor }}; padding: 3px 12px; border-radius: 10px;">● {{ p.status }}</span></td>
+                      <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }};"><span style="font-size: 11px; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }}; padding: 3px 10px; border-radius: 6px; font-weight: 600;">{{ p.role }}</span></td>
+                      <td style="padding: 14px 8px; border-bottom: 1px solid {{ t.cardBorder }};">
+                        <div style="display: flex; gap: 6px;">
+                          <button style="background: transparent; border: 1px solid {{ t.cardBorder }}; color: {{ t.textPrimary }}; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;">View</button>
+                          <button style="background: transparent; border: 1px solid {{ t.cardBorder }}; color: {{ t.textPrimary }}; padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer;">Edit</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPlayerProfile }}" hint-placeholder-val="{{ false }}">
+            <div style="background: {{ t.cardBg }}; border: 1px solid #2f6b45; border-radius: 14px; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 20px;">
+              <div style="display: flex; align-items: center; gap: 20px;">
+                <div style="width: 76px; height: 76px; border-radius: 50%; background: #2a3d31; border: 2px solid #2f6b45; flex-shrink: 0;"></div>
+                <div>
+                  <div style="font-size: 24px; font-weight: 800; color: {{ t.textPrimary }};">Zahid Hasan</div>
+                  <div style="font-size: 13px; color: {{ t.textMuted }}; margin-bottom: 8px;">zhdruvo@gmail.com</div>
+                  <div style="display: flex; gap: 8px;">
+                    <sc-for list="{{ profileRoles }}" as="r" hint-placeholder-count="4">
+                      <span style="font-size: 11px; background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; color: {{ t.textSecondary }}; padding: 4px 10px; border-radius: 12px; font-weight: 600;">{{ r }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <sc-for list="{{ profileStats }}" as="s" hint-placeholder-count="4">
+                  <div style="background: {{ t.innerBg }}; border-top: 2px solid {{ s.color }}; border-radius: 0 0 10px 10px; padding: 12px 18px; text-align: center;">
+                    <div style="font-size: 20px; font-weight: 800; color: {{ t.textPrimary }};">{{ s.value }}</div>
+                    <div style="font-size: 10px; color: {{ t.textMuted }}; letter-spacing: 0.5px;">{{ s.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+              <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px;">
+                <div style="font-size: 15px; font-weight: 700; color: {{ t.textPrimary }}; margin-bottom: 16px;">Player Details</div>
+                <sc-for list="{{ profileDetails }}" as="d" hint-placeholder-count="6">
+                  <div style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid {{ t.cardBorder }};">
+                    <div style="width: 30px; height: 30px; border-radius: 8px; background: {{ t.innerBg }}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">{{ d.icon }}</div>
+                    <div>
+                      <div style="font-size: 10px; color: {{ t.textMuted }}; letter-spacing: 0.5px;">{{ d.label }}</div>
+                      <div style="font-size: 13px; color: {{ t.textPrimary }}; font-weight: 600;">{{ d.value }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px;">
+                <div style="display: flex; gap: 24px; border-bottom: 1px solid {{ t.cardBorder }}; padding-bottom: 14px; margin-bottom: 20px; font-size: 13px; color: {{ t.textSecondary }};">
+                  <span style="color: #2f8a52; font-weight: 700; border-bottom: 2px solid #2f8a52; padding-bottom: 12px;">Edit Profile</span>
+                  <span>Change Password</span>
+                  <span>Match History</span>
+                  <span>Goalkeeping History</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <sc-for list="{{ profileFormFields }}" as="ff" hint-placeholder-count="4">
+                    <div>
+                      <div style="font-size: 12px; color: {{ t.textSecondary }}; margin-bottom: 6px;">{{ ff.label }}</div>
+                      <div style="background: {{ t.innerBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: {{ t.textPrimary }};">{{ ff.value }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <button style="margin-top: 20px; background: #2f6b45; border: none; color: #fff; padding: 11px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">Save Changes</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPlayerStats }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+              <span style="width: 20px; height: 20px; color: #2f6b45;" dangerouslySetInnerHTML="{{ topbarIcons.chart }}"></span>
+              <span style="font-size: 22px; font-weight: 800; color: {{ t.textPrimary }};">Player Statistics</span>
+            </div>
+            <div style="font-size: 13px; color: {{ t.textMuted }}; margin-bottom: 20px;">Goals, assists and disciplinary records across MatchDays</div>
+            <div style="display: grid; grid-template-columns: 2.2fr 1fr; gap: 20px;">
+              <div>
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
+                  <sc-for list="{{ statPlayers }}" as="sp" hint-placeholder-count="8">
+                    <div style="min-width: 0; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 12px; padding: 16px; overflow: hidden;">
+                      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #2a3d31; color: #cfe0d4; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">{{ sp.initial }}</div>
+                        <div style="min-width: 0;">
+                          <div style="font-size: 12px; font-weight: 700; color: {{ t.textPrimary }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ sp.name }}</div>
+                          <div style="font-size: 10px; color: {{ t.textMuted }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ sp.position }}</div>
+                        </div>
+                      </div>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 15px; font-weight: 800; color: {{ t.textPrimary }}; text-align: center;">
+                        <div style="min-width: 0;">{{ sp.matches }}<div style="font-size: 9px; color: {{ t.textMuted }}; font-weight: 400; letter-spacing: 0.3px;">MATCHES</div></div>
+                        <div style="min-width: 0;">{{ sp.goals }}<div style="font-size: 9px; color: {{ t.textMuted }}; font-weight: 400; letter-spacing: 0.3px;">GOALS</div></div>
+                        <div style="min-width: 0;">{{ sp.assists }}<div style="font-size: 9px; color: {{ t.textMuted }}; font-weight: 400; letter-spacing: 0.3px;">ASSISTS</div></div>
+                        <div style="min-width: 0;">{{ sp.rating }}<div style="font-size: 9px; color: {{ t.textMuted }}; font-weight: 400; letter-spacing: 0.3px;">RATING</div></div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px;">
+                  <div style="font-size: 15px; font-weight: 700; color: {{ t.textPrimary }}; margin-bottom: 16px;">Top 3 Players (G+A)</div>
+                  <div style="display: flex; justify-content: center; gap: 16px;">
+                    <sc-for list="{{ top3 }}" as="tp" hint-placeholder-count="3">
+                      <div style="text-align: center;">
+                        <div style="width: 44px; height: 44px; border-radius: 50%; background: {{ tp.bg }}; color: #fff; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px;">{{ tp.initial }}</div>
+                        <div style="font-size: 12px; font-weight: 700; color: {{ t.textPrimary }};">{{ tp.name }}</div>
+                        <div style="font-size: 11px; color: {{ t.textMuted }};">{{ tp.value }} G+A</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 14px; padding: 20px;">
+                  <div style="font-size: 15px; font-weight: 700; color: {{ t.textPrimary }}; margin-bottom: 4px;">Player Spotlight</div>
+                  <div style="font-size: 13px; font-weight: 700; color: #2f8a52; margin-bottom: 16px;">MD MANJURUL HOQUE JONY</div>
+                  <div style="font-size: 13px; color: {{ t.textSecondary }};">Performance Rating <strong style="color: {{ t.textPrimary }};">6.3</strong></div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isClubRules }}" hint-placeholder-val="{{ false }}">
+            <div style="background: linear-gradient(135deg, #142a1c, #1c3a26); border-radius: 14px; padding: 40px; margin-bottom: 24px;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <span style="width: 28px; height: 28px; color: #fff;" dangerouslySetInnerHTML="{{ topbarIcons.book }}"></span>
+                <span style="font-size: 28px; font-weight: 800; color: #fff;">Club Rules</span>
+              </div>
+              <div style="font-size: 14px; color: #cfe0d4; margin-top: 8px;">Guidelines every member is expected to follow — on and off the pitch.</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <span style="font-size: 13px; font-weight: 700; color: #2f8a52; letter-spacing: 0.5px;">{{ clubRules.length }} RULES</span>
+              <button style="background: #2f6b45; border: none; color: #fff; padding: 11px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;">+ Add Rule</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <sc-for list="{{ clubRules }}" as="rule" hint-placeholder-count="4">
+                <div style="display: flex; align-items: flex-start; gap: 16px; background: {{ t.cardBg }}; border: 1px solid {{ t.cardBorder }}; border-radius: 12px; padding: 18px 22px;">
+                  <div style="width: 26px; height: 26px; border-radius: 50%; background: #2f6b45; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">{{ rule.n }}</div>
+                  <div style="font-size: 15px; color: {{ t.textPrimary }}; line-height: 1.6;">{{ rule.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ICONS = {
+  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  calendar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>',
+  whistle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="16" r="4"/><path d="M12 16h6a3 3 0 0 0 0-6h-2l-5-6"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/></svg>',
+  finance: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="16" x2="15" y2="16"/></svg>',
+  rules: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="1.5"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>',
+  settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"/></svg>'
+};
+
+const THEMES = {
+  dark: {
+    pageBg: '#0a0f0c', sidebarBg: '#0e1c14', sidebarBorder: '#1c2b21',
+    textPrimary: '#f2f5f0', textSecondary: '#9fb3a5', textMuted: '#6b8172',
+    cardBg: '#12241a', cardBorder: '#2a3d31', innerBg: '#0e1c14',
+    progressTrack: '#0e1c14', btnGhostBg: 'transparent',
+    navActiveBg: '#16281c', navActiveColor: '#7fd99a', navInactiveColor: '#9fb3a5',
+    confirmedBg: '#123322', pendingBg: '#332c14', notJoiningBg: '#331717',
+  },
+  light: {
+    pageBg: '#f7f8f6', sidebarBg: '#ffffff', sidebarBorder: '#eceee9',
+    textPrimary: '#16241a', textSecondary: '#6b7d70', textMuted: '#8a988d',
+    cardBg: '#ffffff', cardBorder: '#e7ebe4', innerBg: '#f4f6f2',
+    progressTrack: '#e7ebe4', btnGhostBg: '#ffffff',
+    navActiveBg: '#eaf3ec', navActiveColor: '#2f6b45', navInactiveColor: '#6b7d70',
+    confirmedBg: '#e6f5ea', pendingBg: '#fbf1de', notJoiningBg: '#fbe9e6',
+  },
+};
+
+const TOPBAR_ICONS = {
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>',
+  pie: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v10l8.5 5A10 10 0 1 0 12 2z"/><path d="M12 12L3.5 17"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>',
+  theme: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 4-2 5-2 7h16c0-2-2-3-2-7"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>',
+  calSmall: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>',
+  chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="4" y2="12"/><line x1="10" y1="20" x2="10" y2="6"/><line x1="16" y1="20" x2="16" y2="14"/><line x1="4" y1="20" x2="20" y2="20"/></svg>',
+  trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4h8v4a4 4 0 0 1-8 0V4z"/><path d="M8 5H5a2 2 0 0 0 0 4h1"/><path d="M16 5h3a2 2 0 0 1 0 4h-1"/><path d="M10 13v3h4v-3"/><path d="M8 20h8"/><path d="M10 17h4v3h-4z"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+  fire: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c1 4-4 5-4 9a4 4 0 0 0 8 0c0-1.5-1-2-1-3.5 1.5 1 3 3 3 5.5a6 6 0 0 1-12 0C6 8 9 6 12 2z"/></svg>',
+  trend: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg>',
+  venue: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="1.5"/><line x1="9" y1="8" x2="9" y2="8.01"/><line x1="15" y1="8" x2="15" y2="8.01"/><line x1="9" y1="13" x2="9" y2="13.01"/><line x1="15" y1="13" x2="15" y2="13.01"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h11a4 4 0 0 1 4 4v13H8a4 4 0 0 1-4-4V4z"/><line x1="8" y1="9" x2="15" y2="9"/></svg>',
+};
+
+const MATCHDAYS = [
+  { title: 'Responsive Test Cup', status: 'CONCLUDED', date: '15/08/2026, 04:00 pm', venue: 'GreenVill' },
+  { title: 'TEST', status: 'CONCLUDED', date: '08/08/2026, 06:30 pm', venue: 'GreenVill' },
+  { title: 'Match Day — Aug 7, 2026', status: 'CONCLUDED', date: '08/08/2026, 01:00 am', venue: 'GreenVill' },
+  { title: 'test', status: 'UPCOMING', date: '07/08/2026, 06:00 pm', venue: "Chef's Table Courtside" },
+  { title: 'Test', status: 'CONCLUDED', date: '06/08/2026, 10:14 pm', venue: "Chef's Table Courtside" },
+  { title: 'test', status: 'CONCLUDED', date: '05/08/2026, 11:50 pm', venue: "Chef's Table Courtside" },
+];
+
+const VENUES = [
+  { name: 'GreenVill', address: 'Madani Avenue, Satarkul, (3 km East of US Embassy, 100 Feet, Panch Khola Bus Stand, Dhaka' },
+  { name: "Chef's Table Courtside", address: '100 Feet Road Madani Ave, Dhaka' },
+];
+
+const PLAYERS = [
+  { name: 'TestQA Matchday', id: '99099', status: 'Active', role: 'ADMIN' },
+  { name: 'Sabit Bin Hamid', id: '11913', status: 'Active', role: 'PLAYER' },
+  { name: 'Shovon Das', id: '10695', status: 'Inactive', role: 'PLAYER' },
+  { name: 'Asem', id: '4', status: 'Active', role: 'PLAYER' },
+  { name: 'Abhishek', id: '3', status: 'Active', role: 'PLAYER' },
+  { name: 'Ibrahim Khalil', id: '2', status: 'Active', role: 'PLAYER' },
+];
+
+const STAT_PLAYERS = [
+  { name: 'MD MANJURUL...', position: 'UNASSIGNED', matches: 3, goals: 1, assists: 0, rating: '6.3' },
+  { name: 'Asem', position: 'UNASSIGNED', matches: 3, goals: 0, assists: 1, rating: '6.3' },
+  { name: 'Nahid', position: 'STRIKER', matches: 0, goals: 0, assists: 0, rating: '6.0' },
+  { name: 'Saiful Islam', position: 'RIGHT_BACK', matches: 2, goals: 0, assists: 0, rating: '6.0' },
+  { name: 'Md. Tahid...', position: 'RIGHT_BACK', matches: 0, goals: 0, assists: 0, rating: '6.0' },
+  { name: 'Gazi Md S...', position: 'ATTACKING_MIDFIELD', matches: 0, goals: 0, assists: 0, rating: '6.0' },
+  { name: 'Md. Amiru...', position: 'GOALKEEPER', matches: 0, goals: 0, assists: 0, rating: '6.0' },
+  { name: 'Md. Roni', position: 'UNASSIGNED', matches: 0, goals: 0, assists: 0, rating: '6.0' },
+];
+
+const CLUB_RULES = [
+  'কেও বল নিয়ে আগ্রসর হবার সময় প্রতিপক্ষের কেও বিপরীত দিক থেকে সরাসরি বলে শট নিতে পারবে না। এতে করে দুই জনই আঘাতপ্রাপ্ত হতে পারে।',
+  'বল দখলের সময় বা হুটগোলের মধ্যে কাওকে ধাক্কা দেওয়া যাবে না।',
+  'কাউকে ধাক্কা দিয়ে বল দখলের চেষ্টা করা যাবে না।',
+  'বলের সাথে দুইজন থাকা অবস্থায় হাটুর উপরে কোন বলে পা উঠানো যাবে না। বলের সাথে বা কাছে অন্য কেও না থাকলে কোন সমস্যা নেই।',
+];
+
+const TEAM_DATA = [
+  { name: 'Team A', initials: 'TA', players: ['Zahid Hasan','Md Manjurul Hoque Jony','Md. Alman Hossain Yen','Asem','Ihsan Md. Al-Aqib','Sheikh Mustafizur Rahman','Abhishek'] },
+  { name: 'Team B', initials: 'TB', players: ['Abid Hasan Rashel','Abu Hossain','Asef Hossain Khan','Gazi Md Saiful Hoque','Ibrahim Khalil','Md. Akramul Hoque','Shofiuddin'] },
+  { name: 'Team C', initials: 'TC', players: ['Mahfuz Islam Nayon','Md Kamrus Samad','Sabit Bin Hamid','Md. Roni','Saiful Islam','Saniyat Al Ahmed','Testqa Matchday'] },
+];
+
+const RESULTS = [
+  { home: 'Team B', homeInit: 'TB', away: 'Team C', awayInit: 'TC', homeScore: 0, awayScore: 0, date: 'Sat, Aug 8', venue: 'GreenVill' },
+  { home: 'Team A', homeInit: 'TA', away: 'Team C', awayInit: 'TC', homeScore: 0, awayScore: 0, date: 'Sat, Aug 8', venue: 'GreenVill' },
+];
+
+const STANDINGS = [
+  { rank: 1, name: 'Team A', initials: 'TA', p: 3, w: 1, d: 2, l: 0, gd: '+1', gdColor: '#2f8a52', gf: 1, ga: 0, y: 1, r: 0, pts: 5, rankBg: '#c9a24b', rankColor: '#1c1406' },
+  { rank: 2, name: 'Team C', initials: 'TC', p: 2, w: 0, d: 2, l: 0, gd: '0', gdColor: '#9fb3a5', gf: 0, ga: 0, y: 0, r: 0, pts: 2, rankBg: '#8a988d', rankColor: '#0a0f0c' },
+  { rank: 3, name: 'Team B', initials: 'TB', p: 3, w: 0, d: 2, l: 1, gd: '-1', gdColor: '#c04a3a', gf: 0, ga: 1, y: 1, r: 1, pts: 2, rankBg: '#b0602f', rankColor: '#fff' },
+];
+
+const PAYMENTS_DUE = ['Nahid', 'Saiful Islam', 'Md. Tahiduzzaman', 'Gazi Md Saiful Hoque', 'Md. Roni', 'Abu Hossain'];
+const MONTH_NAMES = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const MONTH_AMOUNTS = { JUN: 1000, JUL: 1000, AUG: 1000 };
+const TABLE_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov'];
+const CONTRIBUTORS = ['Nahid', 'Saiful Islam', 'Md. Tahiduzzaman', 'Gazi Md Saiful Hoque', 'Md. Roni'];
+
+class Component extends DCLogic {
+  state = { screen: 'login', autoLogin: false, theme: 'light', userMenuOpen: false, notifications: false, nmTab: 'home', teamFilter: 'ALL', mdFilter: 'All', playerFilter: 'All', showEmptyVenues: false };
+
+  renderVals() {
+    const s = this.state;
+    const t = THEMES[s.theme];
+    const nav = [
+      { label: 'Dashboard', icon: 'grid', active: true },
+      { label: 'Next Match', icon: 'calendar', active: false },
+      { label: 'Match Management', icon: 'whistle', active: false },
+      { label: 'Player', icon: 'user', active: false },
+      { label: 'Finance', icon: 'finance', active: false },
+      { label: 'Club Rules', icon: 'rules', active: false },
+      { label: 'Settings', icon: 'settings', active: false },
+    ].map(item => ({
+      label: item.label,
+      iconHtml: { __html: ICONS[item.icon] },
+      active: item.active ? t.navActiveBg : 'transparent',
+      color: item.active ? t.navActiveColor : t.navInactiveColor,
+      weight: item.active ? 600 : 400,
+    }));
+
+    return {
+      isLogin: s.screen === 'login',
+      isDashboard: s.screen === 'dashboard',
+      showLogin: () => this.setState({ screen: 'login' }),
+      showDashboard: () => this.setState({ screen: 'dashboard' }),
+      loginBtnBg: s.screen === 'login' ? '#c9a24b' : 'transparent',
+      loginBtnColor: s.screen === 'login' ? '#1c1406' : '#cfe0d4',
+      dashBtnBg: s.screen === 'dashboard' ? '#c9a24b' : 'transparent',
+      dashBtnColor: s.screen === 'dashboard' ? '#1c1406' : '#cfe0d4',
+      isNextMatch: s.screen === 'nextmatch',
+      showNextMatch: () => this.setState({ screen: 'nextmatch' }),
+      nmBtnBg: s.screen === 'nextmatch' ? '#c9a24b' : 'transparent',
+      nmBtnColor: s.screen === 'nextmatch' ? '#1c1406' : '#cfe0d4',
+      autoLogin: s.autoLogin,
+      toggleAutoLogin: () => this.setState({ autoLogin: !s.autoLogin }),
+      navItems: nav,
+      t: t,
+      themeToggleLabel: s.theme === 'light' ? 'dark' : 'light',
+      toggleTheme: () => this.setState({ theme: s.theme === 'light' ? 'dark' : 'light' }),
+      topbarIcons: {
+        menu: { __html: TOPBAR_ICONS.menu },
+        pie: { __html: TOPBAR_ICONS.pie },
+        search: { __html: TOPBAR_ICONS.search },
+        theme: { __html: TOPBAR_ICONS.theme },
+        bell: { __html: TOPBAR_ICONS.bell },
+        chevron: { __html: TOPBAR_ICONS.chevron },
+        user: { __html: TOPBAR_ICONS.user },
+        warn: { __html: TOPBAR_ICONS.warn },
+        calSmall: { __html: TOPBAR_ICONS.calSmall },
+        chart: { __html: TOPBAR_ICONS.chart },
+      },
+      userMenuOpen: s.userMenuOpen,
+      toggleUserMenu: () => this.setState({ userMenuOpen: !s.userMenuOpen }),
+      userMenuChevron: s.userMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+      notifToggleBg: s.notifications ? '#2f6b45' : (s.theme === 'light' ? '#d8ddd2' : '#2a3d31'),
+      notifToggleLeft: s.notifications ? '18px' : '2px',
+      toggleNotifications: () => this.setState({ notifications: !s.notifications }),
+      paymentsDue: PAYMENTS_DUE.map(name => ({ name })),
+      months: MONTH_NAMES.map(name => {
+        const amount = MONTH_AMOUNTS[name];
+        const isCurrent = name === 'AUG';
+        return {
+          name,
+          amount: amount ? amount.toLocaleString() : '-',
+          bg: isCurrent ? t.navActiveBg : (amount ? t.confirmedBg : t.innerBg),
+          border: isCurrent ? '#2f6b45' : (amount ? '#2f6b45' : t.cardBorder),
+          labelColor: amount ? t.textSecondary : t.textMuted,
+          amountColor: amount ? (isCurrent ? t.textPrimary : '#2f8a52') : t.textMuted,
+        };
+      }),
+      calendarDow: ['S','M','T','W','T','F','S'],
+      calendarCells: (() => {
+        const blanks = 6; // Aug 2026 starts on Saturday
+        const cells = [];
+        for (let i = 0; i < blanks; i++) cells.push({ day: '', bg: 'transparent', color: t.textMuted, hasMatch: false });
+        for (let d = 1; d <= 31; d++) {
+          const isToday = d === 6;
+          const hasMatch = d === 7;
+          cells.push({
+            day: d,
+            bg: isToday ? '#2f6b45' : (hasMatch ? t.confirmedBg : 'transparent'),
+            color: isToday ? '#fff' : t.textPrimary,
+            hasMatch,
+          });
+        }
+        return cells;
+      })(),
+      tableMonths: TABLE_MONTHS,
+      contributionRows: CONTRIBUTORS.map(name => ({
+        name,
+        cells: TABLE_MONTHS.map(m => {
+          if (m === 'Jul') return { value: '1000', color: t.textPrimary, weight: 400, bg: 'transparent' };
+          if (m === 'Aug') return { value: 'Due', color: '#a07a1f', weight: 700, bg: t.pendingBg };
+          return { value: '', color: t.textMuted, weight: 400, bg: 'transparent' };
+        }),
+      })),
+      navItemsNextMatch: nav.map((n, i) => (i === 1 ? { ...n, active: t.navActiveBg, color: t.navActiveColor, weight: 600 } : { ...n, active: 'transparent', color: t.navInactiveColor, weight: 400 })),
+      nmTabs: [
+        { key: 'home', label: 'Home', icon: 'home' },
+        { key: 'results', label: 'Results', icon: 'check' },
+        { key: 'table', label: 'Table', icon: 'list' },
+        { key: 'stats', label: 'Stats', icon: 'chart' },
+      ].map(tab => ({
+        label: tab.label,
+        iconHtml: { __html: TOPBAR_ICONS[tab.icon] },
+        color: s.nmTab === tab.key ? '#2f8a52' : t.textSecondary,
+        underline: s.nmTab === tab.key ? '#2f8a52' : 'transparent',
+        onClick: () => this.setState({ nmTab: tab.key }),
+      })),
+      isNmHome: s.nmTab === 'home',
+      isNmResults: s.nmTab === 'results',
+      isNmTable: s.nmTab === 'table',
+      isNmStats: s.nmTab === 'stats',
+      teamFilters: ['ALL', 'TEAM A', 'TEAM B', 'TEAM C'].map(f => ({
+        label: f,
+        border: s.teamFilter === f ? '#c9a24b' : t.cardBorder,
+        color: s.teamFilter === f ? '#c9a24b' : t.textSecondary,
+        onClick: () => this.setState({ teamFilter: f }),
+      })),
+      visibleTeams: TEAM_DATA
+        .filter(team => s.teamFilter === 'ALL' || team.name.toUpperCase() === s.teamFilter)
+        .map(team => ({
+          name: team.name, initials: team.initials, count: team.players.length,
+          players: team.players.map(name => ({ name: name.toUpperCase(), initial: name[0] })),
+        })),
+      results: RESULTS,
+      standingsHeaders: ['#','TEAM','P','W','D','L','GD','GF','GA','Y','R','PTS'],
+      standings: STANDINGS,
+      statBlocks: [
+        {
+          title: 'Top Scorers', subtitle: 'Ranked by goals', iconBg: t.confirmedBg, iconColor: '#c04a3a', iconHtml: { __html: TOPBAR_ICONS.fire },
+          leader: { rank: 1, initial: 'M', name: 'MD MANJURUL HOQUE JONY', team: 'Team A', value: 1 },
+        },
+        {
+          title: 'Most Assists', subtitle: 'Ranked by assists', iconBg: t.confirmedBg, iconColor: '#2f8a52', iconHtml: { __html: TOPBAR_ICONS.trend },
+          leader: { rank: 1, initial: 'A', name: 'Asem', team: 'Team A', value: 1 },
+        },
+      ],
+      extraScreens: [
+        { key: 'matchdays', label: 'MatchDays' },
+        { key: 'venues', label: 'Venues' },
+        { key: 'players', label: 'Players' },
+        { key: 'playerprofile', label: 'Player Profile' },
+        { key: 'playerstats', label: 'Player Stats' },
+        { key: 'clubrules', label: 'Club Rules' },
+      ].map(sc => ({
+        label: sc.label,
+        bg: s.screen === sc.key ? '#c9a24b' : 'transparent',
+        color: s.screen === sc.key ? '#1c1406' : '#cfe0d4',
+        onClick: () => this.setState({ screen: sc.key }),
+      })),
+      isShellScreen: ['matchdays','venues','players','playerprofile','playerstats','clubrules'].includes(s.screen),
+      isMatchDays: s.screen === 'matchdays',
+      isVenues: s.screen === 'venues',
+      isPlayers: s.screen === 'players',
+      isPlayerProfile: s.screen === 'playerprofile',
+      isPlayerStats: s.screen === 'playerstats',
+      isClubRules: s.screen === 'clubrules',
+      shellNavItems: [
+        { key: 'dashboard', label: 'Dashboard', icon: 'grid' },
+        { key: 'nextmatch', label: 'Next Match', icon: 'calendar' },
+        { key: 'matchmanagement', label: 'Match Management', icon: 'whistle', children: [
+          { key: 'matchdays', label: 'MatchDays' }, { key: 'venues', label: 'Venues' },
+        ]},
+        { key: 'player', label: 'Player', icon: 'user', children: [
+          { key: 'players', label: 'Player List' }, { key: 'playerprofile', label: 'My Player Profile' }, { key: 'playerstats', label: 'Player Statistics' },
+        ]},
+        { key: 'finance', label: 'Finance', icon: 'finance' },
+        { key: 'clubrules', label: 'Club Rules', icon: 'rules' },
+        { key: 'settings', label: 'Settings', icon: 'settings' },
+      ].map(item => {
+        const isActive = s.screen === item.key || (item.children || []).some(c => c.key === s.screen);
+        return {
+          label: item.label,
+          iconHtml: { __html: ICONS[item.icon] },
+          active: isActive && !item.children ? t.navActiveBg : 'transparent',
+          color: isActive ? t.navActiveColor : t.navInactiveColor,
+          weight: isActive ? 600 : 400,
+          onClick: item.children ? undefined : (() => this.setState({ screen: item.key })),
+          hasChildren: !!item.children,
+          children: (item.children || []).map(c => ({
+            label: c.label,
+            active: s.screen === c.key ? t.navActiveBg : 'transparent',
+            color: s.screen === c.key ? t.navActiveColor : t.navInactiveColor,
+            onClick: () => this.setState({ screen: c.key }),
+          })),
+        };
+      }),
+      mdFilters: ['All', 'Upcoming', 'Concluded'].map(f => ({
+        label: f,
+        bg: s.mdFilter === f ? '#2f6b45' : 'transparent',
+        color: s.mdFilter === f ? '#fff' : t.textSecondary,
+        onClick: () => this.setState({ mdFilter: f }),
+      })),
+      matchDays: MATCHDAYS
+        .filter(md => s.mdFilter === 'All' || md.status.toLowerCase() === s.mdFilter.toLowerCase())
+        .map(md => ({
+          ...md,
+          borderColor: md.status === 'UPCOMING' ? '#2f6b45' : t.cardBorder,
+          badgeBg: md.status === 'UPCOMING' ? t.confirmedBg : t.innerBg,
+          badgeColor: md.status === 'UPCOMING' ? '#2f8a52' : t.textSecondary,
+        })),
+      venues: VENUES,
+      showEmptyVenues: s.showEmptyVenues,
+      isVenuesNotEmpty: !s.showEmptyVenues,
+      toggleEmptyVenues: () => this.setState({ showEmptyVenues: !s.showEmptyVenues }),
+      playerFilters: [
+        { label: 'All', count: 33 }, { label: 'Active', count: 27 }, { label: 'Inactive', count: 6 },
+      ].map(pf => ({
+        label: pf.label, count: pf.count,
+        bg: s.playerFilter === pf.label ? '#2f6b45' : t.innerBg,
+        color: s.playerFilter === pf.label ? '#fff' : t.textSecondary,
+        countBg: s.playerFilter === pf.label ? 'rgba(255,255,255,0.2)' : t.cardBg,
+        countColor: s.playerFilter === pf.label ? '#fff' : t.textPrimary,
+        onClick: () => this.setState({ playerFilter: pf.label }),
+      })),
+      players: PLAYERS
+        .filter(p => s.playerFilter === 'All' || p.status === s.playerFilter)
+        .map(p => ({
+          ...p, initial: p.name[0],
+          statusBg: p.status === 'Active' ? t.confirmedBg : t.notJoiningBg,
+          statusColor: p.status === 'Active' ? '#2f8a52' : '#c04a3a',
+        })),
+      profileRoles: ['CENTRAL_MIDFIELD', 'ADMIN', 'PLAYER', 'SUPERADMIN'],
+      profileStats: [
+        { label: 'MATCHES', value: 3, color: '#d69a2f' },
+        { label: 'GOALS', value: 0, color: '#2f8a52' },
+        { label: 'ASSISTS', value: 0, color: '#4a90d6' },
+        { label: 'G+A', value: 0, color: '#c9a24b' },
+      ],
+      profileDetails: [
+        { icon: '✉', label: 'EMAIL', value: 'zhdruvo@gmail.com' },
+        { icon: '📞', label: 'MOBILE', value: '01988353282' },
+        { icon: '🪪', label: 'EMPLOYEE ID', value: '11664' },
+        { icon: '👕', label: 'JERSEY NUMBER', value: '—' },
+        { icon: '✓', label: 'STATUS', value: 'Active' },
+      ],
+      profileFormFields: [
+        { label: 'Name', value: 'Zahid Hasan' },
+        { label: 'Email', value: 'zhdruvo@gmail.com' },
+        { label: 'Employee ID', value: '11664' },
+        { label: 'Mobile No', value: '01988353282' },
+      ],
+      statPlayers: STAT_PLAYERS.map(sp => ({ ...sp, initial: sp.name[0] })),
+      top3: [
+        { name: 'Asem', initial: 'A', value: 1, bg: '#4a5a4f' },
+        { name: 'MD MANJU...', initial: 'M', value: 1, bg: '#c9a24b' },
+        { name: 'Nahid', initial: 'N', value: 0, bg: '#a05a3a' },
+      ],
+      clubRules: CLUB_RULES.map((text, i) => ({ n: i + 1, text })),
+    };
+  }
+}
+</script>
+</body>
+</html>

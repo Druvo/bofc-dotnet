@@ -7,8 +7,9 @@ import { AuctionPage, AuctionHeader, StatTile, StatusPill, SignedTile, PanelCard
 import { useStatTones } from "../../hooks/useStatTones";
 import Loader from "../ui/loader";
 import Alert from "../ui/alert";
+import { formatCurrency } from "../../utils/formatCurrency";
 
-const taka = (v?: number) => `৳${(v ?? 0).toLocaleString()}`;
+const taka = (v?: number) => formatCurrency(v ?? 0, { decimals: 0 });
 
 const moneyChip = (label: string, color: string) => (
   <span

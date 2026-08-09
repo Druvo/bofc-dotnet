@@ -30,7 +30,13 @@ import {
 } from "./fixtureTypes";
 
 const apiWithTags = apiSlice.enhanceEndpoints({
-  addTagTypes: ["fixtures", "matches", "statistics"],
+  // "standings" is also declared in manualFixturesSlice.ts — a group/bracket match completed or
+  // corrected through this slice's start/complete/score/event endpoints previously left
+  // GetGroupStandingsQuery (tagged {type:"standings", id: groupId}) stale until someone
+  // explicitly hit "Recalculate Standings"; invalidating the bare "standings" tag (no id) below
+  // refetches every currently-mounted group's standings, matching RTK Query's documented
+  // type-wide invalidation behavior.
+  addTagTypes: ["fixtures", "matches", "statistics", "standings"],
 });
 
 export const fixturesApi = apiWithTags.injectEndpoints({
@@ -142,6 +148,8 @@ export const fixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { matchId }) => [
         "fixtures",
         { type: "matches", id: matchId },
+        "statistics",
+        "standings",
       ],
     }),
 
@@ -156,6 +164,8 @@ export const fixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { matchId }) => [
         "fixtures",
         { type: "matches", id: matchId },
+        "statistics",
+        "standings",
       ],
     }),
 
@@ -170,6 +180,8 @@ export const fixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { matchId }) => [
         "fixtures",
         { type: "matches", id: matchId },
+        "statistics",
+        "standings",
       ],
     }),
 
@@ -187,6 +199,8 @@ export const fixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { matchId }) => [
         "fixtures",
         { type: "matches", id: matchId },
+        "statistics",
+        "standings",
       ],
     }),
 
@@ -205,6 +219,8 @@ export const fixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { matchId }) => [
         "fixtures",
         { type: "matches", id: matchId },
+        "statistics",
+        "standings",
       ],
     }),
 
@@ -226,6 +242,7 @@ export const fixturesApi = apiWithTags.injectEndpoints({
         "fixtures",
         { type: "matches", id: arg.matchId },
         "statistics",
+        "standings",
       ],
     }),
 
@@ -292,6 +309,7 @@ export const fixturesApi = apiWithTags.injectEndpoints({
         "fixtures",
         { type: "matches", id: matchId },
         "statistics",
+        "standings",
       ],
     }),
 
@@ -312,6 +330,7 @@ export const fixturesApi = apiWithTags.injectEndpoints({
         "fixtures",
         { type: "matches", id: matchId },
         "statistics",
+        "standings",
       ],
     }),
 

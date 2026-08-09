@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { EditOutlined, PlayCircleOutlined, PlusOutlined, MinusOutlined, DragOutlined, CalendarOutlined } from "@ant-design/icons";
-import moment from "moment";
 import { IFixture } from "../../../state/features/fixtures/fixtureTypes";
-import { getStatusColor } from "../../../utils/matchStatusUtils";
-import { formatMatchTime, isMatchOngoing } from "../../../utils/matchTimeUtils";
+import { getMatchStatusVisual } from "../../../utils/matchStatusVisuals";
+import { formatMatchTime, isMatchOngoing, formatMatchTimeRange } from "../../../utils/matchTimeUtils";
 import { useNavigate } from "react-router-dom";
 import { useDeleteMatchMutation, useUpdateMatchOrderMutation } from "../../../state/features/fixtures/fixturesSlice";
 import AddMatchModal from "./AddMatchModal";
@@ -33,13 +32,6 @@ interface FixturesTableProps {
   enableDragDrop?: boolean;
 }
 
-const statusBadgeVariant: Record<string, "primary" | "success" | "error" | "warning" | "info" | "light"> = {
-  SCHEDULED: "info",
-  ONGOING: "success",
-  PAUSED: "warning",
-  COMPLETED: "light",
-  CANCELLED: "error",
-};
 
 export default function FixturesTable({
   fixtures,
@@ -149,10 +141,12 @@ export default function FixturesTable({
             </VenueLink>
           ) : "—"}
         </td>
-        <td className="px-3 py-2.5 text-gray-500 dark:text-gray-400">{moment.utc(fixture.matchDate).local().format("DD/MM/YYYY, hh:mm a")}</td>
+        <td className="px-3 py-2.5 text-gray-500 dark:text-gray-400">
+          {formatMatchTimeRange(fixture.matchDate, fixture.matchDurationMinutes)}
+        </td>
         <td className="px-3 py-2.5">
           <div className="flex flex-col gap-1">
-            <Badge variant={statusBadgeVariant[fixture.matchStatus] || "light"}>
+            <Badge variant={getMatchStatusVisual(fixture.matchStatus).badgeVariant}>
               {isOngoing && <PlayCircleOutlined />} {fixture.matchStatus}
             </Badge>
             {isOngoing && matchTime && <Badge variant="success">{matchTime}</Badge>}
@@ -201,10 +195,10 @@ export default function FixturesTable({
           <p className="text-theme-sm text-gray-400 dark:text-gray-500">No fixtures found</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+        <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
           <table className="w-full min-w-max border-collapse text-theme-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+              <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                 {enableDragDrop && <th className="w-10 px-3 py-2.5" />}
                 <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Match #</th>
                 <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Home Team</th>
@@ -295,8 +289,8 @@ function ConfirmDeleteModal({ open, onCancel, onConfirm }: { open: boolean; onCa
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-modal flex items-center justify-center p-5">
-      <div className="fixed inset-0 bg-gray-400/50 backdrop-blur-[2px] dark:bg-gray-900/50" onClick={onCancel} />
-      <div className="relative w-full max-w-[380px] rounded-2xl bg-white p-6 dark:bg-gray-900">
+      <div className="fixed inset-0 bg-gray-400/50 backdrop-blur-[2px] dark:bg-[var(--color-paper-3)]/50" onClick={onCancel} />
+      <div className="relative w-full max-w-[380px] rounded-2xl bg-white p-6 dark:bg-[var(--color-paper-3)]">
         <h4 className="mb-2 text-base font-semibold text-gray-800 dark:text-white/90">Delete this match?</h4>
         <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">Are you sure you want to delete this match? This action cannot be undone.</p>
         <div className="flex justify-end gap-2.5">

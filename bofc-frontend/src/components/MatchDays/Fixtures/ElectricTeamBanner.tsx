@@ -419,6 +419,17 @@ export default function ElectricTeamBanner({ match, isAdmin = false, onRefresh }
                   >
                     {moment.utc(match.matchDate).local().format("DD MMM")}
                   </div>
+                  <div
+                    style={{
+                      fontSize: 9,
+                      fontWeight: 600,
+                      color: "#38003c",
+                      opacity: 0.5,
+                      marginTop: 1,
+                    }}
+                  >
+                    ends {moment.utc(match.matchDate).local().add(match.matchDurationMinutes || 90, "minutes").format("hh:mm A")}
+                  </div>
                 </>
               ) : (
                 // Show match timer for ONGOING, PAUSED, or COMPLETED
@@ -620,7 +631,7 @@ export default function ElectricTeamBanner({ match, isAdmin = false, onRefresh }
           >
             <TrophyOutlined style={{ fontSize: 16, color: "white" }} />
           </div>
-          <div className="electric-banner-matchDay-info">
+          <div className="electric-banner-match-day-info">
             <div
               style={{
                 color: "white",

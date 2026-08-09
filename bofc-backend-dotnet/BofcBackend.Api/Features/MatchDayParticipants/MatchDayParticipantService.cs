@@ -24,8 +24,12 @@ public class MatchDayParticipantService(
     public async Task SaveOrUpdateMatchDayParticipantAsync(MatchDayParticipantRequest request)
     {
         var playerId = request.PlayerId!.Value;
+        // COORDINATOR manages teams/lineup/fixtures/prizes for a MatchDay elsewhere in the app —
+        // excluding it here (Admin/SuperAdmin only) was an arbitrary gap for editing another
+        // player's RSVP on their behalf.
         if (!currentUser.IsUserAuthorizedForSelf(playerId)
-            && !currentUser.IsInRole(PlayerRoleNames.Admin) && !currentUser.IsInRole(PlayerRoleNames.SuperAdmin))
+            && !currentUser.IsInRole(PlayerRoleNames.Admin) && !currentUser.IsInRole(PlayerRoleNames.SuperAdmin)
+            && !currentUser.IsInRole(PlayerRoleNames.Coordinator))
         {
             // Java calls `throw new SecurityException(UNAUTHORIZED)` with a single argument —
             // only compiles against java.lang.SecurityException (the app's own SecurityException
@@ -40,9 +44,16 @@ public class MatchDayParticipantService(
         var player = await db.Players.FirstOrDefaultAsync(p => p.Id == playerId)
             ?? throw new PlayerServiceException(RestErrorMessageDetail.PlayerIsNotFound, HttpStatusCode.NotFound);
 
-        if (matchDay.MatchDayDate < DateTime.UtcNow)
+        // MatchDayDate is naive-local (Dhaka wall-clock, see MatchDay.cs) — compare against
+        // DateTime.Now, not UtcNow, matching TeamService.ValidateMatchDayDateAsync's convention.
+        // Comparing against UtcNow here previously let RSVPs happen up to ~6h after real kickoff.
+        if (matchDay.MatchDayDate < DateTime.Now)
         {
             throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayDateCannotBePastDate, HttpStatusCode.BadRequest);
+        }
+        if (matchDay.MatchDayStatus == MatchDayStatus.CONCLUDED)
+        {
+            throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayAlreadyConcluded, HttpStatusCode.BadRequest);
         }
 
         MatchDayParticipant participant;
@@ -50,6 +61,14 @@ public class MatchDayParticipantService(
         {
             participant = await db.MatchDayParticipants.FirstOrDefaultAsync(p => p.Id == request.MatchDayParticipantId)
                 ?? throw new MatchDayServiceException(RestErrorMessageDetail.ParticipantNotFound, HttpStatusCode.NotFound);
+
+            // Fetching purely by Id let any caller who passed the self-check above (their own
+            // PlayerId) repurpose a DIFFERENT player's participant row by supplying its Id —
+            // verify the row actually belongs to this player and this MatchDay before touching it.
+            if (participant.PlayerId != playerId || participant.MatchDayId != matchDay.Id)
+            {
+                throw new BofcSecurityException(RestErrorMessageDetail.NotAuthorizedForAction, HttpStatusCode.Forbidden);
+            }
         }
         else
         {
@@ -66,7 +85,17 @@ public class MatchDayParticipantService(
         participant.ParticipationStatus = request.ParticipationStatus;
         participant.Comments = StringUtils.NormalizeString(request.Comments);
 
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException) when (request.MatchDayParticipantId == null)
+        {
+            // Two concurrent first-time RSVPs from the same player both pass the AnyAsync check
+            // above before either commits — the unique index on (MatchDayId, PlayerId) is the
+            // real guard; map its violation to the same friendly 409 instead of a masked 500.
+            throw new MatchDayServiceException(RestErrorMessageDetail.AlreadyParticipant, HttpStatusCode.Conflict);
+        }
     }
 
     public async Task<List<PlayerParticipationResponse>> PlayersToBeSelectedForTeamAsync(long matchDayId)
@@ -76,24 +105,20 @@ public class MatchDayParticipantService(
             .ToListAsync();
 
         var teamIds = await db.Teams.Where(t => t.MatchDayId == matchDayId).Select(t => t.Id).ToListAsync();
+        var assignedPlayerIds = (await db.TeamPlayers.Where(tp => teamIds.Contains(tp.TeamId)).Select(tp => tp.PlayerId).ToListAsync())
+            .ToHashSet();
 
-        var result = new List<PlayerParticipationResponse>();
-        foreach (var participant in participants)
-        {
-            var isAssigned = await db.TeamPlayers.AnyAsync(tp => teamIds.Contains(tp.TeamId) && tp.PlayerId == participant.PlayerId);
-            if (!isAssigned)
+        return participants
+            .Where(participant => !assignedPlayerIds.Contains(participant.PlayerId))
+            .Select(participant => new PlayerParticipationResponse
             {
-                result.Add(new PlayerParticipationResponse
-                {
-                    PlayerId = participant.Player.Id,
-                    PlayerName = participant.Player.Name,
-                    EmployeeId = participant.Player.EmployeeId,
-                    ParticipationStatus = participant.ParticipationStatus,
-                    Comments = participant.Comments,
-                });
-            }
-        }
-        return result;
+                PlayerId = participant.Player.Id,
+                PlayerName = participant.Player.Name,
+                EmployeeId = participant.Player.EmployeeId,
+                ParticipationStatus = participant.ParticipationStatus,
+                Comments = participant.Comments,
+            })
+            .ToList();
     }
 
     public async Task<List<GoalkeeperStatsResponse>> GoalkeeperStatsResponseAsync(long matchDayId)

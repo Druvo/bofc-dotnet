@@ -155,10 +155,10 @@ export default function UserProfile() {
     };
 
     const heroStat = (label: string, value: number, accent: string) => (
-        <div className="relative min-w-[84px] overflow-hidden rounded-2xl border border-white/15 bg-white/10 px-4 pb-2.5 pt-3.5 text-center backdrop-blur">
+        <div className="relative min-w-[84px] overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 px-4 pb-2.5 pt-3.5 text-center backdrop-blur dark:border-white/15 dark:bg-white/10">
             <div className="absolute inset-x-0 top-0 h-[3px]" style={{ background: accent }} />
-            <div className="text-[28px] font-extrabold leading-tight text-white">{value}</div>
-            <div className="text-[10.5px] uppercase tracking-wide text-white/70">{label}</div>
+            <div className="text-[28px] font-extrabold leading-tight text-gray-800 dark:text-white">{value}</div>
+            <div className="text-[10.5px] uppercase tracking-wide text-gray-500 dark:text-white/70">{label}</div>
         </div>
     );
 
@@ -175,7 +175,7 @@ export default function UserProfile() {
     );
 
     const disciplineTile = (label: string, value: number, color: string) => (
-        <div className="flex flex-1 items-center gap-2.5 rounded-[10px] border border-l-[3px] border-gray-200 bg-white px-3 py-2.5 dark:border-gray-800 dark:bg-white/[0.03]" style={{ borderLeftColor: color }}>
+        <div className="flex flex-1 items-center gap-2.5 rounded-[10px] border border-l-[3px] border-gray-200 bg-white px-3 py-2.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]" style={{ borderLeftColor: color }}>
             <span className="text-[22px] font-extrabold" style={{ color }}>{value}</span>
             <span className="text-theme-xs text-gray-500 dark:text-gray-400">{label}</span>
         </div>
@@ -276,7 +276,7 @@ export default function UserProfile() {
                 ].filter(Boolean) as { icon: string; n: number; label: string }[];
 
                 return (
-                    <div key={`${m.matchId}-${idx}`} className="mb-2.5 flex overflow-hidden rounded-xl border border-gray-100 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+                    <div key={`${m.matchId}-${idx}`} className="mb-2.5 flex overflow-hidden rounded-xl border border-gray-100 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                         <div className="w-1 shrink-0" style={{ background: rc }} />
                         <div className="min-w-0 flex-1 px-4 py-3">
                             <div className="flex items-center gap-3">
@@ -334,13 +334,13 @@ export default function UserProfile() {
             <span className="text-theme-sm text-gray-500 dark:text-gray-400">
                 You have played as goalkeeper <strong className="text-gray-800 dark:text-white/90">{goalkeepingHistoryData.content.length}</strong> times.
             </span>
-            <div className="relative mt-5 flex flex-col gap-4 border-l-2 border-gray-100 pl-5 dark:border-gray-800">
+            <div className="relative mt-5 flex flex-col gap-4 border-l-2 border-gray-100 pl-5 dark:border-[var(--color-rule)]">
                 {goalkeepingHistoryData.content.map((record, index) => (
                     <div key={index} className="relative">
-                        <span className="absolute -left-[27px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-warning-500 dark:bg-gray-900">
+                        <span className="absolute -left-[27px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-warning-500 dark:bg-[var(--color-paper-3)]">
                             <TrophyOutlined className="text-xs" />
                         </span>
-                        <div className="rounded-lg border border-gray-100 px-3.5 py-2.5 dark:border-gray-800">
+                        <div className="rounded-lg border border-gray-100 px-3.5 py-2.5 dark:border-[var(--color-rule)]">
                             <div className="flex items-center justify-between gap-2">
                                 <span className="font-semibold text-gray-800 dark:text-white/90">Round {record.roundNumber}</span>
                                 <span className="text-theme-xs text-gray-400">#{goalkeepingHistoryData.content.length - index}</span>
@@ -369,14 +369,12 @@ export default function UserProfile() {
             {/* Hero header */}
             <div className="overflow-hidden rounded-2xl">
                 <div
-                    className={`relative ${isMobile ? "px-4 pb-7 pt-6" : "px-8 py-8"}`}
+                    className={`relative border border-[#2f6b45] ${isMobile ? "px-4 pb-7 pt-6" : "px-8 py-8"}`}
                     style={{
-                        boxShadow: "inset 0 -50px 90px rgba(0,0,0,0.38)",
                         background: `
-                            radial-gradient(130% 100% at 50% -25%, rgba(255,255,255,0.08), transparent 55%),
-                            radial-gradient(circle at 16% 28%, rgba(40,85,43,0.30), transparent 45%),
-                            radial-gradient(circle at 88% 115%, rgba(40,85,43,0.16), transparent 45%),
-                            linear-gradient(120deg, #1a2233 0%, #0f172a 55%, #0b1220 100%)
+                            radial-gradient(circle at 16% 28%, rgba(47,107,69,0.16), transparent 45%),
+                            radial-gradient(circle at 88% 115%, rgba(47,107,69,0.10), transparent 45%),
+                            var(--color-paper-3)
                         `,
                     }}
                 >
@@ -398,22 +396,22 @@ export default function UserProfile() {
                                 seed={viewingId}
                                 size={isMobile ? 92 : 112}
                                 fontSize={isMobile ? 30 : 36}
-                                className="border-[3px] border-gray-900"
+                                className="border-[3px] border-[var(--color-paper-3)]"
                             />
                             {profile?.active && (
-                                <span title="Active player" className="absolute bottom-1.5 right-1.5 h-[18px] w-[18px] rounded-full border-[3px] border-gray-900 bg-success-500" />
+                                <span title="Active player" className="absolute bottom-1.5 right-1.5 h-[18px] w-[18px] rounded-full border-[3px] border-[var(--color-paper-3)] bg-success-500" />
                             )}
                         </div>
 
                         <div className={`min-w-0 flex-1 ${isMobile ? "text-center" : "text-left"}`} style={{ minWidth: isMobile ? 0 : 220 }}>
-                            <h2 className={`m-0 font-bold text-white ${isMobile ? "text-2xl" : "text-3xl"}`}>{profile?.name || loginInfo.username}</h2>
-                            {isOwn && <div className="mt-0.5 text-theme-sm text-white/60">{profile?.email || loginInfo.email}</div>}
+                            <h2 className={`m-0 font-bold text-gray-800 dark:text-white ${isMobile ? "text-2xl" : "text-3xl"}`}>{profile?.name || loginInfo.username}</h2>
+                            {isOwn && <div className="mt-0.5 text-theme-sm text-gray-500 dark:text-white/60">{profile?.email || loginInfo.email}</div>}
                             <div className={`mt-3 flex flex-wrap items-center gap-2 ${isMobile ? "justify-center" : "justify-start"}`}>
                                 {profile?.playingPosition && (
                                     <span className="rounded-full bg-brand-500 px-3 py-0.5 text-theme-xs font-bold tracking-wide text-white">{profile.playingPosition}</span>
                                 )}
                                 {isOwn && loginInfo?.roles?.filter(Boolean).map((r) => (
-                                    <span key={r} className="rounded-full border border-white/20 bg-white/10 px-3 py-0.5 text-theme-xs text-white">{r}</span>
+                                    <span key={r} className="rounded-full border border-gray-200 bg-gray-100 px-3 py-0.5 text-theme-xs text-gray-700 dark:border-white/20 dark:bg-white/10 dark:text-white">{r}</span>
                                 ))}
                                 {!isOwn && isAdmin && (
                                     <Button type="button" variant="outline" size="sm" startIcon={<EditOutlined />} onClick={() => navigate(`/players/${routeId}/edit`)}>
@@ -434,7 +432,7 @@ export default function UserProfile() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:col-span-1">
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:col-span-1">
                     <h5 className="mb-2 text-base font-bold text-gray-800 dark:text-white/90">Player Details</h5>
                     {isLoading ? (
                         <Loader className="py-8" />
@@ -461,7 +459,7 @@ export default function UserProfile() {
                             )}
 
                             {myStats && (
-                                <div className="mt-3 flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5 dark:border-gray-800 dark:bg-white/[0.02]">
+                                <div className="mt-3 flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                                     <span className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">Performance Rating</span>
                                     <div className="flex items-center gap-2">
                                         <span className="text-lg font-extrabold text-brand-500 dark:text-brand-400">{computeRating(myStats).toFixed(1)}</span>
@@ -478,7 +476,7 @@ export default function UserProfile() {
                                 </div>
                             )}
 
-                            <div className="mt-3 border-t border-gray-100 pt-3 dark:border-gray-800">
+                            <div className="mt-3 border-t border-gray-100 pt-3 dark:border-[var(--color-rule)]">
                                 <span className="text-[11px] uppercase tracking-wide text-gray-400">Disciplinary Record</span>
                                 <div className="mt-2 flex gap-2.5">
                                     {disciplineTile("Yellow Cards", myStats?.yellowCards ?? 0, "#f79009")}
@@ -489,7 +487,7 @@ export default function UserProfile() {
                     )}
                 </div>
 
-                <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:col-span-2">
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:col-span-2">
                     <Tabs items={visibleTabs.map((t) => ({ key: t.key, label: t.label }))} active={activeTab} onChange={setActiveTab} />
                     <div className="mt-4">{currentTab?.content}</div>
                 </div>

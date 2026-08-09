@@ -128,13 +128,13 @@ export default function MatchLivePanel({
 
   return (
     <>
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-5">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-5">
         <div className="mb-3 flex items-center justify-between">
           <h5 className="text-base font-bold text-gray-800 dark:text-white/90">Match Controls</h5>
           <Dropdown
             align="right"
             trigger={({ toggle }) => (
-              <button type="button" onClick={toggle} className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-theme-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-300">
+              <button type="button" onClick={toggle} className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-theme-sm font-medium text-gray-700 dark:border-[var(--color-rule)] dark:text-gray-300">
                 <SettingOutlined /> Match Settings
               </button>
             )}

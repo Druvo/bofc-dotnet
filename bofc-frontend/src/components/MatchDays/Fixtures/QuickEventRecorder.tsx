@@ -132,7 +132,7 @@ export default function QuickEventRecorder({
   return (
     <>
       <div>
-        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3 dark:border-gray-800">
+        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3 dark:border-[var(--color-rule)]">
           <span className="flex items-center gap-2 text-base font-semibold text-gray-800 dark:text-white/90">
             <ThunderboltOutlined /> Quick Event Recording
           </span>
@@ -200,14 +200,14 @@ export default function QuickEventRecorder({
               <button
                 type="button"
                 onClick={() => { setSelectedTeamId(fixture.homeTeamId); setSelectedPlayerId(null); }}
-                className={`h-[60px] rounded-xl font-semibold ${selectedTeamId === fixture.homeTeamId ? "bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white" : "border border-gray-300 text-gray-700 dark:border-gray-700 dark:text-gray-300"}`}
+                className={`h-[60px] rounded-xl font-semibold ${selectedTeamId === fixture.homeTeamId ? "bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white" : "border border-gray-300 text-gray-700 dark:border-[var(--color-rule)] dark:text-gray-300"}`}
               >
                 {fixture.homeTeamName}
               </button>
               <button
                 type="button"
                 onClick={() => { setSelectedTeamId(fixture.awayTeamId); setSelectedPlayerId(null); }}
-                className={`h-[60px] rounded-xl font-semibold ${selectedTeamId === fixture.awayTeamId ? "bg-gradient-to-br from-[#f093fb] to-[#f5576c] text-white" : "border border-gray-300 text-gray-700 dark:border-gray-700 dark:text-gray-300"}`}
+                className={`h-[60px] rounded-xl font-semibold ${selectedTeamId === fixture.awayTeamId ? "bg-gradient-to-br from-[#f093fb] to-[#f5576c] text-white" : "border border-gray-300 text-gray-700 dark:border-[var(--color-rule)] dark:text-gray-300"}`}
               >
                 {fixture.awayTeamName}
               </button>

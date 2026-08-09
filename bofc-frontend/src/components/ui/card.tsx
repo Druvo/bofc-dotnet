@@ -2,7 +2,7 @@ import React from "react";
 
 /**
  * TailAdmin Free v2.3.0 card container (src/form-elements.html's section
- * wrapper: `rounded-2xl border border-gray-200 bg-white ... dark:bg-white/[0.03]`).
+ * wrapper: `rounded-2xl border border-gray-200 bg-white ... dark:bg-[var(--color-paper-3)]`).
  */
 export function Card({
   title,
@@ -16,14 +16,14 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] ${className}`}>
+    <div className={`rounded-2xl border border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] ${className}`}>
       {(title || action) && (
         <div className="flex items-center justify-between px-5 py-4 sm:px-6 sm:py-5">
           {title && <h3 className="text-base font-medium text-gray-800 dark:text-white/90">{title}</h3>}
           {action}
         </div>
       )}
-      <div className={title || action ? "border-t border-gray-100 p-5 sm:p-6 dark:border-gray-800" : "p-5 sm:p-6"}>
+      <div className={title || action ? "border-t border-gray-100 p-5 sm:p-6 dark:border-[var(--color-rule)]" : "p-5 sm:p-6"}>
         {children}
       </div>
     </div>
@@ -46,9 +46,9 @@ export function CardDataStats({
   trend?: { direction: "up" | "down"; label: string };
 }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
       {icon && (
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-[var(--color-paper-2)]">
           {icon}
         </div>
       )}

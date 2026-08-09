@@ -20,6 +20,7 @@ import FormInput from "../../ui/form-input";
 import FormSelect from "../../ui/form-select";
 import Badge from "../../ui/badge";
 import Loader from "../../ui/loader";
+import { formatCurrency } from "../../../utils/formatCurrency";
 
 type SortField = "date" | "monthOfPayment" | "amount" | "totalAmount" | null;
 type SortOrder = "asc" | "desc";
@@ -287,7 +288,7 @@ function AcCollection() {
     );
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <ContainerOutlined className="text-brand-500 dark:text-brand-400" />
@@ -310,7 +311,7 @@ function AcCollection() {
                         placeholder="Search TrxID or Voucher"
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
-                        className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                        className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                     />
                 </div>
                 <FormSelect className="!h-10 w-[130px]" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} options={[{ value: "", label: "All Years" }, ...getUniqueYears().map((y) => ({ value: y, label: String(y) }))]} />
@@ -320,10 +321,10 @@ function AcCollection() {
             {tableLoadingSpin ? (
                 <Loader className="py-10" />
             ) : (
-                <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+                <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
                     <table className="w-full min-w-max border-collapse text-theme-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                            <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                                 <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">TrxID</th>
                                 <th onClick={() => toggleSort("date")} className="cursor-pointer px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Date<SortIcon field="date" /></th>
                                 <th onClick={() => toggleSort("monthOfPayment")} className="cursor-pointer px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Month Of Payment<SortIcon field="monthOfPayment" /></th>
@@ -374,7 +375,7 @@ function AcCollection() {
                                     </tr>
                                     {expandedId === record.id && record.players.length > 1 && (
                                         <tr>
-                                            <td colSpan={canManage ? 9 : 8} className="bg-gray-50 px-3 py-2.5 text-theme-sm text-gray-600 dark:bg-white/[0.02] dark:text-gray-300">
+                                            <td colSpan={canManage ? 9 : 8} className="bg-gray-50 px-3 py-2.5 text-theme-sm text-gray-600 dark:bg-[var(--color-paper-2)] dark:text-gray-300">
                                                 {record.allPayersName}
                                             </td>
                                         </tr>
@@ -420,7 +421,7 @@ function AcCollection() {
                                         setSelectedPlayerIds(e.target.value ? [Number(e.target.value)] : []);
                                     }
                                 }}
-                                className={`w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-gray-900 ${isMultiPlayers ? "h-40" : "h-11"} ${formErrors.playerIds ? "border-error-500 focus:border-error-300 focus:ring-error-500/10" : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"}`}
+                                className={`w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] ${isMultiPlayers ? "h-40" : "h-11"} ${formErrors.playerIds ? "border-error-500 focus:border-error-300 focus:ring-error-500/10" : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"}`}
                             >
                                 {!isMultiPlayers && <option value="" disabled hidden>Select a Player</option>}
                                 {players.map((player) => (
@@ -452,13 +453,13 @@ function AcCollection() {
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows={3}
-                                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                             />
                         </div>
 
                         {selectedPlayerIds.length > 0 && amount > 0 && (
                             <p className="text-theme-sm text-success-600 dark:text-success-500">
-                                Total transaction amount is <strong>{selectedPlayerIds.length * amount}</strong> BDT.
+                                Total transaction amount is <strong>{formatCurrency(selectedPlayerIds.length * amount, { decimals: 0 })}</strong>.
                             </p>
                         )}
                     </div>

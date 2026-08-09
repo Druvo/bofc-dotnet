@@ -21,8 +21,9 @@ import FormSelect from "../ui/form-select";
 import FormInput from "../ui/form-input";
 import Loader from "../ui/loader";
 import Alert from "../ui/alert";
+import { formatCurrency } from "../../utils/formatCurrency";
 
-const taka = (v?: number) => `৳${(v ?? 0).toLocaleString()}`;
+const taka = (v?: number) => formatCurrency(v ?? 0, { decimals: 0 });
 
 interface BudgetFormState {
   teamId: number | "";
@@ -153,7 +154,7 @@ const AuctionTeamBudgetsPage: React.FC = () => {
         1) Create teams → 2) Assign an owner (captain who bids) and budget to each team → 3) Start the live auction!
       </Alert>
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
         {isLoading ? (
           <Loader className="py-10" />
         ) : budgets && budgets.length === 0 ? (
@@ -161,10 +162,10 @@ const AuctionTeamBudgetsPage: React.FC = () => {
             No teams set up yet. Create teams and assign budgets to get started.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
             <table className="w-full min-w-[800px] border-collapse text-theme-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Team</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Owner (Captain)</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Total Budget</th>
@@ -254,7 +255,7 @@ const AuctionTeamBudgetsPage: React.FC = () => {
             options={teams.map((t) => ({ value: t.teamId, label: t.teamName }))}
           />
           {teams.length === 0 && (
-            <div className="-mt-2 flex flex-col items-center gap-1 rounded-lg bg-gray-50 p-2 text-center dark:bg-white/[0.02]">
+            <div className="-mt-2 flex flex-col items-center gap-1 rounded-lg bg-gray-50 p-2 text-center dark:bg-[var(--color-paper-2)]">
               <span className="text-theme-xs text-gray-400">No teams found</span>
               <button
                 type="button"
@@ -313,7 +314,7 @@ const AuctionTeamBudgetsPage: React.FC = () => {
           <Button disabled={creatingTeam} onClick={handleCreateTeam} className="w-full">
             Create Team
           </Button>
-          <div className="h-px bg-gray-200 dark:bg-gray-800" />
+          <div className="h-px bg-gray-200 dark:bg-[var(--color-paper-2)]" />
           <span className="text-theme-xs text-gray-400 dark:text-gray-500">
             After creating the team, you can assign an owner and budget using "Assign Team Budget".
           </span>

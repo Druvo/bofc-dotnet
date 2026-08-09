@@ -20,6 +20,7 @@ public class TeamService(
     public async Task<TeamResponse> CreateOrUpdateTeamAsync(TeamRequest request)
     {
         var matchDay = await GetMatchDayOrThrowAsync(request.MatchDayId!.Value);
+        await ValidateMatchDayDateAsync(matchDay.Id);
 
         string? oldLogoKeyToDelete = null;
         Team team;
@@ -81,6 +82,20 @@ public class TeamService(
         }
 
         db.Teams.Remove(team);
+
+        // If this was the last team on the MatchDay, clear the auto-team-generation flag too —
+        // otherwise it stays stuck true forever with zero actual teams, permanently blocking the
+        // "Generate Teams Now" test action (and the hourly scheduler) from ever regenerating.
+        var isLastTeam = await db.Teams.CountAsync(t => t.MatchDayId == team.MatchDayId) == 1;
+        if (isLastTeam)
+        {
+            var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == team.MatchDayId);
+            if (matchDay != null)
+            {
+                matchDay.AutoTeamsGenerated = false;
+            }
+        }
+
         await db.SaveChangesAsync();
 
         // Best-effort cleanup — the team is already gone from the DB; a storage failure here
@@ -211,6 +226,7 @@ public class TeamService(
             Description = matchDay.Description,
             Rules = matchDay.Rules,
             MatchDayDate = matchDay.MatchDayDate,
+            DurationMinutes = matchDay.DurationMinutes,
             VenueName = matchDay.Venue.Name,
             VenueMapLink = matchDay.Venue.MapLink,
             ActiveStatus = matchDay.IsActive,
@@ -315,6 +331,8 @@ public class TeamService(
 
     private async Task<TeamPlayer> UpdateTeamPlayerAsync(TeamPlayerRequest request, Team team, Player player)
     {
+        await ValidateMatchDayDateAsync(team.MatchDayId);
+
         var teamPlayer = await db.TeamPlayers.FirstOrDefaultAsync(tp => tp.Id == request.Id)
             ?? throw new TeamServiceException(RestErrorMessageDetail.TeamIsNotFound, HttpStatusCode.NotFound);
 

@@ -29,7 +29,7 @@ const MonthYearSelector: React.FC<MonthYearSelectorProps> = ({
       type="month"
       defaultValue={defaultValue}
       onChange={handleChange}
-      className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+      className="h-10 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-white/90"
     />
   );
 };

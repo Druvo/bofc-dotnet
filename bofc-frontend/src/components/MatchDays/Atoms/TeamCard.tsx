@@ -13,6 +13,7 @@ import { Dropdown, DropdownItem } from "../../ui/dropdown";
 import Button from "../../ui/button";
 import Modal from "../../ui/modal";
 import Loader from "../../ui/loader";
+import Badge from "../../ui/badge";
 
 interface TeamCardProps {
     team: Team;
@@ -56,13 +57,14 @@ const TeamCard: React.FC<TeamCardProps> = ({
     };
 
     return (
-        <div className="min-w-[300px] max-w-[400px] flex-1 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-            <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="min-w-[300px] max-w-[400px] flex-1 rounded-lg border border-gray-100 p-3 dark:border-[var(--color-rule)]">
+            <div className="mb-2 flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-800 text-theme-xs font-bold text-white">
                         {logoSrc ? <img src={logoSrc} alt="" className="h-full w-full object-cover" /> : team.teamName?.charAt(0)?.toUpperCase()}
                     </div>
                     <DoubleClickTextInputField initialName={team.teamName} onNameChange={handleRenameTeamClick} isDiabled={!canManage} />
+                    <Badge variant="light">{team.players.length}</Badge>
                 </div>
                 {canManage && (
                     <div className="flex items-center gap-1.5">
@@ -114,20 +116,32 @@ const TeamCard: React.FC<TeamCardProps> = ({
             </div>
 
             <Droppable droppableId={team.teamId.toString()} isDropDisabled={!canManage}>
-                {(provided) => (
-                    <div ref={provided.innerRef} {...provided.droppableProps} className="no-scrollbar overflow-auto" style={{ height: 300 }}>
+                {(provided, snapshot) => (
+                    <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={`custom-scrollbar flex max-h-[300px] flex-col gap-1.5 overflow-y-auto rounded-xl border-2 border-dashed p-2 ${
+                            snapshot.isDraggingOver
+                                ? "border-brand-300 bg-brand-50/50 dark:border-brand-500/40 dark:bg-brand-500/5"
+                                : "border-gray-200 dark:border-[var(--color-rule)]"
+                        }`}
+                    >
                         {isLoading ? (
                             <Loader className="py-6" />
                         ) : (
                             <>
                                 {team.players.map((player, index) => (
                                     <Draggable key={`${team.teamId}-${player.playerId}`} draggableId={`${team.teamId}-${player.playerId}`} index={index}>
-                                        {(provided) => (
+                                        {(provided, snapshot) => (
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                className="my-1 rounded bg-gray-50 p-1.5 dark:bg-white/[0.02]"
+                                                className={`rounded-lg border p-1.5 ${
+                                                    snapshot.isDragging
+                                                        ? "border-brand-300 bg-brand-50 shadow-lg dark:border-brand-500/40 dark:bg-brand-500/10"
+                                                        : "border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]"
+                                                }`}
                                                 style={provided.draggableProps.style}
                                             >
                                                 <PlayerCard

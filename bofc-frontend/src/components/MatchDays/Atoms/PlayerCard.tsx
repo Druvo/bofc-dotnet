@@ -4,6 +4,7 @@ import { MoreOutlined, CrownOutlined, EditOutlined } from "@ant-design/icons";
 import { Dropdown, DropdownItem } from "../../ui/dropdown";
 import Button from "../../ui/button";
 import Badge from "../../ui/badge";
+import Avatar from "../../CommonAtoms/Avatar";
 
 interface PlayerCardProps {
     player: Player;
@@ -16,10 +17,11 @@ interface PlayerCardProps {
 }
 
 const PlayerIdentity = ({ player }: { player: Player }) => (
-    <span className="flex items-center gap-2 text-theme-sm text-gray-700 dark:text-gray-300">
-        {player.jerseyNumber != null && <Badge variant="dark">{player.jerseyNumber}</Badge>}
-        {player.isCaptain && <CrownOutlined className="text-warning-500" title="Captain" />}
-        {player?.playerName ? player.playerName : "processing..."}
+    <span className="flex min-w-0 items-center gap-2 text-theme-sm text-gray-800 dark:text-white/90">
+        <Avatar name={player.playerName} seed={player.playerId} size={28} />
+        <span className="truncate font-medium">{player?.playerName ? player.playerName : "processing..."}</span>
+        {player.jerseyNumber != null && <Badge variant="light">#{player.jerseyNumber}</Badge>}
+        {player.isCaptain && <CrownOutlined className="shrink-0 text-warning-500" title="Captain" />}
     </span>
 );
 

@@ -36,8 +36,8 @@ const NotificationsPage: React.FC = () => {
   return (
     <div className="mx-auto max-w-3xl">
       <PushOptInBanner />
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4 dark:border-gray-800">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4 dark:border-[var(--color-rule)]">
           <div className="flex items-center gap-2">
             <span className="relative text-xl text-brand-500 dark:text-brand-400">
               <BellOutlined />
@@ -84,7 +84,7 @@ const NotificationsPage: React.FC = () => {
                   }}
                   className={`cursor-pointer rounded-xl border px-4 py-3 ${
                     e.isRead
-                      ? "border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]"
+                      ? "border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]"
                       : "border-brand-500/30 bg-brand-50 dark:bg-brand-500/10"
                   }`}
                 >

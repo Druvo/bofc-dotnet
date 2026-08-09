@@ -93,6 +93,19 @@ public class MatchDayRoundService(BofcDbContext db, IRoundGroupService roundGrou
             throw new RoundServiceException(RestErrorMessageDetail.RoundHasMatches, HttpStatusCode.Conflict);
         }
 
+        // RoundGroups/RoundTeams/AdvancementRules/LogicNodes are all DeleteBehavior.Restrict
+        // against MatchDayRound — a round can reach this point with groups or manually-assigned
+        // teams but no matches yet (AssignTeamsToRoundAsync allows that), and deleting it would
+        // otherwise throw a raw FK-constraint DbUpdateException (masked as a 500).
+        var hasDependents = await db.RoundGroups.AnyAsync(g => g.RoundId == roundId)
+            || await db.RoundTeams.AnyAsync(rt => rt.RoundId == roundId)
+            || await db.AdvancementRules.AnyAsync(a => a.SourceRoundId == roundId || a.TargetRoundId == roundId)
+            || await db.LogicNodes.AnyAsync(n => n.SourceRoundId == roundId || n.TargetRoundId == roundId);
+        if (hasDependents)
+        {
+            throw new RoundServiceException(RestErrorMessageDetail.RoundHasDependents, HttpStatusCode.Conflict);
+        }
+
         db.MatchDayRounds.Remove(round);
         await db.SaveChangesAsync();
     }
@@ -383,6 +396,17 @@ public class MatchDayRoundService(BofcDbContext db, IRoundGroupService roundGrou
         var format = request.FixtureFormat!.Value;
         if (format == FixtureFormat.SINGLE_ELIMINATION)
         {
+            // GenerateSingleEliminationMatchesAsync pairs teams two at a time — an odd team count
+            // previously left the last (lowest-seeded) team silently unpaired and un-advanced,
+            // vanishing from the bracket with no match, no bye, and no error. This engine has no
+            // bye-advancement mechanism (a bye has no match to attach a winner-advances rule to),
+            // so surface it as a clear validation error instead of silently dropping a team.
+            if (teams.Count % 2 != 0)
+            {
+                throw new RoundServiceException(
+                    $"Single-elimination requires an even number of teams (got {teams.Count}) — add or remove a team first.",
+                    HttpStatusCode.BadRequest);
+            }
             matches = await GenerateSingleEliminationMatchesAsync(round, teams, request.StartDate!.Value, matchTimeGap, matchDuration, venue);
         }
         else if (format == FixtureFormat.ROUND_ROBIN)

@@ -4,6 +4,7 @@ using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Features.Matches;
+using BofcBackend.Api.Features.Statistics.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,10 @@ namespace BofcBackend.Api.Features.Statistics;
 /// </summary>
 [ApiController]
 [Route("statistics")]
-public class StatisticsController(IMatchStatisticsService matchStatisticsService, BofcDbContext db) : ControllerBase
+public class StatisticsController(
+    IMatchStatisticsService matchStatisticsService,
+    IPlayerStatisticsService playerStatisticsService,
+    BofcDbContext db) : ControllerBase
 {
     [AllowAnonymous]
     [HttpGet("match-days/{matchDayId}/standings")]
@@ -82,6 +86,23 @@ public class StatisticsController(IMatchStatisticsService matchStatisticsService
     {
         var statistics = await matchStatisticsService.GetPlayerMatchStatisticsAsync(matchId, playerId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, statistics);
+    }
+
+    /// <summary>Admin-only manual correction on top of this one Match's derived stats — see PlayerStatAdjustment.</summary>
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpGet("matches/{matchId}/players/{playerId}/adjustment")]
+    public async Task<IActionResult> GetMatchPlayerStatAdjustment(long matchId, long playerId)
+    {
+        var response = await playerStatisticsService.GetPlayerStatAdjustmentAsync(playerId, matchId);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
+    }
+
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpPut("matches/{matchId}/players/{playerId}/adjustment")]
+    public async Task<IActionResult> UpdateMatchPlayerStatAdjustment(long matchId, long playerId, [FromBody] UpdatePlayerStatAdjustmentRequest request)
+    {
+        var response = await playerStatisticsService.UpdatePlayerStatAdjustmentAsync(playerId, matchId, request);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, response);
     }
 
     [AllowAnonymous]

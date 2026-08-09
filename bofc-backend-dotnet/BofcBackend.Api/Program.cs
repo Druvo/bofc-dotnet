@@ -28,6 +28,7 @@ using BofcBackend.Api.Features.Prizes;
 using BofcBackend.Api.Features.Rounds;
 using BofcBackend.Api.Features.Settings;
 using BofcBackend.Api.Features.Statistics;
+using BofcBackend.Api.Features.SquadLineups;
 using BofcBackend.Api.Features.Teams;
 using BofcBackend.Api.Features.MatchDayParticipants;
 using BofcBackend.Api.Features.MatchDays;
@@ -92,7 +93,6 @@ builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IClubRuleService, ClubRuleService>();
 builder.Services.AddScoped<IMatchDayService, MatchDayService>();
-builder.Services.AddSingleton<FixtureValidationService>();
 builder.Services.AddScoped<IMatchDayPrizeService, MatchDayPrizeService>();
 builder.Services.AddScoped<IPlayerStatisticsService, PlayerStatisticsService>();
 builder.Services.Configure<PlayerOptions>(builder.Configuration.GetSection("Player"));
@@ -119,7 +119,9 @@ builder.Services.AddScoped<ILogicNodeService, LogicNodeService>();
 
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<ISquadLineupService, SquadLineupService>();
 builder.Services.AddScoped<IFixtureGenerationService, FixtureGenerationService>();
+builder.Services.AddScoped<BofcBackend.Api.Common.Scheduling.WeeklyMatchDayTeamGenerator>();
 
 // --- Accounting/ledger domain. AcVoucherService is deliberately concrete (no interface,
 // matching Java) and sits below AcBillPaymentService/AcCollectionService in the dependency

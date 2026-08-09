@@ -304,6 +304,10 @@ export interface ScheduledMatch extends MatchPairing {
  * Compute the real per-match schedule for a round-robin MatchDay — same formula as
  * FixtureGenerationService.GenerateFixturesAsync, so the preview always matches what
  * generation will actually produce.
+ *
+ * @param targetMatchCount - When larger than one full round-robin cycle, the cycle is repeated
+ * to reach it — mirrors the backend's repeat-to-fill-the-MatchDay's-duration behavior instead
+ * of previewing only the first (shorter) cycle.
  */
 export function generateRoundRobinSchedule(
   teamIds: number[],
@@ -311,10 +315,20 @@ export function generateRoundRobinSchedule(
   matchDurationMinutes: number,
   timeGapMinutes: number,
   breakAfterMatchNumber?: number,
-  breakDurationMinutes = 0
+  breakDurationMinutes = 0,
+  targetMatchCount?: number
 ): ScheduledMatch[] {
-  const pairings = generateRoundRobinPairings(teamIds);
+  const basePairings = generateRoundRobinPairings(teamIds);
   const slotMinutes = matchDurationMinutes + timeGapMinutes;
+
+  let pairings = basePairings;
+  if (targetMatchCount && targetMatchCount > basePairings.length && basePairings.length > 0) {
+    pairings = [];
+    while (pairings.length < targetMatchCount) {
+      pairings.push(...basePairings);
+    }
+    pairings = pairings.slice(0, targetMatchCount);
+  }
 
   return pairings.map((pairing, index) => {
     const matchNumber = index + 1;

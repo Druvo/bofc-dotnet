@@ -18,7 +18,7 @@ const TopScorersWidget: React.FC = () => {
   const scorers = data?.content || [];
 
   return (
-    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
       <div className="mb-3 flex items-center gap-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         <TrophyOutlined /> Top Scorers
       </div>
@@ -34,8 +34,8 @@ const TopScorersWidget: React.FC = () => {
           {scorers.map((s, i) => (
             <div
               key={s.playerId}
-              className={`flex items-center gap-2.5 rounded-lg border border-gray-100 px-2 py-1.5 dark:border-gray-800 ${
-                i === 0 ? "bg-brand-50 dark:bg-brand-500/10" : "bg-gray-50 dark:bg-white/[0.02]"
+              className={`flex items-center gap-2.5 rounded-lg border border-gray-100 px-2 py-1.5 dark:border-[var(--color-rule)] ${
+                i === 0 ? "bg-brand-50 dark:bg-brand-500/10" : "bg-gray-50 dark:bg-[var(--color-paper-2)]"
               }`}
             >
               <span className={`w-4.5 text-theme-xs font-extrabold ${MEDAL_COLOR[i] || "text-gray-400"}`}>{i + 1}</span>

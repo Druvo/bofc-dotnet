@@ -16,6 +16,7 @@ import {
 } from "../../state/features/notifications/notificationSlice";
 import { useGetMatchDaysQuery } from "../../state/features/matchDays/matchDaysSlice";
 import { useGetVanuesQuery } from "../../state/features/vanues/vanuesSlice";
+import { useGetPushNotificationsEnabledQuery } from "../../state/features/settings/settingsSlice";
 
 const NOTIF_PREVIEW_LIMIT = 5;
 
@@ -60,6 +61,8 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
   );
   const [markNotificationRead] = useMarkNotificationReadMutation();
   const [markAllNotificationsRead] = useMarkAllNotificationsReadMutation();
+  const { data: pushEnabledData } = useGetPushNotificationsEnabledQuery();
+  const pushNotificationsEnabled = pushEnabledData?.content ?? true;
   const notifEntries = notifData?.content?.notifications ?? [];
   const unreadNotifCount = notifData?.content?.unreadCount ?? 0;
 
@@ -147,11 +150,11 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
   };
 
   return (
-    <header className="sticky top-0 z-sticky flex w-full border-gray-200 bg-white lg:border-b dark:border-gray-800 dark:bg-gray-900">
+    <header className="sticky top-0 z-sticky hidden w-full border-[var(--color-rule-2)] bg-[var(--color-paper-3)] md:flex lg:border-b">
       <div className="flex grow flex-col items-center justify-between lg:flex-row lg:px-6">
-        <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 dark:border-gray-800">
+        <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 dark:border-[var(--color-rule)]">
           <button
-            className="z-sticky flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 lg:h-11 lg:w-11 lg:border dark:border-gray-800 dark:text-gray-400"
+            className="z-sticky flex h-10 w-10 items-center justify-center rounded-lg border-gray-200 text-gray-500 lg:h-11 lg:w-11 lg:border dark:border-[var(--color-rule)] dark:text-gray-400"
             onClick={() => setSidebarToggle(!sidebarToggle)}
             aria-label="Toggle sidebar"
           >
@@ -202,11 +205,11 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                   setSearchOpen(true);
                 }}
                 onFocus={() => searchQuery && setSearchOpen(true)}
-                className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 placeholder:text-gray-400 shadow-theme-xs outline-hidden focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 xl:w-[430px] dark:border-gray-800 dark:bg-white/[0.03] dark:text-white/90 dark:placeholder:text-white/30"
+                className="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 placeholder:text-gray-400 shadow-theme-xs outline-hidden focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 xl:w-[430px] dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-white/90 dark:placeholder:text-white/30"
               />
 
               {searchOpen && trimmedQuery && (
-                <div className="shadow-theme-lg absolute left-0 top-[calc(100%+8px)] z-dropdown w-full max-h-[70vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-2 dark:border-gray-800 dark:bg-gray-900">
+                <div className="shadow-theme-lg absolute left-0 top-[calc(100%+8px)] z-dropdown w-full max-h-[70vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-2 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                   {!hasSearchResults ? (
                     <p className="px-3 py-4 text-center text-theme-sm text-gray-400 dark:text-gray-500">
                       No results for "{searchQuery}"
@@ -280,7 +283,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
         <div className="flex w-full items-center justify-between gap-4 px-5 py-4 lg:w-auto lg:justify-end lg:px-0 lg:shadow-none">
           <div className="flex items-center gap-2 2xsm:gap-3">
             <button
-              className="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+              className="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
               onClick={() => setIsDarkMode(!isDarkMode)}
               aria-label="Toggle dark mode"
             >
@@ -305,7 +308,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
 
             <div className="relative">
               <button
-                className="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                className="hover:text-dark-900 relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
                 onClick={() => setNotifDropdownOpen((v) => !v)}
                 aria-label="Notifications"
               >
@@ -326,8 +329,8 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
               {notifDropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-dropdown" onClick={() => setNotifDropdownOpen(false)} />
-                  <div className="shadow-theme-lg absolute right-0 z-dropdown mt-[17px] flex w-[320px] flex-col rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
-                    <div className="mb-2 flex items-center justify-between border-b border-gray-100 pb-3 dark:border-gray-800">
+                  <div className="shadow-theme-lg absolute right-0 z-dropdown mt-[17px] flex w-[320px] flex-col rounded-2xl border border-gray-200 bg-white p-3 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
+                    <div className="mb-2 flex items-center justify-between border-b border-gray-100 pb-3 dark:border-[var(--color-rule)]">
                       <h5 className="text-lg font-semibold text-gray-800 dark:text-white/90">Notifications</h5>
                       {unreadNotifCount > 0 && (
                         <button
@@ -354,7 +357,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                             }}
                             className={`cursor-pointer rounded-lg border px-2.5 py-2 ${
                               e.isRead
-                                ? "border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]"
+                                ? "border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]"
                                 : "border-brand-500/30 bg-brand-50 dark:bg-brand-500/10"
                             }`}
                           >
@@ -375,7 +378,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                         setNotifDropdownOpen(false);
                         navigate("/notifications");
                       }}
-                      className="mt-3 w-full rounded-lg border border-gray-200 py-2 text-center text-theme-sm font-medium text-brand-500 hover:bg-gray-50 dark:border-gray-800 dark:text-brand-400 dark:hover:bg-white/5"
+                      className="mt-3 w-full rounded-lg border border-gray-200 py-2 text-center text-theme-sm font-medium text-brand-500 hover:bg-gray-50 dark:border-[var(--color-rule)] dark:text-brand-400 dark:hover:bg-white/5"
                     >
                       See more
                     </button>
@@ -395,7 +398,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                 name={loginInfo?.username}
                 seed={loginInfo?.userId}
                 size={44}
-                className="mr-3 bg-gray-100 dark:bg-gray-800"
+                className="mr-3 bg-gray-100 dark:bg-[var(--color-paper-2)]"
               />
               <span className="mr-1 whitespace-nowrap text-theme-sm font-medium">{loginInfo?.username || "User"}</span>
               <svg
@@ -413,7 +416,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
             {userDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-dropdown" onClick={() => setUserDropdownOpen(false)} />
-                <div className="shadow-theme-lg absolute right-0 z-dropdown mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
+                <div className="shadow-theme-lg absolute right-0 z-dropdown mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                   <div>
                     <span className="block text-theme-sm font-medium text-gray-700 dark:text-gray-400">
                       {loginInfo?.username || "User"}
@@ -422,7 +425,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                       {loginInfo?.email || ""}
                     </span>
                   </div>
-                  <ul className="flex flex-col gap-1 border-b border-gray-200 pb-3 pt-4 dark:border-gray-800">
+                  <ul className="flex flex-col gap-1 border-b border-gray-200 pb-3 pt-4 dark:border-[var(--color-rule)]">
                     <li>
                       <button
                         onClick={() => {
@@ -445,18 +448,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                         My Goalkeeping History
                       </button>
                     </li>
-                    <li>
-                      <button
-                        onClick={() => {
-                          setUserDropdownOpen(false);
-                          navigate("/settings");
-                        }}
-                        className="group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-theme-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-                      >
-                        Settings
-                      </button>
-                    </li>
-                    {appShell.notificationsSupported && (
+                    {appShell.notificationsSupported && pushNotificationsEnabled && (
                       <li>
                         <div className="flex items-center justify-between rounded-lg px-3 py-2 text-theme-sm font-medium text-gray-700 dark:text-gray-400">
                           <FormSwitch

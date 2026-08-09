@@ -24,7 +24,7 @@ import {
   useGetMatchDaySummaryQuery,
   useGetNextActiveMatchDayQuery,
 } from "../../state/features/matchDays/matchDaysSlice";
-import { showBdLocalTime, getEffectiveMatchDayStatus } from "../../utils/utils";
+import { showBdLocalTimeRange, getEffectiveMatchDayStatus } from "../../utils/utils";
 import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import styles from "./MatchDayViewerPage.module.css";
@@ -108,7 +108,7 @@ export default function MatchDayViewerPage({
   );
 
   const selectedMatchDayDateTime = selectedMatchDay?.matchDayDate
-    ? showBdLocalTime(selectedMatchDay.matchDayDate)
+    ? showBdLocalTimeRange(selectedMatchDay.matchDayDate, selectedMatchDay.durationMinutes)
     : "Date/time not set";
 
   const selectedStatus = getEffectiveMatchDayStatus(
@@ -328,7 +328,7 @@ export default function MatchDayViewerPage({
                 </div>
               )}
               <div className="match-day-viewer-tabs" style={{ marginTop: 6 }}>
-                <div className="flex justify-center overflow-x-auto border-b border-gray-200 dark:border-gray-800">
+                <div className="flex justify-center overflow-x-auto border-b border-gray-200 dark:border-[var(--color-rule)]">
                   <nav className="flex gap-4">
                     {tabItems.map((item) => (
                       <button

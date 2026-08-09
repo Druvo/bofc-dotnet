@@ -186,7 +186,7 @@ export default function MatchesTab({
 
   if (!matchDayStructure || matchDayStructure.rounds.length === 0) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
         <p className="text-theme-sm text-gray-500 dark:text-gray-400">No matches available yet.</p>
         <p className="text-theme-sm text-gray-500 dark:text-gray-400">Create rounds and generate matches in the MatchDay tab.</p>
       </div>
@@ -195,7 +195,7 @@ export default function MatchesTab({
 
   if (finalFixtures.length === 0) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
         <CalendarOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
         <p className="text-theme-sm text-gray-500 dark:text-gray-400">No matches found.</p>
         <p className="text-theme-sm text-gray-500 dark:text-gray-400">Generate matches in the MatchDay tab.</p>
@@ -223,7 +223,7 @@ export default function MatchesTab({
       </div>
 
       {shouldShowAllFixtures && (
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-5">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-5">
           <div className="mb-4 flex items-center gap-2">
             <TrophyOutlined className="text-brand-500" />
             <h5 className="text-lg font-bold text-gray-800 dark:text-white/90">All Matches</h5>
@@ -250,7 +250,7 @@ export default function MatchesTab({
       {!shouldShowAllFixtures && (
         <div className="flex flex-col gap-6">
           {fixturesByRoundAndGroup[-1] && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-5">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-5">
               <div className="mb-4 flex items-center gap-2">
                 <TrophyOutlined className="text-brand-500" />
                 <h5 className="text-lg font-bold text-gray-800 dark:text-white/90">Unmatched Matches</h5>
@@ -281,7 +281,7 @@ export default function MatchesTab({
             if (!hasMatches) return null;
 
             return (
-              <div key={round.id} className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-5">
+              <div key={round.id} className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-5">
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <span className="flex items-center gap-2">
                     <TrophyOutlined className="text-brand-500" />
@@ -301,7 +301,7 @@ export default function MatchesTab({
 
                       return (
                         <div key={group.id}>
-                          <div className="mb-2 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
+                          <div className="mb-2 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-[var(--color-rule)]">
                             <TeamOutlined className="text-gray-400" />
                             <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{group.groupName}</span>
                             <span className="text-theme-xs text-gray-400">({groupMatches.length} {groupMatches.length === 1 ? 'match' : 'matches'})</span>
@@ -365,7 +365,7 @@ export default function MatchesTab({
 
                       return (
                         <div key={`no-group-${round.id}`}>
-                          <div className="mb-2 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
+                          <div className="mb-2 flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-[var(--color-rule)]">
                             <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">Other Matches</span>
                             <span className="text-theme-xs text-gray-400">({noGroupMatches.length} matches)</span>
                           </div>

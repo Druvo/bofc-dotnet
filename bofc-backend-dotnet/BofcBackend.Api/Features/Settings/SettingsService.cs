@@ -1,5 +1,6 @@
 using BofcBackend.Api.Common.Email;
 using BofcBackend.Api.Common.Exceptions;
+using BofcBackend.Api.Common.Scheduling;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
@@ -15,7 +16,8 @@ public class SettingsService(
     BofcDbContext db,
     IDataProtectionProvider dataProtectionProvider,
     IEmailSender emailSender,
-    IOptions<AccountingOptions> accountingOptions) : ISettingsService
+    IOptions<AccountingOptions> accountingOptions,
+    WeeklyMatchDayTeamGenerator weeklyMatchDayTeamGenerator) : ISettingsService
 {
     private readonly IDataProtector protector = dataProtectionProvider.CreateProtector(SettingsEncryption.Purpose);
 
@@ -40,6 +42,7 @@ public class SettingsService(
         settings.NotifyCustomEmailEnabled = request.NotifyCustomEmailEnabled;
         settings.PushNotificationsEnabled = request.PushNotificationsEnabled;
         settings.AuctionEnabled = request.AuctionEnabled;
+        settings.MatchDayStatusCheckIntervalHours = request.MatchDayStatusCheckIntervalHours;
 
         // Null = leave the stored password untouched (the UI never re-sends it back).
         // Empty string = admin explicitly cleared the field, so wipe it.
@@ -50,25 +53,67 @@ public class SettingsService(
                 : protector.Protect(request.SmtpPassword);
         }
 
-        if (request.WeeklyMatchEnabled && request.WeeklyMatchVenueId == null)
+        if (request.WeeklyMatchDayEnabled && request.WeeklyMatchDayVenueId == null)
         {
             throw new BadRequestException("A venue is required to enable the weekly match");
         }
 
-        settings.WeeklyMatchEnabled = request.WeeklyMatchEnabled;
-        settings.WeeklyMatchNamePrefix = string.IsNullOrWhiteSpace(request.WeeklyMatchNamePrefix) ? "Next Match" : request.WeeklyMatchNamePrefix.Trim();
-        settings.WeeklyMatchDayOfWeek = request.WeeklyMatchDayOfWeek;
-        settings.WeeklyMatchTime = TimeSpan.Parse(request.WeeklyMatchTime);
-        settings.WeeklyMatchVenueId = request.WeeklyMatchVenueId;
-        settings.WeeklyMatchSportType = request.WeeklyMatchSportType;
-        settings.WeeklyMatchDurationMinutes = request.WeeklyMatchDurationMinutes;
-        settings.WeeklyMatchTimeGapMinutes = request.WeeklyMatchTimeGapMinutes;
+        if (request.WeeklyMatchDayEnabled && request.WeeklyMatchDaySlots.Count == 0)
+        {
+            throw new BadRequestException("At least one match day/time is required to enable the weekly match");
+        }
+
+        settings.WeeklyMatchDayEnabled = request.WeeklyMatchDayEnabled;
+        settings.WeeklyMatchDayNamePrefix = string.IsNullOrWhiteSpace(request.WeeklyMatchDayNamePrefix) ? "Next Match" : request.WeeklyMatchDayNamePrefix.Trim();
+        settings.WeeklyMatchDayVenueId = request.WeeklyMatchDayVenueId;
+        settings.WeeklyMatchDaySportType = request.WeeklyMatchDaySportType;
+        settings.MatchDaysPerWeek = request.MatchDaysPerWeek;
+        settings.WeeklyMatchDayMaxPlayersPerTeam = request.WeeklyMatchDayMaxPlayersPerTeam;
+        settings.WeeklyMatchDayAutoTeamsEnabled = request.WeeklyMatchDayAutoTeamsEnabled;
+        settings.WeeklyMatchDayAutoTeamsLeadHours = request.WeeklyMatchDayAutoTeamsLeadHours;
+
+        // Full replace — this is a small config list (max ~7 rows), not worth diffing.
+        db.WeeklyMatchDaySlots.RemoveRange(settings.WeeklyMatchDaySlots);
+        settings.WeeklyMatchDaySlots = request.WeeklyMatchDaySlots.Select((s, i) => new WeeklyMatchDaySlot
+        {
+            SystemSettingsId = settings.Id,
+            DayOfWeek = s.DayOfWeek,
+            Time = TimeSpan.Parse(s.Time),
+            DurationMinutes = s.DurationMinutes,
+            MatchDurationMinutes = s.MatchDurationMinutes,
+            TimeGapMinutes = s.TimeGapMinutes,
+            SortOrder = i,
+        }).ToList();
 
         settings.CashChartCode = await NormalizeAndValidateChartCodeAsync(request.CashChartCode, "Cash chart");
         settings.CollectionIncomeChartCode = await NormalizeAndValidateChartCodeAsync(request.CollectionIncomeChartCode, "Collection income chart");
 
-        settings.JerseyColorA = request.JerseyColorA.Trim();
-        settings.JerseyColorB = request.JerseyColorB.Trim();
+        if (request.JerseyColors != null)
+        {
+            var normalizedColors = request.JerseyColors
+                .Select(c => c?.Trim())
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Select(c => c!)
+                .ToList();
+
+            if (normalizedColors.Count < 2)
+            {
+                throw new BadRequestException("At least 2 jersey colors are required — the club needs 2 distinct colors to tell the teams in a match apart.");
+            }
+            if (normalizedColors.Distinct(StringComparer.OrdinalIgnoreCase).Count() != normalizedColors.Count)
+            {
+                throw new BadRequestException("Jersey colors must be unique — no duplicates.");
+            }
+
+            // Full replace — this is a small config list, not worth diffing.
+            db.JerseyColors.RemoveRange(settings.JerseyColors);
+            settings.JerseyColors = normalizedColors.Select((c, i) => new JerseyColor
+            {
+                SystemSettingsId = settings.Id,
+                Color = c,
+                SortOrder = i,
+            }).ToList();
+        }
 
         await db.SaveChangesAsync();
         return await ToDtoAsync(settings);
@@ -105,12 +150,50 @@ public class SettingsService(
         }
     }
 
+    public async Task<bool> GetPushNotificationsEnabledAsync() =>
+        (await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1))?.PushNotificationsEnabled ?? true;
+
+    public async Task<GenerateWeeklyMatchesResponse> GenerateWeeklyMatchesNowAsync()
+    {
+        var settings = await LoadOrCreateAsync();
+        if (!settings.WeeklyMatchDayEnabled || settings.WeeklyMatchDayVenueId == null)
+        {
+            throw new BadRequestException("Enable the weekly match and select a venue before generating.");
+        }
+        if (settings.WeeklyMatchDaySlots.Count == 0)
+        {
+            throw new BadRequestException("At least one match day/time slot is required before generating.");
+        }
+
+        var createdMatchDays = await MatchDaySchedulerBackgroundService.GenerateForCurrentMonthAsync(db, settings, DateTime.Now);
+
+        var teamsGenerated = settings.WeeklyMatchDayAutoTeamsEnabled
+            ? await MatchDaySchedulerBackgroundService.GenerateDueTeamsAsync(
+                db, weeklyMatchDayTeamGenerator, settings.WeeklyMatchDayMaxPlayersPerTeam, settings.WeeklyMatchDayAutoTeamsLeadHours)
+            : 0;
+
+        return new GenerateWeeklyMatchesResponse { MatchDaysCreated = createdMatchDays.Count, TeamsGenerated = teamsGenerated };
+    }
+
+    public async Task<TeamGenerationResult> GenerateTeamsNowAsync(long matchDayId)
+    {
+        var settings = await LoadOrCreateAsync();
+        return await weeklyMatchDayTeamGenerator.GenerateAsync(matchDayId, settings.WeeklyMatchDayMaxPlayersPerTeam);
+    }
+
     private async Task<SystemSettings> LoadOrCreateAsync()
     {
-        var settings = await db.SystemSettings.FirstOrDefaultAsync(s => s.Id == 1);
+        var settings = await db.SystemSettings
+            .Include(s => s.WeeklyMatchDaySlots)
+            .Include(s => s.JerseyColors)
+            .FirstOrDefaultAsync(s => s.Id == 1);
         if (settings != null) return settings;
 
         settings = new SystemSettings { Id = 1 };
+        // Seed the same 2 defaults the old hardcoded JerseyColorA/JerseyColorB fields used to
+        // have, so a fresh install isn't left with zero jersey colors configured.
+        settings.JerseyColors.Add(new JerseyColor { SystemSettingsId = settings.Id, Color = "red", SortOrder = 0 });
+        settings.JerseyColors.Add(new JerseyColor { SystemSettingsId = settings.Id, Color = "yellow", SortOrder = 1 });
         db.SystemSettings.Add(settings);
         await db.SaveChangesAsync();
         return settings;
@@ -119,9 +202,9 @@ public class SettingsService(
     private async Task<SystemSettingsResponse> ToDtoAsync(SystemSettings s)
     {
         string? venueName = null;
-        if (s.WeeklyMatchVenueId != null)
+        if (s.WeeklyMatchDayVenueId != null)
         {
-            venueName = await db.Venues.Where(v => v.Id == s.WeeklyMatchVenueId).Select(v => v.Name).FirstOrDefaultAsync();
+            venueName = await db.Venues.Where(v => v.Id == s.WeeklyMatchDayVenueId).Select(v => v.Name).FirstOrDefaultAsync();
         }
 
         var effectiveCashCode = string.IsNullOrWhiteSpace(s.CashChartCode) ? accountingOptions.Value.CashChartCode : s.CashChartCode;
@@ -147,23 +230,28 @@ public class SettingsService(
             NotifyCustomEmailEnabled = s.NotifyCustomEmailEnabled,
             PushNotificationsEnabled = s.PushNotificationsEnabled,
             AuctionEnabled = s.AuctionEnabled,
-            WeeklyMatchEnabled = s.WeeklyMatchEnabled,
-            WeeklyMatchNamePrefix = s.WeeklyMatchNamePrefix,
-            WeeklyMatchDayOfWeek = s.WeeklyMatchDayOfWeek.ToString(),
-            WeeklyMatchTime = s.WeeklyMatchTime.ToString(@"hh\:mm"),
-            WeeklyMatchVenueId = s.WeeklyMatchVenueId,
-            WeeklyMatchVenueName = venueName,
-            WeeklyMatchSportType = s.WeeklyMatchSportType.ToString(),
-            WeeklyMatchDurationMinutes = s.WeeklyMatchDurationMinutes,
-            WeeklyMatchTimeGapMinutes = s.WeeklyMatchTimeGapMinutes,
+            MatchDayStatusCheckIntervalHours = s.MatchDayStatusCheckIntervalHours,
+            WeeklyMatchDayEnabled = s.WeeklyMatchDayEnabled,
+            WeeklyMatchDayNamePrefix = s.WeeklyMatchDayNamePrefix,
+            WeeklyMatchDayOfWeek = (s.WeeklyMatchDaySlots.OrderBy(sl => sl.SortOrder).FirstOrDefault()?.DayOfWeek ?? s.WeeklyMatchDayOfWeek).ToString(),
+            WeeklyMatchTime = (s.WeeklyMatchDaySlots.OrderBy(sl => sl.SortOrder).FirstOrDefault()?.Time ?? s.WeeklyMatchTime).ToString(@"hh\:mm"),
+            WeeklyMatchDayVenueId = s.WeeklyMatchDayVenueId,
+            WeeklyMatchDayVenueName = venueName,
+            WeeklyMatchDaySportType = s.WeeklyMatchDaySportType.ToString(),
+            MatchDaysPerWeek = s.MatchDaysPerWeek,
+            WeeklyMatchDaySlots = s.WeeklyMatchDaySlots.OrderBy(sl => sl.SortOrder)
+                .Select(sl => new WeeklyMatchDaySlotDto { DayOfWeek = sl.DayOfWeek, Time = sl.Time.ToString(@"hh\:mm"), DurationMinutes = sl.DurationMinutes, MatchDurationMinutes = sl.MatchDurationMinutes, TimeGapMinutes = sl.TimeGapMinutes })
+                .ToList(),
+            WeeklyMatchDayMaxPlayersPerTeam = s.WeeklyMatchDayMaxPlayersPerTeam,
+            WeeklyMatchDayAutoTeamsEnabled = s.WeeklyMatchDayAutoTeamsEnabled,
+            WeeklyMatchDayAutoTeamsLeadHours = s.WeeklyMatchDayAutoTeamsLeadHours,
             CashChartCode = effectiveCashCode,
             CashChartName = cashChartName,
             CollectionIncomeChartCode = effectiveCollectionCode,
             CollectionIncomeChartName = collectionChartName,
             CashChartCodeIsOverridden = !string.IsNullOrWhiteSpace(s.CashChartCode),
             CollectionIncomeChartCodeIsOverridden = !string.IsNullOrWhiteSpace(s.CollectionIncomeChartCode),
-            JerseyColorA = s.JerseyColorA,
-            JerseyColorB = s.JerseyColorB,
+            JerseyColors = s.JerseyColors.OrderBy(j => j.SortOrder).Select(j => j.Color).ToList(),
         };
     }
 }

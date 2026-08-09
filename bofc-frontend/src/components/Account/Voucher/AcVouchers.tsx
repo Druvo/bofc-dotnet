@@ -15,6 +15,7 @@ import FormInput from "../../ui/form-input";
 import FormSelect from "../../ui/form-select";
 import Badge from "../../ui/badge";
 import Loader from "../../ui/loader";
+import { formatCurrency } from "../../../utils/formatCurrency";
 
 type SortField = "voucherDate" | "amount" | null;
 
@@ -184,7 +185,7 @@ function AcVouchers() {
     const canManage = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN");
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <FileTextOutlined className="text-brand-500 dark:text-brand-400" />
@@ -202,7 +203,7 @@ function AcVouchers() {
                         placeholder="Search Voucher No"
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
-                        className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                        className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                     />
                 </div>
                 <FormSelect className="!h-10 w-[130px]" value={yearFilter} onChange={(e) => setYearFilter(e.target.value)} options={[{ value: "", label: "All Years" }, ...getUniqueYears().map((y) => ({ value: y, label: String(y) }))]} />
@@ -212,10 +213,10 @@ function AcVouchers() {
             {tableLoadingSpin ? (
                 <Loader className="py-10" />
             ) : (
-                <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+                <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
                     <table className="w-full min-w-max border-collapse text-theme-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                            <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                                 <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Voucher No</th>
                                 <th onClick={() => toggleSort("voucherDate")} className="cursor-pointer px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Date</th>
                                 <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Type</th>
@@ -271,7 +272,7 @@ function AcVouchers() {
                                 value={selectedPlayerIds.map(String)}
                                 disabled={playerApiLoading}
                                 onChange={(e) => setSelectedPlayerIds(Array.from(e.target.selectedOptions).map((o) => Number(o.value)))}
-                                className={`h-40 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-gray-900 ${formErrors.playerIds ? "border-error-500 focus:border-error-300 focus:ring-error-500/10" : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"}`}
+                                className={`h-40 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] ${formErrors.playerIds ? "border-error-500 focus:border-error-300 focus:ring-error-500/10" : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"}`}
                             >
                                 {players.map((player) => (
                                     <option key={player.id} value={player.id}>{player.name} [{player.employeeId}]</option>
@@ -290,13 +291,13 @@ function AcVouchers() {
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows={3}
-                                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                                className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                             />
                         </div>
 
                         {playerListSize > 0 && (
                             <p className="text-theme-sm text-success-600 dark:text-success-500">
-                                Total transaction amount is <strong>{playerListSize * paymentAmount}</strong> BDT.
+                                Total transaction amount is <strong>{formatCurrency(playerListSize * paymentAmount, { decimals: 0 })}</strong>.
                             </p>
                         )}
                     </div>

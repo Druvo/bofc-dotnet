@@ -19,18 +19,29 @@ interface FinanceStatTileProps {
   /** Non-numeric tile (e.g. a plain count) — set `display` instead of `value`. */
   display?: React.ReactNode;
   subtitle?: React.ReactNode;
+  /** Metric implies the user needs to act (e.g. unpaid dues) — amber left-border
+   * accent + tinted value, distinct from purely informational metrics. */
+  actionable?: boolean;
 }
 
-const FinanceStatTile: React.FC<FinanceStatTileProps> = ({ title, icon, variant, value, display, subtitle }) => {
+const FinanceStatTile: React.FC<FinanceStatTileProps> = ({ title, icon, variant, value, display, subtitle, actionable }) => {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+    <div
+      className={`overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] ${
+        actionable ? "border-l-[3px] border-l-warning-500" : ""
+      }`}
+    >
       <div className="mb-2.5 flex items-center justify-between">
         <span className="text-theme-xs font-medium text-gray-500 dark:text-gray-400">{title}</span>
         <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm ${variantIconWrap[variant]}`}>
           {icon}
         </span>
       </div>
-      <div className="flex items-baseline text-title-sm font-bold text-gray-800 dark:text-white/90">
+      <div
+        className={`flex items-baseline text-title-sm font-bold ${
+          actionable ? "text-warning-600 dark:text-warning-500" : "text-gray-800 dark:text-white/90"
+        }`}
+      >
         {value !== undefined ? (
           <>
             <span className="mr-1 text-sm font-semibold text-gray-500 dark:text-gray-400">৳</span>

@@ -183,7 +183,7 @@ export default function ViewerPlayersTab({
                   </div>
                 ) : (
                   <span
-                    style={{ fontSize: 12, color: "rgba(255, 255, 255, 0.55)" }}
+                    style={{ fontSize: 12, color: "var(--color-muted)" }}
                   >
                     No players available
                   </span>

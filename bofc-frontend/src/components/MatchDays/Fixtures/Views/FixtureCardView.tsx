@@ -12,6 +12,7 @@ import VenueLink from "../../../CommonAtoms/VenueLink";
 import moment from "moment";
 import { IFixture, MatchStatus } from "../../../../state/features/fixtures/fixtureTypes";
 import { getStatusColor } from "../../../../utils/matchStatusUtils";
+import { formatMatchTimeRange } from "../../../../utils/matchTimeUtils";
 import { selectLoginInfo } from "../../../../state/slices/loginInfoSlice";
 import { useGetMatchByIdQuery } from "../../../../state/features/fixtures/fixturesSlice";
 
@@ -193,7 +194,7 @@ export default function FixtureCardView({ fixtures, onEdit, onDataChange }: Fixt
                   <CalendarOutlined style={{ marginRight: 8, color: token.colorPrimary }} />
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     {fixture.matchDate
-                      ? moment.utc(fixture.matchDate).local().format("MMM DD, YYYY HH:mm")
+                      ? formatMatchTimeRange(fixture.matchDate, fixture.matchDurationMinutes, "MMM DD, YYYY hh:mm a")
                       : "TBD"}
                   </Text>
                 </div>

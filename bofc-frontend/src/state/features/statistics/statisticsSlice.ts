@@ -8,6 +8,8 @@ import {
   IGetPlayerMatchDayStatisticsResponse,
   IGetPlayerStatisticsResponse,
   IGetPlayerMatchHistoryResponse,
+  IGetPlayerStatAdjustmentResponse,
+  IUpdatePlayerStatAdjustmentRequest,
 } from "./statisticsTypes";
 
 const apiWithTags = apiSlice.enhanceEndpoints({
@@ -162,6 +164,60 @@ export const statisticsApi = apiWithTags.injectEndpoints({
       }),
       providesTags: ["statistics"],
     }),
+
+    /**
+     * Admin-only manual correction added on top of a player's match-derived stats — e.g. to
+     * backfill history from before this app tracked matches. All zero if never set.
+     */
+    getPlayerStatAdjustment: builder.query<
+      IGetPlayerStatAdjustmentResponse,
+      { playerId: number }
+    >({
+      query: ({ playerId }) => ({
+        url: `/player-statistics/${playerId}/adjustment`,
+        method: "GET",
+      }),
+      providesTags: ["statistics"],
+    }),
+
+    updatePlayerStatAdjustment: builder.mutation<
+      IGetPlayerStatAdjustmentResponse,
+      { playerId: number; body: IUpdatePlayerStatAdjustmentRequest }
+    >({
+      query: ({ playerId, body }) => ({
+        url: `/player-statistics/${playerId}/adjustment`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["statistics"],
+    }),
+
+    /**
+     * Same manual correction as getPlayerStatAdjustment/updatePlayerStatAdjustment, but scoped
+     * to one specific Match instead of the player's lifetime total.
+     */
+    getMatchPlayerStatAdjustment: builder.query<
+      IGetPlayerStatAdjustmentResponse,
+      { matchId: number; playerId: number }
+    >({
+      query: ({ matchId, playerId }) => ({
+        url: `/statistics/matches/${matchId}/players/${playerId}/adjustment`,
+        method: "GET",
+      }),
+      providesTags: ["statistics"],
+    }),
+
+    updateMatchPlayerStatAdjustment: builder.mutation<
+      IGetPlayerStatAdjustmentResponse,
+      { matchId: number; playerId: number; body: IUpdatePlayerStatAdjustmentRequest }
+    >({
+      query: ({ matchId, playerId, body }) => ({
+        url: `/statistics/matches/${matchId}/players/${playerId}/adjustment`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["statistics"],
+    }),
   }),
 });
 
@@ -175,4 +231,8 @@ export const {
   useGetPlayerStatisticsQuery,
   useGetPlayerMatchHistoryQuery,
   useAggregateMatchDayStatisticsMutation,
+  useGetPlayerStatAdjustmentQuery,
+  useUpdatePlayerStatAdjustmentMutation,
+  useGetMatchPlayerStatAdjustmentQuery,
+  useUpdateMatchPlayerStatAdjustmentMutation,
 } = statisticsApi;

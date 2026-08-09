@@ -17,8 +17,9 @@ import {
 } from "../Auction/AuctionAtoms";
 import { toAbsolutePlayerPhotoUrl } from "../../utils/playerPhotoUtils";
 import Loader from "../ui/loader";
+import { formatCurrency } from "../../utils/formatCurrency";
 
-const fmt = (n?: number) => (n != null ? `৳${n.toLocaleString()}` : "—");
+const fmt = (n?: number) => (n != null ? formatCurrency(n, { decimals: 0 }) : "—");
 const panel: React.CSSProperties = {
   background: ac.panel,
   border: `1px solid ${ac.panelBorder}`,
@@ -189,7 +190,7 @@ const ViewerAuctionTab: React.FC<Props> = ({ matchDayId }) => {
                 </div>
                 {settings?.scheduledStartTime && (
                   <span style={{ color: ac.textMuted, fontSize: 12, display: "block", marginTop: 18 }}>
-                    {new Date(settings.scheduledStartTime).toLocaleString()}
+                    {new Date(settings.scheduledStartTime).toLocaleString([], { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true })}
                   </span>
                 )}
               </>
@@ -243,7 +244,7 @@ const ViewerAuctionTab: React.FC<Props> = ({ matchDayId }) => {
           <UserOutlined style={{ marginRight: 8, color: ac.gold }} />
           Players
         </h4>
-        <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+        <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-[var(--color-rule)]">
           {playerTabDefs.map((t) => (
             <button key={t.key} type="button" onClick={() => setPlayerTab(t.key)} className={segmentBtn(activeTabKey === t.key)}>
               {t.label} ({t.list.length})

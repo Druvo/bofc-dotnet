@@ -33,6 +33,8 @@ interface PlayerFormValues {
     playingPosition: string;
     jerseyNumber: string;
     active: boolean;
+    /** Admin-only — never returned by the public player endpoints, fetched/saved separately. */
+    rank: string;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -46,6 +48,7 @@ const emptyValues: PlayerFormValues = {
     playingPosition: "UNASSIGNED",
     jerseyNumber: "",
     active: false,
+    rank: "",
 };
 
 function Player() {
@@ -103,6 +106,10 @@ function Player() {
             const num = Number(values.jerseyNumber);
             if (!Number.isInteger(num) || num < 1 || num > 99) next.jerseyNumber = "Jersey number must be between 1 and 99";
         }
+        if (values.rank) {
+            const num = Number(values.rank);
+            if (!Number.isInteger(num) || num < 1 || num > 10) next.rank = "Rank must be a whole number between 1 and 10";
+        }
         setErrors(next);
         return Object.keys(next).length === 0;
     };
@@ -137,8 +144,13 @@ function Player() {
             axiosApi
                 .put(`${API_URL}/players/${id}`, playerData)
                 .then((response) => {
-                    axiosApi
-                        .put(`${API_URL}/players/${id}/status?active=${values.active}`, {})
+                    const followUps = [axiosApi.put(`${API_URL}/players/${id}/status?active=${values.active}`, {})];
+                    if (isAdmin) {
+                        followUps.push(axiosApi.put(`${API_URL}/players/${id}/rank`, {
+                            rank: values.rank ? Number(values.rank) : null,
+                        }));
+                    }
+                    Promise.all(followUps)
                         .then(() => {
                             toast.success(response.data.message);
                             dispatch(playerApi.util.invalidateTags(["player"]));
@@ -171,6 +183,7 @@ function Player() {
                     active: !!c.active,
                     playingPosition: c.playingPosition || "UNASSIGNED",
                     jerseyNumber: c.jerseyNumber != null ? String(c.jerseyNumber) : "",
+                    rank: "",
                 });
                 if (c.photoKey) {
                     setPhotoKey(c.photoKey);
@@ -178,6 +191,18 @@ function Player() {
                 }
                 setPlayerLoading(false);
                 setFormSubmitButtonText("Change");
+
+                if (isAdmin) {
+                    axiosApi
+                        .get(`${API_URL}/players/${id}/rank`, {
+                            headers: { Authorization: `Bearer ${getTokenFromLocalStorage(tokenContent)}` },
+                        })
+                        .then((rankResponse) => {
+                            const rank = rankResponse.data.content;
+                            setValues((prev) => ({ ...prev, rank: rank != null ? String(rank) : "" }));
+                        })
+                        .catch(() => {});
+                }
             })
             .catch(() => {
                 setPlayerLoading(false);
@@ -248,8 +273,8 @@ function Player() {
             </h2>
             <div className="mb-5 h-0.5 w-full rounded bg-gradient-to-r from-brand-500 to-transparent" />
 
-            <div className="rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
-                <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4 dark:border-gray-800">
+            <div className="rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
+                <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4 dark:border-[var(--color-rule)]">
                     <TeamOutlined className="text-brand-500 dark:text-brand-400" />
                     <h5 className="font-semibold text-gray-800 dark:text-white/90">Player Information</h5>
                 </div>
@@ -265,7 +290,7 @@ function Player() {
                             }}
                         >
                             {/* Photo upload */}
-                            <div className="mb-5 flex flex-wrap items-center gap-4 rounded-xl border border-gray-200 bg-brand-50/40 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+                            <div className="mb-5 flex flex-wrap items-center gap-4 rounded-xl border border-gray-200 bg-brand-50/40 p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                                 <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-brand-500 bg-brand-50 text-gray-400 dark:bg-brand-500/15">
                                     {photoPreviewUrl ? (
                                         <img src={photoPreviewUrl} alt="" className="h-full w-full object-cover" />
@@ -378,11 +403,28 @@ function Player() {
                                         ]}
                                     />
                                 )}
+                                {isAdmin && formState === "UPDATE" && (
+                                    <FormInput
+                                        label="Rank (admin only)"
+                                        type="number"
+                                        min={1}
+                                        max={10}
+                                        placeholder="1-10, lower is stronger"
+                                        value={values.rank}
+                                        onChange={(e) => setField("rank", e.target.value)}
+                                        error={errors.rank}
+                                    />
+                                )}
                             </div>
+                            {isAdmin && formState === "UPDATE" && (
+                                <p className="mt-2 text-theme-xs text-gray-500 dark:text-gray-400">
+                                    Used only to balance auto-generated Match Day teams — never shown to players.
+                                </p>
+                            )}
 
                             {isAdmin && (
                                 <>
-                                    <div className="my-6 h-px bg-gray-100 dark:bg-gray-800" />
+                                    <div className="my-6 h-px bg-gray-100 dark:bg-[var(--color-paper-2)]" />
                                     <div className="flex flex-wrap items-center gap-3">
                                         <Button type="submit">{formSubmitButtonText}</Button>
                                         {!id && (

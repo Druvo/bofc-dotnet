@@ -66,7 +66,7 @@ export function Dropdown({
           <div
             ref={menuRef}
             style={{ position: "fixed", top: coords.top, left: coords.left, right: coords.right }}
-            className={`z-dropdown flex min-w-[190px] flex-col whitespace-nowrap rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark ${className}`}
+            className={`z-dropdown flex min-w-[190px] flex-col whitespace-nowrap rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-[var(--color-rule)] dark:bg-gray-dark ${className}`}
           >
             {children(() => setOpen(false))}
           </div>,

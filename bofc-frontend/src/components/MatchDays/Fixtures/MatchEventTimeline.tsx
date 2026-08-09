@@ -267,7 +267,7 @@ export default function MatchEventTimeline({
 
   return (
     <div className="relative">
-      <div className="mb-4 flex items-center gap-2 border-b border-gray-100 pb-3 dark:border-gray-800">
+      <div className="mb-4 flex items-center gap-2 border-b border-gray-100 pb-3 dark:border-[var(--color-rule)]">
         <span className="text-base font-semibold text-gray-800 dark:text-white/90">Match Events Timeline</span>
         <Badge variant="info">{events.length} events</Badge>
       </div>
@@ -275,7 +275,7 @@ export default function MatchEventTimeline({
       <div className="relative max-h-[540px] overflow-y-auto overflow-x-hidden pb-5">
         <div className="relative min-h-full">
           <div
-            className="absolute left-1/2 hidden -translate-x-1/2 border-l-[3px] border-dotted border-gray-200 dark:border-gray-800 md:block"
+            className="absolute left-1/2 hidden -translate-x-1/2 border-l-[3px] border-dotted border-gray-200 dark:border-[var(--color-rule)] md:block"
             style={{ top: 115, height: "calc(100% - 200px)" }}
           />
 

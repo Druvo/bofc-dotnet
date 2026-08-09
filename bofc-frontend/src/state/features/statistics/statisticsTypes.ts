@@ -127,3 +127,32 @@ export interface IGetPlayerMatchHistoryResponse {
   message: string;
   content: IPlayerMatchHistory[];
 }
+
+/** Admin-only manual correction added on top of match-derived stats — see backend
+ * PlayerStatAdjustment. All zero/null if an admin has never set one. matchId is null for a
+ * player's lifetime/overall adjustment, or set when scoped to one specific Match. */
+export interface IPlayerStatAdjustment {
+  playerId: number;
+  matchId?: number | null;
+  goalsAdjustment: number;
+  assistsAdjustment: number;
+  yellowCardsAdjustment: number;
+  redCardsAdjustment: number;
+  matchesPlayedAdjustment: number;
+  note?: string | null;
+}
+
+export interface IGetPlayerStatAdjustmentResponse {
+  status: string;
+  message: string;
+  content: IPlayerStatAdjustment;
+}
+
+export interface IUpdatePlayerStatAdjustmentRequest {
+  goalsAdjustment: number;
+  assistsAdjustment: number;
+  yellowCardsAdjustment: number;
+  redCardsAdjustment: number;
+  matchesPlayedAdjustment: number;
+  note?: string | null;
+}

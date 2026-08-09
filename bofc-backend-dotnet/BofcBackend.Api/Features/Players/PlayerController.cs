@@ -45,6 +45,32 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.StatusUpdateOk);
     }
 
+    /// <summary>Admin-only — Rank is never exposed via the anonymous-readable PlayerResponse endpoints above.</summary>
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpGet("{id}/rank")]
+    public async Task<IActionResult> GetPlayerRank(long id)
+    {
+        var rank = await playerService.GetPlayerRankAsync(id);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, rank);
+    }
+
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpPut("{id}/rank")]
+    public async Task<IActionResult> SetPlayerRank(long id, [FromBody] PlayerRankRequest request)
+    {
+        await playerService.SetPlayerRankAsync(id, request.Rank);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
+    }
+
+    /// <summary>Feeds the admin drag-and-drop rank board — separate from the plain player list/edit page.</summary>
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpGet("ranks")]
+    public async Task<IActionResult> GetPlayerRanks()
+    {
+        var ranks = await playerService.GetPlayerRanksAsync();
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, ranks);
+    }
+
     // Was [AllowAnonymous] — PlayerService.UpdatePlayerAsync's self-or-admin check only ever
     // blocked anonymous callers as a side effect of GetPlayerId() throwing on a missing claim,
     // not because this endpoint declared it needs authentication. Explicit [Authorize] now

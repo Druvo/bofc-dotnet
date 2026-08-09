@@ -131,9 +131,6 @@ function LeaderboardSection({
   emptyMessage,
   valueTitle,
   accentColor,
-  onSync,
-  isSyncing,
-  isAdmin,
   completedMatches,
   onNavigate,
   showCompletedMatchesHelp = true,
@@ -146,9 +143,6 @@ function LeaderboardSection({
   emptyMessage: string;
   valueTitle: string;
   accentColor: string;
-  onSync?: () => void;
-  isSyncing?: boolean;
-  isAdmin?: boolean;
   completedMatches?: CompletedMatch[];
   onNavigate?: (matchId: number) => void;
   showCompletedMatchesHelp?: boolean;
@@ -162,12 +156,12 @@ function LeaderboardSection({
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
       {loading ? (
         <Loader className="py-10" />
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4 dark:border-gray-800">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4 dark:border-[var(--color-rule)]">
             <div className="flex min-w-0 items-center gap-3.5">
               <div
                 className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-extrabold"
@@ -180,17 +174,12 @@ function LeaderboardSection({
                 <span className="text-theme-xs text-gray-400">Ranked by {valueTitle.toLowerCase()}</span>
               </div>
             </div>
-            {isAdmin && onSync && (
-              <Button type="button" variant="outline" size="sm" startIcon={<ReloadOutlined />} disabled={isSyncing} onClick={onSync} title="Re-sync statistics from recorded match events">
-                Sync Stats
-              </Button>
-            )}
           </div>
 
           {rows.length > 0 ? (
             <div className="flex flex-col">
               {rows.map((row, index) => (
-                <div key={row.key} className="flex items-center gap-3 border-b border-gray-100 py-2.5 last:border-b-0 dark:border-gray-800">
+                <div key={row.key} className="flex items-center gap-3 border-b border-gray-100 py-2.5 last:border-b-0 dark:border-[var(--color-rule)]">
                   <div
                     className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full text-theme-xs font-bold text-white"
                     style={{ background: rankAvatarColor(index + 1) }}
@@ -217,13 +206,13 @@ function LeaderboardSection({
             <div className="flex flex-col gap-3">
               <p className="text-theme-sm text-gray-400">{emptyMessage}</p>
               {showCompletedMatchesHelp && completedMatches && completedMatches.length > 0 && (
-                <div className="rounded-xl border border-gray-100 p-3 dark:border-gray-800">
+                <div className="rounded-xl border border-gray-100 p-3 dark:border-[var(--color-rule)]">
                   <div className="mb-2 flex items-center gap-1.5 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
                     <EditOutlined /> Completed matches — record events here
                   </div>
                   <div className="flex flex-col gap-2">
                     {completedMatches.map((match) => (
-                      <div key={match.id} className="flex items-center justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2 dark:border-gray-800">
+                      <div key={match.id} className="flex items-center justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2 dark:border-[var(--color-rule)]">
                         <span className="flex items-center gap-2 text-theme-sm text-gray-700 dark:text-gray-300">
                           {match.homeTeamName} <Badge variant="info">{match.homeTeamScore} – {match.awayTeamScore}</Badge> {match.awayTeamName}
                         </span>
@@ -362,6 +351,23 @@ export default function StatsLeaderboardPanel({
 
   return (
     <div className="flex flex-col gap-5">
+      {isAdmin && (
+        <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
+          <span className="text-theme-sm text-gray-500 dark:text-gray-400">
+            Re-sync goals, assists and cards from recorded match events.
+          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            startIcon={<ReloadOutlined />}
+            disabled={isAggregating}
+            onClick={() => aggregateStats({ matchDayId })}
+          >
+            Sync Stats
+          </Button>
+        </div>
+      )}
       <LeaderboardSection
         title="Top Scorers"
         icon={<FireOutlined style={{ color: "#ff4d4f", fontSize: 18 }} />}
@@ -371,9 +377,6 @@ export default function StatsLeaderboardPanel({
         emptyMessage="No goal scorers found for this MatchDay."
         valueTitle="Goals"
         accentColor="#ff4d4f"
-        onSync={() => aggregateStats({ matchDayId })}
-        isSyncing={isAggregating}
-        isAdmin={isAdmin}
         completedMatches={completedMatches}
         onNavigate={handleNavigateToMatch}
       />
@@ -386,9 +389,6 @@ export default function StatsLeaderboardPanel({
         emptyMessage="No assists found for this MatchDay."
         valueTitle="Assists"
         accentColor="#52c41a"
-        onSync={() => aggregateStats({ matchDayId })}
-        isSyncing={isAggregating}
-        isAdmin={isAdmin}
         completedMatches={completedMatches}
         onNavigate={handleNavigateToMatch}
         showCompletedMatchesHelp={false}
@@ -402,9 +402,6 @@ export default function StatsLeaderboardPanel({
         emptyMessage="No yellow cards found for this MatchDay."
         valueTitle="Cards"
         accentColor="#faad14"
-        onSync={() => aggregateStats({ matchDayId })}
-        isSyncing={isAggregating}
-        isAdmin={isAdmin}
         completedMatches={completedMatches}
         onNavigate={handleNavigateToMatch}
         showCompletedMatchesHelp={false}
@@ -418,9 +415,6 @@ export default function StatsLeaderboardPanel({
         emptyMessage="No red cards found for this MatchDay"
         valueTitle="Cards"
         accentColor="#cf1322"
-        onSync={() => aggregateStats({ matchDayId })}
-        isSyncing={isAggregating}
-        isAdmin={isAdmin}
         completedMatches={completedMatches}
         onNavigate={handleNavigateToMatch}
         showCompletedMatchesHelp={false}

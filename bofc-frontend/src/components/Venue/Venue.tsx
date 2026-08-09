@@ -15,6 +15,7 @@ import Button from "../ui/button";
 import Modal from "../ui/modal";
 import FormInput from "../ui/form-input";
 import Loader from "../ui/loader";
+import EmptyState from "../ui/empty-state";
 
 function Venue() {
     const loginInfo = useSelector(selectLoginInfo);
@@ -108,7 +109,7 @@ function Venue() {
     const venueList = venues?.content || [];
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <ProjectOutlined className="text-brand-500 dark:text-brand-400" />
@@ -124,15 +125,17 @@ function Venue() {
             {tableLoadingSpin ? (
                 <Loader className="py-10" />
             ) : venueList.length === 0 ? (
-                <div className="py-10 text-center">
-                    <EnvironmentOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
-                    <p className="text-theme-sm text-gray-400 dark:text-gray-500">No venues found</p>
-                </div>
+                <EmptyState
+                    icon={<EnvironmentOutlined />}
+                    title="No venues yet"
+                    description="Add a venue so MatchDays can be scheduled there."
+                    action={isAdmin ? { label: "Add Venue", icon: <PlusOutlined />, onClick: showModal } : undefined}
+                />
             ) : (
-                <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+                <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
                     <table className="w-full min-w-max border-collapse text-theme-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                            <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                                 <th className="px-4 py-3 text-left font-semibold text-gray-500 dark:text-gray-400">Venue Name</th>
                                 <th className="px-4 py-3 text-left font-semibold text-gray-500 dark:text-gray-400">Address</th>
                                 <th className="px-4 py-3 text-left font-semibold text-gray-500 dark:text-gray-400">Status</th>
@@ -209,7 +212,7 @@ function Venue() {
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
                             rows={3}
-                            className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                            className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                         />
                     </div>
                     <FormInput

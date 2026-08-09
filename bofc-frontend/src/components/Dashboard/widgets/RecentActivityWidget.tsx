@@ -3,8 +3,9 @@ import { HistoryOutlined, DollarOutlined } from "@ant-design/icons";
 import { useGetAcCollectionsQuery } from "../../../state/features/account/accountSlice";
 import { showBdLocalTime } from "../../../utils/utils";
 import { Spinner } from "../../ui/loader";
+import { formatCurrency } from "../../../utils/formatCurrency";
 
-const fmt = (n: number) => `৳${n.toLocaleString()}`;
+const fmt = (n: number) => formatCurrency(n, { decimals: 0 });
 
 // Scoped to payment collections — the only cross-player event stream with a
 // reliable timestamp available today. A true cross-domain activity log (bids,
@@ -21,7 +22,7 @@ const RecentActivityWidget: React.FC = () => {
   );
 
   return (
-    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
       <div className="mb-3 flex items-center gap-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         <HistoryOutlined /> Recent Payments
       </div>
@@ -35,7 +36,7 @@ const RecentActivityWidget: React.FC = () => {
           {recent.map((c) => (
             <div
               key={c.id}
-              className="flex items-center gap-2.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5 dark:border-gray-800 dark:bg-white/[0.02]"
+              className="flex items-center gap-2.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]"
             >
               <span className="flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded-lg bg-success-500/15 text-theme-xs text-success-600 dark:text-success-500">
                 <DollarOutlined />

@@ -9,11 +9,12 @@ import {
 } from "../../state/features/clubRules/clubRulesSlice";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import { normalizeErrorMessage } from "../../utils/normalizeErrorMessage";
-import { PlusOutlined, EditOutlined, BookOutlined } from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, BookOutlined, FileTextOutlined } from "@ant-design/icons";
 import clubRulesCover from "../../assets/club-rules-cover.png";
 import Button from "../ui/button";
 import Modal from "../ui/modal";
 import Loader from "../ui/loader";
+import EmptyState from "../ui/empty-state";
 
 export default function ClubRules() {
     const loginInfo = useSelector(selectLoginInfo);
@@ -95,7 +96,7 @@ export default function ClubRules() {
 
             <div className="pb-16">
                 <div className="mb-4 flex items-center justify-between">
-                    <span className="text-theme-xs font-bold uppercase tracking-wide text-brand-500 dark:text-brand-400">
+                    <span className="text-theme-xs font-bold uppercase tracking-wide text-success-600 dark:text-success-500">
                         {rules.length} {rules.length === 1 ? "rule" : "rules"}
                     </span>
                     {isAdmin && (
@@ -108,20 +109,20 @@ export default function ClubRules() {
                 {isLoading || isFetching ? (
                     <Loader className="py-10" />
                 ) : rules.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-gray-300 p-12 text-center dark:border-gray-700">
-                        <p className="mb-4 text-theme-sm text-gray-400 dark:text-gray-500">No club rules added yet.</p>
-                        {isAdmin && (
-                            <Button type="button" startIcon={<PlusOutlined />} onClick={() => showModal()}>
-                                Add the first rule
-                            </Button>
-                        )}
+                    <div className="rounded-2xl border border-dashed border-gray-300 dark:border-[var(--color-rule)]">
+                        <EmptyState
+                            icon={<FileTextOutlined />}
+                            title="No club rules added yet"
+                            description="Add the guidelines every member is expected to follow."
+                            action={isAdmin ? { label: "Add the first rule", icon: <PlusOutlined />, onClick: () => showModal() } : undefined}
+                        />
                     </div>
                 ) : (
                     <ol className="flex flex-col gap-3">
                         {rules.map((rule, index) => (
                             <li
                                 key={rule.id ?? index}
-                                className="group flex items-start gap-4 rounded-2xl border border-l-[3px] border-gray-100 border-l-brand-500 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-theme-sm dark:border-gray-800 dark:border-l-brand-500 dark:bg-white/[0.03]"
+                                className="group flex items-start gap-4 rounded-2xl border border-l-[3px] border-gray-100 border-l-brand-500 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-theme-sm dark:border-[var(--color-rule)] dark:border-l-brand-500 dark:bg-[var(--color-paper-3)]"
                             >
                                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-theme-sm font-extrabold text-white">
                                     {index + 1}
@@ -173,7 +174,7 @@ export default function ClubRules() {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={4}
-                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                     />
                     {descriptionError && <p className="mt-1.5 text-theme-xs text-error-500">{descriptionError}</p>}
                 </div>

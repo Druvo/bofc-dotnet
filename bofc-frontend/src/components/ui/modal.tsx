@@ -37,12 +37,12 @@ export default function Modal({
   // ancestor's box instead of the viewport.
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-modal flex items-center justify-center p-5">
-      <div className="fixed inset-0 bg-gray-400/50 backdrop-blur-[2px] dark:bg-gray-900/50" onClick={onClose} />
-      <div className={`no-scrollbar relative max-h-[90vh] w-full overflow-y-auto rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8 ${className}`}>
+      <div className="fixed inset-0 bg-gray-400/50 backdrop-blur-[2px] dark:bg-[var(--color-paper-3)]/50" onClick={onClose} />
+      <div className={`no-scrollbar relative max-h-[90vh] w-full overflow-y-auto rounded-3xl bg-white p-6 dark:bg-[var(--color-paper-3)] lg:p-8 ${className}`}>
         <button
           onClick={onClose}
           type="button"
-          className="absolute right-5 top-5 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+          className="absolute right-5 top-5 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-[var(--color-paper-2)] dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path

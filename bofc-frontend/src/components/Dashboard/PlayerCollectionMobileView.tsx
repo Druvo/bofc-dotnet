@@ -24,7 +24,7 @@ const monthCellClasses = {
   due: 'border-error-500/40 bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-500',
   current: 'border-brand-500/40 bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400',
   paid: 'border-success-500/40 bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500',
-  empty: 'border-gray-100 bg-gray-50 text-gray-400 dark:border-gray-800 dark:bg-white/[0.02] dark:text-gray-600',
+  empty: 'border-gray-100 bg-gray-50 text-gray-400 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)] dark:text-gray-600',
 };
 
 const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
@@ -39,7 +39,7 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
 }) => {
   return (
     <div className="grid grid-cols-1 gap-3 p-4 lg:grid-cols-3">
-      <div className="col-span-full flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 dark:border-gray-800 dark:bg-white/[0.02]">
+      <div className="col-span-full flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
         <div className="flex items-center gap-2">
           <CalendarOutlined className="text-brand-500 dark:text-brand-400" />
           <FormSelect
@@ -62,7 +62,7 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
         const isActive = playerData?.active ?? false;
 
         return (
-          <div key={player.key} className="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]">
+          <div key={player.key} className="rounded-xl border border-gray-200 bg-white p-3 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
             <div className="mb-2.5 flex items-center justify-between">
               <div>
                 <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{player.playerName}</span>

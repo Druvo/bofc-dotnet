@@ -3,6 +3,7 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { club, kicker, scoreNum } from "../../theme/clubTheme";
 import { toAbsolutePlayerPhotoUrl } from "../../utils/playerPhotoUtils";
+import { formatCurrency } from "../../utils/formatCurrency";
 
 // ── Club palette shortcuts (kept local so pages read cleanly) ────────────────
 export const ac = {
@@ -153,7 +154,7 @@ export const PanelCard: React.FC<PanelCardProps> = ({
 }) => (
   <div
     onClick={onClick}
-    className={`h-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition dark:border-gray-800 dark:bg-white/[0.03] ${hoverable ? "hover:-translate-y-0.5 hover:shadow-theme-sm" : ""} ${onClick ? "cursor-pointer" : ""}`}
+    className={`h-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] ${hoverable ? "hover:-translate-y-0.5 hover:shadow-theme-sm" : ""} ${onClick ? "cursor-pointer" : ""}`}
     style={style}
   >
     {accent && <div style={{ height: 3, background: accent }} />}
@@ -171,7 +172,7 @@ export const FormCard: React.FC<{
     className="overflow-hidden rounded-2xl"
     style={{ borderTop: `3px solid ${ac.gold}`, ...style }}
   >
-    <div className="rounded-b-2xl border border-t-0 border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]" style={{ padding: 24, ...bodyStyle }}>
+    <div className="rounded-b-2xl border border-t-0 border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]" style={{ padding: 24, ...bodyStyle }}>
       {children}
     </div>
   </div>
@@ -196,7 +197,7 @@ export const StatTile: React.FC<{
 );
 
 // ── Signing tile (shared by the live board, squad modal & results) ───────────
-const taka = (v?: number) => (v != null ? `৳${v.toLocaleString()}` : "—");
+const taka = (v?: number) => (v != null ? formatCurrency(v, { decimals: 0 }) : "—");
 
 export const metaMuted: React.CSSProperties = { fontSize: 11, color: ac.textMuted, whiteSpace: "nowrap" };
 export const teamChip: React.CSSProperties = {

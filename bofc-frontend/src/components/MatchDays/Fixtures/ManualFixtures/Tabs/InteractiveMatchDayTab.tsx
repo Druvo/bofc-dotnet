@@ -132,7 +132,7 @@ function MiniStandingsTable({ rows }: { rows: any[] }) {
     <div className="overflow-x-auto">
       <table className="w-full text-theme-xs">
         <thead>
-          <tr className="border-b border-gray-100 dark:border-gray-800">
+          <tr className="border-b border-gray-100 dark:border-[var(--color-rule)]">
             <th className="px-2 py-1.5 text-left font-semibold text-gray-500 dark:text-gray-400">Pos</th>
             <th className="px-2 py-1.5 text-left font-semibold text-gray-500 dark:text-gray-400">Team</th>
             <th className="px-2 py-1.5 text-center font-semibold text-gray-500 dark:text-gray-400">P</th>
@@ -832,11 +832,11 @@ export default function InteractiveMatchDayTab({
           </div>
         </div>
 
-        <div className="h-px bg-gray-100 dark:bg-gray-800" />
+        <div className="h-px bg-gray-100 dark:bg-[var(--color-paper-2)]" />
 
         <div className="text-theme-sm text-gray-600 dark:text-gray-300">Type: <strong>{round.roundType}</strong></div>
 
-        <div className="h-px bg-gray-100 dark:bg-gray-800" />
+        <div className="h-px bg-gray-100 dark:bg-[var(--color-paper-2)]" />
 
         <div className="flex flex-col gap-2.5">
           {canManage && canStart && (
@@ -936,7 +936,7 @@ export default function InteractiveMatchDayTab({
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 border-t border-gray-100 pt-3 text-theme-sm font-semibold text-gray-800 dark:border-gray-800 dark:text-white/90">
+        <div className="flex items-center gap-1.5 border-t border-gray-100 pt-3 text-theme-sm font-semibold text-gray-800 dark:border-[var(--color-rule)] dark:text-white/90">
           <TeamOutlined /> Assigned Teams
         </div>
 
@@ -960,7 +960,7 @@ export default function InteractiveMatchDayTab({
                   });
 
                 return (
-                  <div key={group.id} className="rounded-xl border border-gray-100 p-3 dark:border-gray-800">
+                  <div key={group.id} className="rounded-xl border border-gray-100 p-3 dark:border-[var(--color-rule)]">
                     <div className="mb-2 flex items-center gap-2">
                       <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{group.groupName}</span>
                       <Badge variant="info">{groupTeams.length} team{groupTeams.length !== 1 ? 's' : ''}</Badge>
@@ -1003,7 +1003,7 @@ export default function InteractiveMatchDayTab({
                     key={team.teamId || team.id}
                     type="button"
                     onClick={() => handleRemoveTeamFromRound(team.teamId || team.id, team.teamName)}
-                    className="flex items-center gap-1.5 rounded-full border border-gray-300 px-2.5 py-1 text-theme-xs text-gray-700 hover:border-error-400 hover:text-error-500 dark:border-gray-700 dark:text-gray-300"
+                    className="flex items-center gap-1.5 rounded-full border border-gray-300 px-2.5 py-1 text-theme-xs text-gray-700 hover:border-error-400 hover:text-error-500 dark:border-[var(--color-rule)] dark:text-gray-300"
                   >
                     {team.teamName} ×
                   </button>
@@ -1017,7 +1017,7 @@ export default function InteractiveMatchDayTab({
 
         {!isGroupBased && (
           <>
-            <div className="h-px bg-gray-100 dark:bg-gray-800" />
+            <div className="h-px bg-gray-100 dark:bg-[var(--color-paper-2)]" />
             <div>
               <div className="mb-2 flex items-center gap-1.5 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
                 <BarChartOutlined /> Standings
@@ -1047,7 +1047,7 @@ export default function InteractiveMatchDayTab({
             <div className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">Groups ({round.groups.length})</div>
             <div className="flex flex-col gap-2">
               {round.groups.map((group) => (
-                <div key={group.id} className="rounded-xl border border-gray-100 p-2.5 dark:border-gray-800">
+                <div key={group.id} className="rounded-xl border border-gray-100 p-2.5 dark:border-[var(--color-rule)]">
                   <div className="mb-1.5 flex items-center justify-between">
                     <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{group.groupName}</span>
                     <button
@@ -1121,7 +1121,7 @@ export default function InteractiveMatchDayTab({
           </div>
         </div>
 
-        <div className="h-px bg-gray-100 dark:bg-gray-800" />
+        <div className="h-px bg-gray-100 dark:bg-[var(--color-paper-2)]" />
 
         <div className="flex flex-col gap-2.5">
           <Button type="button" className="w-full" startIcon={<ThunderboltOutlined />} disabled={!canGenerateMatches} onClick={() => handleGenerateMatches(selectedNode.id, group.groupName, teamCount)}>
@@ -1149,7 +1149,7 @@ export default function InteractiveMatchDayTab({
           </Button>
         </div>
 
-        <div className="h-px bg-gray-100 dark:bg-gray-800" />
+        <div className="h-px bg-gray-100 dark:bg-[var(--color-paper-2)]" />
 
         <div>
           <h5 className="mb-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">Teams ({group.teams?.length || 0})</h5>
@@ -1186,7 +1186,7 @@ export default function InteractiveMatchDayTab({
 
         {standings.length > 0 && (
           <>
-            <div className="h-px bg-gray-100 dark:bg-gray-800" />
+            <div className="h-px bg-gray-100 dark:bg-[var(--color-paper-2)]" />
             <div>
               <h5 className="mb-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">Standings</h5>
               <MiniStandingsTable rows={standings} />
@@ -1236,7 +1236,7 @@ export default function InteractiveMatchDayTab({
   return (
     <div className="relative" style={{ height: "calc(100vh - 200px)" }}>
       {renderEmptyState ? (
-        <div className="flex h-full items-center justify-center rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="flex h-full items-center justify-center rounded-2xl border border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
           <div className="text-center">
             <p className="mb-4 text-theme-sm text-gray-400 dark:text-gray-500">No MatchDay structure yet.</p>
             <Button type="button" startIcon={<PlusOutlined />} onClick={() => handleCreateRound()}>
@@ -1261,13 +1261,13 @@ export default function InteractiveMatchDayTab({
           {showDetailsDrawer && selectedNode !== null && (
             <div className="fixed inset-0 z-modal flex justify-end">
               <div
-                className="fixed inset-0 bg-gray-400/50 backdrop-blur-[2px] dark:bg-gray-900/50"
+                className="fixed inset-0 bg-gray-400/50 backdrop-blur-[2px] dark:bg-[var(--color-paper-3)]/50"
                 onClick={() => {
                   dispatch(setShowDetailsDrawer(false));
                   dispatch(setSelectedNode(null));
                 }}
               />
-              <div className="no-scrollbar relative flex h-full w-full max-w-[420px] flex-col overflow-y-auto bg-white p-5 dark:bg-gray-900">
+              <div className="no-scrollbar relative flex h-full w-full max-w-[420px] flex-col overflow-y-auto bg-white p-5 dark:bg-[var(--color-paper-3)]">
                 <div className="mb-4 flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-base font-bold text-gray-800 dark:text-white/90">
                     {selectedNode?.type === "round" ? <><TrophyOutlined /> Round Details</> : <><TeamOutlined /> Group Details</>}

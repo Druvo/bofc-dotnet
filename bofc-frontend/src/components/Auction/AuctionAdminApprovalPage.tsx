@@ -21,6 +21,7 @@ import Badge from "../ui/badge";
 import Modal from "../ui/modal";
 import Tabs from "../ui/tabs";
 import Loader from "../ui/loader";
+import { formatCurrency } from "../../utils/formatCurrency";
 
 const CATEGORY_OPTIONS: { value: AuctionPlayerCategory; label: string; defaultPrice: number }[] = [
   { value: "ICON", label: "⭐ Icon", defaultPrice: 30000 },
@@ -39,7 +40,7 @@ interface RowState {
   basePrice: number;
 }
 
-const money = (v?: number) => (v != null ? `৳${v.toLocaleString()}` : "—");
+const money = (v?: number) => (v != null ? formatCurrency(v, { decimals: 0 }) : "—");
 
 const AuctionAdminApprovalPage: React.FC = () => {
   const tones = useStatTones();
@@ -127,7 +128,7 @@ const AuctionAdminApprovalPage: React.FC = () => {
         <StatTile label="Rejected" value={rejected} accent={tones.error} icon={<CloseCircleOutlined />} />
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
         <Tabs
           active={tab}
           onChange={setTab}
@@ -147,10 +148,10 @@ const AuctionAdminApprovalPage: React.FC = () => {
             No registrations yet for this MatchDay.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
             <table className="w-full min-w-[900px] border-collapse text-theme-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Player</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Position</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Pref. Price</th>
@@ -182,7 +183,7 @@ const AuctionAdminApprovalPage: React.FC = () => {
                             value={state.category}
                             onChange={(e) => setCategory(r.id, e.target.value as AuctionPlayerCategory)}
                             disabled={rejectedRow}
-                            className="h-8 rounded-md border border-gray-300 bg-transparent px-2 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-gray-300"
+                            className="h-8 rounded-md border border-gray-300 bg-transparent px-2 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-[var(--color-rule)] dark:text-gray-300"
                           >
                             {CATEGORY_OPTIONS.map(o => (
                               <option key={o.value} value={o.value}>{o.label}</option>
@@ -201,7 +202,7 @@ const AuctionAdminApprovalPage: React.FC = () => {
                             min={0}
                             step={1000}
                             disabled={rejectedRow}
-                            className="h-8 w-[110px] rounded-md border border-gray-300 bg-transparent px-2 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-gray-300"
+                            className="h-8 w-[110px] rounded-md border border-gray-300 bg-transparent px-2 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-[var(--color-rule)] dark:text-gray-300"
                           />
                         )}
                       </td>
@@ -279,7 +280,7 @@ const AuctionAdminApprovalPage: React.FC = () => {
           placeholder="Reason for rejection (optional)..."
           value={rejectReason}
           onChange={e => setRejectReason(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+          className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-white/90 dark:placeholder:text-white/30"
         />
       </Modal>
     </AuctionPage>

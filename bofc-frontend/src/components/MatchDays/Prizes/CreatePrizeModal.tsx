@@ -258,7 +258,7 @@ export default function CreatePrizeModal({
             maxLength={500}
             value={values.description}
             onChange={(e) => setField("description", e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+            className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
           />
           {errors.description && <p className="mt-1.5 text-theme-xs text-error-500">{errors.description}</p>}
         </div>
@@ -272,7 +272,7 @@ export default function CreatePrizeModal({
                   value={link}
                   onChange={(e) => setImageLinks((prev) => prev.map((l, i) => (i === index ? e.target.value : l)))}
                   placeholder="https://example.com/image.jpg"
-                  className="h-10 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                  className="h-10 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                 />
                 <button type="button" onClick={() => setImageLinks((prev) => prev.filter((_, i) => i !== index))} className="text-error-500">
                   <MinusCircleOutlined />

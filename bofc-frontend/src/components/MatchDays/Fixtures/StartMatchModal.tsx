@@ -90,7 +90,7 @@ export default function StartMatchModal({
           error={error && venueId ? error : undefined}
         />
 
-        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-white/[0.02]">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
           <p className="text-theme-xs text-gray-500 dark:text-gray-400">
             <strong>Match:</strong> {fixture.homeTeamName} vs {fixture.awayTeamName}
             <br />

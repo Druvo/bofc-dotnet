@@ -15,7 +15,7 @@ const monthCellClasses = {
   due: "border-error-500/40 bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-500",
   current: "border-brand-500/40 bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400",
   paid: "border-success-500/40 bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500",
-  empty: "border-gray-100 bg-gray-50 text-gray-400 dark:border-gray-800 dark:bg-white/[0.02] dark:text-gray-600",
+  empty: "border-gray-100 bg-gray-50 text-gray-400 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)] dark:text-gray-600",
 };
 
 // The dashboard's "your own" slice of the full Monthly Contributions table —
@@ -36,14 +36,14 @@ const MyContributionsCard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+      <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
         <Loader className="py-4" />
       </div>
     );
   }
 
   return (
-    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
           <CalendarOutlined />

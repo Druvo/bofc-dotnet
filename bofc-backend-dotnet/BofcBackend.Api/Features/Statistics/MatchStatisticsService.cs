@@ -17,21 +17,25 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         var stats = await db.MatchStatistics.Include(s => s.Player).Include(s => s.Team)
             .FirstOrDefaultAsync(s => s.MatchId == matchId && s.PlayerId == playerId)
             ?? throw new MatchDayServiceException("Statistics not found", HttpStatusCode.NotFound);
-        return ToResponse(stats);
+        var adjustment = await db.PlayerStatAdjustments.AsNoTracking()
+            .FirstOrDefaultAsync(a => a.MatchId == matchId && a.PlayerId == playerId);
+        return ToResponse(stats, adjustment);
     }
 
     public async Task<List<MatchStatisticsResponse>> GetMatchStatisticsAsync(long matchId)
     {
         var stats = await db.MatchStatistics.Include(s => s.Player).Include(s => s.Team)
             .Where(s => s.MatchId == matchId).OrderByDescending(s => s.GoalsScored).ToListAsync();
-        return stats.Select(ToResponse).ToList();
+        var adjustments = await GetAdjustmentsForMatchAsync(matchId);
+        return stats.Select(s => ToResponse(s, adjustments.GetValueOrDefault(s.PlayerId))).ToList();
     }
 
     public async Task<List<MatchStatisticsResponse>> GetTeamMatchStatisticsAsync(long matchId, long teamId)
     {
         var stats = await db.MatchStatistics.Include(s => s.Player).Include(s => s.Team)
             .Where(s => s.MatchId == matchId && s.TeamId == teamId).OrderByDescending(s => s.GoalsScored).ToListAsync();
-        return stats.Select(ToResponse).ToList();
+        var adjustments = await GetAdjustmentsForMatchAsync(matchId);
+        return stats.Select(s => ToResponse(s, adjustments.GetValueOrDefault(s.PlayerId))).ToList();
     }
 
     public async Task<List<MatchStatisticsResponse>> GetPlayerMatchDayStatisticsAsync(long matchDayId, long playerId)
@@ -39,8 +43,17 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         var stats = await db.MatchStatistics.Include(s => s.Player).Include(s => s.Team).Include(s => s.Match)
             .Where(s => s.Match.MatchDayId == matchDayId && s.PlayerId == playerId)
             .OrderBy(s => s.Match.MatchDate).ToListAsync();
-        return stats.Select(ToResponse).ToList();
+
+        var matchIds = stats.Select(s => s.MatchId).Distinct().ToList();
+        var adjustments = await db.PlayerStatAdjustments.AsNoTracking()
+            .Where(a => a.PlayerId == playerId && a.MatchId != null && matchIds.Contains(a.MatchId!.Value))
+            .ToDictionaryAsync(a => a.MatchId!.Value);
+
+        return stats.Select(s => ToResponse(s, adjustments.GetValueOrDefault(s.MatchId))).ToList();
     }
+
+    private async Task<Dictionary<long, PlayerStatAdjustment>> GetAdjustmentsForMatchAsync(long matchId) =>
+        await db.PlayerStatAdjustments.AsNoTracking().Where(a => a.MatchId == matchId).ToDictionaryAsync(a => a.PlayerId);
 
     public async Task<List<PlayerMatchHistoryResponse>> GetPlayerMatchHistoryAsync(long playerId)
     {
@@ -160,7 +173,7 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
             }
             else
             {
-                aggregated[stat.PlayerId] = ToResponse(stat);
+                aggregated[stat.PlayerId] = ToResponse(stat, null);
             }
         }
         return aggregated.Values.ToList();
@@ -323,7 +336,11 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         return redCards + yellowCards;
     }
 
-    private static MatchStatisticsResponse ToResponse(MatchStatistics stats) => new()
+    // Manual corrections (PlayerStatAdjustment) here are scoped to this one Match (MatchId set),
+    // as opposed to PlayerStatisticsService's lifetime-scope adjustments — summed on top of the
+    // computed totals the same way, since MatchStatistics rows are destructively rebuilt from
+    // MatchEvents on every lifecycle transition and are therefore unsafe to edit directly.
+    private static MatchStatisticsResponse ToResponse(MatchStatistics stats, PlayerStatAdjustment? adjustment) => new()
     {
         Id = stats.Id,
         MatchId = stats.MatchId,
@@ -331,10 +348,10 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         PlayerName = stats.Player.Name,
         TeamId = stats.TeamId,
         TeamName = stats.Team.TeamName,
-        GoalsScored = stats.GoalsScored,
-        Assists = stats.Assists,
-        RedCards = stats.RedCards,
-        YellowCards = stats.YellowCards,
+        GoalsScored = stats.GoalsScored + (adjustment?.GoalsAdjustment ?? 0),
+        Assists = stats.Assists + (adjustment?.AssistsAdjustment ?? 0),
+        RedCards = stats.RedCards + (adjustment?.RedCardsAdjustment ?? 0),
+        YellowCards = stats.YellowCards + (adjustment?.YellowCardsAdjustment ?? 0),
         SubstitutionIn = stats.SubstitutionIn,
         SubstitutionOut = stats.SubstitutionOut,
         MinutesPlayed = stats.MinutesPlayed,

@@ -68,7 +68,8 @@ export default function GroupMatchGenerationModal({
 
   useEffect(() => {
     if (isModalVisible) {
-      const defaultStartDateTime = matchDayDate ? dayjs.utc(matchDayDate).local() : dayjs().add(1, "day").hour(15).minute(0);
+      // matchDayDate is naive-local already — see RoundManagement.tsx's identical fix.
+      const defaultStartDateTime = matchDayDate ? dayjs(matchDayDate) : dayjs().add(1, "day").hour(15).minute(0);
       const matchDayVenue = venues.find((v) => v.name === matchDayVenueName);
 
       setValues({

@@ -66,8 +66,8 @@ const useMatchDayTeams = (matchDayId: number) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        if (matchDaySummary) {
-            const teamsData = matchDaySummary?.content[0].teams || [];
+        if (matchDaySummary?.content?.[0]) {
+            const teamsData = matchDaySummary.content[0].teams || [];
             const teams: Teams[] = teamsData.map((team) => ({
                 teamId: team.teamId,
                 teamName: team.teamName,

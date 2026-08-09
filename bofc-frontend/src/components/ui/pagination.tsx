@@ -20,7 +20,7 @@ export default function Pagination({
         type="button"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
-        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/5"
+        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-rule)] dark:text-gray-400 dark:hover:bg-white/5"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path d="M11.25 13.5 6.75 9l4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -44,7 +44,7 @@ export default function Pagination({
         type="button"
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
-        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-white/5"
+        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-[var(--color-rule)] dark:text-gray-400 dark:hover:bg-white/5"
       >
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <path d="M6.75 4.5 11.25 9l-4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

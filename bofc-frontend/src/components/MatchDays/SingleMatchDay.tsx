@@ -9,25 +9,34 @@ import { useParams } from "react-router-dom";
 import useMatchDayTeams from "../../hooks/useMatchDayTeams";
 import "./matchDay.css";
 import CreateTeamComponent from "./Atoms/CreateTeamComponent";
+import GenerateTeamsButton from "./Atoms/GenerateTeamsButton";
 import PlayerCard from "./Atoms/PlayerCard";
 import TeamCard from "./Atoms/TeamCard";
 import GoalKeeperDrawer from "./Atoms/GoalKeeperDrawer";
+import Badge from "../ui/badge";
 import { useSelector, useDispatch } from "react-redux";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import { RootState } from "../../state/store";
 import { setActiveMainTab } from "../../state/features/matchDays/matchDayUISlice";
 import PickerWheelModal from "./Atoms/pickerWheel/PickerWheelModal";
 import { BarChartOutlined, FileExcelOutlined, RightSquareOutlined, TrophyOutlined, SearchOutlined } from "@ant-design/icons";
-import { exportToExcel, showBdLocalTime } from "../../utils/utils";
+import { exportToExcel, showBdLocalTimeRange } from "../../utils/utils";
 import FixturesPanel from "./Fixtures/FixturesPanel";
 import SimpleMatchesPanel from "./Fixtures/SimpleMatchesPanel";
 import PrizesPanel from "./Prizes/PrizesPanel";
 import StatsLeaderboardPanel from "./Statistics/StatsLeaderboardPanel";
+import SquadLineupTab from "./SquadLineup/SquadLineupTab";
 import Button from "../ui/button";
 import Tabs from "../ui/tabs";
 
 const buildMainTabs = (hasTeams: boolean, isWeeklyMatchDay: boolean) => [
   { key: "team-building", label: "Team Building" },
+  {
+    key: "squad-lineup",
+    label: "Squad & Lineup",
+    disabled: !hasTeams,
+    disabledTitle: "Add teams in Team Building first",
+  },
   {
     key: "fixtures",
     label: isWeeklyMatchDay ? "Matches" : "Fixtures",
@@ -77,6 +86,14 @@ function SingleMatchDay() {
     refetchPlayer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // activeMainTab lives in a global slice (shared across every MatchDay's page, not
+  // just this one), so without this it carries over from whatever tab was last open
+  // on a DIFFERENT MatchDay — always land back on Team Building for a fresh MatchDay.
+  useEffect(() => {
+    dispatch(setActiveMainTab("team-building"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchDayId]);
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination, draggableId } = result;
@@ -153,11 +170,15 @@ function SingleMatchDay() {
           </h5>
           <span className="flex items-center gap-1.5 text-theme-sm text-gray-500 dark:text-gray-400">
             <RightSquareOutlined />
-            {matchDaySummary?.content[0]?.matchDayDate && showBdLocalTime(matchDaySummary?.content[0]?.matchDayDate)}
+            {matchDaySummary?.content[0]?.matchDayDate &&
+              showBdLocalTimeRange(matchDaySummary?.content[0]?.matchDayDate, matchDaySummary?.content[0]?.durationMinutes)}
           </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {isAdmin && !hasTeams && (
+            <GenerateTeamsButton matchDayId={matchDayId} refetchSummary={refetchMatchDay} />
+          )}
           {isAdmin && (
             <CreateTeamComponent
               matchDayId={matchDayId}
@@ -197,37 +218,47 @@ function SingleMatchDay() {
               )}
             </div>
 
-            <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+            <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5">
-                <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">Players ({filteredPlayers.length})</span>
+                <span className="flex items-center gap-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                  Unassigned Pool <Badge variant="light">{filteredPlayers.length}</Badge>
+                </span>
                 <div className="relative w-full sm:w-[250px]">
                   <SearchOutlined className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     placeholder="Search players..."
                     value={playerSearch}
                     onChange={(e) => setPlayerSearch(e.target.value)}
-                    className="h-9 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                    className="h-9 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                   />
                 </div>
               </div>
 
               <Droppable droppableId="players">
-                {(provided) => (
+                {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="grid max-h-[180px] gap-2 overflow-y-auto pr-2"
+                    className={`grid max-h-[220px] gap-2 overflow-y-auto rounded-xl border-2 border-dashed p-2.5 ${
+                      snapshot.isDraggingOver
+                        ? "border-brand-300 bg-brand-50/50 dark:border-brand-500/40 dark:bg-brand-500/5"
+                        : "border-gray-200 dark:border-[var(--color-rule)]"
+                    }`}
                     style={{ gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))" }}
                   >
                     {filteredPlayers.length > 0 ? (
                       filteredPlayers.map((player, index) => (
                         <Draggable key={player.playerId.toString()} draggableId={player.playerId.toString()} index={index}>
-                          {(provided) => (
+                          {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
-                              className="cursor-grab rounded bg-gray-50 p-2 dark:bg-white/[0.02]"
+                              className={`cursor-grab rounded-lg border p-1.5 active:cursor-grabbing ${
+                                snapshot.isDragging
+                                  ? "border-brand-300 bg-brand-50 shadow-lg dark:border-brand-500/40 dark:bg-brand-500/10"
+                                  : "border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]"
+                              }`}
                               style={provided.draggableProps.style}
                             >
                               <PlayerCard player={player} />
@@ -249,6 +280,8 @@ function SingleMatchDay() {
         </div>
       )}
 
+      {activeTab === "squad-lineup" && <SquadLineupTab teams={teams} />}
+
       {activeTab === "fixtures" && (
         hasTeams ? (
           isWeeklyMatchDay ? (
@@ -256,6 +289,7 @@ function SingleMatchDay() {
               matchDayId={matchDayId}
               teams={teams}
               matchDayStartDate={matchDaySummary?.content[0]?.matchDayDate}
+              matchDayDurationMinutes={matchDaySummary?.content[0]?.durationMinutes}
             />
           ) : (
             <FixturesPanel matchDayId={matchDayId} teams={teams} />

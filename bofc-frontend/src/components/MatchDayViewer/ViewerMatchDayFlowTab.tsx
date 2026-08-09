@@ -78,7 +78,7 @@ export default function ViewerMatchDayFlowTab({
     <div className={styles.flowTabWrap}>
       {roadmapImageUrl && hasFlowChart && (
         <div className={styles.toggleWrap}>
-          <div className="inline-flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+          <div className="inline-flex overflow-hidden rounded-lg border border-gray-300 dark:border-[var(--color-rule)]">
             <button type="button" onClick={() => setView("image")} className={segmentBtn(view === "image")}>
               <PictureOutlined /> Roadmap Image
             </button>

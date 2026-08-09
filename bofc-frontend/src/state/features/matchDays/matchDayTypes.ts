@@ -5,6 +5,7 @@ export interface IoMatchDaySingleSummaryType {
     name: string;
     matchDayDate: string;
     durationMinutes?: number | null;
+    venueId?: number;
     venueName: string;
     venueMapLink?: string;
     activeStatus: boolean;
@@ -55,6 +56,7 @@ export interface NextMatchDayResType {
         matchDayId: number;
         matchDayName: string;
         matchDayDate: string;
+        durationMinutes?: number | null;
         totalParticipants: number;
         players: MatchDayPlayerInfoType[];
     };
@@ -76,6 +78,7 @@ export interface MatchDaySummeryResType {
             rules?: string;
             roadmapImageUrl?: string;
             matchDayDate: string;
+            durationMinutes?: number | null;
             venueName: string;
             venueMapLink?: string;
             activeStatus: boolean;

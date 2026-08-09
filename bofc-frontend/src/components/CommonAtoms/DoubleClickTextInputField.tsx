@@ -53,11 +53,11 @@ const DoubleClickTextInputField: React.FC<DoubleClickTextInputFieldProps> = ({
             onChange={handleInputChange}
             onBlur={handleBlur}
             onKeyPress={handleKeyPress}
-            className="h-8 rounded-md border border-gray-300 bg-transparent px-2 text-theme-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+            className="h-8 rounded-md border border-gray-300 bg-transparent px-2 text-theme-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
         />
     ) : (
         <div className="flex items-center" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-            <span onDoubleClick={handleDoubleClick} className="mr-1 cursor-pointer text-theme-sm">
+            <span onDoubleClick={handleDoubleClick} className="mr-1 cursor-pointer text-theme-sm text-gray-800 dark:text-white/90">
                 {displayName}
             </span>
             {hovered && <EditOutlined onClick={handleDoubleClick} className="cursor-pointer text-theme-xs text-gray-400" />}

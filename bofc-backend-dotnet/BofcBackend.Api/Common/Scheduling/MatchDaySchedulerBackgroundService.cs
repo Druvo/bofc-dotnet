@@ -7,13 +7,14 @@ using Microsoft.EntityFrameworkCore;
 namespace BofcBackend.Api.Common.Scheduling;
 
 /// <summary>
-/// Keeps exactly one upcoming "Match Day" queued at all times — a MatchDay row
-/// (IsWeeklyMatchDay=true) auto-created weekly from SystemSettings.WeeklyMatch* config, reusing
-/// the full existing MatchDay system (Teams, fixtures, live scoring, stats, prizes) instead of
-/// a separate bespoke model. As soon as the currently-queued Match Day's date passes, the next
-/// tick creates next week's occurrence and notifies everyone to RSVP via the existing
-/// MatchDayParticipant flow (no new RSVP mechanism — see /MatchDays/join-MatchDay/:id).
-/// Hourly is frequent enough; this isn't time-critical.
+/// Keeps every configured WeeklyMatchDaySlot covered for the current month — one MatchDay row
+/// (IsWeeklyMatchDay=true) per (week, slot) pair, reusing the full existing MatchDay system
+/// (Teams, fixtures, live scoring, stats, prizes) instead of a separate bespoke model. A slot is
+/// identified by its immutable AutoGenSlotDayOfWeek/AutoGenWeekStart (not MatchDayDate), so an
+/// admin manually moving a generated MatchDay's date never causes a duplicate to be created for
+/// that week. Once a generated MatchDay is within WeeklyMatchDayAutoTeamsLeadHours of kickoff, this
+/// also auto-drafts confirmed participants into teams and schedules their fixtures (see
+/// WeeklyMatchDayTeamGenerator). Hourly is frequent enough; none of this is time-critical.
 /// </summary>
 public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactory, ILogger<MatchDaySchedulerBackgroundService> logger)
     : BackgroundService
@@ -39,45 +40,133 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
     {
         using var scope = scopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<BofcDbContext>();
+
+        var settings = await db.SystemSettings.AsNoTracking()
+            .Include(s => s.WeeklyMatchDaySlots)
+            .FirstOrDefaultAsync(s => s.Id == 1);
+        if (settings is not { WeeklyMatchDayEnabled: true } || settings.WeeklyMatchDayVenueId == null) return;
+        if (settings.WeeklyMatchDaySlots.Count == 0) return;
+
         var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
+        var created = await GenerateForCurrentMonthAsync(db, settings, DateTime.Now);
 
-        var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
-        if (settings is not { WeeklyMatchEnabled: true } || settings.WeeklyMatchVenueId == null) return;
-
-        var now = DateTime.Now;
-        var hasUpcoming = await db.MatchDays.AnyAsync(t => t.IsWeeklyMatchDay && t.MatchDayDate > now);
-        if (hasUpcoming) return;
-
-        var nextDate = ComputeNextOccurrence(now, settings.WeeklyMatchDayOfWeek, settings.WeeklyMatchTime);
-
-        // Auto-created MatchDays are always THE default — clear it off every other MatchDay first
-        // to preserve the single-default invariant MatchDayService enforces for manual creates/updates.
-        await db.MatchDays.Where(t => t.DefaultMatchDay)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(t => t.DefaultMatchDay, false));
-
-        var matchDay = new MatchDay
+        foreach (var matchDay in created)
         {
-            Name = $"{settings.WeeklyMatchNamePrefix} — {nextDate:MMM d, yyyy}",
-            MatchDayDate = nextDate,
-            DurationMinutes = settings.WeeklyMatchDurationMinutes,
-            VenueId = settings.WeeklyMatchVenueId.Value,
-            MatchDayStatus = MatchDayStatus.UPCOMING,
-            IsActive = true,
-            SportType = settings.WeeklyMatchSportType,
-            MatchDayType = MatchDayType.ROUND_ROBIN,
-            AuctionMode = false,
-            DefaultMatchDay = true,
-            IsWeeklyMatchDay = true,
-        };
-        db.MatchDays.Add(matchDay);
-        await db.SaveChangesAsync();
+            await NotifyPlayersAsync(db, emailSender, settings, matchDay);
+        }
 
+        if (settings.WeeklyMatchDayAutoTeamsEnabled)
+        {
+            var teamGenerator = scope.ServiceProvider.GetRequiredService<WeeklyMatchDayTeamGenerator>();
+            await GenerateDueTeamsAsync(db, teamGenerator, settings.WeeklyMatchDayMaxPlayersPerTeam, settings.WeeklyMatchDayAutoTeamsLeadHours, logger);
+        }
+    }
+
+    /// <summary>Auto-drafts teams for every generated MatchDay now within its lead-time window.
+    /// Shared by the hourly tick and the admin "Generate now" action. Returns how many MatchDays
+    /// actually got teams (some may be skipped — see WeeklyMatchDayTeamGenerator.GenerateAsync).</summary>
+    public static async Task<int> GenerateDueTeamsAsync(BofcDbContext db, WeeklyMatchDayTeamGenerator teamGenerator, int maxPlayersPerTeam, int leadHours, ILogger? logger = null)
+    {
+        var now = DateTime.Now;
+        var dueMatchDayIds = await db.MatchDays
+            .Where(t => t.IsWeeklyMatchDay && !t.AutoTeamsGenerated
+                && t.MatchDayDate > now && t.MatchDayDate <= now.AddHours(leadHours))
+            .Select(t => t.Id)
+            .ToListAsync();
+
+        var generatedCount = 0;
+        foreach (var matchDayId in dueMatchDayIds)
+        {
+            // One MatchDay throwing (e.g. fixture generation failing after teams already
+            // committed — see WeeklyMatchDayTeamGenerator's own remarks) must not abort every
+            // other due MatchDay in this same tick; they'd otherwise silently wait a full extra
+            // hour (or slide past their lead-time window) for something unrelated to them.
+            try
+            {
+                if ((await teamGenerator.GenerateAsync(matchDayId, maxPlayersPerTeam)).Success)
+                {
+                    generatedCount++;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Auto team generation failed for MatchDay {MatchDayId}", matchDayId);
+            }
+        }
+
+        return generatedCount;
+    }
+
+    /// <summary>Creates the MatchDay for every (week, slot) pair not yet covered, for every week
+    /// whose Monday falls within <paramref name="anchor"/>'s calendar month. Safe to call
+    /// repeatedly — already-covered pairs are skipped. Returns the newly created MatchDays only
+    /// (for the RSVP notification), not ones that already existed.</summary>
+    public static async Task<List<MatchDay>> GenerateForCurrentMonthAsync(BofcDbContext db, SystemSettings settings, DateTime anchor)
+    {
+        var created = new List<MatchDay>();
+        var monthEnd = new DateTime(anchor.Year, anchor.Month, DateTime.DaysInMonth(anchor.Year, anchor.Month));
+        var weekStart = MondayOf(anchor.Date);
+
+        while (weekStart <= monthEnd)
+        {
+            foreach (var slot in settings.WeeklyMatchDaySlots)
+            {
+                var occurrence = OccurrenceOf(weekStart, slot.DayOfWeek, slot.Time);
+                if (occurrence < anchor) continue;
+
+                var alreadyExists = await db.MatchDays.AnyAsync(t =>
+                    t.IsWeeklyMatchDay && t.AutoGenSlotDayOfWeek == slot.DayOfWeek && t.AutoGenWeekStart == weekStart);
+                if (alreadyExists) continue;
+
+                // An admin manually creating a MatchDay never sets IsWeeklyMatchDay/AutoGenSlotDayOfWeek,
+                // so the check above alone would let this generator create a SECOND MatchDay for the
+                // same venue on the same calendar day — same event, double-booked venue, two separate
+                // RSVP/notification threads. Skip generation if the venue already has any MatchDay
+                // (admin-created or otherwise) that day.
+                var venueAlreadyBookedThatDay = await db.MatchDays.AnyAsync(t =>
+                    t.VenueId == settings.WeeklyMatchDayVenueId && t.MatchDayDate.Date == occurrence.Date);
+                if (venueAlreadyBookedThatDay) continue;
+
+                var matchDay = new MatchDay
+                {
+                    Name = $"{settings.WeeklyMatchDayNamePrefix} — {occurrence:MMM d, yyyy}",
+                    MatchDayDate = occurrence,
+                    DurationMinutes = slot.DurationMinutes,
+                    TimeGapMinutes = slot.TimeGapMinutes,
+                    MatchDurationMinutes = slot.MatchDurationMinutes,
+                    VenueId = settings.WeeklyMatchDayVenueId!.Value,
+                    MatchDayStatus = MatchDayStatus.UPCOMING,
+                    IsActive = true,
+                    SportType = settings.WeeklyMatchDaySportType,
+                    MatchDayType = MatchDayType.ROUND_ROBIN,
+                    AuctionMode = false,
+                    IsWeeklyMatchDay = true,
+                    AutoGenSlotDayOfWeek = slot.DayOfWeek,
+                    AutoGenWeekStart = weekStart,
+                };
+                db.MatchDays.Add(matchDay);
+                created.Add(matchDay);
+            }
+
+            weekStart = weekStart.AddDays(7);
+        }
+
+        if (created.Count > 0)
+        {
+            await db.SaveChangesAsync();
+        }
+
+        return created;
+    }
+
+    private async Task NotifyPlayersAsync(BofcDbContext db, IEmailSender emailSender, SystemSettings settings, MatchDay matchDay)
+    {
         var activePlayers = await db.Players.Where(p => p.IsActive).Select(p => new { p.Id, p.Email }).ToListAsync();
         if (activePlayers.Count == 0) return;
 
         var venueName = await db.Venues.Where(v => v.Id == matchDay.VenueId).Select(v => v.Name).FirstOrDefaultAsync() ?? "TBD";
-        var title = $"{settings.WeeklyMatchNamePrefix} — {nextDate:dddd, MMM d}";
-        var body = $"{nextDate:dddd, MMM d} at {nextDate:h:mm tt}, {venueName}. Are you in?";
+        var title = $"{settings.WeeklyMatchDayNamePrefix} — {matchDay.MatchDayDate:dddd, MMM d}";
+        var body = $"{matchDay.MatchDayDate:dddd, MMM d} at {matchDay.MatchDayDate:h:mm tt}, {venueName}. Are you in?";
 
         var notification = new Notification { Title = title, Body = body, TargetType = NotificationTargetType.ALL };
         db.Notifications.Add(notification);
@@ -100,16 +189,15 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
         }
     }
 
-    /// <summary>Smallest date/time strictly after <paramref name="afterExclusive"/> that falls on <paramref name="targetDay"/> at <paramref name="targetTime"/>.</summary>
-    private static DateTime ComputeNextOccurrence(DateTime afterExclusive, DayOfWeek targetDay, TimeSpan targetTime)
+    private static DateTime MondayOf(DateTime date)
     {
-        var candidate = afterExclusive.Date + targetTime;
-        var dayDiff = ((int)targetDay - (int)candidate.DayOfWeek + 7) % 7;
-        candidate = candidate.AddDays(dayDiff);
-        if (candidate <= afterExclusive)
-        {
-            candidate = candidate.AddDays(7);
-        }
-        return candidate;
+        var dayDiff = ((int)date.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+        return date.Date.AddDays(-dayDiff);
+    }
+
+    private static DateTime OccurrenceOf(DateTime weekStart, DayOfWeek targetDay, TimeSpan targetTime)
+    {
+        var dayDiff = ((int)targetDay - (int)DayOfWeek.Monday + 7) % 7;
+        return weekStart.AddDays(dayDiff) + targetTime;
     }
 }

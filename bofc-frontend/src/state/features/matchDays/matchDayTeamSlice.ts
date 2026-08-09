@@ -5,8 +5,17 @@ import {
     MatchDayPlayerInfoType,
 } from "./matchDayTypes";
 
+// "matchDays" is also declared in matchDaysSlice.ts — declaring the same tag type again here is
+// safe/idempotent (RTK Query merges tag-type declarations across every enhanceEndpoints call
+// against the same base apiSlice) and is what lets a team/roster mutation invalidate
+// getMatchDaySummary/getMatchDayById/getMatchDays too. Without this, those consumers (a second
+// browser tab, the MatchDayViewer team-count badge, etc.) stayed on the pre-mutation roster
+// until a manual page reload — SingleMatchDay.tsx/useMatchDayTeams.ts previously worked around
+// this with a manual refetchMatchDay() call, which is a local patch, not a cache contract.
 const apiWithTags = apiSlice.enhanceEndpoints({
-    addTagTypes: ["matchDayTeam"],
+    // "fixtures" is also declared in fixturesSlice.ts — generateTeamsByRank creates round-robin
+    // matches alongside the teams it drafts, so its cache invalidation needs to reach that tag too.
+    addTagTypes: ["matchDayTeam", "matchDays", "fixtures"],
 });
 
 export const matchDayTeamApi = apiWithTags.injectEndpoints({
@@ -20,7 +29,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                 method: "POST",
                 body: { matchDayId, teamName, logoKey },
             }),
-            invalidatesTags: ["matchDayTeam"],
+            invalidatesTags: ["matchDayTeam", "matchDays"],
         }),
 
         renameTeam: builder.mutation<
@@ -32,7 +41,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                 method: "POST",
                 body: { id: teamId, teamName, matchDayId, logoKey },
             }),
-            invalidatesTags: ["matchDayTeam"],
+            invalidatesTags: ["matchDayTeam", "matchDays"],
         }),
 
         presignTeamLogoUpload: builder.mutation<
@@ -44,7 +53,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                 method: "POST",
                 params: { fileName, contentType },
             }),
-            invalidatesTags: ["matchDayTeam"],
+            invalidatesTags: ["matchDayTeam", "matchDays"],
         }),
 
         deleteMatchDayTeam: builder.mutation<
@@ -55,7 +64,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                 url: `teams/${teamId}`,
                 method: "DELETE",
             }),
-            invalidatesTags: ["matchDayTeam"],
+            invalidatesTags: ["matchDayTeam", "matchDays"],
         }),
 
         playerListToAddToTeam: builder.query<
@@ -108,7 +117,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                     body,
                 };
             },
-            invalidatesTags: ["matchDayTeam"],
+            invalidatesTags: ["matchDayTeam", "matchDays"],
         }),
 
         updatePlayerInTeam: builder.mutation<
@@ -142,7 +151,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                     body,
                 };
             },
-            invalidatesTags: ["matchDayTeam"],
+            invalidatesTags: ["matchDayTeam", "matchDays"],
         }),
         removePlayerFromTeam: builder.mutation<
             BasicResType,
@@ -153,7 +162,23 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                 method: "DELETE",
                 body: { teamId, playerId },
             }),
-            invalidatesTags: ["matchDayTeam"],
+            invalidatesTags: ["matchDayTeam", "matchDays"],
+        }),
+
+        /** Manual on-demand rank-based team draft — same snake-draft-by-rank logic the weekly
+         * scheduler uses, admin-triggered with a max-players-per-team cap. The number of teams
+         * is derived from confirmed participant turnout, not chosen directly. Only succeeds when
+         * the MatchDay has zero teams yet (see TeamController.GenerateTeamsByRank). */
+        generateTeamsByRank: builder.mutation<
+            BasicResType & { content: { success: boolean; reason?: string | null } },
+            { matchDayId: number; maxPlayersPerTeam: number }
+        >({
+            query: ({ matchDayId, maxPlayersPerTeam }) => ({
+                url: `teams/matchday/${matchDayId}/generate`,
+                method: "POST",
+                params: { maxPlayersPerTeam },
+            }),
+            invalidatesTags: ["matchDayTeam", "matchDays", "fixtures"],
         }),
     }),
 });
@@ -167,4 +192,5 @@ export const {
     useAddPlayerToTeamMutation,
     useUpdatePlayerInTeamMutation,
     useRemovePlayerFromTeamMutation,
+    useGenerateTeamsByRankMutation,
 } = matchDayTeamApi;

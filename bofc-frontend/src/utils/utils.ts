@@ -13,6 +13,32 @@ import { saveAs } from "file-saver";
  * CONCLUDED is treated as terminal (an admin's explicit ConcludeMatchDayAsync call)
  * and never resurrected by date math. durationMinutes defaults to 90 when unset.
  */
+/**
+ * Bangladesh has no DST and is a fixed UTC+6 — so "Dhaka wall-clock minus 6 hours" is always
+ * the true UTC instant a naive matchDayDate string represents. `new Date(matchDayDate)` on a
+ * "YYYY-MM-DDTHH:mm:ss" string with no offset parses it as the *viewer's own* local time per
+ * the JS spec, not Dhaka's — for any viewer not already in Asia/Dhaka, comparing that against
+ * `new Date()` (the real current instant) computes UPCOMING/ONGOING/CONCLUDED against the
+ * wrong absolute instant. Building the UTC millis directly from the string's components sidesteps
+ * the viewer's timezone entirely, unlike showBdLocalTime's regex approach — which only ever
+ * needs to relabel-and-display the given numbers, never compare them against "now".
+ */
+const BD_UTC_OFFSET_HOURS = 6;
+
+const bdNaiveToUtcMillis = (timeString: string): number | null => {
+    const match = timeString.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+    if (!match) return null;
+    const [, year, month, day, hour, minute, second] = match;
+    return Date.UTC(
+        parseInt(year, 10),
+        parseInt(month, 10) - 1,
+        parseInt(day, 10),
+        parseInt(hour, 10) - BD_UTC_OFFSET_HOURS,
+        parseInt(minute, 10),
+        second ? parseInt(second, 10) : 0
+    );
+};
+
 export const getEffectiveMatchDayStatus = (
     status?: string,
     matchDayDate?: string,
@@ -22,30 +48,104 @@ export const getEffectiveMatchDayStatus = (
     if (status === "CONCLUDED") return status;
     if (status !== "UPCOMING" && status !== "ONGOING") return status || "";
 
-    const start = new Date(matchDayDate);
-    const end = new Date(start.getTime() + (durationMinutes ?? 90) * 60_000);
-    const now = new Date();
+    const startMillis = bdNaiveToUtcMillis(matchDayDate);
+    if (startMillis == null) return status || "";
 
-    if (now < start) return "UPCOMING";
-    if (now < end) return "ONGOING";
+    const endMillis = startMillis + (durationMinutes ?? 90) * 60_000;
+    const nowMillis = Date.now();
+
+    if (nowMillis < startMillis) return "UPCOMING";
+    if (nowMillis < endMillis) return "ONGOING";
     return "CONCLUDED";
 };
 
+/**
+ * The backend sends naive datetime strings ("2026-09-02T18:00:00", no offset) that already
+ * represent Bangladesh wall-clock time — there is nothing to convert. Parsing this through
+ * `new Date()` and re-formatting with an explicit timeZone would first localize it to
+ * whatever timezone the *viewer's browser* happens to be in and only then reinterpret it as
+ * Asia/Dhaka, silently shifting the displayed value for any viewer not already in that zone
+ * (and previously this also added a redundant manual +6h on top, double-shifting even for
+ * Dhaka-local viewers — e.g. 18:00 rendering as the next day's 00:00). Parse the components
+ * directly instead so the displayed value is always exactly what the backend recorded.
+ */
 export const showBdLocalTime = (timeString: string) => {
     if (!timeString) return "";
 
-    const localTime = new Date(timeString);
-    const bdLocalTime = new Date(localTime.getTime() + 6 * 60 * 60 * 1000); // Adjusting to GMT +6
+    const match = timeString.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+    if (!match) return "";
 
-    return bdLocalTime.toLocaleString("en-GB", {
-        timeZone: "Asia/Dhaka",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-    });
+    const [, year, month, day, hourStr, minuteStr] = match;
+    const hour24 = parseInt(hourStr, 10);
+    const period = hour24 >= 12 ? "pm" : "am";
+    const hour12 = ((hour24 + 11) % 12) + 1;
+
+    return `${day}/${month}/${year}, ${String(hour12).padStart(2, "0")}:${minuteStr} ${period}`;
+};
+
+/**
+ * Parses the same naive "YYYY-MM-DDTHH:mm[:ss]" backend string showBdLocalTime does, but
+ * returns a real Date (via the local-component constructor, not the ISO-string one) so
+ * duration arithmetic — add N minutes, roll over midnight/month/year — works correctly.
+ * Reading it back with local getters (getHours/getDate/etc, never getUTCHours) always
+ * reproduces the exact wall-clock numbers that were parsed, regardless of the viewer's
+ * actual system timezone — same "don't convert, just relabel" contract as showBdLocalTime.
+ */
+const parseBdNaiveDateTime = (timeString?: string | null): Date | null => {
+    if (!timeString) return null;
+    const match = timeString.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+    if (!match) return null;
+
+    const [, year, month, day, hour, minute, second] = match;
+    return new Date(
+        parseInt(year, 10),
+        parseInt(month, 10) - 1,
+        parseInt(day, 10),
+        parseInt(hour, 10),
+        parseInt(minute, 10),
+        second ? parseInt(second, 10) : 0
+    );
+};
+
+const formatBdDate = (date: Date, dateOnly = false) => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    if (dateOnly) return `${day}/${month}/${year}`;
+
+    const hour24 = date.getHours();
+    const minute = String(date.getMinutes()).padStart(2, "0");
+    const period = hour24 >= 12 ? "pm" : "am";
+    const hour12 = ((hour24 + 11) % 12) + 1;
+
+    return `${day}/${month}/${year}, ${String(hour12).padStart(2, "0")}:${minute} ${period}`;
+};
+
+/** Start + durationMinutes -> the projected end Date, using the same naive-local parsing as showBdLocalTime. Defaults duration to 90 when unset, mirroring getEffectiveMatchDayStatus. Null if start can't be parsed. */
+export const getMatchDayEndDate = (start?: string | null, durationMinutes?: number | null): Date | null => {
+    const startDate = parseBdNaiveDateTime(start);
+    if (!startDate) return null;
+    return new Date(startDate.getTime() + (durationMinutes ?? 90) * 60_000);
+};
+
+/**
+ * "Starts – Ends" range for display, e.g. "09/08/2026, 06:00 pm – 07:30 pm" (end collapses
+ * to time-only when it lands on the same calendar day as the start; shows the full end date
+ * too if the duration pushes it past midnight).
+ */
+export const showBdLocalTimeRange = (start?: string | null, durationMinutes?: number | null): string => {
+    const startDate = parseBdNaiveDateTime(start);
+    if (!startDate) return "";
+    const end = new Date(startDate.getTime() + (durationMinutes ?? 90) * 60_000);
+
+    const sameDay =
+        startDate.getFullYear() === end.getFullYear() &&
+        startDate.getMonth() === end.getMonth() &&
+        startDate.getDate() === end.getDate();
+
+    const startStr = formatBdDate(startDate);
+    const endStr = sameDay ? formatBdDate(end).split(", ")[1] : formatBdDate(end);
+    return `${startStr} – ${endStr}`;
 };
 
 export const checkTockenValidity = (tokenContent: string) => {

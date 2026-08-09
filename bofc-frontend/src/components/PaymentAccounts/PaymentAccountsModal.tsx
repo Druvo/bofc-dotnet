@@ -184,7 +184,7 @@ const PaymentAccountsModal: React.FC<PaymentAccountsModalProps> = ({ isOpen, onC
           ) : (
             accounts.map((account, idx) => (
               <div key={account.id}>
-                {idx > 0 && <div className="mb-4 border-t border-gray-100 dark:border-gray-800" />}
+                {idx > 0 && <div className="mb-4 border-t border-gray-100 dark:border-[var(--color-rule)]" />}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
                     <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
@@ -249,7 +249,7 @@ const PaymentAccountsModal: React.FC<PaymentAccountsModalProps> = ({ isOpen, onC
           )}
 
           {isAdmin && (
-            <div className="mt-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+            <div className="mt-2 border-t border-gray-100 pt-4 dark:border-[var(--color-rule)]">
               <Button variant="outline" size="sm" startIcon={<PlusOutlined />} onClick={openAddForm}>
                 Add Payment Account
               </Button>

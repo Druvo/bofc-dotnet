@@ -92,7 +92,7 @@ const AccountBalanceCard: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+    <div className="flex h-full flex-col justify-between rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
       <div>
         <div className="mb-1 flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
@@ -129,7 +129,7 @@ const AccountBalanceCard: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-5 border-t border-gray-100 pt-4 dark:border-gray-800">
+      <div className="mt-5 border-t border-gray-100 pt-4 dark:border-[var(--color-rule)]">
         {primaryAccount ? (
           <div className="mb-3 flex items-center justify-between gap-2">
             <div className="min-w-0">

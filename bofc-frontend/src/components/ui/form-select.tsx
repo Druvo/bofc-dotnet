@@ -20,10 +20,10 @@ export default function FormSelect({ label, error, hint, placeholder, options, i
       <div className="relative">
         <select
           id={id}
-          className={`h-11 w-full appearance-none rounded-lg border px-4 py-2.5 pr-9 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-gray-900 ${
+          className={`h-11 w-full appearance-none rounded-lg border px-4 py-2.5 pr-9 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] ${
             error
               ? "border-error-500 focus:border-error-300 focus:ring-error-500/10 dark:border-error-500 dark:focus:border-error-800"
-              : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800"
+              : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90 dark:focus:border-brand-800"
           } ${className}`}
           {...rest}
         >

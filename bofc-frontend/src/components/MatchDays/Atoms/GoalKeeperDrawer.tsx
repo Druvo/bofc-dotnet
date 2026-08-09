@@ -60,16 +60,16 @@ export default function GoalKeeperDrawer({
           placeholder="Search Player"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          className="mb-4 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+          className="mb-4 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
         />
         <div ref={scrollRef} className="flex flex-row gap-4 overflow-x-auto pb-4" style={{ maxHeight: "70vh" }}>
           {dataSourceByRound.map((roundData) => (
             <div key={roundData.round} className="min-w-[280px] max-w-[280px] shrink-0">
               <h3 className="mb-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">Round {roundData.round}</h3>
-              <div className="overflow-hidden rounded-lg border border-gray-100 dark:border-gray-800">
+              <div className="overflow-hidden rounded-lg border border-gray-100 dark:border-[var(--color-rule)]">
                 <table className="w-full border-collapse text-theme-xs">
                   <thead>
-                    <tr className="bg-gray-50 dark:bg-white/[0.02]">
+                    <tr className="bg-gray-50 dark:bg-[var(--color-paper-2)]">
                       <th className="px-2.5 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Player</th>
                       <th className="px-2.5 py-2 text-left font-semibold text-gray-500 dark:text-gray-400">Played Date</th>
                     </tr>

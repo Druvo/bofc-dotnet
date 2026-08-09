@@ -27,7 +27,7 @@ const UpcomingDuesWidget: React.FC = () => {
   );
 
   return (
-    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
       <div className="mb-3 flex items-center justify-between">
         <div className="text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
           Payments Due This Month
@@ -46,7 +46,7 @@ const UpcomingDuesWidget: React.FC = () => {
           {duePlayers.map((p) => (
             <div
               key={p.playerId}
-              className="flex items-center gap-2.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5 dark:border-gray-800 dark:bg-white/[0.02]"
+              className="flex items-center gap-2.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]"
             >
               <span className="flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500">
                 <UserOutlined />

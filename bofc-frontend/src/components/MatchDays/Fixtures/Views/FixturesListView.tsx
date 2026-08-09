@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { IFixture } from "../../../../state/features/fixtures/fixtureTypes";
 import VenueLink from "../../../CommonAtoms/VenueLink";
 import { getStatusColor } from "../../../../utils/matchStatusUtils";
+import { formatMatchTimeRange } from "../../../../utils/matchTimeUtils";
 
 const { Text } = Typography;
 const { useToken } = theme;
@@ -112,7 +113,7 @@ export default function FixturesListView({ fixtures }: FixturesListViewProps) {
                         <Space size="small">
                           <CalendarOutlined style={{ color: token.colorPrimary }} />
                           <Text strong style={{ fontSize: 13 }}>
-                            {moment.utc(fixture.matchDate).local().format("HH:mm")}
+                            {formatMatchTimeRange(fixture.matchDate, fixture.matchDurationMinutes, "hh:mm a")}
                           </Text>
                           <Tag
                             color={getStatusColor(fixture.matchStatus)}

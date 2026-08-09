@@ -31,6 +31,7 @@ import Loader from "../ui/loader";
 import Pagination from "../ui/pagination";
 import Avatar from "../CommonAtoms/Avatar";
 import SendNotificationModal from "../Notifications/SendNotificationModal";
+import EmptyState from "../ui/empty-state";
 
 const segmentBtn = (active: boolean) =>
   `flex items-center gap-1.5 px-3.5 py-2 text-theme-sm font-medium transition ${
@@ -244,7 +245,7 @@ function Players() {
       name={record.name}
       seed={record.id}
       size={size}
-      className={`border-2 ${record.active ? "border-brand-500" : "border-gray-300 opacity-60 dark:border-gray-700"}`}
+      className={`border-2 ${record.active ? "border-brand-500" : "border-gray-300 opacity-60 dark:border-[var(--color-rule)]"}`}
     />
   );
 
@@ -286,10 +287,12 @@ function Players() {
   const renderMobilePlayers = () => {
     if (isLoading) return <Loader className="py-10" />;
     if (!filteredPlayers.length) return (
-      <div className="py-10 text-center">
-        <TeamOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
-        <p className="text-theme-sm text-gray-400 dark:text-gray-500">No players found</p>
-      </div>
+      <EmptyState
+        icon={<TeamOutlined />}
+        title="No players yet"
+        description="Players will show up here once they're added."
+        action={canManagePlayers ? { label: "Add Player", icon: <PlusOutlined />, onClick: () => navigate("/player") } : undefined}
+      />
     );
     const start = (mobilePage - 1) * mobilePageSize;
     const paged = filteredPlayers.slice(start, start + mobilePageSize);
@@ -297,7 +300,7 @@ function Players() {
       <>
         <div className="flex flex-col gap-3">
           {paged.map((record) => (
-            <div key={record.id} className="rounded-xl border border-gray-200 bg-white p-3.5 dark:border-gray-800 dark:bg-white/[0.03]">
+            <div key={record.id} className="rounded-xl border border-gray-200 bg-white p-3.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
               <div className="flex items-center gap-3">
                 <PlayerAvatar record={record} size={44} />
                 <div className="min-w-0 flex-1">
@@ -350,7 +353,7 @@ function Players() {
   const pagedDesktop = filteredPlayers.slice((tableCurrentPage - 1) * tablePageSize, tableCurrentPage * tablePageSize);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
       {/* Page header */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-white/90">
@@ -363,7 +366,7 @@ function Players() {
             <input
               placeholder="Search players"
               onChange={(e) => handleSearch(e.target.value)}
-              className="h-10 w-48 rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90 sm:w-64"
+              className="h-10 w-48 rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90 sm:w-64"
             />
           </div>
           {canManagePlayers && (
@@ -377,7 +380,7 @@ function Players() {
       </div>
 
       {/* Tab segmented control */}
-      <div className="mb-4 flex overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700" style={{ width: "fit-content" }}>
+      <div className="mb-4 flex overflow-x-auto rounded-lg border border-gray-300 dark:border-[var(--color-rule)]" style={{ width: "fit-content" }}>
         <button type="button" onClick={() => setActiveTabKey("all")} className={segmentBtn(activeTabKey === "all")}>
           All <Badge variant={activeTabKey === "all" ? "light" : "primary"}>{allCount}</Badge>
         </button>
@@ -394,16 +397,18 @@ function Players() {
       ) : isLoading ? (
         <Loader className="py-10" />
       ) : !filteredPlayers.length ? (
-        <div className="py-10 text-center">
-          <TeamOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
-          <p className="text-theme-sm text-gray-400 dark:text-gray-500">No players found</p>
-        </div>
+        <EmptyState
+          icon={<TeamOutlined />}
+          title="No players yet"
+          description="Players will show up here once they're added."
+          action={canManagePlayers ? { label: "Add Player", icon: <PlusOutlined />, onClick: () => navigate("/player") } : undefined}
+        />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
             <table className="w-full min-w-max border-collapse text-theme-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                   <th className="px-4 py-3 text-left font-semibold text-gray-500 dark:text-gray-400">Player</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-500 dark:text-gray-400">Contact Info</th>
                   <th className="px-4 py-3 text-left font-semibold text-gray-500 dark:text-gray-400">Employee ID</th>

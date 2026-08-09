@@ -181,7 +181,7 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className={`login-page-wrapper ${backgroundLoaded ? 'bg-loaded' : ''}`}>
+        <div className={`login-page-wrapper dark ${backgroundLoaded ? 'bg-loaded' : ''}`}>
             <div className="login-form-container">
                 {/* Login Form */}
                 <div className="login-right-section">

@@ -1,21 +1,11 @@
 import { MatchStatus } from "../state/features/fixtures/fixtureTypes";
+import { getMatchStatusVisual } from "./matchStatusVisuals";
 
 /**
  * Get color for match status badge
  */
 export function getStatusColor(status: string): string {
-  switch (status) {
-    case MatchStatus.SCHEDULED:
-      return "gold";
-    case MatchStatus.ONGOING:
-      return "orange";
-    case MatchStatus.PAUSED:
-      return "purple";
-    case MatchStatus.COMPLETED:
-      return "green";
-    default:
-      return "default";
-  }
+  return getMatchStatusVisual(status).antdColor;
 }
 
 /**

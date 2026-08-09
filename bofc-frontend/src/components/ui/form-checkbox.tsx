@@ -27,7 +27,7 @@ export default function FormCheckbox({
         />
         <span
           className={`flex h-5 w-5 items-center justify-center rounded-md border-[1.25px] ${
-            checked ? "border-brand-500 bg-brand-500" : "border-gray-300 bg-transparent dark:border-gray-700"
+            checked ? "border-brand-500 bg-brand-500" : "border-gray-300 bg-transparent dark:border-[var(--color-rule)]"
           }`}
         >
           {checked && (

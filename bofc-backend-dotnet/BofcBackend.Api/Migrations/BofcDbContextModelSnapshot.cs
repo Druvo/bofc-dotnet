@@ -1177,6 +1177,36 @@ namespace BofcBackend.Api.Migrations
                     b.ToTable("group_standing", (string)null);
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.JerseyColor", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("color");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("sort_order");
+
+                    b.Property<long>("SystemSettingsId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("system_settings_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SystemSettingsId");
+
+                    b.ToTable("jersey_color", (string)null);
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.LogicNode", b =>
                 {
                     b.Property<long>("Id")
@@ -1419,6 +1449,18 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("auction_mode");
 
+                    b.Property<string>("AutoGenSlotDayOfWeek")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("auto_gen_slot_day_of_week");
+
+                    b.Property<DateTime?>("AutoGenWeekStart")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("auto_gen_week_start");
+
+                    b.Property<bool>("AutoTeamsGenerated")
+                        .HasColumnType("bit")
+                        .HasColumnName("auto_teams_generated");
+
                     b.Property<long>("CreatedBy")
                         .HasColumnType("bigint")
                         .HasColumnName("created_by");
@@ -1447,6 +1489,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsManuallyModified")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_manually_modified");
+
                     b.Property<bool>("IsWeeklyMatchDay")
                         .HasColumnType("bit")
                         .HasColumnName("is_weekly_match_day");
@@ -1468,6 +1514,10 @@ namespace BofcBackend.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("match_day_type");
+
+                    b.Property<int?>("MatchDurationMinutes")
+                        .HasColumnType("int")
+                        .HasColumnName("match_duration_minutes");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1496,6 +1546,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("sport_type");
 
+                    b.Property<int?>("TimeGapMinutes")
+                        .HasColumnType("int")
+                        .HasColumnName("time_gap_minutes");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("title");
@@ -1509,6 +1563,11 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnName("venue_id");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DefaultMatchDay")
+                        .IsUnique()
+                        .HasDatabaseName("ux_match_day_single_default")
+                        .HasFilter("[is_default] = 1");
 
                     b.HasIndex("VenueId");
 
@@ -2197,6 +2256,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(500)")
                         .HasColumnName("profile_photo");
 
+                    b.Property<int?>("Rank")
+                        .HasColumnType("int")
+                        .HasColumnName("player_rank");
+
                     b.Property<string>("TeamsId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
@@ -2276,6 +2339,86 @@ namespace BofcBackend.Api.Migrations
                     b.HasIndex("PlayerId");
 
                     b.ToTable("player_goalkeeping_history", (string)null);
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.PlayerStatAdjustment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("AssistsAdjustment")
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("assists_adjustment");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<int>("GoalsAdjustment")
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("goals_adjustment");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<long?>("MatchId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_id");
+
+                    b.Property<int>("MatchesPlayedAdjustment")
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("matches_played_adjustment");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("note");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_id");
+
+                    b.Property<int>("RedCardsAdjustment")
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("red_cards_adjustment");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.Property<int>("YellowCardsAdjustment")
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("yellow_cards_adjustment");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("PlayerId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_player_stat_adjustment_player_id_lifetime")
+                        .HasFilter("[match_id] IS NULL");
+
+                    b.HasIndex("PlayerId", "MatchId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_player_stat_adjustment_player_id_match_id")
+                        .HasFilter("[match_id] IS NOT NULL");
+
+                    b.ToTable("player_stat_adjustment", (string)null);
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.PushSubscription", b =>
@@ -2583,22 +2726,6 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("created_date");
 
-                    b.Property<string>("JerseyColorA")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
-                        .HasDefaultValue("red")
-                        .HasColumnName("jersey_color_a");
-
-                    b.Property<string>("JerseyColorB")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)")
-                        .HasDefaultValue("yellow")
-                        .HasColumnName("jersey_color_b");
-
                     b.Property<long?>("LastModifiedBy")
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
@@ -2611,6 +2738,18 @@ namespace BofcBackend.Api.Migrations
                     b.Property<int>("MatchDayReminderDaysBefore")
                         .HasColumnType("int")
                         .HasColumnName("match_day_reminder_days_before");
+
+                    b.Property<int>("MatchDayStatusCheckIntervalHours")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1)
+                        .HasColumnName("match_day_status_check_interval_hours");
+
+                    b.Property<int>("MatchDaysPerWeek")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1)
+                        .HasColumnName("match_days_per_week");
 
                     b.Property<bool>("NotifyCustomEmailEnabled")
                         .HasColumnType("bit")
@@ -2673,45 +2812,52 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
 
+                    b.Property<bool>("WeeklyMatchDayAutoTeamsEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("weekly_match_day_auto_teams_enabled");
+
+                    b.Property<int>("WeeklyMatchDayAutoTeamsLeadHours")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(24)
+                        .HasColumnName("weekly_match_day_auto_teams_lead_hours");
+
+                    b.Property<bool>("WeeklyMatchDayEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("weekly_match_day_enabled");
+
+                    b.Property<int>("WeeklyMatchDayMaxPlayersPerTeam")
+                        .HasColumnType("int")
+                        .HasDefaultValue(6)
+                        .HasColumnName("weekly_match_day_max_players_per_team");
+
+                    b.Property<string>("WeeklyMatchDayNamePrefix")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("weekly_match_day_name_prefix");
+
                     b.Property<string>("WeeklyMatchDayOfWeek")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("weekly_match_day_of_week");
 
-                    b.Property<int>("WeeklyMatchDurationMinutes")
-                        .HasColumnType("int")
-                        .HasColumnName("weekly_match_duration_minutes");
-
-                    b.Property<bool>("WeeklyMatchEnabled")
-                        .HasColumnType("bit")
-                        .HasColumnName("weekly_match_enabled");
-
-                    b.Property<string>("WeeklyMatchNamePrefix")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("weekly_match_name_prefix");
-
-                    b.Property<string>("WeeklyMatchSportType")
+                    b.Property<string>("WeeklyMatchDaySportType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("weekly_match_sport_type");
+                        .HasColumnName("weekly_match_day_sport_type");
+
+                    b.Property<long?>("WeeklyMatchDayVenueId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("weekly_match_day_venue_id");
 
                     b.Property<TimeSpan>("WeeklyMatchTime")
                         .HasColumnType("time")
                         .HasColumnName("weekly_match_time");
 
-                    b.Property<int>("WeeklyMatchTimeGapMinutes")
-                        .HasColumnType("int")
-                        .HasColumnName("weekly_match_time_gap_minutes");
-
-                    b.Property<long?>("WeeklyMatchVenueId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("weekly_match_venue_id");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("WeeklyMatchVenueId");
+                    b.HasIndex("WeeklyMatchDayVenueId");
 
                     b.ToTable("system_settings", (string)null);
                 });
@@ -2830,6 +2976,109 @@ namespace BofcBackend.Api.Migrations
                     b.ToTable("team_budgets", (string)null);
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TeamLineup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<string>("Formation")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("formation");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<int>("SquadSize")
+                        .HasColumnType("int")
+                        .HasColumnName("squad_size");
+
+                    b.Property<long>("TeamId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("team_id");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId")
+                        .IsUnique();
+
+                    b.ToTable("team_lineup", (string)null);
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TeamLineupPlayer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Availability")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("availability");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<bool>("IsStarter")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_starter");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int")
+                        .HasColumnName("order_index");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_id");
+
+                    b.Property<long>("TeamLineupId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("team_lineup_id");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("TeamLineupId", "PlayerId")
+                        .IsUnique();
+
+                    b.ToTable("team_lineup_player", (string)null);
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TeamPlayer", b =>
                 {
                     b.Property<long>("Id")
@@ -2939,6 +3188,54 @@ namespace BofcBackend.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("venues", (string)null);
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.WeeklyMatchDaySlot", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("DayOfWeek")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("day_of_week");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("int")
+                        .HasDefaultValue(90)
+                        .HasColumnName("duration_minutes");
+
+                    b.Property<int>("MatchDurationMinutes")
+                        .HasColumnType("int")
+                        .HasDefaultValue(13)
+                        .HasColumnName("match_duration_minutes");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int")
+                        .HasColumnName("sort_order");
+
+                    b.Property<long>("SystemSettingsId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("system_settings_id");
+
+                    b.Property<TimeSpan>("Time")
+                        .HasColumnType("time")
+                        .HasColumnName("time");
+
+                    b.Property<int>("TimeGapMinutes")
+                        .HasColumnType("int")
+                        .HasDefaultValue(15)
+                        .HasColumnName("time_gap_minutes");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SystemSettingsId");
+
+                    b.ToTable("weekly_match_day_slot", (string)null);
                 });
 
             modelBuilder.Entity("collection_players", b =>
@@ -3263,6 +3560,17 @@ namespace BofcBackend.Api.Migrations
                     b.Navigation("Team");
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.JerseyColor", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.SystemSettings", "SystemSettings")
+                        .WithMany("JerseyColors")
+                        .HasForeignKey("SystemSettingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SystemSettings");
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.LogicNode", b =>
                 {
                     b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
@@ -3519,6 +3827,24 @@ namespace BofcBackend.Api.Migrations
                     b.Navigation("Player");
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.PlayerStatAdjustment", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Match", "Match")
+                        .WithMany()
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Match");
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.PushSubscription", b =>
                 {
                     b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
@@ -3586,12 +3912,12 @@ namespace BofcBackend.Api.Migrations
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.SystemSettings", b =>
                 {
-                    b.HasOne("BofcBackend.Api.Domain.Entities.Venue", "WeeklyMatchVenue")
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Venue", "WeeklyMatchDayVenue")
                         .WithMany()
-                        .HasForeignKey("WeeklyMatchVenueId")
+                        .HasForeignKey("WeeklyMatchDayVenueId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("WeeklyMatchVenue");
+                    b.Navigation("WeeklyMatchDayVenue");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Team", b =>
@@ -3632,6 +3958,36 @@ namespace BofcBackend.Api.Migrations
                     b.Navigation("Team");
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TeamLineup", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TeamLineupPlayer", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BofcBackend.Api.Domain.Entities.TeamLineup", "TeamLineup")
+                        .WithMany("LineupPlayers")
+                        .HasForeignKey("TeamLineupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+
+                    b.Navigation("TeamLineup");
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TeamPlayer", b =>
                 {
                     b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
@@ -3649,6 +4005,17 @@ namespace BofcBackend.Api.Migrations
                     b.Navigation("Player");
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.WeeklyMatchDaySlot", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.SystemSettings", "SystemSettings")
+                        .WithMany("WeeklyMatchDaySlots")
+                        .HasForeignKey("SystemSettingsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SystemSettings");
                 });
 
             modelBuilder.Entity("collection_players", b =>
@@ -3743,9 +4110,21 @@ namespace BofcBackend.Api.Migrations
                     b.Navigation("Standings");
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.SystemSettings", b =>
+                {
+                    b.Navigation("JerseyColors");
+
+                    b.Navigation("WeeklyMatchDaySlots");
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Team", b =>
                 {
                     b.Navigation("TeamPlayers");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.TeamLineup", b =>
+                {
+                    b.Navigation("LineupPlayers");
                 });
 #pragma warning restore 612, 618
         }

@@ -59,7 +59,8 @@ export default function RoundMatchGenerationModal({
         const next = { ...prev };
         if (matchDayVenueId) next.venueId = String(matchDayVenueId);
         if (matchDayStartDate) {
-          const matchDayDateTime = dayjs.utc(matchDayStartDate).local();
+          // matchDayStartDate is naive-local already — see RoundManagement.tsx's identical fix.
+          const matchDayDateTime = dayjs(matchDayStartDate);
           next.startDate = matchDayDateTime.format("YYYY-MM-DD");
           next.startTime = matchDayDateTime.format("HH:mm");
         }

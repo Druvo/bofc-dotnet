@@ -226,7 +226,7 @@ const AuctionRegistrationPage: React.FC = () => {
           </Alert>
         )}
 
-        <div className="my-4 h-px bg-gray-200 dark:bg-gray-800" />
+        <div className="my-4 h-px bg-gray-200 dark:bg-[var(--color-paper-2)]" />
 
         <div className="flex flex-col gap-4">
           <FormInput label="Full Name" placeholder="e.g. Md. Zahid Hasan" value={form.name} error={errors.name}
@@ -260,13 +260,13 @@ const AuctionRegistrationPage: React.FC = () => {
               placeholder="Any previous cricket/football experience..."
               value={form.previousExperience}
               onChange={(e) => setField("previousExperience", e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-white/90 dark:placeholder:text-white/30"
             />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Profile Photo (Optional)</label>
             <div className="flex flex-col gap-2">
-              <label className={`inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] ${profileUploading ? "pointer-events-none opacity-50" : ""}`}>
+              <label className={`inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-theme-sm text-gray-700 shadow-theme-xs hover:bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)] dark:text-gray-400 dark:hover:bg-white/[0.03] ${profileUploading ? "pointer-events-none opacity-50" : ""}`}>
                 {profileUploading ? "Uploading…" : "Upload Profile Photo"}
                 <input
                   type="file"

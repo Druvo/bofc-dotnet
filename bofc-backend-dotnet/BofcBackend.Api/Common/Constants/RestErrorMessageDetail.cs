@@ -49,6 +49,7 @@ public static class RestErrorMessageDetail
     public const string ParticipantNotFound = "Participant is not Found";
     public const string AlreadyParticipant = "Already given vote for participant";
     public const string MatchDayDateCannotBePastDate = "This MatchDay is already past";
+    public const string MatchDayAlreadyConcluded = "This MatchDay has already been concluded";
     public const string NoUpcomingMatchDay = "No upcoming MatchDay";
     public const string PlayerIsNotParticipantYet = "Player is not a confirmed participant in the MatchDay";
     public const string PlayerAlreadyAddedAnotherTeam = "This player is already added another team";
@@ -56,6 +57,7 @@ public static class RestErrorMessageDetail
 
     public const string RoundNumberAlreadyExists = "A round with this round number already exists in the MatchDay";
     public const string RoundHasMatches = "Cannot delete round with existing matches";
+    public const string RoundHasDependents = "Cannot delete round with groups, assigned teams, or advancement rules already set up";
     public const string RoundNotCompleted = "Round is not completed yet";
     public const string InvalidRoundSequence = "Invalid round sequence order";
     public const string GroupNameAlreadyExists = "A group with this name already exists in the round";

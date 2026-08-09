@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { CalendarOutlined } from "@ant-design/icons";
-import moment from "moment";
 import { useGetFixturesQuery } from "../../state/features/fixtures/fixturesSlice";
 import { useGetMatchDaySummaryQuery } from "../../state/features/matchDays/matchDaysSlice";
 import { useGetMatchDayStructureQuery } from "../../state/features/manualFixtures/manualFixturesSlice";
 import type { RoundGroupResponse } from "../../state/features/manualFixtures/manualFixtureTypes";
 import type { IFixture } from "../../state/features/fixtures/fixtureTypes";
 import { getTeamInitials, getTeamLogoUrlFromSummary } from "./teamLogoUtils";
+import { formatMatchTimeRange } from "../../utils/matchTimeUtils";
 import MatchCardShell, { matchStatusTag } from "../CommonAtoms/MatchCard";
 import VenueLink from "../CommonAtoms/VenueLink";
 import styles from "./ViewerFixturesTab.module.css";
@@ -42,10 +42,10 @@ const getLeafGroups = (groups: RoundGroupResponse[] = []): RoundGroupResponse[] 
 
 const buildStageLabel = (label: string) => label.toUpperCase();
 
-const formatMatchDate = (matchDate?: string) => {
+const formatMatchDate = (matchDate?: string, matchDurationMinutes?: number | null) => {
   if (!matchDate) return "TO BE ANNOUNCED";
 
-  return moment.utc(matchDate).local().format("DD MMM YYYY, HH:mm");
+  return formatMatchTimeRange(matchDate, matchDurationMinutes, "DD MMM YYYY, hh:mm a");
 };
 
 const normalizeFilterLabel = (label: string) => label.toUpperCase();
@@ -97,7 +97,7 @@ function MatchCard({ fixture, matchDaySummary, isMobile, roundNameMap }: { fixtu
       <div className={styles.cardMetaRow}>
         <span className={styles.metaItem}>
           <CalendarOutlined />
-          {formatMatchDate(fixture.matchDate)}
+          {formatMatchDate(fixture.matchDate, fixture.matchDurationMinutes)}
         </span>
         {fixture.venueName && (
           <VenueLink

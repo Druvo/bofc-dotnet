@@ -43,8 +43,23 @@ public class MatchManagementService(
             }
         }
 
+        // Plain read-check-write here would let two concurrent "start" clicks both pass the
+        // SCHEDULED check above and both log a MATCH_STARTED event. ExecuteUpdateAsync's WHERE
+        // clause is an atomic compare-and-set at the DB row level — only one concurrent caller
+        // can ever see claimed == 1.
+        var startedAt = DateTime.UtcNow;
+        var claimed = await db.Matches
+            .Where(m => m.Id == matchId && m.MatchStatus == MatchStatus.SCHEDULED)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(m => m.MatchStatus, MatchStatus.ONGOING)
+                .SetProperty(m => m.StartedAt, startedAt)
+                .SetProperty(m => m.ElapsedTimeSeconds, 0));
+        if (claimed == 0)
+        {
+            throw new MatchDayServiceException("Only scheduled matches can be started", HttpStatusCode.Conflict);
+        }
         match.MatchStatus = MatchStatus.ONGOING;
-        match.StartedAt = DateTime.UtcNow;
+        match.StartedAt = startedAt;
         match.ElapsedTimeSeconds = 0;
 
         var adminPlayer = await db.Players.FirstOrDefaultAsync(p => p.Id == currentUser.GetPlayerId())
@@ -72,8 +87,14 @@ public class MatchManagementService(
         {
             throw new MatchDayServiceException("Only ongoing matches can be paused", HttpStatusCode.Conflict);
         }
+        var claimed = await db.Matches
+            .Where(m => m.Id == matchId && m.MatchStatus == MatchStatus.ONGOING)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(m => m.MatchStatus, MatchStatus.PAUSED));
+        if (claimed == 0)
+        {
+            throw new MatchDayServiceException("Only ongoing matches can be paused", HttpStatusCode.Conflict);
+        }
         match.MatchStatus = MatchStatus.PAUSED;
-        await db.SaveChangesAsync();
         liveMatchUpdatePublisher.PublishMatchUpdate(match.MatchDayId, match.Id, "MATCH_PAUSED");
         return ToResponse(match);
     }
@@ -85,8 +106,14 @@ public class MatchManagementService(
         {
             throw new MatchDayServiceException("Only paused matches can be resumed", HttpStatusCode.Conflict);
         }
+        var claimed = await db.Matches
+            .Where(m => m.Id == matchId && m.MatchStatus == MatchStatus.PAUSED)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(m => m.MatchStatus, MatchStatus.ONGOING));
+        if (claimed == 0)
+        {
+            throw new MatchDayServiceException("Only paused matches can be resumed", HttpStatusCode.Conflict);
+        }
         match.MatchStatus = MatchStatus.ONGOING;
-        await db.SaveChangesAsync();
         liveMatchUpdatePublisher.PublishMatchUpdate(match.MatchDayId, match.Id, "MATCH_RESUMED");
         return ToResponse(match);
     }
@@ -99,8 +126,18 @@ public class MatchManagementService(
             throw new MatchDayServiceException("Only ongoing matches can be completed", HttpStatusCode.Conflict);
         }
 
+        var completedAt = DateTime.UtcNow;
+        var claimed = await db.Matches
+            .Where(m => m.Id == matchId && m.MatchStatus == MatchStatus.ONGOING)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(m => m.MatchStatus, MatchStatus.COMPLETED)
+                .SetProperty(m => m.CompletedAt, completedAt));
+        if (claimed == 0)
+        {
+            throw new MatchDayServiceException("Only ongoing matches can be completed", HttpStatusCode.Conflict);
+        }
         match.MatchStatus = MatchStatus.COMPLETED;
-        match.CompletedAt = DateTime.UtcNow;
+        match.CompletedAt = completedAt;
 
         var adminPlayer = await db.Players.FirstOrDefaultAsync(p => p.Id == currentUser.GetPlayerId())
             ?? throw new MatchDayServiceException("Admin player not found", HttpStatusCode.NotFound);
@@ -135,28 +172,36 @@ public class MatchManagementService(
     {
         var match = await GetMatchEntityAsync(matchId);
 
-        var newStatus = Enum.Parse<MatchStatus>(request.MatchStatus);
-        match.MatchStatus = newStatus;
-
-        if (newStatus == MatchStatus.COMPLETED && match.CompletedAt == null)
+        if (!Enum.TryParse<MatchStatus>(request.MatchStatus, out var newStatus))
         {
-            match.CompletedAt = DateTime.UtcNow;
-            if (match.GroupId is { } groupId)
-            {
-                await TryAsync(() => roundGroupService.RecalculateGroupStandingsAsync(groupId), "auto-update group standings");
-            }
-            if (match.RoundId is { } roundId)
-            {
-                await TryAsync(() => matchDayRoundService.CheckAndAutoCompleteRoundAsync(roundId), "auto-complete round");
-            }
+            throw new MatchDayServiceException($"Unknown match status '{request.MatchStatus}'", HttpStatusCode.BadRequest);
         }
 
+        // This endpoint is for score/elapsed-time corrections, not lifecycle transitions —
+        // setting MatchStatus to anything other than the match's current status here would
+        // bypass StartMatchAsync/PauseMatchAsync/ResumeMatchAsync/CompleteMatchAsync entirely
+        // (skipping the round-started check, MATCH_STARTED/COMPLETED event logging, stats
+        // aggregation, and group-standings recalculation those do). Use the dedicated
+        // /start /pause /resume /complete endpoints for an actual status change.
+        if (newStatus != match.MatchStatus)
+        {
+            throw new MatchDayServiceException(
+                "Match status can't be changed here — use the start/pause/resume/complete actions instead",
+                HttpStatusCode.Conflict);
+        }
+
+        // Route through the same "must match recorded GOAL events" rule UpdateTeamScoreAsync
+        // enforces — this was previously a THIRD, unconstrained way to set the score (alongside
+        // UpdateTeamScoreAsync's strict check and the event CRUD paths' +1/recompute), letting a
+        // score silently drift out of sync with the actual goal events.
         if (request.HomeTeamScore != null)
         {
+            await ValidateScoreMatchesGoalEventsAsync(match.Id, match.HomeTeamId, request.HomeTeamScore.Value);
             match.HomeTeamScore = request.HomeTeamScore.Value;
         }
         if (request.AwayTeamScore != null)
         {
+            await ValidateScoreMatchesGoalEventsAsync(match.Id, match.AwayTeamId, request.AwayTeamScore.Value);
             match.AwayTeamScore = request.AwayTeamScore.Value;
         }
         if (request.ElapsedTimeSeconds != null)
@@ -169,9 +214,35 @@ public class MatchManagementService(
         return ToResponse(match);
     }
 
+    private async Task ValidateScoreMatchesGoalEventsAsync(long matchId, long teamId, int newScore)
+    {
+        var recordedGoals = await db.MatchEvents.CountAsync(e =>
+            e.MatchId == matchId && e.TeamId == teamId && e.EventType == MatchEventType.GOAL);
+        if (newScore != recordedGoals)
+        {
+            throw new MatchDayServiceException(
+                $"Score must match the recorded goal events for this team ({recordedGoals}). Record or delete goal events first.",
+                HttpStatusCode.Conflict);
+        }
+    }
+
     public async Task<MatchEventResponse> RecordMatchEventAsync(MatchEventRequest request)
     {
         var match = await GetMatchEntityAsync(request.MatchId!.Value);
+
+        // UpdateMatchEventAsync/DeleteMatchEventAsync already lock a COMPLETED match's events to
+        // SUPERADMIN — recording a brand-new event had no equivalent check at all, letting anyone
+        // who could reach this endpoint add goals/cards to a match that hasn't started yet or is
+        // already finished, circumventing that lock and skewing stats after the fact.
+        if (match.MatchStatus == MatchStatus.SCHEDULED)
+        {
+            throw new MatchDayServiceException("Match hasn't started yet — start it before recording events", HttpStatusCode.Conflict);
+        }
+        if (match.MatchStatus == MatchStatus.COMPLETED && !currentUser.IsInRole(Domain.Constants.PlayerRoleNames.SuperAdmin))
+        {
+            throw new MatchDayServiceException("Only SUPERADMIN can add events to a completed match", HttpStatusCode.Conflict);
+        }
+
         var player = await db.Players.FirstOrDefaultAsync(p => p.Id == request.PlayerId)
             ?? throw new MatchDayServiceException("Player not found", HttpStatusCode.NotFound);
         var team = await db.Teams.FirstOrDefaultAsync(t => t.Id == request.TeamId)
@@ -302,15 +373,7 @@ public class MatchManagementService(
     public async Task UpdateTeamScoreAsync(long matchId, long teamId, int newScore)
     {
         var match = await GetMatchEntityAsync(matchId);
-        var recordedGoals = await db.MatchEvents.CountAsync(e =>
-            e.MatchId == matchId && e.TeamId == teamId && e.EventType == MatchEventType.GOAL);
-
-        if (newScore != recordedGoals)
-        {
-            throw new MatchDayServiceException(
-                $"Score must match the recorded goal events for this team ({recordedGoals}). Record or delete goal events first.",
-                HttpStatusCode.Conflict);
-        }
+        await ValidateScoreMatchesGoalEventsAsync(matchId, teamId, newScore);
 
         if (match.HomeTeamId == teamId)
         {
@@ -378,6 +441,8 @@ public class MatchManagementService(
         {
             throw new MatchDayServiceException("Home team and away team cannot be the same", HttpStatusCode.BadRequest);
         }
+
+        await Common.Util.JerseyColorValidator.ValidateAsync(db, request.HomeJerseyColor, request.AwayJerseyColor);
 
         MatchDayRound? round = null;
         if (request.RoundId != null)
@@ -569,7 +634,21 @@ public class MatchManagementService(
             VenueName = match.Venue?.Name,
             VenueMapLink = match.Venue?.MapLink,
             MatchDate = match.MatchDate,
-            EndTime = match.MatchDurationMinutes != null ? match.MatchDate.AddMinutes(match.MatchDurationMinutes.Value) : null,
+            // Once the match has actually started, project the end from when it really started
+            // rather than the originally-scheduled MatchDate — a match that kicked off late would
+            // otherwise show a projected end time that's already wrong the moment it starts.
+            // StartedAt is true UTC (DateTime.UtcNow) while MatchDate is naive-local Dhaka
+            // wall-clock (see MatchDay.MatchDayDate's doc comment — Match inherits the same
+            // convention from FixtureGenerationService/WeeklyMatchDayTeamGenerator, which build
+            // it directly off MatchDayDate with no conversion) — ConvertTimeFromUtc against the
+            // host's local timezone (the same "host is configured for Dhaka" assumption every
+            // DateTime.Now call in this codebase already relies on) brings it into the same
+            // naive-local space instead of mixing two different absolute epochs.
+            EndTime = match.MatchDurationMinutes != null
+                ? (match.StartedAt is { } startedAtUtc
+                    ? TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(startedAtUtc, DateTimeKind.Utc), TimeZoneInfo.Local)
+                    : match.MatchDate).AddMinutes(match.MatchDurationMinutes.Value)
+                : null,
             MatchStatus = match.MatchStatus.ToString(),
             MatchOrder = match.MatchOrder,
             Round = match.LegacyRound,

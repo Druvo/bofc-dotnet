@@ -112,7 +112,7 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
       }
     >({
       query: ({ offSet, pageSize, sortedBy, sortDirection }) =>
-        `matchDays?offSet=${offSet}&pageSize=${pageSize}&sortedBy=${sortedBy}&sortDirection=${sortDirection}`,
+        `match-days?offSet=${offSet}&pageSize=${pageSize}&sortedBy=${sortedBy}&sortDirection=${sortDirection}`,
       providesTags: ["matchDays"],
     }),
 
@@ -121,7 +121,7 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
       { matchDayId: number }
     >({
       query: ({ matchDayId }) =>
-        `matchDay-participants/${matchDayId}/next-upcoming`,
+        `match-day-participants/${matchDayId}/next-upcoming`,
       providesTags: ["matchDays"],
     }),
 
@@ -169,7 +169,7 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
       { matchDayId: number }
     >({
       query: ({ matchDayId }) =>
-        `matchDay-participants/${matchDayId}/goal-keepers`,
+        `match-day-participants/${matchDayId}/goal-keepers`,
       providesTags: ["matchDays"],
     }),
     getMatchDayGoalkeeperHistoryList: builder.query<

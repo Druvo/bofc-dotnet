@@ -3,7 +3,6 @@ import { toast } from "react-toastify";
 import { CalendarOutlined, ClockCircleOutlined, UploadOutlined, DeleteOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useGetVanuesQuery } from "../../../state/features/vanues/vanuesSlice";
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
 import {
     useCreateMatchDayMutation,
     useUpdateMatchDayMutation,
@@ -21,8 +20,6 @@ import FormSwitch from "../../ui/form-switch";
 import Loader from "../../ui/loader";
 
 const MAX_ROADMAP_IMAGE_SIZE = 8 * 1024 * 1024;
-
-dayjs.extend(utc);
 
 interface CreateMatchDayProps {
     matchDayId?: number;
@@ -95,14 +92,18 @@ export default function CreateMatchDay({
     };
 
     const handleCreateOrUpdateMatchDay = async () => {
+        if (isCreating || isUpdating) return;
         if (!validate()) return;
 
-        const localDateTime = dayjs(`${values.matchDayDate}T${values.matchDayTime}:00`);
-        const matchDayDateUTC = localDateTime.utc().format("YYYY-MM-DDTHH:mm:ss");
+        // The backend stores matchDayDate as a naive string that already represents Bangladesh
+        // wall-clock time — there is nothing to convert (see utils.ts's showBdLocalTime doc
+        // comment for the exact bug this caused before: converting through .utc() here shifted
+        // an admin's entered kickoff time by their browser's offset before it was ever persisted).
+        const matchDayDateNaive = `${values.matchDayDate}T${values.matchDayTime}:00`;
 
         const payload = {
             matchDayName: values.matchDayName,
-            matchDayDate: matchDayDateUTC,
+            matchDayDate: matchDayDateNaive,
             durationMinutes: values.durationMinutes ? Number(values.durationMinutes) : undefined,
             venueId: Number(values.venueId),
             auctionMode: isAutoMatchDay ? false : values.auctionMode || false,
@@ -174,7 +175,10 @@ export default function CreateMatchDay({
 
     useEffect(() => {
         if (matchDayData && venuesData) {
-            const matchDayDateTime = dayjs.utc(matchDayData.matchDayDate).local();
+            // Plain dayjs(...) parse — no .utc()/.local() conversion. matchDayDate is naive-local
+            // already (see the write side above); running it through .utc().local() here applied
+            // a second, opposite conversion and could even roll the date to the wrong calendar day.
+            const matchDayDateTime = dayjs(matchDayData.matchDayDate);
             setValues({
                 matchDayName: matchDayData.name || "",
                 matchDayDate: matchDayDateTime.format("YYYY-MM-DD"),
@@ -184,7 +188,10 @@ export default function CreateMatchDay({
                 season: matchDayData.season || "",
                 description: matchDayData.description || "",
                 rules: matchDayData.rules || "",
-                venueId: String(venuesData.content.find((venue: any) => venue.name === matchDayData.venueName)?.id || ""),
+                // Matched by id, not by name — matching by name silently failed to preselect
+                // (or preselected the wrong venue) if a venue was ever renamed or two venues
+                // shared a display name.
+                venueId: String(matchDayData.venueId ?? ""),
                 auctionMode: matchDayData.auctionMode || false,
             });
             setRoadmapImageUrl(matchDayData.roadmapImageUrl);
@@ -193,7 +200,13 @@ export default function CreateMatchDay({
 
     const closeModal = () => {
         setOpen(false);
-        if (!matchDayId) setRoadmapImageUrl(undefined);
+        // Only reset the blank "create" form — the "edit" form is re-hydrated from matchDayData
+        // by the effect above, which doesn't re-run just because the modal re-opens (matchDayData
+        // is the same cached object), so resetting it here would leave a blank form next open.
+        if (!matchDayId) {
+            resetForm();
+            setRoadmapImageUrl(undefined);
+        }
         handleSetIsUpdateModalVisible?.(false);
     };
 
@@ -246,7 +259,13 @@ export default function CreateMatchDay({
                             min={10}
                             max={720}
                             label={<span className="flex items-center gap-1.5"><ClockCircleOutlined /> Duration (minutes)</span>}
-                            hint="How long the MatchDay runs from its start time — drives whether it shows as Upcoming, Ongoing, or Concluded."
+                            hint={
+                                values.matchDayDate && values.matchDayTime && values.durationMinutes
+                                    ? `Ends at ${dayjs(`${values.matchDayDate}T${values.matchDayTime}:00`)
+                                          .add(Number(values.durationMinutes) || 0, "minute")
+                                          .format("MMM D, YYYY h:mm A")} — drives whether it shows as Upcoming, Ongoing, or Concluded.`
+                                    : "How long the MatchDay runs from its start time — drives whether it shows as Upcoming, Ongoing, or Concluded."
+                            }
                             value={values.durationMinutes}
                             onChange={(e) => setField("durationMinutes", e.target.value)}
                         />
@@ -306,7 +325,7 @@ export default function CreateMatchDay({
                                         placeholder="Enter a short description or session message"
                                         value={values.description}
                                         onChange={(e) => setField("description", e.target.value)}
-                                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                                     />
                                     <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Optional. Shown on the Match Center Home tab below the title.</p>
                                 </div>
@@ -318,7 +337,7 @@ export default function CreateMatchDay({
                                         placeholder="Enter MatchDay rules in Markdown format"
                                         value={values.rules}
                                         onChange={(e) => setField("rules", e.target.value)}
-                                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                                        className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                                     />
                                     <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Optional. Supports Markdown formatting. If left empty, the Rules tab will be hidden on the viewer page.</p>
                                 </div>

@@ -61,8 +61,7 @@ export default function AddMatchModal({
   const { data: settingsData } = useGetSystemSettingsQuery();
   const jerseyColorOptions = [
     { value: "", label: "Not set" },
-    ...[settingsData?.content.jerseyColorA, settingsData?.content.jerseyColorB]
-      .filter((c): c is string => !!c)
+    ...(settingsData?.content.jerseyColors || [])
       .map((c) => ({ value: c, label: JERSEY_COLOR_PALETTE.find((p) => p.value === c)?.label || c })),
   ];
 
@@ -84,9 +83,15 @@ export default function AddMatchModal({
     else if (values.awayTeamId === values.homeTeamId) next.awayTeamId = "Away team must be different from home team";
     if (!values.matchDate) next.matchDate = "Please select match date";
     if (!values.matchTime) next.matchTime = "Please select match time";
+    if (values.matchDate && values.matchTime && moment(`${values.matchDate}T${values.matchTime}:00`).isBefore(moment())) {
+      next.matchTime = "Match date/time can't be in the past";
+    }
     if (!values.venueId) next.venueId = "Please select a venue";
     const duration = Number(values.matchDurationMinutes);
     if (!values.matchDurationMinutes || duration < 10 || duration > 180) next.matchDurationMinutes = "Duration must be between 10 and 180 minutes";
+    if (values.homeJerseyColor && values.awayJerseyColor && values.homeJerseyColor === values.awayJerseyColor) {
+      next.awayJerseyColor = "Away jersey must differ from home jersey";
+    }
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -148,7 +153,7 @@ export default function AddMatchModal({
 
           <div className="grid grid-cols-2 gap-3">
             <FormSelect label="Home Jersey" value={values.homeJerseyColor} onChange={(e) => setField("homeJerseyColor", e.target.value)} options={jerseyColorOptions} />
-            <FormSelect label="Away Jersey" value={values.awayJerseyColor} onChange={(e) => setField("awayJerseyColor", e.target.value)} options={jerseyColorOptions} />
+            <FormSelect label="Away Jersey" value={values.awayJerseyColor} onChange={(e) => setField("awayJerseyColor", e.target.value)} options={jerseyColorOptions} error={errors.awayJerseyColor} />
           </div>
 
           <div className="grid grid-cols-2 gap-3">

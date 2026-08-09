@@ -29,7 +29,7 @@ const variantInlineText: Record<AnalyticsCardVariant, string> = {
 const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, value, variant, icon, inline = false }) => {
   if (inline) {
     return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs transition hover:-translate-y-0.5 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs transition hover:-translate-y-0.5 hover:shadow-theme-sm dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
         <div className={`mb-3 flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400`}>
           <span className={`text-base ${variantInlineText[variant]}`}>{icon}</span>
           {title}
@@ -43,7 +43,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({ title, value, variant, ic
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs transition hover:-translate-y-0.5 hover:shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs transition hover:-translate-y-0.5 hover:shadow-theme-sm dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
       <div className="min-w-0">
         <div className="mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">{title}</div>
         <div className="flex items-baseline text-title-sm font-bold text-gray-800 dark:text-white/90">

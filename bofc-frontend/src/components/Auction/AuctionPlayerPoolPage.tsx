@@ -18,6 +18,7 @@ import Badge from "../ui/badge";
 import Modal from "../ui/modal";
 import FormSelect from "../ui/form-select";
 import Loader from "../ui/loader";
+import { formatCurrency } from "../../utils/formatCurrency";
 
 const categoryBadge: Record<AuctionPlayerCategory, "warning" | "info" | "success" | "primary" | "light"> = {
   ICON: "warning",
@@ -43,7 +44,7 @@ const defaultBasePrices: Record<AuctionPlayerCategory, number> = {
   OUTSIDE: 3000,
 };
 
-const taka = (v?: number) => `৳${(v ?? 0).toLocaleString()}`;
+const taka = (v?: number) => formatCurrency(v ?? 0, { decimals: 0 });
 
 interface PlayerAddState {
   category: AuctionPlayerCategory;
@@ -205,7 +206,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
       />
 
       {/* Section 1: Registered Players ready to add */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <CheckCircleOutlined className="text-brand-500" />
@@ -224,10 +225,10 @@ const AuctionPlayerPoolPage: React.FC = () => {
             All approved registrations are already in the pool (or no approved registrations yet).
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
             <table className="w-full min-w-[720px] border-collapse text-theme-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Player</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Position</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Category</th>
@@ -249,7 +250,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
                         <select
                           value={state.category}
                           onChange={(e) => handleCategoryChange(reg.id, e.target.value as AuctionPlayerCategory)}
-                          className="h-8 rounded-md border border-gray-300 bg-transparent px-2 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-gray-300"
+                          className="h-8 rounded-md border border-gray-300 bg-transparent px-2 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-[var(--color-rule)] dark:text-gray-300"
                         >
                           {CATEGORY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
@@ -261,7 +262,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
                           onChange={(e) => updateState(reg.id, { basePrice: Number(e.target.value) || 0 })}
                           min={0}
                           step={1000}
-                          className="h-8 w-[120px] rounded-md border border-gray-300 bg-transparent px-2 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-gray-300"
+                          className="h-8 w-[120px] rounded-md border border-gray-300 bg-transparent px-2 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-[var(--color-rule)] dark:text-gray-300"
                         />
                       </td>
                       <td className="px-3 py-2.5">
@@ -279,7 +280,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
       </div>
 
       {/* Section 2: Current Pool */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <span className="font-semibold text-gray-800 dark:text-white/90">Current Pool</span>
           <Badge variant="success">{activePoolPlayers.length} active</Badge>
@@ -293,10 +294,10 @@ const AuctionPlayerPoolPage: React.FC = () => {
             No players in the pool yet. Add players from the approved list above.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
             <table className="w-full min-w-[800px] border-collapse text-theme-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Player</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Category</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Base Price</th>
@@ -401,10 +402,10 @@ const AuctionPlayerPoolPage: React.FC = () => {
               onChange={(e) => setExistingForm((f) => ({ ...f, basePrice: Number(e.target.value) || 0 }))}
               min={1}
               step={1000}
-              className={`h-11 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-gray-900 ${
+              className={`h-11 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] ${
                 existingErrors.basePrice
                   ? "border-error-500 focus:border-error-300 focus:ring-error-500/10 dark:border-error-500"
-                  : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                  : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
               }`}
             />
             {existingErrors.basePrice && <p className="mt-1.5 text-theme-xs text-error-500">{existingErrors.basePrice}</p>}

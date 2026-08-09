@@ -35,6 +35,20 @@ export interface PlayerPhotoPresignResponse extends BasicResType {
     };
 }
 
+export interface PlayerRankListItem {
+    playerId: number;
+    name: string;
+    photoUrl?: string | null;
+    jerseyNumber?: number | null;
+    isActive: boolean;
+    /** Null = not ranked yet. */
+    rank?: number | null;
+}
+
+export interface PlayerRankListResType extends BasicResType {
+    content: PlayerRankListItem[];
+}
+
 export const playerApi = apiWithTags.injectEndpoints({
     endpoints: (builder) => ({
         getPlayers: builder.query<PlayerList, void>({
@@ -62,6 +76,21 @@ export const playerApi = apiWithTags.injectEndpoints({
                 method: "POST",
             }),
         }),
+
+        getPlayerRanks: builder.query<PlayerRankListResType, void>({
+            query: () => "players/ranks",
+            providesTags: ["player"],
+        }),
+
+        // Board owns its own optimistic local state (see PlayerRankBoard) — no invalidatesTags,
+        // an in-flight getPlayerRanks refetch would otherwise clobber a drag that hasn't saved yet.
+        setPlayerRank: builder.mutation<BasicResType, { playerId: number; rank: number | null }>({
+            query: ({ playerId, rank }) => ({
+                url: `players/${playerId}/rank`,
+                method: "PUT",
+                body: { rank },
+            }),
+        }),
     }),
 });
 
@@ -71,4 +100,6 @@ export const {
     useGetPlayerGoalkeepingHistoryQuery,
     useGetMyGoalkeepingHistoryQuery,
     usePresignPlayerPhotoUploadMutation,
+    useGetPlayerRanksQuery,
+    useSetPlayerRankMutation,
 } = playerApi;

@@ -45,9 +45,15 @@ export default function DefaultLayout({ children, isDarkMode, setIsDarkMode }: D
   };
 
   return (
-    <AppShellProvider>
-      <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
-        <Sidebar sidebarToggle={sidebarToggle} setSidebarToggle={setSidebarToggle} sidebarExpanded={sidebarExpanded} />
+    <AppShellProvider onOpenSidebar={() => setSidebarToggle(true)}>
+      <div className="flex h-screen overflow-hidden bg-[var(--color-paper)]">
+        <Sidebar
+          sidebarToggle={sidebarToggle}
+          setSidebarToggle={setSidebarToggle}
+          sidebarExpanded={sidebarExpanded}
+          isDarkMode={isDarkMode}
+          setIsDarkMode={setIsDarkMode}
+        />
 
         <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           {/* Small-device overlay/scrim — closes the sidebar on outside tap */}
@@ -63,7 +69,7 @@ export default function DefaultLayout({ children, isDarkMode, setIsDarkMode }: D
             setIsDarkMode={setIsDarkMode}
           />
 
-          <main className="bg-gray-50 dark:bg-gray-900">
+          <main className="bg-[var(--color-paper)]">
             <div className="mx-auto max-w-screen-2xl p-4 md:p-6">{children}</div>
           </main>
         </div>

@@ -10,7 +10,7 @@ import {
 import { IFixture, MatchStatus } from "../../../state/features/fixtures/fixtureTypes";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import { getStatusText } from "../../../utils/matchStatusUtils";
-import { showBdLocalTime } from "../../../utils/utils";
+import { formatMatchTimeRange } from "../../../utils/matchTimeUtils";
 import { getJerseySwatch } from "../../../utils/jerseyColors";
 import Button from "../../ui/button";
 import Badge from "../../ui/badge";
@@ -24,6 +24,7 @@ interface SimpleMatchesPanelProps {
   matchDayId: number;
   teams: Array<{ teamId: number; teamName: string }>;
   matchDayStartDate?: string;
+  matchDayDurationMinutes?: number | null;
 }
 
 const STATUS_BADGE_VARIANT: Record<string, "success" | "warning" | "info" | "light"> = {
@@ -58,7 +59,7 @@ function TeamAvatar({ name }: { name: string }) {
   );
 }
 
-export default function SimpleMatchesPanel({ matchDayId, teams, matchDayStartDate }: SimpleMatchesPanelProps) {
+export default function SimpleMatchesPanel({ matchDayId, teams, matchDayStartDate, matchDayDurationMinutes }: SimpleMatchesPanelProps) {
   const navigate = useNavigate();
   const loginInfo = useSelector(selectLoginInfo);
   const isAdmin =
@@ -119,7 +120,7 @@ export default function SimpleMatchesPanel({ matchDayId, teams, matchDayStartDat
       {isLoading ? (
         <Loader className="py-10" />
       ) : filteredFixtures.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-theme-sm text-gray-400 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-500">
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-theme-sm text-gray-400 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-gray-500">
           No matches found. {isAdmin && "Add teams above, then use \"Generate Matches\"."}
         </div>
       ) : (
@@ -128,7 +129,7 @@ export default function SimpleMatchesPanel({ matchDayId, teams, matchDayStartDat
             <div
               key={fixture.id}
               onClick={() => navigate(`/fixtures/${fixture.id}`)}
-              className="relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 transition hover:border-brand-300 dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-brand-500/40"
+              className="relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 transition hover:border-brand-300 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:hover:border-brand-500/40"
             >
               <div className="absolute right-4 top-4 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                 <Badge variant={STATUS_BADGE_VARIANT[fixture.matchStatus] || "light"}>
@@ -170,8 +171,7 @@ export default function SimpleMatchesPanel({ matchDayId, teams, matchDayStartDat
 
               <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-theme-xs text-gray-400">
                 <span className="flex items-center gap-1">
-                  <CalendarOutlined /> {showBdLocalTime(fixture.matchDate)}
-                  {fixture.endTime && ` – ${showBdLocalTime(fixture.endTime).split(", ").pop()}`}
+                  <CalendarOutlined /> {formatMatchTimeRange(fixture.matchDate, fixture.matchDurationMinutes)}
                 </span>
                 {fixture.venueName && (
                   <span className="flex items-center gap-1"><EnvironmentOutlined /> {fixture.venueName}</span>
@@ -189,6 +189,7 @@ export default function SimpleMatchesPanel({ matchDayId, teams, matchDayStartDat
         handleSetIsModalVisible={setGenerateModalOpen}
         teams={teams}
         matchDayStartDate={matchDayStartDate}
+        matchDayDurationMinutes={matchDayDurationMinutes}
       />
 
       <AddMatchModal

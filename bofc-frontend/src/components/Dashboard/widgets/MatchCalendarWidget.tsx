@@ -13,7 +13,7 @@ const localDateKey = (date: Date) =>
 
 // Lightweight month grid — antd's <Calendar> pulled in a whole grid/picker
 // subsystem for what this widget only ever needed: current month, a dot on
-// days with a match, click-through to that match.
+// days with a Match Day, click-through to that Match Day.
 const MatchCalendarWidget: React.FC = () => {
   const navigate = useNavigate();
   const [cursor, setCursor] = useState(() => new Date());
@@ -51,10 +51,10 @@ const MatchCalendarWidget: React.FC = () => {
   const cells: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
 
   return (
-    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
-          <CalendarOutlined /> Match Calendar
+          <CalendarOutlined /> Match Day Calendar
         </div>
         <div className="flex items-center gap-1">
           <button

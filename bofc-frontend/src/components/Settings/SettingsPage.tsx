@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { SettingOutlined, MailOutlined, CalendarOutlined, BankOutlined, BellOutlined, FireOutlined, SkinOutlined, UserOutlined, LockOutlined } from "@ant-design/icons";
+import { SettingOutlined, MailOutlined, CalendarOutlined, BankOutlined, BellOutlined, FireOutlined, SkinOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import FormInput from "../ui/form-input";
 import FormSelect from "../ui/form-select";
@@ -9,156 +9,21 @@ import Button from "../ui/button";
 import Loader from "../ui/loader";
 import { Dropdown, DropdownItem } from "../ui/dropdown";
 import { JERSEY_COLOR_PALETTE, getJerseySwatch } from "../../utils/jerseyColors";
+import { showBdLocalTimeRange } from "../../utils/utils";
 import {
     useGetSystemSettingsQuery,
     useUpdateSystemSettingsMutation,
     useSendTestEmailMutation,
+    useGenerateWeeklyMatchesNowMutation,
+    useGenerateTeamsNowMutation,
+    WeeklyMatchDaySlot,
 } from "../../state/features/settings/settingsSlice";
-import {
-    useChangePasswordMutation,
-    useUpdatePlayerDataMutation,
-    useGetUserProfileQuery,
-} from "../../state/features/auth/authSlice";
-import { useGetPlayerPositionsQuery } from "../../state/features/player/playerSlice";
 import { useGetVanuesQuery } from "../../state/features/vanues/vanuesSlice";
+import { useGetMatchDaysQuery } from "../../state/features/matchDays/matchDaysSlice";
 import { useGetAcChartListQuery } from "../../state/features/account/accountSlice";
 import { normalizeErrorMessage } from "../../utils/normalizeErrorMessage";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import { isAdmin } from "../../utils/roleUtils";
-
-/** Change Password + Update Player Data — every logged-in user's own account,
- * ported from the old header-dropdown modal (CommonAtoms/SettingsModal.tsx) so it
- * lives on the same page as the rest of Settings instead of a separate modal. */
-function MyAccountSection() {
-    const loginInfo = useSelector(selectLoginInfo);
-    const { data: profileData, isLoading: isProfileLoading } = useGetUserProfileQuery(
-        { id: loginInfo?.userId || "" },
-        { skip: !loginInfo?.userId }
-    );
-    const [changePassword, { isLoading: isChangePasswordLoading }] = useChangePasswordMutation();
-    const [updatePlayerData, { isLoading: isUpdatePlayerLoading }] = useUpdatePlayerDataMutation();
-    const { data: playerPositions } = useGetPlayerPositionsQuery();
-
-    const [oldPassword, setOldPassword] = useState("");
-    const [newPassword, setNewPassword] = useState("");
-
-    const [playerInfo, setPlayerInfo] = useState({
-        id: 0,
-        name: "",
-        email: "",
-        employeeId: "",
-        fullName: "",
-        teamsId: "",
-        mobileNo: "",
-        playingPosition: "",
-    });
-
-    useEffect(() => {
-        const p = profileData?.content;
-        if (!p) return;
-        setPlayerInfo({
-            id: p.id,
-            name: p.name || "",
-            email: p.email || "",
-            employeeId: p.employeeId || "",
-            fullName: p.fullName || "",
-            teamsId: p.teamsId || "",
-            mobileNo: p.mobileNo || "",
-            playingPosition: p.playingPosition || "",
-        });
-    }, [profileData]);
-
-    const handleChangePassword = async () => {
-        if (!oldPassword || !newPassword) {
-            toast.error("Both fields are mandatory!");
-            return;
-        }
-        try {
-            await changePassword({ oldPassword, newPassword }).unwrap();
-            toast.success("Password updated successfully");
-            setOldPassword("");
-            setNewPassword("");
-        } catch (err: any) {
-            toast.error(normalizeErrorMessage(err?.data || err, "Failed to update password"));
-        }
-    };
-
-    const handleUpdatePlayerData = async () => {
-        if (!playerInfo.name || !playerInfo.email) {
-            toast.error("Name and Email are mandatory!");
-            return;
-        }
-        try {
-            await updatePlayerData({ id: playerInfo.id, data: playerInfo }).unwrap();
-            toast.success("Player data updated successfully");
-        } catch (err: any) {
-            toast.error(normalizeErrorMessage(err?.data || err, "Failed to update player data"));
-        }
-    };
-
-    if (isProfileLoading) {
-        return (
-            <div className="flex justify-center py-8">
-                <Loader />
-            </div>
-        );
-    }
-
-    return (
-        <>
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-                <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
-                    <LockOutlined className="text-brand-500 dark:text-brand-400" />
-                    Change Password
-                </h2>
-                <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">Your own login password.</p>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <FormInput type="password" autoComplete="current-password" label="Old Password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} />
-                    <FormInput type="password" autoComplete="new-password" label="New Password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-                </div>
-
-                <div className="mt-4 flex justify-end">
-                    <Button disabled={isChangePasswordLoading} onClick={handleChangePassword}>
-                        {isChangePasswordLoading ? "Updating..." : "Update Password"}
-                    </Button>
-                </div>
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-                <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
-                    <UserOutlined className="text-brand-500 dark:text-brand-400" />
-                    Update Player Data
-                </h2>
-                <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">Your own profile details.</p>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <FormInput autoComplete="name" label="Name" value={playerInfo.name} onChange={(e) => setPlayerInfo({ ...playerInfo, name: e.target.value })} />
-                    <FormInput type="email" autoComplete="email" label="Email" value={playerInfo.email} onChange={(e) => setPlayerInfo({ ...playerInfo, email: e.target.value })} />
-                    <FormInput autoComplete="off" label="Employee ID" value={playerInfo.employeeId} onChange={(e) => setPlayerInfo({ ...playerInfo, employeeId: e.target.value })} />
-                    <FormInput autoComplete="off" label="Teams ID" value={playerInfo.teamsId} onChange={(e) => setPlayerInfo({ ...playerInfo, teamsId: e.target.value })} />
-                    <FormInput type="tel" autoComplete="tel" label="Mobile No" value={playerInfo.mobileNo} onChange={(e) => setPlayerInfo({ ...playerInfo, mobileNo: e.target.value })} />
-                    <FormSelect
-                        label="Playing Position"
-                        placeholder="Select Playing Position"
-                        value={playerInfo.playingPosition}
-                        onChange={(e) => setPlayerInfo({ ...playerInfo, playingPosition: e.target.value })}
-                        options={(playerPositions?.content || []).map((position) => ({
-                            value: position.name,
-                            label: position.description,
-                        }))}
-                    />
-                </div>
-
-                <div className="mt-4 flex justify-end">
-                    <Button disabled={isUpdatePlayerLoading} onClick={handleUpdatePlayerData}>
-                        {isUpdatePlayerLoading ? "Updating..." : "Update Player Info"}
-                    </Button>
-                </div>
-            </div>
-        </>
-    );
-}
 
 function JerseyColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
     const swatch = getJerseySwatch(value);
@@ -174,7 +39,7 @@ function JerseyColorPicker({ label, value, onChange }: { label: string; value: s
                             e.preventDefault();
                             toggle();
                         }}
-                        className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-theme-sm text-gray-800 dark:border-gray-700 dark:text-white/90"
+                        className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-theme-sm text-gray-800 dark:border-[var(--color-rule)] dark:text-white/90"
                     >
                         <span className="h-3.5 w-3.5 shrink-0 rounded-full border border-gray-300 dark:border-gray-600" style={{ backgroundColor: swatch || "transparent" }} />
                         {JERSEY_COLOR_PALETTE.find((c) => c.value === value)?.label || "Select"}
@@ -205,7 +70,6 @@ function JerseyColorPicker({ label, value, onChange }: { label: string; value: s
 }
 
 const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const SPORT_TYPES = ["FOOTBALL", "CRICKET", "BASKETBALL"];
 
 /** My Account (Change Password / Update Player Data) is visible to every logged-in
  * user. Everything else on this page (SMTP, notifications, push, auction, accounting,
@@ -219,6 +83,9 @@ function SettingsPage() {
     const { data, isLoading } = useGetSystemSettingsQuery(undefined, { skip: !admin });
     const [updateSettings, { isLoading: isSaving }] = useUpdateSystemSettingsMutation();
     const [sendTestEmail, { isLoading: isSendingTest }] = useSendTestEmailMutation();
+    const [generateWeeklyMatchesNow, { isLoading: isGenerating }] = useGenerateWeeklyMatchesNowMutation();
+    const [generateTeamsNow, { isLoading: isTestingTeams }] = useGenerateTeamsNowMutation();
+    const [testMatchDayId, setTestMatchDayId] = useState<number | undefined>(undefined);
 
     const [smtpEnabled, setSmtpEnabled] = useState(false);
     const [smtpHost, setSmtpHost] = useState("");
@@ -237,24 +104,103 @@ function SettingsPage() {
     const [notifyCustomEmailEnabled, setNotifyCustomEmailEnabled] = useState(false);
     const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
     const [auctionEnabled, setAuctionEnabled] = useState(true);
+    const [matchDayStatusCheckIntervalHours, setMatchDayStatusCheckIntervalHours] = useState(1);
 
-    const [weeklyMatchEnabled, setWeeklyMatchEnabled] = useState(false);
-    const [weeklyMatchNamePrefix, setWeeklyMatchNamePrefix] = useState("Next Match");
-    const [weeklyMatchDayOfWeek, setWeeklyMatchDayOfWeek] = useState("Friday");
-    const [weeklyMatchTime, setWeeklyMatchTime] = useState("19:00");
-    const [weeklyMatchVenueId, setWeeklyMatchVenueId] = useState<number | undefined>(undefined);
-    const [weeklyMatchSportType, setWeeklyMatchSportType] = useState("FOOTBALL");
-    const [weeklyMatchDurationMinutes, setWeeklyMatchDurationMinutes] = useState(90);
-    const [weeklyMatchTimeGapMinutes, setWeeklyMatchTimeGapMinutes] = useState(15);
+    const [weeklyMatchDayEnabled, setWeeklyMatchDayEnabled] = useState(false);
+    const [weeklyMatchDayNamePrefix, setWeeklyMatchDayNamePrefix] = useState("Next Match");
+    const [weeklyMatchDayVenueId, setWeeklyMatchDayVenueId] = useState<number | undefined>(undefined);
+    const [weeklyMatchDaySportType, setWeeklyMatchDaySportType] = useState("FOOTBALL");
+
+    const [matchDaysPerWeek, setMatchDaysPerWeek] = useState(1);
+    const [weeklyMatchDaySlots, setWeeklyMatchDaySlots] = useState<WeeklyMatchDaySlot[]>([
+        { dayOfWeek: "Friday", time: "19:00", durationMinutes: 90, matchDurationMinutes: 13, timeGapMinutes: 15 },
+    ]);
+    const [weeklyMatchDayMaxPlayersPerTeam, setWeeklyMatchDayMaxPlayersPerTeam] = useState(6);
+    const [weeklyMatchDayAutoTeamsEnabled, setWeeklyMatchDayAutoTeamsEnabled] = useState(false);
+    const [weeklyMatchDayAutoTeamsLeadHours, setWeeklyMatchDayAutoTeamsLeadHours] = useState(24);
+
+    const handleMatchDaysPerWeekChange = (count: number) => {
+        const clamped = Math.min(7, Math.max(1, count || 1));
+        setMatchDaysPerWeek(clamped);
+        setWeeklyMatchDaySlots((prev) => {
+            if (clamped === prev.length) return prev;
+            if (clamped < prev.length) return prev.slice(0, clamped);
+            const extra = Array.from({ length: clamped - prev.length }, () => ({
+                dayOfWeek: "Friday",
+                time: "19:00",
+                durationMinutes: 90,
+                matchDurationMinutes: 13,
+                timeGapMinutes: 15,
+            }));
+            return [...prev, ...extra];
+        });
+    };
+
+    const updateSlot = (index: number, patch: Partial<WeeklyMatchDaySlot>) => {
+        setWeeklyMatchDaySlots((prev) => prev.map((slot, i) => (i === index ? { ...slot, ...patch } : slot)));
+    };
+
+    const handleGenerateNow = async () => {
+        // Slots/settings only exist in the DB after Save — generating against unsaved
+        // in-browser state would silently use whatever was last persisted.
+        const saved = await handleSave();
+        if (!saved) return;
+
+        try {
+            const result = await generateWeeklyMatchesNow().unwrap();
+            const { matchDaysCreated, teamsGenerated } = result.content;
+            toast.success(`Generated ${matchDaysCreated} Match Day(s), ${teamsGenerated} team set(s)`);
+        } catch (err: any) {
+            toast.error(normalizeErrorMessage(err?.data || err, "Failed to generate matches"));
+        }
+    };
 
     const [cashChartCode, setCashChartCode] = useState<string | undefined>(undefined);
     const [collectionIncomeChartCode, setCollectionIncomeChartCode] = useState<string | undefined>(undefined);
 
-    const [jerseyColorA, setJerseyColorA] = useState("red");
-    const [jerseyColorB, setJerseyColorB] = useState("yellow");
+    const [jerseyColors, setJerseyColors] = useState<string[]>(["red", "yellow"]);
+
+    const updateJerseyColor = (index: number, color: string) => {
+        setJerseyColors((prev) => prev.map((c, i) => (i === index ? color : c)));
+    };
+
+    const addJerseyColor = () => {
+        setJerseyColors((prev) => {
+            const unused = JERSEY_COLOR_PALETTE.map((c) => c.value).find((v) => !prev.includes(v));
+            return [...prev, unused || JERSEY_COLOR_PALETTE[0].value];
+        });
+    };
+
+    const removeJerseyColor = (index: number) => {
+        setJerseyColors((prev) => (prev.length <= 2 ? prev : prev.filter((_, i) => i !== index)));
+    };
 
     const { data: venuesData, isLoading: isVenuesLoading } = useGetVanuesQuery();
     const { data: chartsData, isLoading: isChartsLoading } = useGetAcChartListQuery();
+    const { data: matchDaysData, isLoading: isMatchDaysLoading } = useGetMatchDaysQuery(
+        { offSet: 0, pageSize: 50, sortedBy: "matchDayDate", sortDirection: "ASC" },
+        { skip: !weeklyMatchDayAutoTeamsEnabled }
+    );
+    const weeklyMatchDayOptionsList = (matchDaysData?.content?.matchDays ?? [])
+        .filter((m) => m.isWeeklyMatchDay)
+        .map((m) => ({ value: m.id, label: `${m.name} — ${showBdLocalTimeRange(m.matchDayDate, m.durationMinutes)}` }));
+
+    const handleTestGenerateTeams = async () => {
+        if (!testMatchDayId) {
+            toast.error("Pick a Match Day to test against");
+            return;
+        }
+        try {
+            const result = await generateTeamsNow({ matchDayId: testMatchDayId }).unwrap();
+            if (result.content.success) {
+                toast.success("Teams generated for the selected Match Day");
+            } else {
+                toast.error(result.content.reason || "Could not generate teams");
+            }
+        } catch (err: any) {
+            toast.error(normalizeErrorMessage(err?.data || err, "Failed to test team generation"));
+        }
+    };
 
     const [testEmailAddress, setTestEmailAddress] = useState("");
 
@@ -276,24 +222,41 @@ function SettingsPage() {
         setNotifyCustomEmailEnabled(s.notifyCustomEmailEnabled);
         setPushNotificationsEnabled(s.pushNotificationsEnabled);
         setAuctionEnabled(s.auctionEnabled);
-        setWeeklyMatchEnabled(s.weeklyMatchEnabled);
-        setWeeklyMatchNamePrefix(s.weeklyMatchNamePrefix);
-        setWeeklyMatchDayOfWeek(s.weeklyMatchDayOfWeek);
-        setWeeklyMatchTime(s.weeklyMatchTime);
-        setWeeklyMatchVenueId(s.weeklyMatchVenueId ?? undefined);
-        setWeeklyMatchSportType(s.weeklyMatchSportType);
-        setWeeklyMatchDurationMinutes(s.weeklyMatchDurationMinutes);
-        setWeeklyMatchTimeGapMinutes(s.weeklyMatchTimeGapMinutes);
+        setMatchDayStatusCheckIntervalHours(s.matchDayStatusCheckIntervalHours || 1);
+        setWeeklyMatchDayEnabled(s.weeklyMatchDayEnabled);
+        setWeeklyMatchDayNamePrefix(s.weeklyMatchDayNamePrefix);
+        setWeeklyMatchDayVenueId(s.weeklyMatchDayVenueId ?? undefined);
+        setWeeklyMatchDaySportType(s.weeklyMatchDaySportType);
+        setMatchDaysPerWeek(s.matchDaysPerWeek || 1);
+        setWeeklyMatchDaySlots(
+            s.weeklyMatchDaySlots?.length
+                ? s.weeklyMatchDaySlots
+                : [{ dayOfWeek: s.weeklyMatchDayOfWeek, time: s.weeklyMatchTime, durationMinutes: 90, matchDurationMinutes: 13, timeGapMinutes: 15 }]
+        );
+        setWeeklyMatchDayMaxPlayersPerTeam(s.weeklyMatchDayMaxPlayersPerTeam || 6);
+        setWeeklyMatchDayAutoTeamsEnabled(s.weeklyMatchDayAutoTeamsEnabled);
+        setWeeklyMatchDayAutoTeamsLeadHours(s.weeklyMatchDayAutoTeamsLeadHours || 24);
         setCashChartCode(s.cashChartCodeIsOverridden ? s.cashChartCode : undefined);
         setCollectionIncomeChartCode(s.collectionIncomeChartCodeIsOverridden ? s.collectionIncomeChartCode : undefined);
-        setJerseyColorA(s.jerseyColorA);
-        setJerseyColorB(s.jerseyColorB);
+        setJerseyColors(s.jerseyColors?.length ? s.jerseyColors : ["red", "yellow"]);
     }, [data]);
 
-    const handleSave = async () => {
-        if (weeklyMatchEnabled && !weeklyMatchVenueId) {
-            toast.error("Pick a venue for the weekly match before enabling it");
-            return;
+    const handleSave = async (): Promise<boolean> => {
+        if (weeklyMatchDayEnabled && !weeklyMatchDayVenueId) {
+            toast.error("Pick a venue for the weekly Match Day before enabling it");
+            return false;
+        }
+        if (weeklyMatchDayEnabled && weeklyMatchDaySlots.length === 0) {
+            toast.error("Add at least one Match Day day/time before enabling it");
+            return false;
+        }
+        if (jerseyColors.length < 2) {
+            toast.error("At least 2 jersey colors are required — the club needs 2 distinct colors to tell the teams in a match apart");
+            return false;
+        }
+        if (new Set(jerseyColors).size !== jerseyColors.length) {
+            toast.error("Jersey colors must be unique — no duplicates");
+            return false;
         }
         try {
             await updateSettings({
@@ -313,23 +276,28 @@ function SettingsPage() {
                 notifyCustomEmailEnabled,
                 pushNotificationsEnabled,
                 auctionEnabled,
-                weeklyMatchEnabled,
-                weeklyMatchNamePrefix,
-                weeklyMatchDayOfWeek,
-                weeklyMatchTime,
-                weeklyMatchVenueId,
-                weeklyMatchSportType,
-                weeklyMatchDurationMinutes,
-                weeklyMatchTimeGapMinutes,
+                matchDayStatusCheckIntervalHours,
+                weeklyMatchDayEnabled,
+                weeklyMatchDayNamePrefix,
+                weeklyMatchDayOfWeek: weeklyMatchDaySlots[0]?.dayOfWeek || "Friday",
+                weeklyMatchTime: weeklyMatchDaySlots[0]?.time || "19:00",
+                weeklyMatchDayVenueId,
+                weeklyMatchDaySportType,
+                matchDaysPerWeek,
+                weeklyMatchDaySlots,
+                weeklyMatchDayMaxPlayersPerTeam,
+                weeklyMatchDayAutoTeamsEnabled,
+                weeklyMatchDayAutoTeamsLeadHours,
                 cashChartCode: cashChartCode ?? null,
                 collectionIncomeChartCode: collectionIncomeChartCode ?? null,
-                jerseyColorA,
-                jerseyColorB,
+                jerseyColors,
             }).unwrap();
             toast.success("Settings saved");
             setSmtpPassword("");
+            return true;
         } catch (err: any) {
             toast.error(normalizeErrorMessage(err?.data || err, "Failed to save settings"));
+            return false;
         }
     };
 
@@ -354,13 +322,22 @@ function SettingsPage() {
         );
     }
 
+    if (!admin) {
+        return (
+            <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
+                <p className="text-theme-sm text-gray-500 dark:text-gray-400">
+                    Nothing to configure here. To change your password or profile details, go to your{" "}
+                    <a href="/profile" className="text-brand-500 hover:underline dark:text-brand-400">Player Profile</a>.
+                </p>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-6">
-            <MyAccountSection />
-
             {admin && (
             <>
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <MailOutlined className="text-brand-500 dark:text-brand-400" />
                     SMTP / Email Configuration
@@ -397,7 +374,7 @@ function SettingsPage() {
                     <FormSwitch label="Use SSL/TLS" checked={smtpUseSsl} onChange={setSmtpUseSsl} />
                 </div>
 
-                <div className="mt-6 flex flex-wrap items-end gap-3 border-t border-gray-100 pt-5 dark:border-gray-800">
+                <div className="mt-6 flex flex-wrap items-end gap-3 border-t border-gray-100 pt-5 dark:border-[var(--color-rule)]">
                     <div className="min-w-[240px] flex-1">
                         <FormInput
                             label="Send a test email to"
@@ -412,7 +389,7 @@ function SettingsPage() {
                 </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <SettingOutlined className="text-brand-500 dark:text-brand-400" />
                     Automated Email Notifications
@@ -422,7 +399,7 @@ function SettingsPage() {
                 </p>
 
                 <div className="flex flex-col gap-5">
-                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 p-4 dark:border-gray-800">
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 p-4 dark:border-[var(--color-rule)]">
                         <div>
                             <FormSwitch label="Upcoming MatchDay reminder" checked={notifyMatchDayReminderEnabled} onChange={setNotifyMatchDayReminderEnabled} />
                             <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">Notifies every player before a MatchDay starts.</p>
@@ -440,7 +417,7 @@ function SettingsPage() {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 p-4 dark:border-gray-800">
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 p-4 dark:border-[var(--color-rule)]">
                         <div>
                             <FormSwitch label="Monthly payment due reminder" checked={notifyPaymentDueEnabled} onChange={setNotifyPaymentDueEnabled} />
                             <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">Notifies players who haven't paid dues for the current month.</p>
@@ -458,7 +435,7 @@ function SettingsPage() {
                         </div>
                     </div>
 
-                    <div className="rounded-lg border border-gray-100 p-4 dark:border-gray-800">
+                    <div className="rounded-lg border border-gray-100 p-4 dark:border-[var(--color-rule)]">
                         <FormSwitch label="Allow email on custom notifications" checked={notifyCustomEmailEnabled} onChange={setNotifyCustomEmailEnabled} />
                         <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
                             When on, the "Also send email" option becomes available in the Notify button's Send Notification dialog.
@@ -467,7 +444,7 @@ function SettingsPage() {
                 </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <BellOutlined className="text-brand-500 dark:text-brand-400" />
                     Push Notifications
@@ -479,7 +456,7 @@ function SettingsPage() {
                 <FormSwitch label="Enable push notifications" checked={pushNotificationsEnabled} onChange={setPushNotificationsEnabled} />
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <FireOutlined className="text-brand-500 dark:text-brand-400" />
                     Auction
@@ -491,7 +468,28 @@ function SettingsPage() {
                 <FormSwitch label="Enable auction" checked={auctionEnabled} onChange={setAuctionEnabled} />
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
+                <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
+                    <ClockCircleOutlined className="text-brand-500 dark:text-brand-400" />
+                    Scheduler
+                </h2>
+                <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
+                    How often the background job re-checks MatchDays and concludes any that are overdue. Takes effect after the current wait finishes — no restart needed.
+                </p>
+
+                <div className="w-48">
+                    <FormInput
+                        label="Status check interval (hours)"
+                        type="number"
+                        min={1}
+                        max={24}
+                        value={matchDayStatusCheckIntervalHours}
+                        onChange={(e) => setMatchDayStatusCheckIntervalHours(Number(e.target.value) || 1)}
+                    />
+                </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <BankOutlined className="text-brand-500 dark:text-brand-400" />
                     Accounting
@@ -530,85 +528,238 @@ function SettingsPage() {
                 </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <SkinOutlined className="text-brand-500 dark:text-brand-400" />
                     Jersey Colors
                 </h2>
                 <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    The club owns only 2 physical jerseys. These are the 2 colors available when
-                    assigning a jersey to each team per match on the Next Match fixtures panel.
+                    The club's physical jerseys — configure as many as the club owns (at least 2).
+                    These are the colors available when assigning a jersey to each team per match
+                    on the Next Match fixtures panel.
                 </p>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <JerseyColorPicker label="Jersey A" value={jerseyColorA} onChange={setJerseyColorA} />
-                    <JerseyColorPicker label="Jersey B" value={jerseyColorB} onChange={setJerseyColorB} />
+                <div className="flex flex-col gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {jerseyColors.map((color, index) => (
+                            <div key={index} className="flex items-end gap-2">
+                                <div className="flex-1">
+                                    <JerseyColorPicker
+                                        label={`Jersey ${index + 1}`}
+                                        value={color}
+                                        onChange={(value) => updateJerseyColor(index, value)}
+                                    />
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="!px-2.5"
+                                    disabled={jerseyColors.length <= 2}
+                                    onClick={() => removeJerseyColor(index)}
+                                >
+                                    ✕
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                    <div>
+                        <Button type="button" variant="outline" size="sm" onClick={addJerseyColor}>
+                            + Add Jersey Color
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <CalendarOutlined className="text-brand-500 dark:text-brand-400" />
-                    Next Match
+                    Weekly Match Day
                 </h2>
                 <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    A weekly club-wide match, created and announced automatically as soon as the previous one's date passes. Teams, jersey colors, and matches are managed from the Next Match page; every active player is notified to RSVP.
+                    A weekly club-wide Match Day, created and announced automatically as soon as the previous one's date passes. Teams, jersey colors, and matches are managed from that Match Day's page; every active player is notified to RSVP.
                 </p>
 
                 <div className="mb-5">
-                    <FormSwitch label="Enable Next Match" checked={weeklyMatchEnabled} onChange={setWeeklyMatchEnabled} />
+                    <FormSwitch label="Enable Weekly Match Day" checked={weeklyMatchDayEnabled} onChange={setWeeklyMatchDayEnabled} />
                 </div>
 
-                {weeklyMatchEnabled && (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <FormInput
-                        label="Name prefix"
-                        placeholder="Next Match"
-                        value={weeklyMatchNamePrefix}
-                        onChange={(e) => setWeeklyMatchNamePrefix(e.target.value)}
-                    />
-                    <FormSelect
-                        label="Day of week"
-                        value={weeklyMatchDayOfWeek}
-                        onChange={(e) => setWeeklyMatchDayOfWeek(e.target.value)}
-                        options={DAYS_OF_WEEK.map((d) => ({ value: d, label: d }))}
-                    />
-                    <FormInput
-                        label="Time"
-                        type="time"
-                        value={weeklyMatchTime}
-                        onChange={(e) => setWeeklyMatchTime(e.target.value)}
-                    />
-                    <FormSelect
-                        label="Venue"
-                        placeholder="Please select a venue"
-                        value={weeklyMatchVenueId ?? ""}
-                        disabled={isVenuesLoading}
-                        onChange={(e) => setWeeklyMatchVenueId(Number(e.target.value))}
-                        options={venuesData?.content.map((v: any) => ({ value: v.id, label: v.name })) || []}
-                    />
-                    <FormSelect
-                        label="Sport"
-                        value={weeklyMatchSportType}
-                        onChange={(e) => setWeeklyMatchSportType(e.target.value)}
-                        options={SPORT_TYPES.map((s) => ({ value: s, label: s }))}
-                    />
-                    <FormInput
-                        label="Match duration (minutes)"
-                        type="number"
-                        min={15}
-                        max={300}
-                        value={weeklyMatchDurationMinutes}
-                        onChange={(e) => setWeeklyMatchDurationMinutes(Number(e.target.value) || 90)}
-                    />
-                    <FormInput
-                        label="Time gap between matches (minutes)"
-                        type="number"
-                        min={1}
-                        max={120}
-                        value={weeklyMatchTimeGapMinutes}
-                        onChange={(e) => setWeeklyMatchTimeGapMinutes(Number(e.target.value) || 15)}
-                    />
+                {weeklyMatchDayEnabled && (
+                <div className="flex flex-col gap-5">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <FormInput
+                            label="Name prefix"
+                            placeholder="Next Match"
+                            value={weeklyMatchDayNamePrefix}
+                            onChange={(e) => setWeeklyMatchDayNamePrefix(e.target.value)}
+                        />
+                        <FormSelect
+                            label="Venue"
+                            placeholder="Please select a venue"
+                            value={weeklyMatchDayVenueId ?? ""}
+                            disabled={isVenuesLoading}
+                            onChange={(e) => setWeeklyMatchDayVenueId(Number(e.target.value))}
+                            options={venuesData?.content.map((v: any) => ({ value: v.id, label: v.name })) || []}
+                        />
+                    </div>
+
+                    <div className="rounded-lg border border-gray-100 p-4 dark:border-[var(--color-rule)]">
+                        <div className="mb-3 w-40">
+                            <FormInput
+                                label="Matches per week"
+                                type="number"
+                                min={1}
+                                max={7}
+                                value={matchDaysPerWeek}
+                                onChange={(e) => handleMatchDaysPerWeekChange(Number(e.target.value))}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-4">
+                            {weeklyMatchDaySlots.map((slot, index) => (
+                                <div
+                                    key={index}
+                                    className="rounded-lg border border-gray-100 p-3 dark:border-[var(--color-rule)]"
+                                >
+                                    {/* MatchDay-level: when this Match Day happens and how long the whole day runs. */}
+                                    <p className="mb-2 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                        Match Day {index + 1}
+                                    </p>
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                        <FormSelect
+                                            label="Day"
+                                            value={slot.dayOfWeek}
+                                            onChange={(e) => updateSlot(index, { dayOfWeek: e.target.value })}
+                                            options={DAYS_OF_WEEK.map((d) => ({ value: d, label: d }))}
+                                        />
+                                        <FormInput
+                                            label="Time"
+                                            type="time"
+                                            value={slot.time}
+                                            onChange={(e) => updateSlot(index, { time: e.target.value })}
+                                        />
+                                        <FormInput
+                                            label="Total duration (min)"
+                                            hint="Whole Match Day's length (e.g. 6:00–7:30pm = 90) — not any single match's length."
+                                            type="number"
+                                            min={15}
+                                            max={300}
+                                            value={slot.durationMinutes}
+                                            onChange={(e) => updateSlot(index, { durationMinutes: Number(e.target.value) || 90 })}
+                                        />
+                                    </div>
+
+                                    {/* Match-level: applies to each individual match auto-generated inside this Match Day — separated from the fields above so it doesn't read as another Match Day property. */}
+                                    <p className="mb-2 mt-3 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                                        Matches within Match Day {index + 1}
+                                    </p>
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                        <FormInput
+                                            label="Match duration (min)"
+                                            hint="Length of each individual auto-generated match — not this Match Day's own total duration above."
+                                            type="number"
+                                            min={5}
+                                            max={180}
+                                            value={slot.matchDurationMinutes}
+                                            onChange={(e) => updateSlot(index, { matchDurationMinutes: Number(e.target.value) || 13 })}
+                                        />
+                                        <FormInput
+                                            label="Gap between matches (min)"
+                                            hint="Breather between one auto-generated match ending and the next starting — a per-match setting, not this Match Day's own total duration above."
+                                            type="number"
+                                            min={0}
+                                            max={120}
+                                            value={slot.timeGapMinutes}
+                                            onChange={(e) => {
+                                                // `|| 15` would treat 0 as falsy and silently snap it back to
+                                                // 15 — 0 (no gap) is a valid, intentional choice (matches the
+                                                // manual fixture-generation modal, which allows it too).
+                                                const parsed = Number(e.target.value);
+                                                updateSlot(index, { timeGapMinutes: Number.isNaN(parsed) ? 15 : parsed });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="rounded-lg border border-gray-100 p-4 dark:border-[var(--color-rule)]">
+                        <div className="mb-3">
+                            <FormInput
+                                label="Players per Team (max)"
+                                hint="Includes the goalkeeper — e.g. 6 for 5-a-side + 1 GK."
+                                type="number"
+                                min={2}
+                                max={11}
+                                value={weeklyMatchDayMaxPlayersPerTeam}
+                                onChange={(e) => setWeeklyMatchDayMaxPlayersPerTeam(Number(e.target.value) || 6)}
+                            />
+                            <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
+                                The number of teams is worked out automatically from how many players confirm — e.g. 13 confirmed at a cap of 6 makes 3 teams — rather than a fixed team count. An admin can still add/remove players by hand afterward on any given Match Day.
+                            </p>
+                        </div>
+
+                        <FormSwitch
+                            label="Auto-generate teams and fixtures"
+                            checked={weeklyMatchDayAutoTeamsEnabled}
+                            onChange={setWeeklyMatchDayAutoTeamsEnabled}
+                        />
+                        <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
+                            Confirmed players are auto-drafted into balanced teams (using each player's admin-set rank) and their fixtures scheduled automatically, ahead of kickoff.
+                        </p>
+
+                        {weeklyMatchDayAutoTeamsEnabled && (
+                            <>
+                                <div className="mt-3 w-56">
+                                    <FormInput
+                                        label="Hours before kickoff"
+                                        type="number"
+                                        min={1}
+                                        max={168}
+                                        value={weeklyMatchDayAutoTeamsLeadHours}
+                                        onChange={(e) => setWeeklyMatchDayAutoTeamsLeadHours(Number(e.target.value) || 24)}
+                                    />
+                                </div>
+
+                                <div className="mt-4 rounded-lg border border-dashed border-gray-300 p-3 dark:border-[var(--color-rule)]">
+                                    <p className="mb-2 text-theme-xs text-gray-500 dark:text-gray-400">
+                                        Test team + fixture auto-generation on a specific Match Day right now, bypassing the
+                                        lead-time wait above — drafts teams, schedules their round-robin matches, and assigns
+                                        jerseys in one step.
+                                    </p>
+                                    <div className="flex flex-wrap items-end gap-2">
+                                        <div className="min-w-[220px] flex-1">
+                                            <FormSelect
+                                                label="Match Day"
+                                                placeholder={isMatchDaysLoading ? "Loading..." : "Select a Match Day"}
+                                                disabled={isMatchDaysLoading}
+                                                value={testMatchDayId ?? ""}
+                                                onChange={(e) => setTestMatchDayId(e.target.value ? Number(e.target.value) : undefined)}
+                                                options={weeklyMatchDayOptionsList}
+                                            />
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={!testMatchDayId || isTestingTeams}
+                                            onClick={handleTestGenerateTeams}
+                                        >
+                                            {isTestingTeams ? "Testing..." : "Test Generate Teams & Fixtures"}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-lg border border-dashed border-gray-300 p-4 dark:border-[var(--color-rule)]">
+                        <p className="text-theme-xs text-gray-500 dark:text-gray-400">
+                            Saves the settings above, then runs the generator right now instead of waiting for the hourly check — useful to verify the configuration works as expected.
+                        </p>
+                        <Button variant="outline" onClick={handleGenerateNow} disabled={isGenerating || isSaving}>
+                            {isGenerating || isSaving ? "Working..." : "Save & Generate for this month"}
+                        </Button>
+                    </div>
                 </div>
                 )}
             </div>

@@ -8,13 +8,14 @@ import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import { canConductMatches } from "../../../utils/roleUtils";
 import MatchEventTimeline from "./MatchEventTimeline";
 import QuickEventRecorder from "./QuickEventRecorder";
+import MatchStatistics from "./MatchStatistics";
 import ElectricTeamBanner from "./ElectricTeamBanner";
 import Loader from "../../ui/loader";
 import Badge from "../../ui/badge";
 
 export default function MatchDetailsPage() {
   const { matchId } = useParams<{ matchId: string }>();
-  const [activeTab, setActiveTab] = useState<"information" | "live">("information");
+  const [activeTab, setActiveTab] = useState<"information" | "live" | "statistics">("information");
   const loginInfo = useSelector(selectLoginInfo);
   const canConduct = canConductMatches(loginInfo.roles);
 
@@ -59,7 +60,7 @@ export default function MatchDetailsPage() {
       />
 
       <div className="mt-4">
-        <div className="mb-4 flex overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700" style={{ width: "fit-content" }}>
+        <div className="mb-4 flex overflow-x-auto rounded-lg border border-gray-300 dark:border-[var(--color-rule)]" style={{ width: "fit-content" }}>
           <button
             type="button"
             onClick={() => { setActiveTab("information"); handleRefresh(); }}
@@ -81,7 +82,16 @@ export default function MatchDetailsPage() {
               <LockOutlined className="text-[10px]" /> Live Control & Events
             </span>
           )}
+          <button
+            type="button"
+            onClick={() => { setActiveTab("statistics"); handleRefresh(); }}
+            className={`px-4 py-2.5 text-theme-sm font-medium transition ${activeTab === "statistics" ? "bg-brand-500 text-white" : "bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"}`}
+          >
+            Statistics
+          </button>
         </div>
+
+        {activeTab === "statistics" && <MatchStatistics matchId={match.id} />}
 
         {activeTab === "information" && (
           <MatchEventTimeline

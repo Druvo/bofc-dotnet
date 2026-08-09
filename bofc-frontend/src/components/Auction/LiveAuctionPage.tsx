@@ -38,8 +38,9 @@ import Button from "../ui/button";
 import Modal from "../ui/modal";
 import Loader from "../ui/loader";
 import Pagination from "../ui/pagination";
+import { formatCurrency } from "../../utils/formatCurrency";
 
-const fmt = (n?: number) => n != null ? `৳${n.toLocaleString()}` : "—";
+const fmt = (n?: number) => n != null ? formatCurrency(n, { decimals: 0 }) : "—";
 const hasRole = (roles: string[] | undefined, role: string) =>
   !!roles?.some(r => r === role || r === `ROLE_${role}`);
 
@@ -161,13 +162,13 @@ const LiveAuctionPage: React.FC = () => {
       case "BID_PLACED":
         showBrowserNotification(
           playerName ? `New bid on ${playerName}` : "New bid placed",
-          { body: p.bidAmount ? `৳${Number(p.bidAmount).toLocaleString()}${p.teamName ? ` by ${p.teamName}` : ""}` : undefined, tag: "auction-bid" }
+          { body: p.bidAmount ? `${fmt(Number(p.bidAmount))}${p.teamName ? ` by ${p.teamName}` : ""}` : undefined, tag: "auction-bid" }
         );
         break;
       case "PLAYER_SOLD":
         showBrowserNotification(
           playerName ? `${playerName} sold!` : "Player sold",
-          { body: p.teamName ? `To ${p.teamName}${p.finalPrice ? ` for ৳${Number(p.finalPrice).toLocaleString()}` : ""}` : undefined, tag: "auction-sold" }
+          { body: p.teamName ? `To ${p.teamName}${p.finalPrice ? ` for ${fmt(Number(p.finalPrice))}` : ""}` : undefined, tag: "auction-sold" }
         );
         break;
       case "NEXT_PLAYER":
@@ -291,7 +292,7 @@ const LiveAuctionPage: React.FC = () => {
 
       {/* ── Admin controls ─────────────────────────── */}
       {isAdmin && (
-        <div className="mb-3.5 rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="mb-3.5 rounded-xl border border-gray-200 bg-white p-3 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
           <div className="flex flex-wrap items-center gap-2">
             {(!session || session.status === "COMPLETED") && (
               <span title={teamBudgets.length === 0 ? "Add at least one team budget before starting the auction" : undefined}>
@@ -409,7 +410,7 @@ const LiveAuctionPage: React.FC = () => {
         {/* ── Center: Current Player + Timer + Bid ── */}
         <div>
           {!session && (
-            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+            <div className="rounded-xl border border-gray-200 bg-white p-6 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
               <p className="m-0 text-theme-sm text-gray-600 dark:text-gray-300">Auction not started yet.</p>
               {isAdmin && (
                 <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">
@@ -676,10 +677,10 @@ const LiveAuctionPage: React.FC = () => {
           <div className="py-8 text-center text-theme-sm text-gray-400 dark:text-gray-500">No remaining players</div>
         ) : (
           <>
-            <div className="max-h-[420px] overflow-y-auto overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+            <div className="max-h-[420px] overflow-y-auto overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
               <table className="w-full min-w-[640px] border-collapse text-theme-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                  <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                     <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">#</th>
                     <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Player</th>
                     <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Grade</th>
@@ -738,10 +739,10 @@ const LiveAuctionPage: React.FC = () => {
         {(dashboard?.unsoldPlayers?.length ?? 0) === 0 ? (
           <div className="py-8 text-center text-theme-sm text-gray-400 dark:text-gray-500">No unsold players</div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
             <table className="w-full min-w-[560px] border-collapse text-theme-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">#</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Player</th>
                   <th className="px-3 py-2.5 text-left font-semibold text-gray-500 dark:text-gray-400">Grade</th>

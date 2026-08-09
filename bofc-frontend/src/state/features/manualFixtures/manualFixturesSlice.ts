@@ -37,7 +37,12 @@ import {
 } from "./manualFixtureTypes";
 
 const apiWithTags = apiSlice.enhanceEndpoints({
-  addTagTypes: ["rounds", "groups", "standings", "matchDay-structure"],
+  // "fixtures" is also declared in fixturesSlice.ts (RTK Query merges tag-type declarations
+  // across every enhanceEndpoints call against the same base apiSlice) — deleting a
+  // round/group/its matches here previously left the generic Fixtures views (Table/Card/List/
+  // Timeline/Calendar, all driven by getFixtures tagged "fixtures") still showing the
+  // now-orphaned matches until a manual page reload.
+  addTagTypes: ["rounds", "groups", "standings", "matchDay-structure", "fixtures"],
 });
 
 export const manualFixturesApi = apiWithTags.injectEndpoints({
@@ -88,6 +93,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { roundId }) => [
         "rounds",
         "matchDay-structure",
+        "fixtures",
         { type: "rounds", id: roundId }, // Invalidate specific round cache
       ],
     }),
@@ -241,6 +247,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
         { type: "groups", id: groupId },
         "groups",
         "matchDay-structure",
+        "fixtures",
       ],
     }),
 
@@ -487,6 +494,7 @@ export const manualFixturesApi = apiWithTags.injectEndpoints({
       invalidatesTags: (result, error, { groupId }) => [
         { type: "groups", id: groupId },
         "matchDay-structure",
+        "fixtures",
       ],
     }),
   }),

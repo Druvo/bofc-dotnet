@@ -16,7 +16,8 @@ namespace BofcBackend.Api.Features.Fixtures;
 public class FixtureGenerationService(
     BofcDbContext db,
     ILiveMatchUpdatePublisher liveMatchUpdatePublisher,
-    ICurrentUserService currentUserService)
+    ICurrentUserService currentUserService,
+    ILogger<FixtureGenerationService> logger)
     : IFixtureGenerationService
 {
     public async Task<List<Match>> GenerateFixturesAsync(long matchDayId, FixtureGenerationRequest request)
@@ -92,41 +93,135 @@ public class FixtureGenerationService(
 
         var startDate = request.MatchDates[0];
 
-        var matches = new List<Match>();
-        var matchOrder = 1;
-        var matchIndex = 0;
-
+        // One full round-robin cycle — each selected team plays every other once.
+        var basePairings = new List<(Team Home, Team Away)>();
         for (var i = 0; i < selectedTeams.Count; i++)
         {
             for (var j = i + 1; j < selectedTeams.Count; j++)
             {
-                var dayOffset = matchIndex / matchesPerDay;
-                var matchIndexOnDay = matchIndex % matchesPerDay;
-                var matchNumber = matchIndex + 1;
-                var breakOffset = breakAfterMatchNumber != null && matchNumber > breakAfterMatchNumber ? breakDurationMinutes : 0;
+                basePairings.Add((selectedTeams[i], selectedTeams[j]));
+            }
+        }
 
-                var matchDate = startDate.AddDays(dayOffset).AddMinutes((double)matchIndexOnDay * slotMinutes + breakOffset);
-
-                matches.Add(new Match
+        // A single round-robin cycle usually only fills a fraction of the MatchDay's own
+        // duration (e.g. 3 teams -> 1 cycle -> 3 matches -> 45 min of a 90-min window). For a
+        // single-day request, repeat the cycle to use up the remaining time instead of leaving
+        // it empty — spreading a REPEATED cycle across multiple days would instead just be
+        // padding an intentionally multi-day request with duplicate fixtures, so this only
+        // applies when generating for exactly one day.
+        var pairings = basePairings;
+        if (request.MatchDates.Count == 1 && matchDay.DurationMinutes is int totalDurationMinutes and > 0 && slotMinutes > 0)
+        {
+            var capacity = Math.Max(basePairings.Count, totalDurationMinutes / slotMinutes);
+            if (capacity > basePairings.Count)
+            {
+                pairings = new List<(Team Home, Team Away)>(capacity);
+                while (pairings.Count < capacity)
                 {
-                    MatchDayId = matchDay.Id,
-                    MatchDay = matchDay,
-                    HomeTeamId = selectedTeams[i].Id,
-                    HomeTeam = selectedTeams[i],
-                    AwayTeamId = selectedTeams[j].Id,
-                    AwayTeam = selectedTeams[j],
-                    VenueId = venue?.Id,
-                    Venue = venue,
-                    MatchDate = matchDate,
-                    MatchStatus = MatchStatus.SCHEDULED,
-                    MatchOrder = matchOrder++,
-                    HomeTeamScore = 0,
-                    AwayTeamScore = 0,
-                    ElapsedTimeSeconds = 0,
-                    MatchDurationMinutes = matchDurationMinutes,
-                });
+                    pairings.AddRange(basePairings);
+                }
+                pairings = pairings.Take(capacity).ToList();
+            }
+        }
 
-                matchIndex++;
+        // The club's jersey colors are a configurable list (any count, not hardcoded to 2).
+        // Two assignment modes:
+        //  - Colors == teams: enough jerseys for one each — assign every team a FIXED color for
+        //    the whole MatchDay (never changes match to match), so a team is always recognizable
+        //    by the same shirt across its whole slate.
+        //  - Otherwise (fewer physical jerseys than teams, the original "club owns 2 jerseys, 3+
+        //    teams share them" case): rotate through the list match-to-match instead, since teams
+        //    must take turns wearing the limited physical jerseys.
+        // Left unset if fewer than 2 colors are configured (need 2 distinct colors to tell the
+        // teams in a match apart).
+        var jerseyColors = await db.JerseyColors.AsNoTracking()
+            .Where(j => j.SystemSettingsId == 1)
+            .OrderBy(j => j.SortOrder)
+            .Select(j => j.Color)
+            .ToListAsync();
+        var assignJerseys = jerseyColors.Count >= 2;
+
+        Dictionary<long, string>? fixedTeamJerseyColors = null;
+        if (assignJerseys && jerseyColors.Count == selectedTeams.Count)
+        {
+            fixedTeamJerseyColors = new Dictionary<long, string>();
+            for (var i = 0; i < selectedTeams.Count; i++)
+            {
+                fixedTeamJerseyColors[selectedTeams[i].Id] = jerseyColors[i];
+            }
+        }
+
+        var matches = new List<Match>();
+        var matchOrder = 1;
+        var matchIndex = 0;
+
+        foreach (var (home, away) in pairings)
+        {
+            var dayOffset = matchIndex / matchesPerDay;
+            var matchIndexOnDay = matchIndex % matchesPerDay;
+            var matchNumber = matchIndex + 1;
+            var breakOffset = breakAfterMatchNumber != null && matchNumber > breakAfterMatchNumber ? breakDurationMinutes : 0;
+
+            var matchDate = startDate.AddDays(dayOffset).AddMinutes((double)matchIndexOnDay * slotMinutes + breakOffset);
+
+            string? homeJerseyColor = null;
+            string? awayJerseyColor = null;
+            if (fixedTeamJerseyColors != null)
+            {
+                homeJerseyColor = fixedTeamJerseyColors[home.Id];
+                awayJerseyColor = fixedTeamJerseyColors[away.Id];
+            }
+            else if (assignJerseys)
+            {
+                // Consecutive indices mod N are always different as long as N >= 2, so home and
+                // away never land on the same color.
+                var n = jerseyColors.Count;
+                homeJerseyColor = jerseyColors[matchIndex % n];
+                awayJerseyColor = jerseyColors[(matchIndex + 1) % n];
+            }
+
+            matches.Add(new Match
+            {
+                MatchDayId = matchDay.Id,
+                MatchDay = matchDay,
+                HomeTeamId = home.Id,
+                HomeTeam = home,
+                AwayTeamId = away.Id,
+                AwayTeam = away,
+                VenueId = venue?.Id,
+                Venue = venue,
+                MatchDate = matchDate,
+                MatchStatus = MatchStatus.SCHEDULED,
+                MatchOrder = matchOrder++,
+                HomeTeamScore = 0,
+                AwayTeamScore = 0,
+                ElapsedTimeSeconds = 0,
+                MatchDurationMinutes = matchDurationMinutes,
+                HomeJerseyColor = homeJerseyColor,
+                AwayJerseyColor = awayJerseyColor,
+            });
+
+            matchIndex++;
+        }
+
+        // Nothing here checks the generated slate against the MatchDay's own advertised
+        // DurationMinutes window — a full round-robin easily overruns it (e.g. 6 matches at
+        // 90+120min slots vs. a 90-minute MatchDay) with no signal to the admin who requested
+        // it. Not a hard validation error (multi-day generation is a legitimate, expected use of
+        // this same method — see matchesPerDay/dayOffset above), just a log line for same-day
+        // overruns so it's at least visible in the logs instead of silently wrong.
+        if (matches.Count > 0)
+        {
+            var lastMatch = matches[^1];
+            var scheduleEnd = lastMatch.MatchDate.AddMinutes(lastMatch.MatchDurationMinutes ?? matchDurationMinutes);
+            var sameDayAsMatchDay = matches.All(m => m.MatchDate.Date == matchDay.MatchDayDate.Date);
+            if (sameDayAsMatchDay && matchDay.DurationMinutes is > 0
+                && scheduleEnd > matchDay.MatchDayDate.AddMinutes(matchDay.DurationMinutes.Value))
+            {
+                logger.LogWarning(
+                    "Generated fixtures for MatchDay {MatchDayId} run until {ScheduleEnd}, past its own {DurationMinutes}-minute window (ends {MatchDayEnd})",
+                    matchDayId, scheduleEnd, matchDay.DurationMinutes,
+                    matchDay.MatchDayDate.AddMinutes(matchDay.DurationMinutes.Value));
             }
         }
 
@@ -179,14 +274,13 @@ public class FixtureGenerationService(
             match.Venue = venue;
         }
 
-        if (request.HomeJerseyColor != null)
+        if (request.HomeJerseyColor != null || request.AwayJerseyColor != null)
         {
-            match.HomeJerseyColor = request.HomeJerseyColor;
-        }
-
-        if (request.AwayJerseyColor != null)
-        {
-            match.AwayJerseyColor = request.AwayJerseyColor;
+            var newHomeColor = request.HomeJerseyColor ?? match.HomeJerseyColor;
+            var newAwayColor = request.AwayJerseyColor ?? match.AwayJerseyColor;
+            await Common.Util.JerseyColorValidator.ValidateAsync(db, newHomeColor, newAwayColor);
+            match.HomeJerseyColor = newHomeColor;
+            match.AwayJerseyColor = newAwayColor;
         }
 
         await db.SaveChangesAsync();

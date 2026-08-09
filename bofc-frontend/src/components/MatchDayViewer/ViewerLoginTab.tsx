@@ -85,10 +85,10 @@ export default function ViewerLoginTab() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`h-12 w-full rounded-lg border px-4 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3 dark:bg-gray-900 ${
+                className={`h-12 w-full rounded-lg border px-4 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] ${
                   errors.email
                     ? "border-error-500 focus:border-error-300 focus:ring-error-500/10"
-                    : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                    : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                 }`}
               />
               {errors.email && <p className="mt-1.5 text-theme-xs text-error-500">{errors.email}</p>}
@@ -102,10 +102,10 @@ export default function ViewerLoginTab() {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`h-12 w-full rounded-lg border px-4 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3 dark:bg-gray-900 ${
+                  className={`h-12 w-full rounded-lg border px-4 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] ${
                     errors.password
                       ? "border-error-500 focus:border-error-300 focus:ring-error-500/10"
-                      : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+                      : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
                   }`}
                 />
                 <button

@@ -31,6 +31,7 @@ const PendingDuesCountTile: React.FC = () => {
       variant="warning"
       display={<span>{dueCount}</span>}
       subtitle="players this month"
+      actionable
     />
   );
 };

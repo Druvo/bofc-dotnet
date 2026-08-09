@@ -21,7 +21,6 @@ import { notificationApi } from "./state/features/notifications/notificationSlic
 import { useGetUserProfileQuery, useUpdateThemePreferenceMutation } from "./state/features/auth/authSlice";
 
 function App() {
-    const [collapsed, setCollapsed] = useState(false);
     // Lazy-initialize from localStorage directly rather than defaulting to
     // true and flipping in an effect after mount. That two-pass mount (dark
     // commit, then light commit) let antd's cssinjs style injection leak
@@ -99,10 +98,6 @@ function App() {
         navigator.serviceWorker.addEventListener("message", onMessage);
         return () => navigator.serviceWorker.removeEventListener("message", onMessage);
     }, [navigate, dispatch]);
-
-    const handleToggleCollapse = (value: boolean) => {
-        setCollapsed(value);
-    };
 
     useLayoutEffect(() => {
         const tokenContent = localStorage.getItem("tokenContent");
@@ -209,41 +204,40 @@ function App() {
                     ? theme.darkAlgorithm
                     : theme.defaultAlgorithm,
                 token: {
-                    // BOFC crest palette — deep shield green as the primary accent
-                    // (matches brand-500 in tailwind.config.js), gold/deep-green
-                    // link treatment mirroring tokens.css's dark/light --color-accent split.
-                    colorPrimary: '#28552B',
+                    // Exact hex from design_handoff_club_app_fixes's THEMES object
+                    // (source of truth), not hand-picked approximations.
+                    colorPrimary: '#2F6B45',
                     colorTextLightSolid: '#ffffff',
-                    colorLink: isDarkMode ? '#B69549' : '#17461C',
-                    colorLinkHover: isDarkMode ? '#C9AE71' : '#07380E',
-                    colorBgContainer: isDarkMode ? '#1F2937' : '#ffffff',
-                    colorText: isDarkMode ? '#F9FAFB' : '#111827',
-                    colorTextSecondary: isDarkMode ? '#9CA3AF' : '#6B7280',
+                    colorLink: isDarkMode ? '#7fd99a' : '#2f6b45',
+                    colorLinkHover: isDarkMode ? '#a3e6b8' : '#23532f',
+                    colorBgContainer: isDarkMode ? '#12241A' : '#ffffff',
+                    colorText: isDarkMode ? '#F2F5F0' : '#16241A',
+                    colorTextSecondary: isDarkMode ? '#9FB3A5' : '#6B7D70',
 
                     // Semantic status colors — colorInfo intentionally stays a
                     // genuine blue (the app's own "blue-light" scale), distinct
                     // from the green brand accent, so info states don't read as
                     // just another shade of the primary color.
-                    colorSuccess: isDarkMode ? '#22C55E' : '#16A34A',
-                    colorError: isDarkMode ? '#EF4444' : '#DC2626',
+                    colorSuccess: '#2F8A52',
+                    colorError: '#C04A3A',
                     colorInfo: isDarkMode ? '#0ba5ec' : '#0086c9',
-                    colorWarning: isDarkMode ? '#F59E0B' : '#D97706',
+                    colorWarning: '#D69A2F',
 
                     // Layout
-                    colorBgLayout: isDarkMode ? '#111827' : '#F9FAFB',
+                    colorBgLayout: isDarkMode ? '#0A0F0C' : '#F7F8F6',
 
                     // Modal
                     colorBgMask: 'rgba(0, 0, 0, 0.5)',
-                    colorBgElevated: isDarkMode ? '#1F2937' : '#ffffff',
+                    colorBgElevated: isDarkMode ? '#12241A' : '#ffffff',
 
                     // Border
-                    colorBorder: isDarkMode ? '#374151' : '#E5E7EB',
-                    colorBorderSecondary: isDarkMode ? '#1F2937' : '#F3F4F6',
+                    colorBorder: isDarkMode ? '#2A3D31' : '#E7EBE4',
+                    colorBorderSecondary: isDarkMode ? '#1C2B21' : '#ECEEE9',
 
                     // Fills
-                    colorFillSecondary: isDarkMode ? '#374151' : '#F3F4F6',
-                    colorFillTertiary: isDarkMode ? '#4B5563' : '#F9FAFB',
-                    colorFillQuaternary: isDarkMode ? '#1F2937' : '#F3F4F6',
+                    colorFillSecondary: isDarkMode ? '#0E1C14' : '#F4F6F2',
+                    colorFillTertiary: isDarkMode ? '#16281C' : '#EAF3EC',
+                    colorFillQuaternary: isDarkMode ? '#0E1C14' : '#F4F6F2',
 
                     // Border radius — TailAdmin uses 12px
                     borderRadius: 12,
@@ -256,34 +250,34 @@ function App() {
                 },
                 components: {
                     Typography: {
-                        colorTextHeading: isDarkMode ? '#F9FAFB' : '#111827',
-                        colorTextSecondary: isDarkMode ? '#9CA3AF' : '#6B7280',
-                        colorText: isDarkMode ? '#F9FAFB' : '#111827',
+                        colorTextHeading: isDarkMode ? '#F2F5F0' : '#16241A',
+                        colorTextSecondary: isDarkMode ? '#9FB3A5' : '#6B7D70',
+                        colorText: isDarkMode ? '#F2F5F0' : '#16241A',
                     },
                     Button: {
-                        colorPrimary: '#28552B',
-                        colorPrimaryHover: '#547A55',
-                        colorPrimaryActive: '#173F1A',
+                        colorPrimary: '#2F6B45',
+                        colorPrimaryHover: '#3D8759',
+                        colorPrimaryActive: '#245536',
                         borderRadius: 8,
                     },
                     Input: {
-                        colorBgContainer: isDarkMode ? '#1F2937' : '#ffffff',
-                        colorBorder: isDarkMode ? '#374151' : '#D1D5DB',
-                        colorText: isDarkMode ? '#F9FAFB' : '#111827',
+                        colorBgContainer: isDarkMode ? '#12241A' : '#ffffff',
+                        colorBorder: isDarkMode ? '#2A3D31' : '#D1D5DB',
+                        colorText: isDarkMode ? '#F2F5F0' : '#16241A',
                         borderRadius: 8,
                     },
                     Table: {
-                        colorBgContainer: isDarkMode ? '#1F2937' : '#ffffff',
-                        colorText: isDarkMode ? '#F9FAFB' : '#111827',
-                        colorTextHeading: isDarkMode ? '#9CA3AF' : '#6B7280',
-                        headerBg: isDarkMode ? '#1F2937' : '#F9FAFB',
-                        headerColor: isDarkMode ? '#9CA3AF' : '#6B7280',
-                        borderColor: isDarkMode ? '#374151' : '#E5E7EB',
-                        rowHoverBg: isDarkMode ? '#374151' : '#F3F4F6',
+                        colorBgContainer: isDarkMode ? '#12241A' : '#ffffff',
+                        colorText: isDarkMode ? '#F2F5F0' : '#16241A',
+                        colorTextHeading: isDarkMode ? '#9FB3A5' : '#6B7D70',
+                        headerBg: isDarkMode ? '#0E1C14' : '#F7F8F6',
+                        headerColor: isDarkMode ? '#9FB3A5' : '#6B7D70',
+                        borderColor: isDarkMode ? '#2A3D31' : '#E7EBE4',
+                        rowHoverBg: isDarkMode ? '#16281C' : '#F4F6F2',
                         borderRadius: 12,
                     },
                     Card: {
-                        colorBgContainer: isDarkMode ? '#1F2937' : '#ffffff',
+                        colorBgContainer: isDarkMode ? '#12241A' : '#ffffff',
                         borderRadiusLG: 12,
                     },
                 },
@@ -302,8 +296,6 @@ function App() {
                     style={{ top: 88 }}
                 />
                 <ContentComponent
-                    collapsed={collapsed}
-                    onToggleCollapse={handleToggleCollapse}
                     setIsDarkMode={handleSetIsDarkMode}
                     isDarkMode={isDarkMode}
                 />

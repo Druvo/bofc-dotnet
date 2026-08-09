@@ -61,3 +61,23 @@ export function isMatchOngoing(status: string): boolean {
   return status === "ONGOING" || status === "PAUSED";
 }
 
+/**
+ * "Starts – Ends" range for a scheduled fixture, e.g. "DD/MM/YYYY, hh:mm a – hh:mm a"
+ * (end collapses to time-only when it lands on the same calendar day as the start).
+ * Unlike MatchDay's naive-local matchDayDate, a Match's matchDate carries a real UTC
+ * offset, so this goes through moment's normal .utc().local() conversion rather than
+ * the naive-string parsing showBdLocalTime/showBdLocalTimeRange use for MatchDay.
+ */
+export function formatMatchTimeRange(
+  matchDate: string | null | undefined,
+  durationMinutes: number | null | undefined,
+  dateFormat: string = "DD/MM/YYYY, hh:mm a"
+): string {
+  if (!matchDate) return "";
+  const start = moment.utc(matchDate).local();
+  const end = start.clone().add(durationMinutes || 90, "minutes");
+  const sameDay = start.isSame(end, "day");
+  const timeOnlyFormat = dateFormat.replace(/^.*,\s*/, "");
+  return `${start.format(dateFormat)} – ${end.format(sameDay ? timeOnlyFormat : dateFormat)}`;
+}
+

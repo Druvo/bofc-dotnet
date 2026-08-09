@@ -29,10 +29,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
       {/* Finance Overview — balance card leads, KPI tiles alongside */}
       <div className="mb-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-6">
-          <div className="md:col-span-6">
+          <div className="min-w-0 md:col-span-6">
             <AccountBalanceCard />
           </div>
-          <div className="md:col-span-6">
+          <div className="min-w-0 md:col-span-6">
             <div className="grid h-full grid-cols-1 gap-4 sm:grid-cols-2">
               <TotalCollectionsTile />
               <FinanceStatTile

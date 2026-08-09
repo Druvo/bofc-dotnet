@@ -1,4 +1,7 @@
+using System.Net;
+using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Data;
+using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Domain.Enums;
 using BofcBackend.Api.Features.Statistics.Models;
 using Microsoft.EntityFrameworkCore;
@@ -80,10 +83,67 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
             aggregated = aggregated.Where(a => a.Position == filter.Position).ToList();
         }
 
-        var responses = aggregated.Select(ToResponse).ToList();
+        // Manual corrections (PlayerStatAdjustment) represent a lifetime/overall total, not any
+        // single MatchDay's play — folding them into a single-MatchDay view (matchDayId set)
+        // would misattribute them to that one day, so they only apply to the "all MatchDays"
+        // aggregate (whether or not WeeklyMatchDaysOnly narrows which MatchDays count).
+        var adjustments = matchDayId == null
+            ? await db.PlayerStatAdjustments.AsNoTracking().Where(a => a.MatchId == null).ToDictionaryAsync(a => a.PlayerId)
+            : new Dictionary<long, PlayerStatAdjustment>();
+
+        var responses = aggregated.Select(a => ToResponse(a, adjustments.GetValueOrDefault(a.PlayerId))).ToList();
         responses = ApplySorting(responses, filter.SortBy, filter.SortOrder);
         return ApplyPagination(responses, filter.Offset, filter.Limit);
     }
+
+    public async Task<PlayerStatAdjustmentResponse> GetPlayerStatAdjustmentAsync(long playerId, long? matchId)
+    {
+        var adjustment = await db.PlayerStatAdjustments.AsNoTracking()
+            .FirstOrDefaultAsync(a => a.PlayerId == playerId && a.MatchId == matchId);
+        return ToAdjustmentResponse(playerId, matchId, adjustment);
+    }
+
+    public async Task<PlayerStatAdjustmentResponse> UpdatePlayerStatAdjustmentAsync(long playerId, long? matchId, UpdatePlayerStatAdjustmentRequest request)
+    {
+        if (!await db.Players.AnyAsync(p => p.Id == playerId))
+        {
+            throw new PlayerServiceException("Player not found", HttpStatusCode.NotFound);
+        }
+
+        if (matchId != null && !await db.Matches.AnyAsync(m => m.Id == matchId))
+        {
+            throw new MatchDayServiceException("Match not found", HttpStatusCode.NotFound);
+        }
+
+        var adjustment = await db.PlayerStatAdjustments.FirstOrDefaultAsync(a => a.PlayerId == playerId && a.MatchId == matchId);
+        if (adjustment == null)
+        {
+            adjustment = new PlayerStatAdjustment { PlayerId = playerId, MatchId = matchId };
+            db.PlayerStatAdjustments.Add(adjustment);
+        }
+
+        adjustment.GoalsAdjustment = request.GoalsAdjustment;
+        adjustment.AssistsAdjustment = request.AssistsAdjustment;
+        adjustment.YellowCardsAdjustment = request.YellowCardsAdjustment;
+        adjustment.RedCardsAdjustment = request.RedCardsAdjustment;
+        adjustment.MatchesPlayedAdjustment = request.MatchesPlayedAdjustment;
+        adjustment.Note = request.Note?.Trim();
+
+        await db.SaveChangesAsync();
+        return ToAdjustmentResponse(playerId, matchId, adjustment);
+    }
+
+    private static PlayerStatAdjustmentResponse ToAdjustmentResponse(long playerId, long? matchId, PlayerStatAdjustment? a) => new()
+    {
+        PlayerId = playerId,
+        MatchId = matchId,
+        GoalsAdjustment = a?.GoalsAdjustment ?? 0,
+        AssistsAdjustment = a?.AssistsAdjustment ?? 0,
+        YellowCardsAdjustment = a?.YellowCardsAdjustment ?? 0,
+        RedCardsAdjustment = a?.RedCardsAdjustment ?? 0,
+        MatchesPlayedAdjustment = a?.MatchesPlayedAdjustment ?? 0,
+        Note = a?.Note,
+    };
 
     public async Task<List<MatchDayTopScorerResponse>> GetTopScorersByMatchDayAsync(long matchDayId, int limit)
     {
@@ -116,21 +176,26 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
         return rows;
     }
 
-    private static PlayerStatisticsResponse ToResponse(Aggregate a) => new()
+    private static PlayerStatisticsResponse ToResponse(Aggregate a, PlayerStatAdjustment? adjustment)
     {
-        PlayerId = a.PlayerId,
-        PlayerName = a.PlayerName,
-        Position = a.Position.ToString(),
-        Statistics = new PlayerStatisticsResponse.StatisticsSummary
+        var goals = (int)a.GoalsScored + (adjustment?.GoalsAdjustment ?? 0);
+        var assists = (int)a.Assists + (adjustment?.AssistsAdjustment ?? 0);
+        return new PlayerStatisticsResponse
         {
-            MatchesPlayed = (int)a.MatchesPlayed,
-            GoalsScored = (int)a.GoalsScored,
-            Assists = (int)a.Assists,
-            GoalsAndAssists = (int)(a.GoalsScored + a.Assists),
-            YellowCards = (int)a.YellowCards,
-            RedCards = (int)a.RedCards,
-        },
-    };
+            PlayerId = a.PlayerId,
+            PlayerName = a.PlayerName,
+            Position = a.Position.ToString(),
+            Statistics = new PlayerStatisticsResponse.StatisticsSummary
+            {
+                MatchesPlayed = (int)a.MatchesPlayed + (adjustment?.MatchesPlayedAdjustment ?? 0),
+                GoalsScored = goals,
+                Assists = assists,
+                GoalsAndAssists = goals + assists,
+                YellowCards = (int)a.YellowCards + (adjustment?.YellowCardsAdjustment ?? 0),
+                RedCards = (int)a.RedCards + (adjustment?.RedCardsAdjustment ?? 0),
+            },
+        };
+    }
 
     private static List<PlayerStatisticsResponse> ApplySorting(List<PlayerStatisticsResponse> players, string sortBy, string sortOrder)
     {

@@ -90,7 +90,7 @@ function MiniStandingsTable({ rows }: { rows: any[] }) {
     <div className="overflow-x-auto">
       <table className="w-full text-theme-xs">
         <thead>
-          <tr className="border-b border-gray-100 dark:border-gray-800">
+          <tr className="border-b border-gray-100 dark:border-[var(--color-rule)]">
             {miniStandingsHeaders.map((h) => (
               <th key={h} className={`px-2 py-1.5 font-semibold text-gray-500 dark:text-gray-400 ${h === "Team" || h === "Pos" ? "text-left" : "text-center"}`}>{h}</th>
             ))}
@@ -98,7 +98,7 @@ function MiniStandingsTable({ rows }: { rows: any[] }) {
         </thead>
         <tbody>
           {rows.map((standing) => (
-            <tr key={standing.teamId} className="border-b border-gray-100 dark:border-gray-800">
+            <tr key={standing.teamId} className="border-b border-gray-100 dark:border-[var(--color-rule)]">
               <td className="px-2 py-1.5"><Badge variant={standing.position === 1 ? "warning" : "light"}>{standing.position}</Badge></td>
               <td className={`px-2 py-1.5 ${standing.position <= 2 ? "font-semibold text-gray-800 dark:text-white/90" : "text-gray-600 dark:text-gray-300"}`}>{standing.teamName}</td>
               <td className="px-2 py-1.5 text-center text-gray-500 dark:text-gray-400">{standing.matchesPlayed}</td>
@@ -561,14 +561,14 @@ export default function TeamAssignment({
         )}
 
         {previousRound && previousRound.roundType === "GROUP_BASED" && previousRoundGroups.length > 0 && (
-          <div className="rounded-xl border border-gray-200 p-3 dark:border-gray-800">
+          <div className="rounded-xl border border-gray-200 p-3 dark:border-[var(--color-rule)]">
             <div className="mb-2 flex items-center gap-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
               Previous Round: {previousRound.roundName}
               <Badge variant="info">{previousRoundGroups.length} Group{previousRoundGroups.length !== 1 ? 's' : ''}</Badge>
             </div>
             <div className="flex flex-col gap-3">
               {previousRoundGroups.map((group) => (
-                <div key={group.id} className="rounded-lg border border-gray-100 p-2.5 dark:border-gray-800">
+                <div key={group.id} className="rounded-lg border border-gray-100 p-2.5 dark:border-[var(--color-rule)]">
                   <div className="mb-1.5 text-theme-xs font-semibold text-gray-700 dark:text-gray-300">{group.groupName}</div>
                   {group.standings && group.standings.length > 0 ? (
                     <MiniStandingsTable rows={group.standings} />
@@ -582,7 +582,7 @@ export default function TeamAssignment({
         )}
 
         {previousRound && previousRound.roundType === "DIRECT_KNOCKOUT" && previousRoundStandings.length > 0 && (
-          <div className="rounded-xl border border-gray-200 p-3 dark:border-gray-800">
+          <div className="rounded-xl border border-gray-200 p-3 dark:border-[var(--color-rule)]">
             <div className="mb-2 flex items-center gap-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
               Previous Round: {previousRound.roundName}
               <Badge variant="info">Direct Knockout</Badge>
@@ -593,7 +593,7 @@ export default function TeamAssignment({
         )}
 
         {assignedTeamIds.length > 0 && (
-          <div className="rounded-xl border border-gray-200 p-3 dark:border-gray-800">
+          <div className="rounded-xl border border-gray-200 p-3 dark:border-[var(--color-rule)]">
             <div className="mb-2 flex items-center gap-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
               <TeamOutlined /> Currently Assigned Teams <Badge variant="info">{assignedTeamIds.length}</Badge>
               <span className="text-theme-xs font-normal text-gray-400">(Remove teams from Group Details)</span>
@@ -614,7 +614,7 @@ export default function TeamAssignment({
           </div>
         )}
 
-        <div className="h-px bg-gray-100 dark:bg-gray-800" />
+        <div className="h-px bg-gray-100 dark:bg-[var(--color-paper-2)]" />
 
         <div>
           <div className="mb-2 flex flex-wrap items-center gap-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
@@ -640,7 +640,7 @@ export default function TeamAssignment({
                   <label
                     key={team.teamId}
                     className={`flex items-start gap-2 rounded-lg border px-3 py-2 ${isDisabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"} ${
-                      isSelected ? "border-brand-500" : "border-gray-300 dark:border-gray-700"
+                      isSelected ? "border-brand-500" : "border-gray-300 dark:border-[var(--color-rule)]"
                     }`}
                   >
                     <input

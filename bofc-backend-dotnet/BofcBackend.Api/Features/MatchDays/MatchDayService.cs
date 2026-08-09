@@ -31,10 +31,18 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
             MatchDayDate = request.MatchDayDate!.Value,
             DurationMinutes = request.DurationMinutes,
             VenueId = venue.Id,
-            MatchDayStatus = request.MatchDayDate.Value > DateTime.UtcNow ? MatchDayStatus.UPCOMING : MatchDayStatus.ONGOING,
+            // MatchDayDate is always authored/displayed as local (Dhaka) wall-clock time —
+            // by the admin's date picker here, and by the scheduler elsewhere — never UTC.
+            // Comparing it against DateTime.UtcNow is a 6-hour-off comparison; use DateTime.Now
+            // (matches ComputeNextOccurrence/GenerateForCurrentMonthAsync's own convention).
+            // A MatchDay created with a date already past its own end window (start+duration)
+            // should land straight at CONCLUDED, not ONGOING — e.g. back-dating a historical
+            // MatchDay a year in the past would otherwise sit at ONGOING until the next
+            // scheduler tick corrects it.
+            MatchDayStatus = ComputeInitialStatus(request.MatchDayDate.Value, request.DurationMinutes),
             IsActive = true,
-            SportType = request.SportType != null ? Enum.Parse<SportType>(request.SportType) : SportType.FOOTBALL,
-            MatchDayType = request.MatchDayType != null ? Enum.Parse<MatchDayType>(request.MatchDayType) : MatchDayType.ROUND_ROBIN,
+            SportType = ParseEnumOrThrow<SportType>(request.SportType, "sportType") ?? SportType.FOOTBALL,
+            MatchDayType = ParseEnumOrThrow<MatchDayType>(request.MatchDayType, "matchDayType") ?? MatchDayType.ROUND_ROBIN,
             GroupCount = request.GroupCount,
             AuctionMode = request.AuctionMode,
             DefaultMatchDay = defaultMatchDay,
@@ -54,7 +62,17 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         }
 
         db.MatchDays.Add(matchDay);
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException) when (defaultMatchDay)
+        {
+            // ux_match_day_single_default caught a concurrent "set as default" race — the other
+            // request won, so this one just isn't the default (still created successfully).
+            throw new MatchDayServiceException(
+                "Another MatchDay was just set as default — please retry.", HttpStatusCode.Conflict);
+        }
         await transaction.CommitAsync();
 
         return await ToDtoAsync(matchDay);
@@ -81,8 +99,19 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         // drops functionality.
         if (string.Equals(searchColumn, "matchDayDate", StringComparison.OrdinalIgnoreCase) && searchValue != null)
         {
-            var searchDate = DateTime.Parse(searchValue);
-            query = query.Where(t => t.MatchDayDate == searchDate);
+            // MatchDayDate always carries a non-midnight time-of-day, so exact equality against
+            // a date-only search value could never match — filter by calendar day instead.
+            // A malformed searchValue previously threw an unhandled FormatException (masked 500);
+            // treat it as "no match" the same way an out-of-range page number would.
+            if (DateTime.TryParse(searchValue, out var searchDate))
+            {
+                var nextDay = searchDate.Date.AddDays(1);
+                query = query.Where(t => t.MatchDayDate >= searchDate.Date && t.MatchDayDate < nextDay);
+            }
+            else
+            {
+                query = query.Where(t => false);
+            }
         }
         else if (string.Equals(searchColumn, "name", StringComparison.OrdinalIgnoreCase) && searchValue != null)
         {
@@ -124,17 +153,26 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         matchDay.Description = request.Description;
         matchDay.Rules = request.Rules;
         matchDay.RoadmapImageUrl = request.RoadmapImageUrl;
+
+        // An admin manually moving an auto-generated slot's date/time means the scheduler must
+        // never re-create that (week, slot) pair again — see AutoGenSlotDayOfWeek/AutoGenWeekStart
+        // doc comments on MatchDay for why those fields (not this date) are what the scheduler checks.
+        if (matchDay.IsWeeklyMatchDay && matchDay.MatchDayDate != request.MatchDayDate!.Value)
+        {
+            matchDay.IsManuallyModified = true;
+        }
+
         matchDay.MatchDayDate = request.MatchDayDate!.Value;
         matchDay.DurationMinutes = request.DurationMinutes;
         matchDay.VenueId = venue.Id;
 
-        if (request.SportType != null)
+        if (ParseEnumOrThrow<SportType>(request.SportType, "sportType") is { } sportType)
         {
-            matchDay.SportType = Enum.Parse<SportType>(request.SportType);
+            matchDay.SportType = sportType;
         }
-        if (request.MatchDayType != null)
+        if (ParseEnumOrThrow<MatchDayType>(request.MatchDayType, "matchDayType") is { } matchDayType)
         {
-            matchDay.MatchDayType = Enum.Parse<MatchDayType>(request.MatchDayType);
+            matchDay.MatchDayType = matchDayType;
         }
         if (request.GroupCount != null)
         {
@@ -157,7 +195,15 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
             matchDay.DefaultMatchDay = defaultMatchDay;
         }
 
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException) when (request.DefaultMatchDay == true)
+        {
+            throw new MatchDayServiceException(
+                "Another MatchDay was just set as default — please retry.", HttpStatusCode.Conflict);
+        }
         await transaction.CommitAsync();
 
         return await ToDtoAsync(matchDay);
@@ -172,11 +218,15 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         // COMPLETED for MatchDays whose own status never actually got updated.
         await using var transaction = await db.Database.BeginTransactionAsync();
 
+        // MatchDayDate is local (Dhaka) wall-clock time everywhere it's written — comparing
+        // against DateTime.UtcNow here is a 6-hour-off comparison (see SaveMatchDayAsync).
+        var now = DateTime.Now;
+
         // MatchDays without fixtures yet — date-based conclusion only.
         var withoutMatches = await db.MatchDays
             .Where(t => t.IsActive && !db.Matches.Any(m => m.MatchDayId == t.Id))
             .ToListAsync();
-        foreach (var matchDay in withoutMatches.Where(t => t.MatchDayDate < DateTime.UtcNow))
+        foreach (var matchDay in withoutMatches.Where(t => t.MatchDayDate < now))
         {
             matchDay.MatchDayStatus = MatchDayStatus.CONCLUDED;
             matchDay.IsActive = false;
@@ -188,7 +238,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
             .ToListAsync();
         foreach (var matchDay in withMatches)
         {
-            var isOverdue = matchDay.MatchDayDate.AddDays(1) < DateTime.UtcNow;
+            var isOverdue = matchDay.MatchDayDate.AddDays(1) < now;
             if (isOverdue)
             {
                 await CompleteUnfinishedMatchesAsync(matchDay.Id);
@@ -256,7 +306,9 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         // manually marking the matchDay CONCLUDED — so a matchDay whose
         // date has rolled into a previous day can sit at ONGOING forever.
         // Exclude those stale rows here instead of surfacing them as "latest".
-        var today = DateTime.UtcNow.Date;
+        // MatchDayDate is local (Dhaka) wall-clock — DateTime.Now.Date, not UtcNow.Date, or this
+        // filter is itself off by up to 6h (the exact bug it exists to guard against).
+        var today = DateTime.Now.Date;
         var matchDay = await db.MatchDays.Include(t => t.Venue)
             .Where(t => t.MatchDayStatus == MatchDayStatus.UPCOMING
                 || (t.MatchDayStatus == MatchDayStatus.ONGOING && t.MatchDayDate.Date >= today))
@@ -268,7 +320,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
 
     public async Task<MatchDayResponse?> GetCurrentMatchDayAsync()
     {
-        var today = DateTime.UtcNow.Date;
+        var today = DateTime.Now.Date;
         var matchDay = await db.MatchDays.Include(t => t.Venue)
             .Where(t => t.IsWeeklyMatchDay
                 && (t.MatchDayStatus == MatchDayStatus.UPCOMING
@@ -321,6 +373,25 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         return years.Select(y => y.ToString()).ToList();
     }
 
+    private static TEnum? ParseEnumOrThrow<TEnum>(string? value, string fieldName) where TEnum : struct, Enum
+    {
+        if (value == null) return null;
+        if (!Enum.TryParse<TEnum>(value, out var parsed))
+        {
+            throw new MatchDayServiceException($"Unknown {fieldName} '{value}'", HttpStatusCode.BadRequest);
+        }
+        return parsed;
+    }
+
+    private static MatchDayStatus ComputeInitialStatus(DateTime matchDayDate, int? durationMinutes)
+    {
+        var now = DateTime.Now;
+        if (matchDayDate > now) return MatchDayStatus.UPCOMING;
+
+        var end = matchDayDate.AddMinutes(durationMinutes is > 0 ? durationMinutes.Value : 90);
+        return now >= end ? MatchDayStatus.CONCLUDED : MatchDayStatus.ONGOING;
+    }
+
     private async Task<MatchDay> GetMatchDayEntityAsync(long id) =>
         await db.MatchDays.Include(t => t.Venue).FirstOrDefaultAsync(t => t.Id == id)
         ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
@@ -348,6 +419,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         ActiveStatus = matchDay.IsActive,
         DefaultMatchDay = matchDay.DefaultMatchDay,
         MatchDayStatus = matchDay.MatchDayStatus,
+        VenueId = matchDay.Venue.Id,
         VenueName = matchDay.Venue.Name,
         VenueMapLink = matchDay.Venue.MapLink,
         SportType = matchDay.SportType.ToString(),

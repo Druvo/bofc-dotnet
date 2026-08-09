@@ -159,10 +159,10 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
     <div className="overflow-x-auto">
       <table className="w-full min-w-max border-collapse text-theme-sm">
         <thead>
-          <tr className="border-b border-gray-100 dark:border-gray-800">
+          <tr className="border-b border-gray-100 dark:border-[var(--color-rule)]">
             <th
               onClick={() => toggleSort("playerName")}
-              className="sticky left-0 z-10 min-w-[150px] cursor-pointer whitespace-nowrap bg-white px-3 py-2.5 text-left font-semibold text-gray-500 dark:bg-gray-900 dark:text-gray-400"
+              className="sticky left-0 z-10 min-w-[150px] cursor-pointer whitespace-nowrap bg-white px-3 py-2.5 text-left font-semibold text-gray-500 dark:bg-[var(--color-paper-3)] dark:text-gray-400"
             >
               Name <SortIcon field="playerName" />
             </th>
@@ -180,7 +180,7 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
           {dataSource.map((record) => (
             <tr key={record.key} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-              <td className="sticky left-0 z-10 whitespace-nowrap bg-white px-3 py-2 font-semibold text-gray-800 dark:bg-gray-900 dark:text-white/90">
+              <td className="sticky left-0 z-10 whitespace-nowrap bg-white px-3 py-2 font-semibold text-gray-800 dark:bg-[var(--color-paper-3)] dark:text-white/90">
                 {record.playerName}
               </td>
               {monthNames.map((_, idx) => {
@@ -203,8 +203,8 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
           ))}
         </tbody>
         <tfoot>
-          <tr className="border-t border-gray-200 font-bold dark:border-gray-700">
-            <td className="sticky left-0 z-10 bg-white px-3 py-2.5 text-gray-800 dark:bg-gray-900 dark:text-white/90">
+          <tr className="border-t border-gray-200 font-bold dark:border-[var(--color-rule)]">
+            <td className="sticky left-0 z-10 bg-white px-3 py-2.5 text-gray-800 dark:bg-[var(--color-paper-3)] dark:text-white/90">
               Total ({dataSource.length})
             </td>
             {monthlyTotals.map((total, idx) => (
@@ -219,9 +219,9 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
   );
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
       {/* Toolbar */}
-      <div className="border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+      <div className="border-b border-gray-100 px-5 py-4 dark:border-[var(--color-rule)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <span className="h-5 w-1 rounded bg-brand-500" />
@@ -240,7 +240,7 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
               onChange={(e) => handleYearChange(Number(e.target.value))}
               options={years.map((year: number) => ({ value: year, label: String(year) }))}
             />
-            <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+            <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-[var(--color-rule)]">
               <button type="button" disabled={isLoading} onClick={() => setFilter("all")} className={segmentBtn(filter === "all")}>
                 <TeamOutlined /> All
               </button>
@@ -251,7 +251,7 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
                 <UserDeleteOutlined /> Inactive
               </button>
             </div>
-            <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+            <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-[var(--color-rule)]">
               <button type="button" onClick={() => setMobileView('cards')} className={segmentBtn(mobileView === "cards")}>
                 <AppstoreOutlined /> Cards
               </button>

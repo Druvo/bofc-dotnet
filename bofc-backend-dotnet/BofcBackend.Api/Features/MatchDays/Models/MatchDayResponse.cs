@@ -15,6 +15,7 @@ public class MatchDayResponse
 
     /// <summary>How long the MatchDay runs, in minutes — null if not set when created.</summary>
     public int? DurationMinutes { get; set; }
+    public long VenueId { get; set; }
     public string VenueName { get; set; } = string.Empty;
     public string? VenueMapLink { get; set; }
     public bool ActiveStatus { get; set; }

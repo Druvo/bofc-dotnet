@@ -26,7 +26,7 @@ const StandingsSnapshotWidget: React.FC = () => {
   return (
     <div
       onClick={() => matchDayId && navigate(`/match-day-viewer/${matchDayId}/table`)}
-      className={`h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] ${matchDayId ? "cursor-pointer" : ""}`}
+      className={`h-full rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] ${matchDayId ? "cursor-pointer" : ""}`}
     >
       <div className="mb-3 flex items-center gap-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
         <TableOutlined /> Standings
@@ -50,7 +50,7 @@ const StandingsSnapshotWidget: React.FC = () => {
           </thead>
           <tbody>
             {standings.map((s, i) => (
-              <tr key={s.teamId} className="border-t border-gray-100 dark:border-gray-800">
+              <tr key={s.teamId} className="border-t border-gray-100 dark:border-[var(--color-rule)]">
                 <td className="max-w-[140px] py-1.5 pr-2 text-gray-700 dark:text-gray-300">
                   <TeamIdentityCell
                     rank={i + 1}

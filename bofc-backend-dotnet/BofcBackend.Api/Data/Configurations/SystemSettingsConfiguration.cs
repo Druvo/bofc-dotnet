@@ -31,22 +31,28 @@ public class SystemSettingsConfiguration : IEntityTypeConfiguration<SystemSettin
         builder.Property(s => s.PushNotificationsEnabled).HasColumnName("push_notifications_enabled").IsRequired();
         builder.Property(s => s.AuctionEnabled).HasColumnName("auction_enabled").IsRequired();
         builder.Property(s => s.LastPaymentReminderSentMonth).HasColumnName("last_payment_reminder_sent_month").HasMaxLength(7);
+        builder.Property(s => s.MatchDayStatusCheckIntervalHours).HasColumnName("match_day_status_check_interval_hours").HasDefaultValue(1).IsRequired();
 
-        builder.Property(s => s.WeeklyMatchEnabled).HasColumnName("weekly_match_enabled").IsRequired();
-        builder.Property(s => s.WeeklyMatchNamePrefix).HasColumnName("weekly_match_name_prefix").HasMaxLength(100).IsRequired();
+        builder.Property(s => s.WeeklyMatchDayEnabled).HasColumnName("weekly_match_day_enabled").IsRequired();
+        builder.Property(s => s.WeeklyMatchDayNamePrefix).HasColumnName("weekly_match_day_name_prefix").HasMaxLength(100).IsRequired();
         builder.Property(s => s.WeeklyMatchDayOfWeek).HasColumnName("weekly_match_day_of_week").HasConversion<string>().IsRequired();
         builder.Property(s => s.WeeklyMatchTime).HasColumnName("weekly_match_time").IsRequired();
-        builder.Property(s => s.WeeklyMatchVenueId).HasColumnName("weekly_match_venue_id");
-        builder.Property(s => s.WeeklyMatchSportType).HasColumnName("weekly_match_sport_type").HasConversion<string>().IsRequired();
-        builder.Property(s => s.WeeklyMatchDurationMinutes).HasColumnName("weekly_match_duration_minutes").IsRequired();
-        builder.Property(s => s.WeeklyMatchTimeGapMinutes).HasColumnName("weekly_match_time_gap_minutes").IsRequired();
-        builder.HasOne(s => s.WeeklyMatchVenue).WithMany().HasForeignKey(s => s.WeeklyMatchVenueId).OnDelete(DeleteBehavior.SetNull);
+        builder.Property(s => s.WeeklyMatchDayVenueId).HasColumnName("weekly_match_day_venue_id");
+        builder.Property(s => s.WeeklyMatchDaySportType).HasColumnName("weekly_match_day_sport_type").HasConversion<string>().IsRequired();
+        builder.HasOne(s => s.WeeklyMatchDayVenue).WithMany().HasForeignKey(s => s.WeeklyMatchDayVenueId).OnDelete(DeleteBehavior.SetNull);
+
+        builder.Property(s => s.MatchDaysPerWeek).HasColumnName("match_days_per_week").HasDefaultValue(1).IsRequired();
+        // Remember: this replaced WeeklyMatchDayTeamCount (a fixed team count) — the stored
+        // meaning changed, not just the name, so the migration for this drops the old column
+        // and adds this one fresh with a sensible default rather than reinterpreting old values.
+        builder.Property(s => s.WeeklyMatchDayMaxPlayersPerTeam).HasColumnName("weekly_match_day_max_players_per_team").HasDefaultValue(6).ValueGeneratedNever().IsRequired();
+        builder.Property(s => s.WeeklyMatchDayAutoTeamsEnabled).HasColumnName("weekly_match_day_auto_teams_enabled").IsRequired();
+        builder.Property(s => s.WeeklyMatchDayAutoTeamsLeadHours).HasColumnName("weekly_match_day_auto_teams_lead_hours").HasDefaultValue(24).IsRequired();
+        builder.HasMany(s => s.WeeklyMatchDaySlots).WithOne(sl => sl.SystemSettings).HasForeignKey(sl => sl.SystemSettingsId).OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(s => s.CashChartCode).HasColumnName("cash_chart_code").HasMaxLength(50);
         builder.Property(s => s.CollectionIncomeChartCode).HasColumnName("collection_income_chart_code").HasMaxLength(50);
 
-        builder.Property(s => s.JerseyColorA).HasColumnName("jersey_color_a").HasMaxLength(30).HasDefaultValue("red").IsRequired();
-        builder.Property(s => s.JerseyColorB).HasColumnName("jersey_color_b").HasMaxLength(30).HasDefaultValue("yellow").IsRequired();
 
         builder.Property(s => s.CreatedBy).HasColumnName("created_by").IsRequired();
         builder.Property(s => s.CreatedDate).HasColumnName("created_date").IsRequired();

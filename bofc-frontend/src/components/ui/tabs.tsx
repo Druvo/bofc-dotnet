@@ -13,7 +13,7 @@ export function Tabs({
   className?: string;
 }) {
   return (
-    <div className={`border-b border-gray-200 dark:border-gray-800 ${className}`}>
+    <div className={`border-b border-gray-200 dark:border-[var(--color-rule)] ${className}`}>
       <nav className="-mb-px flex gap-6 overflow-x-auto">
         {items.map((item) => (
           <button

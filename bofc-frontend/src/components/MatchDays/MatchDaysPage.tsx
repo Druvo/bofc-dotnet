@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useGetMatchDaysQuery } from "../../state/features/matchDays/matchDaysSlice";
 import { IoMatchDaySingleSummaryType } from "../../state/features/matchDays/matchDayTypes";
 import MatchDaysActionDropdown from "./Atoms/MatchDaysActionDropdown";
@@ -6,13 +6,14 @@ import { useNavigate } from "react-router-dom";
 import CreateMatchDay from "./Atoms/CreateMatchDayModal";
 import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
-import { showBdLocalTime, getEffectiveMatchDayStatus } from "../../utils/utils";
+import { showBdLocalTimeRange, getEffectiveMatchDayStatus } from "../../utils/utils";
 import { CalendarOutlined, EnvironmentOutlined, SearchOutlined, ThunderboltOutlined, TrophyOutlined } from "@ant-design/icons";
 import { canManageMatchDays } from "../../utils/roleUtils";
 import Button from "../ui/button";
 import Pagination from "../ui/pagination";
 import Loader from "../ui/loader";
 import VenueLink from "../CommonAtoms/VenueLink";
+import EmptyState from "../ui/empty-state";
 
 // Status palette drawn from the club identity so cards read as one matchday product.
 // Upcoming = brand, Ongoing = success, Concluded = muted.
@@ -46,12 +47,25 @@ const MatchDaysPage: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // Status filtering happens client-side (the backend has no status-filter query param) — with
+  // pure server pagination that meant filtering the current 12-item page down to a couple of
+  // matches while the pager still advertised page counts from the server's UNFILTERED total,
+  // so a matching MatchDay sitting on a page that was never fetched was simply unreachable.
+  // While any filter/search is active, fetch a much larger batch and paginate it client-side
+  // instead; with no filter active, fall back to plain server pagination (unchanged, still the
+  // efficient path for the common case).
+  const hasActiveFilter = statusFilter !== "ALL" || searchText.trim() !== "";
+
   const { data: matchDaySummaries, isLoading, isError } = useGetMatchDaysQuery({
-    offSet: currentPage - 1,
-    pageSize,
+    offSet: hasActiveFilter ? 0 : currentPage - 1,
+    pageSize: hasActiveFilter ? 1000 : pageSize,
     sortedBy: sorter.sortedBy,
     sortDirection: sorter.sortDirection,
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, searchText]);
 
   const handleMenuClick = (e: any, record: IoMatchDaySingleSummaryType) => {
     if (e.key === "join") {
@@ -65,18 +79,31 @@ const MatchDaysPage: React.FC = () => {
     }
   };
 
-  const filteredMatchDays = useMemo(() => {
-    const all = matchDaySummaries?.content?.matchDays ?? [];
-    return all.filter((t) => {
-      const effectiveStatus = getEffectiveMatchDayStatus(t.matchDayStatus, t.matchDayDate, t.durationMinutes);
-      const matchStatus =
-        statusFilter === "ALL" ||
-        effectiveStatus === statusFilter ||
-        (statusFilter === "CONCLUDED" && (effectiveStatus === "CONCLUDED" || effectiveStatus === "COMPLETED"));
-      const matchSearch = !searchText || t.name.toLowerCase().includes(searchText.toLowerCase());
-      return matchStatus && matchSearch;
-    });
-  }, [matchDaySummaries, statusFilter, searchText]);
+  const matchesFilter = (t: IoMatchDaySingleSummaryType) => {
+    const effectiveStatus = getEffectiveMatchDayStatus(t.matchDayStatus, t.matchDayDate, t.durationMinutes);
+    const matchStatus =
+      statusFilter === "ALL" ||
+      effectiveStatus === statusFilter ||
+      (statusFilter === "CONCLUDED" && (effectiveStatus === "CONCLUDED" || effectiveStatus === "COMPLETED"));
+    const matchSearch = !searchText || t.name.toLowerCase().includes(searchText.toLowerCase());
+    return matchStatus && matchSearch;
+  };
+
+  const allFilteredMatchDays = useMemo(
+    () => (matchDaySummaries?.content?.matchDays ?? []).filter(matchesFilter),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [matchDaySummaries, statusFilter, searchText]
+  );
+
+  // Server pagination already sliced the page when no filter is active — only slice here for
+  // the client-paginated (filtered) path, where the query above fetched everything at once.
+  const filteredMatchDays = hasActiveFilter
+    ? allFilteredMatchDays.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+    : allFilteredMatchDays;
+
+  const filteredTotalCount = hasActiveFilter
+    ? allFilteredMatchDays.length
+    : matchDaySummaries?.content?.totalCount ?? 0;
 
   const segmentedOptions = useMemo(() => {
     const all = matchDaySummaries?.content?.matchDays ?? [];
@@ -100,7 +127,7 @@ const MatchDaysPage: React.FC = () => {
     );
   }
 
-  const totalPages = Math.ceil((matchDaySummaries?.content?.totalCount || 0) / pageSize);
+  const totalPages = Math.ceil((filteredTotalCount || 0) / pageSize);
 
   return (
     <div className="flex flex-col gap-4">
@@ -117,7 +144,7 @@ const MatchDaysPage: React.FC = () => {
 
       {/* Filter bar + search */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+        <div className="flex flex-wrap overflow-hidden rounded-lg border border-gray-300 dark:border-[var(--color-rule)]">
           {segmentedOptions.map((opt) => (
             <button
               key={opt.value}
@@ -135,7 +162,7 @@ const MatchDaysPage: React.FC = () => {
             placeholder="Search matchDays..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+            className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
           />
         </div>
       </div>
@@ -143,9 +170,17 @@ const MatchDaysPage: React.FC = () => {
       {/* Card grid */}
       <div style={{ minHeight: "calc(100vh - 320px)" }}>
         {filteredMatchDays.length === 0 ? (
-          <div className="rounded-2xl border border-gray-200 bg-white py-12 text-center dark:border-gray-800 dark:bg-white/[0.03]">
-            <TrophyOutlined className="mb-3 block text-5xl text-brand-300 dark:text-brand-500/40" />
-            <p className="text-theme-sm text-gray-400 dark:text-gray-500">No MatchDays found.</p>
+          <div className="rounded-2xl border border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
+            <EmptyState
+              icon={<TrophyOutlined />}
+              title="No MatchDays yet"
+              description="Create a MatchDay to start scheduling fixtures."
+            />
+            {canManage && (
+              <div className="flex justify-center pb-8">
+                <CreateMatchDay />
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -159,7 +194,7 @@ const MatchDaysPage: React.FC = () => {
                   onClick={() => {
                     if (!inactive && t.matchDayDate) navigate(`/match-days/join-match-day/${t.id}`);
                   }}
-                  className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] ${
+                  className={`rounded-2xl border border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] ${
                     inactive ? "opacity-50" : "cursor-pointer transition hover:-translate-y-0.5 hover:shadow-theme-sm"
                   }`}
                 >
@@ -184,7 +219,7 @@ const MatchDaysPage: React.FC = () => {
                     <div className="flex flex-col gap-2">
                       <span className="flex items-center gap-2 text-theme-xs text-gray-500 dark:text-gray-400">
                         <CalendarOutlined className="shrink-0 text-brand-500 dark:text-brand-400" />
-                        {t.matchDayDate ? showBdLocalTime(t.matchDayDate) : "—"}
+                        {t.matchDayDate ? showBdLocalTimeRange(t.matchDayDate, t.durationMinutes) : "—"}
                       </span>
                       {t.venueName ? (
                         <VenueLink

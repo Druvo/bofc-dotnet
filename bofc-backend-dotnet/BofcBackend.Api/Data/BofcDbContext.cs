@@ -22,6 +22,8 @@ public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUser
     public DbSet<MatchDay> MatchDays => Set<MatchDay>();
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamPlayer> TeamPlayers => Set<TeamPlayer>();
+    public DbSet<TeamLineup> TeamLineups => Set<TeamLineup>();
+    public DbSet<TeamLineupPlayer> TeamLineupPlayers => Set<TeamLineupPlayer>();
 
     // Phase 3 — match day/bracket engine
     public DbSet<MatchDayRound> MatchDayRounds => Set<MatchDayRound>();
@@ -66,6 +68,9 @@ public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUser
 
     // Phase 7 — global admin settings (SMTP + email notification toggles)
     public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
+    public DbSet<WeeklyMatchDaySlot> WeeklyMatchDaySlots => Set<WeeklyMatchDaySlot>();
+    public DbSet<JerseyColor> JerseyColors => Set<JerseyColor>();
+    public DbSet<PlayerStatAdjustment> PlayerStatAdjustments => Set<PlayerStatAdjustment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

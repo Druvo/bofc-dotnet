@@ -33,7 +33,10 @@ export default function MatchCountdown({ fixture }: MatchCountdownProps) {
       const calculateElapsedTime = () => {
         const now = Date.now();
         const timeSinceStart = Math.floor((now - startTime) / 1000);
-        const totalElapsed = initialElapsed + timeSinceStart;
+        // Cap at 120 minutes, matching ElectricTeamBanner/QuickEventRecorder's clocks for the
+        // same match — without this cap, a match left ONGOING past 120 minutes shows a
+        // different elapsed time here than on those other views of the same match.
+        const totalElapsed = Math.min(initialElapsed + timeSinceStart, 7200);
         setElapsedTime(totalElapsed);
         setDisplayTime(formatTime(totalElapsed));
       };

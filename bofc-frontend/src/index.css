@@ -28,10 +28,10 @@
     @apply text-gray-700 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
   }
   .menu-item-icon-active {
-    @apply fill-brand-500 dark:fill-brand-400;
+    @apply text-brand-500 dark:text-brand-400;
   }
   .menu-item-icon-inactive {
-    @apply fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300;
+    @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
   }
   .menu-item-arrow {
     @apply absolute right-2.5 top-1/2 -translate-y-1/2;

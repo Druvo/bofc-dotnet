@@ -15,6 +15,7 @@ import gsap from "gsap";
 import { IFixture } from "../../../../state/features/fixtures/fixtureTypes";
 import { club } from "../../../../theme/clubTheme";
 import { getStatusColor } from "../../../../utils/matchStatusUtils";
+import { formatMatchTimeRange } from "../../../../utils/matchTimeUtils";
 import VenueLink from "../../../CommonAtoms/VenueLink";
 
 const { Text } = Typography;
@@ -35,14 +36,9 @@ export default function FixturesTimelineView({
   const navigate = useNavigate();
   const timelineRef = useRef<HTMLDivElement>(null);
 
-  // Sort fixtures chronologically
-  const sortedFixtures = [...fixtures].sort((a, b) =>
-    moment(a.matchDate).diff(moment(b.matchDate))
-  );
-
   // Animate timeline items on mount
   useEffect(() => {
-    if (timelineRef.current && sortedFixtures.length > 0) {
+    if (timelineRef.current && fixtures.length > 0) {
       const items = timelineRef.current.querySelectorAll(".timeline-item");
 
       // Staggered entrance animation
@@ -63,7 +59,7 @@ export default function FixturesTimelineView({
         }
       );
     }
-  }, [sortedFixtures.length]);
+  }, [fixtures.length]);
 
   // Animate pulsing dot for ONGOING matches
   useEffect(() => {
@@ -78,7 +74,7 @@ export default function FixturesTimelineView({
         ease: "power1.inOut",
       });
     }
-  }, [sortedFixtures]);
+  }, [fixtures]);
 
   const handleViewDetails = (fixture: IFixture) => {
     if (onViewDetails) {
@@ -130,11 +126,7 @@ export default function FixturesTimelineView({
           </div>
           <Space direction="vertical" size={4}>
             <Text type="secondary">
-              <CalendarOutlined /> {moment.utc(fixture.matchDate).local().format("DD MMM YYYY, HH:mm")}
-            </Text>
-            <Text type="secondary">
-              <ClockCircleOutlined style={{ marginRight: 4 }} />
-              {moment(fixture.matchDate).format("HH:mm")}
+              <CalendarOutlined /> {formatMatchTimeRange(fixture.matchDate, fixture.matchDurationMinutes, "DD MMM YYYY, hh:mm a")}
             </Text>
             {fixture.venueName && (
               <Text type="secondary">
@@ -157,7 +149,7 @@ export default function FixturesTimelineView({
     }));
   }, [fixtures]);
 
-  if (sortedFixtures.length === 0) {
+  if (fixtures.length === 0) {
     return (
       <Card>
         <div style={{ textAlign: "center", padding: "40px 20px", color: "#999" }}>
@@ -180,7 +172,7 @@ export default function FixturesTimelineView({
           📅 Match Timeline
         </Text>
         <Text style={{ marginLeft: 12, fontSize: 13, color: "#999" }}>
-          {sortedFixtures.length} match{sortedFixtures.length !== 1 ? "es" : ""}
+          {fixtures.length} match{fixtures.length !== 1 ? "es" : ""}
         </Text>
       </div>
 

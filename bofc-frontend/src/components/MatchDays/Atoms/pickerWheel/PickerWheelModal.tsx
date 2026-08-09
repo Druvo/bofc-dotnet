@@ -103,9 +103,9 @@ const PickerWheelModal: React.FC<PickerWheelModalProps> = ({ teams = [] }) => {
             <Modal isOpen={isModalVisible} onClose={handleCancel} title="Lottery Wheel" className="max-w-[1000px]">
                 <div className={`flex ${isMobile ? "flex-col" : "flex-row"} justify-between gap-6`}>
                     <div className="flex-1">
-                        <div className="mb-4 rounded-xl border border-gray-200 p-3 text-center dark:border-gray-800">
+                        <div className="mb-4 rounded-xl border border-gray-200 p-3 text-center dark:border-[var(--color-rule)]">
                             <div className="mb-2 text-theme-sm font-semibold text-brand-500 dark:text-brand-400">Wheel Multiplier</div>
-                            <div className="inline-flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+                            <div className="inline-flex overflow-hidden rounded-lg border border-gray-300 dark:border-[var(--color-rule)]">
                                 {[1, 2, 3].map((m) => (
                                     <button
                                         key={m}
@@ -146,7 +146,7 @@ const PickerWheelModal: React.FC<PickerWheelModalProps> = ({ teams = [] }) => {
 
                     <div className="flex-1">
                         <div className="flex flex-col gap-4">
-                            <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+                            <div className="rounded-xl border border-gray-200 p-4 dark:border-[var(--color-rule)]">
                                 <div className="mb-3 text-theme-sm font-semibold text-brand-500 dark:text-brand-400">Add New Player</div>
                                 <div className="flex items-center gap-2">
                                     <FormInput
@@ -160,7 +160,7 @@ const PickerWheelModal: React.FC<PickerWheelModalProps> = ({ teams = [] }) => {
                                 </div>
                             </div>
 
-                            <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+                            <div className="rounded-xl border border-gray-200 p-4 dark:border-[var(--color-rule)]">
                                 <div className="mb-3 text-theme-sm font-semibold text-brand-500 dark:text-brand-400">Players ({segments.length})</div>
                                 <div className="flex max-h-[400px] flex-col gap-1.5 overflow-y-auto">
                                     {segments.map((segment, index) => (
@@ -212,7 +212,7 @@ const PickerWheelModal: React.FC<PickerWheelModalProps> = ({ teams = [] }) => {
                 className="max-w-[700px]"
                 footer={<Button size="sm" onClick={() => setIsWinnersListModalVisible(false)}>Close</Button>}
             >
-                <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800">
+                <div className="rounded-xl border border-gray-200 p-4 dark:border-[var(--color-rule)]">
                     <div className="mb-3 text-theme-sm font-semibold text-brand-500 dark:text-brand-400">All Winners ({winnersList.length})</div>
                     <div className="flex max-h-[400px] flex-col gap-2 overflow-y-auto">
                         {winnersList.map((w, index) => (

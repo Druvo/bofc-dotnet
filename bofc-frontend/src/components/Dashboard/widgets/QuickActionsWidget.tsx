@@ -39,14 +39,14 @@ const QuickActionsWidget: React.FC = () => {
   const actions = ACTIONS.filter((a) => (!a.adminOnly || admin) && (!a.auctionOnly || auctionEnabled));
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
       <div className="mb-3 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Quick Actions</div>
       <div className="flex flex-wrap gap-2.5">
         {actions.map((a) => (
           <button
             key={a.key}
             onClick={() => navigate(a.to)}
-            className="flex items-center gap-2 rounded-lg border border-transparent bg-gray-50 px-3.5 py-2.5 text-theme-sm font-semibold text-gray-700 transition hover:border-brand-500 hover:text-brand-500 dark:bg-white/[0.03] dark:text-gray-300 dark:hover:text-brand-400"
+            className="flex items-center gap-2 rounded-lg border border-transparent bg-gray-50 px-3.5 py-2.5 text-theme-sm font-semibold text-gray-700 transition hover:border-brand-500 hover:text-brand-500 dark:bg-[var(--color-paper-3)] dark:text-gray-300 dark:hover:text-brand-400"
           >
             <span className="inline-flex text-brand-500 dark:text-brand-400">{a.icon}</span>
             {a.label}

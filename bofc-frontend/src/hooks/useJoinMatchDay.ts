@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-toastify";
 import {
     useAddParticipationToMatchDayMutation,
@@ -22,6 +22,14 @@ export default function useJoinMatchDay(matchDayId: number) {
 
     const [players, setPlayers] = useState<MatchDayPlayerInfoType[]>([]);
 
+    // For a first-time joiner, `players` (and the matchDayParticipantId lookup below) only
+    // reflects reality again once the in-flight request's .then() runs — a second click for the
+    // SAME player fired before that lands would read the same stale "no participant row yet"
+    // snapshot and also omit matchDayParticipantId, racing to create two rows for one player
+    // (or applying the earlier click's value last, since whichever response resolves second
+    // wins). Block a second update for a player already in flight instead.
+    const pendingPlayerIds = useRef<Set<number>>(new Set());
+
     useEffect(() => {
         if (nextMatchDay?.content?.players) {
             setPlayers(nextMatchDay.content.players);
@@ -33,6 +41,9 @@ export default function useJoinMatchDay(matchDayId: number) {
 
     const handleUpdate = useCallback(
         (playerId: number, comments: string, participationStatus: boolean) => {
+            if (pendingPlayerIds.current.has(playerId)) return;
+            pendingPlayerIds.current.add(playerId);
+
             // No `players.find(...)` gate here on purpose — a brand-new matchDay
             // has zero participant rows, and this is the call that creates the
             // very first one. Gating on an existing row made a first-time joiner
@@ -71,6 +82,9 @@ export default function useJoinMatchDay(matchDayId: number) {
                         isLoading: false,
                         autoClose: 3000,
                     });
+                })
+                .finally(() => {
+                    pendingPlayerIds.current.delete(playerId);
                 });
         },
         [players, matchDayId, addParticipationToMatchDay]

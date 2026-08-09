@@ -132,7 +132,7 @@ const MatchDayAuctionCard: React.FC<{ matchDay: IoMatchDaySingleSummaryType; isA
         <div className="flex items-center gap-2">
           <ClockCircleOutlined style={{ color: ac.gold, fontSize: 13 }} />
           <span className="text-[12.5px]" style={{ color: ac.textMuted }}>
-            Starts {scheduled.toLocaleString()}
+            Starts {scheduled.toLocaleString([], { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: true })}
           </span>
         </div>
       )}
@@ -228,7 +228,7 @@ const AuctionHubPage: React.FC = () => {
 
       {/* Admin quick guide — collapsed by default so it stays out of the way */}
       {isAdmin && (
-        <div className="auction-guide-collapse overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="auction-guide-collapse overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
           <button
             type="button"
             onClick={() => setGuideOpen((v) => !v)}
@@ -244,7 +244,7 @@ const AuctionHubPage: React.FC = () => {
             />
           </button>
           {guideOpen && (
-            <div className="border-t border-gray-200 px-4 py-4 dark:border-gray-800">
+            <div className="border-t border-gray-200 px-4 py-4 dark:border-[var(--color-rule)]">
               <div className="flex flex-col gap-4">
                 {guideSteps.map((step, i) => (
                   <div key={step.title} className="flex gap-3">

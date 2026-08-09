@@ -19,6 +19,7 @@ import UserProfile from "../authPages/UserProfile";
 import Dashboard from "../Dashboard/DashboardComponent";
 import Player from "../Player/Player";
 import Players from "../Player/Players";
+import PlayerRankBoard from "../Player/PlayerRankBoard";
 import PlayerStatistics from "../Player/PlayerStatistics";
 import JoinMatchDay from "../MatchDays/JoinMatchDay";
 import SingleMatchDay from "../MatchDays/SingleMatchDay";
@@ -49,15 +50,11 @@ import { showBdLocalTime } from "../../utils/utils";
 import Loader from "../ui/loader";
 
 interface ContentComponentProps {
-    onToggleCollapse: (value: boolean) => void;
-    collapsed: boolean;
     isDarkMode: boolean;
     setIsDarkMode: (value: boolean) => void;
 }
 
 const ContentComponent: React.FC<ContentComponentProps> = ({
-    onToggleCollapse,
-    collapsed,
     isDarkMode,
     setIsDarkMode,
 }) => {
@@ -154,6 +151,9 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                                     element={<Player />}
                                 />
                             )}
+                            {(loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN")) && (
+                                <Route path="/players/ranks" element={<PlayerRankBoard />} />
+                            )}
                             <Route path="/players" element={<Players />} />
                             <Route path="/player-statistics" element={<PlayerStatistics />} />
                             <Route
@@ -228,15 +228,15 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                         <AppFooter />
             </div>
                 {isMobile && user?.token && (
-                    <MobileTabBar onOpenMore={() => onToggleCollapse(false)} />
+                    <MobileTabBar onOpenMore={() => appShell.openSidebar()} />
                 )}
 
             {/* Goalkeeping History Drawer */}
             {appShell.goalkeepingHistoryOpen && (
                 <div className="fixed inset-0 z-modal">
-                    <div className="fixed inset-0 bg-gray-400/50 backdrop-blur-[2px] dark:bg-gray-900/50" onClick={appShell.closeGoalkeepingHistory} />
+                    <div className="fixed inset-0 bg-gray-400/50 backdrop-blur-[2px] dark:bg-[var(--color-paper-3)]/50" onClick={appShell.closeGoalkeepingHistory} />
                     <div
-                        className="fixed right-0 top-0 h-full overflow-y-auto bg-white shadow-theme-lg dark:bg-gray-900"
+                        className="fixed right-0 top-0 h-full overflow-y-auto bg-white shadow-theme-lg dark:bg-[var(--color-paper-3)]"
                         style={{ width: isMobile ? '100%' : 480, padding: 24 }}
                     >
                         <div className="mb-5 flex items-center justify-between">
@@ -247,7 +247,7 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                             <button
                                 onClick={appShell.closeGoalkeepingHistory}
                                 type="button"
-                                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+                                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-700 dark:bg-[var(--color-paper-2)] dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
                             >
                                 <CloseOutlined />
                             </button>

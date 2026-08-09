@@ -28,11 +28,18 @@ interface AppShellContextValue {
 
   canInstall: boolean;
   promptInstall: () => void;
+
+  /** Opens the sidebar drawer — the state itself lives in DefaultLayout (it also
+   * owns the desktop icon-rail collapse behavior), passed in via onOpenSidebar so
+   * that deeply-nested triggers like MobileTabBar's "More" button (a sibling of
+   * Sidebar, not a descendant, so it can't just receive the setter as a prop) can
+   * reach it without threading a callback through every intermediate component. */
+  openSidebar: () => void;
 }
 
 const AppShellContext = createContext<AppShellContextValue | null>(null);
 
-export function AppShellProvider({ children }: { children: React.ReactNode }) {
+export function AppShellProvider({ children, onOpenSidebar }: { children: React.ReactNode; onOpenSidebar?: () => void }) {
   const [goalkeepingHistoryOpen, setGoalkeepingHistoryOpen] = useState(false);
   const [notificationsOn, setNotificationsOnState] = useState(isNotificationsEnabled());
   const { canInstall, promptInstall } = usePwaInstall();
@@ -59,6 +66,7 @@ export function AppShellProvider({ children }: { children: React.ReactNode }) {
     toggleNotifications,
     canInstall,
     promptInstall,
+    openSidebar: () => onOpenSidebar?.(),
   };
 
   return <AppShellContext.Provider value={value}>{children}</AppShellContext.Provider>;

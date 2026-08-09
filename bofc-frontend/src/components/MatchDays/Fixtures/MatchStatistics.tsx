@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import {
   Card,
   Table,
@@ -9,12 +10,14 @@ import {
   Statistic,
   Tag,
   Spin,
+  Button,
 } from "antd";
-import {
-  useGetMatchStatisticsQuery,
-  useGetMatchEventsQuery,
-} from "../../../state/features/fixtures/fixturesSlice";
+import { EditOutlined } from "@ant-design/icons";
+import { useGetMatchEventsQuery } from "../../../state/features/fixtures/fixturesSlice";
 import { MatchEventType } from "../../../state/features/fixtures/fixtureTypes";
+import { useGetMatchPlayerStatisticsQuery } from "../../../state/features/statistics/statisticsSlice";
+import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
+import EditMatchPlayerStatAdjustmentModal from "../../Player/EditMatchPlayerStatAdjustmentModal";
 
 interface MatchStatisticsProps {
   matchId: number;
@@ -31,13 +34,17 @@ const EVENT_COLORS: Record<string, string> = {
 
 export default function MatchStatistics({ matchId }: MatchStatisticsProps) {
   const { data: statsData, isLoading: statsLoading } =
-    useGetMatchStatisticsQuery({
+    useGetMatchPlayerStatisticsQuery({
       matchId,
     });
   const { data: eventsData, isLoading: eventsLoading } =
     useGetMatchEventsQuery({
       matchId,
     });
+
+  const loginInfo = useSelector(selectLoginInfo);
+  const isAdmin = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN");
+  const [editingPlayer, setEditingPlayer] = useState<{ id: number; name: string } | null>(null);
 
   const statistics = statsData?.content || [];
   const events = eventsData?.content || [];
@@ -95,6 +102,23 @@ export default function MatchStatistics({ matchId }: MatchStatisticsProps) {
           <span>-</span>
         ),
     },
+    ...(isAdmin
+      ? [
+          {
+            title: "",
+            key: "adjust",
+            width: 40,
+            render: (_: unknown, record: any) => (
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => setEditingPlayer({ id: record.playerId, name: record.playerName })}
+              />
+            ),
+          },
+        ]
+      : []),
   ];
 
   const eventColumns = [
@@ -225,6 +249,15 @@ export default function MatchStatistics({ matchId }: MatchStatisticsProps) {
           },
         ]}
       />
+      {editingPlayer && (
+        <EditMatchPlayerStatAdjustmentModal
+          matchId={matchId}
+          playerId={editingPlayer.id}
+          playerName={editingPlayer.name}
+          isOpen={!!editingPlayer}
+          onClose={() => setEditingPlayer(null)}
+        />
+      )}
     </Card>
   );
 }

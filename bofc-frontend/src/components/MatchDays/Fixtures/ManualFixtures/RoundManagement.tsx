@@ -111,7 +111,10 @@ export default function RoundManagement({
         advancementRule: existingRound.advancementRule || "",
       });
     } else if (isModalVisible && !isEditing) {
-      const tdt = matchDayDate ? dayjs.utc(matchDayDate).local() : null;
+      // matchDayDate is naive-local already (Dhaka wall-clock, see utils.ts's showBdLocalTime
+      // doc comment) — no .utc()/.local() conversion, or this pre-fill silently disagrees with
+      // every other screen reading the same MatchDay.
+      const tdt = matchDayDate ? dayjs(matchDayDate) : null;
       setValues({
         ...emptyValues,
         roundName: createContext?.suggestedRoundName || "",
@@ -130,6 +133,14 @@ export default function RoundManagement({
     if (!values.roundName.trim()) {
       setError("Please enter round name");
       return;
+    }
+    if (values.advancementRule.trim()) {
+      try {
+        JSON.parse(values.advancementRule);
+      } catch {
+        setError("Advancement rule must be valid JSON");
+        return;
+      }
     }
     setError(undefined);
 
@@ -258,7 +269,7 @@ export default function RoundManagement({
               placeholder='{"topN": 2, "criteria": "points"}'
               value={values.advancementRule}
               onChange={(e) => setField("advancementRule", e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 font-mono text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:text-white/90"
+              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 font-mono text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
             />
           </div>
         </div>

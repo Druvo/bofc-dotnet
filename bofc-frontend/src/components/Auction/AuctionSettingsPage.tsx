@@ -175,7 +175,7 @@ const AuctionSettingsPage: React.FC = () => {
               placeholder='e.g. {"GK": 1, "DEF": 2}'
               value={form.minRoleRequirements}
               onChange={(e) => setField("minRoleRequirements", e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"
+              className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-white/90 dark:placeholder:text-white/30"
             />
           </div>
           <Button onClick={onFinish} disabled={creating || updating} className="w-full">

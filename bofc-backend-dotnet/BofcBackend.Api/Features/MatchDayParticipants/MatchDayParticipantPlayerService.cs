@@ -49,6 +49,7 @@ public class MatchDayParticipantPlayerService(BofcDbContext db) : IMatchDayParti
             MatchDayId = matchDay.Id,
             MatchDayName = matchDay.Name,
             MatchDayDate = matchDay.MatchDayDate,
+            DurationMinutes = matchDay.DurationMinutes,
             TotalParticipants = totalParticipants,
             Players = players,
         };

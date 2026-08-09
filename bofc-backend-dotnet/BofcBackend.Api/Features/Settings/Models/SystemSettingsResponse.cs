@@ -26,18 +26,25 @@ public class SystemSettingsResponse
 
     public bool AuctionEnabled { get; set; }
 
-    public bool WeeklyMatchEnabled { get; set; }
-    public string WeeklyMatchNamePrefix { get; set; } = "Next Match";
+    /// <summary>How often (hours) the background job re-checks and concludes overdue MatchDays.</summary>
+    public int MatchDayStatusCheckIntervalHours { get; set; } = 1;
+
+    public bool WeeklyMatchDayEnabled { get; set; }
+    public string WeeklyMatchDayNamePrefix { get; set; } = "Next Match";
     public string WeeklyMatchDayOfWeek { get; set; } = "Friday";
 
     /// <summary>"HH:mm" — 24-hour local time.</summary>
     public string WeeklyMatchTime { get; set; } = "19:00";
 
-    public long? WeeklyMatchVenueId { get; set; }
-    public string? WeeklyMatchVenueName { get; set; }
-    public string WeeklyMatchSportType { get; set; } = "FOOTBALL";
-    public int WeeklyMatchDurationMinutes { get; set; }
-    public int WeeklyMatchTimeGapMinutes { get; set; }
+    public long? WeeklyMatchDayVenueId { get; set; }
+    public string? WeeklyMatchDayVenueName { get; set; }
+    public string WeeklyMatchDaySportType { get; set; } = "FOOTBALL";
+
+    public int MatchDaysPerWeek { get; set; } = 1;
+    public List<WeeklyMatchDaySlotDto> WeeklyMatchDaySlots { get; set; } = new();
+    public int WeeklyMatchDayMaxPlayersPerTeam { get; set; } = 6;
+    public bool WeeklyMatchDayAutoTeamsEnabled { get; set; }
+    public int WeeklyMatchDayAutoTeamsLeadHours { get; set; } = 24;
 
     /// <summary>Effective code in use right now (Settings override, or the appsettings default if never set) — never null, so the UI always has something to show.</summary>
     public string CashChartCode { get; set; } = string.Empty;
@@ -49,7 +56,6 @@ public class SystemSettingsResponse
     public bool CashChartCodeIsOverridden { get; set; }
     public bool CollectionIncomeChartCodeIsOverridden { get; set; }
 
-    /// <summary>The 2 club-wide jersey colors matches are assigned from — the club only owns 2 physical jerseys.</summary>
-    public string JerseyColorA { get; set; } = "red";
-    public string JerseyColorB { get; set; } = "yellow";
+    /// <summary>The club-wide jersey colors matches are assigned from — a configurable list (any count), not hardcoded to 2.</summary>
+    public List<string> JerseyColors { get; set; } = new();
 }

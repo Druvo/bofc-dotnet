@@ -8,6 +8,7 @@ import { Card, Tag, Modal, message } from "antd";
 import moment from "moment";
 import { IFixture } from "../../../../state/features/fixtures/fixtureTypes";
 import { getStatusColor } from "../../../../utils/matchStatusUtils";
+import { formatMatchTimeRange } from "../../../../utils/matchTimeUtils";
 import { useUpdateFixtureMutation } from "../../../../state/features/fixtures/fixturesSlice";
 import VenueLink from "../../../CommonAtoms/VenueLink";
 
@@ -69,6 +70,12 @@ export default function FixturesCalendarView({
       return;
     }
 
+    if (moment(info.event.start).isBefore(moment())) {
+      info.revert();
+      message.error("Can't reschedule a match to a past date/time");
+      return;
+    }
+
     // Convert local time back to UTC for API
     const newDate = moment(info.event.start).utc().format("YYYY-MM-DDTHH:mm:ss");
 
@@ -81,7 +88,7 @@ export default function FixturesCalendarView({
             <strong>{fixture.awayTeamName}</strong>
           </p>
           <p style={{ marginTop: 8, color: "#666" }}>
-            Move to: <strong>{moment(info.event.start).format("DD MMM YYYY, HH:mm")}</strong>
+            Move to: <strong>{moment(info.event.start).format("DD MMM YYYY, hh:mm a")}</strong>
           </p>
         </div>
       ),
@@ -148,7 +155,7 @@ export default function FixturesCalendarView({
           <div style={{ fontSize: 13, color: "#666" }}>
             <p>
               📅 <strong>Date:</strong>{" "}
-              {moment.utc(fixture.matchDate).local().format("DD MMM YYYY, HH:mm")}
+              {formatMatchTimeRange(fixture.matchDate, fixture.matchDurationMinutes, "DD MMM YYYY, hh:mm a")}
             </p>
             {fixture.venueName && (
               <p>
@@ -237,21 +244,23 @@ export default function FixturesCalendarView({
         eventContent={renderEventContent}
         height="auto"
         eventTimeFormat={{
-          hour: "2-digit",
+          hour: "numeric",
           minute: "2-digit",
-          meridiem: false,
+          meridiem: "short",
+          hour12: true,
         }}
         slotLabelFormat={{
-          hour: "2-digit",
+          hour: "numeric",
           minute: "2-digit",
-          meridiem: false,
+          meridiem: "short",
+          hour12: true,
         }}
         nowIndicator={true}
         weekends={true}
         dayMaxEvents={4}
         moreLinkText="more"
         displayEventTime={true}
-        displayEventEnd={false}
+        displayEventEnd={true}
       />
 
       {isAdmin && fixtures.some((f) => f.matchStatus === "SCHEDULED") && (

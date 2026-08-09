@@ -15,7 +15,7 @@ import {
     useAddParticipationToMatchDayMutation,
     useGetMatchDayParticipantsListQuery,
 } from '../../state/features/matchDays/matchDaysSlice';
-import { showBdLocalTime, getEffectiveMatchDayStatus } from '../../utils/utils';
+import { showBdLocalTimeRange, getEffectiveMatchDayStatus, getMatchDayEndDate } from '../../utils/utils';
 import { useSelector } from 'react-redux';
 import { selectLoginInfo } from '../../state/slices/loginInfoSlice';
 import { Link } from 'react-router-dom';
@@ -97,7 +97,7 @@ const LatestMatchDayCard: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                 <Loader className="py-4" />
             </div>
         );
@@ -105,7 +105,7 @@ const LatestMatchDayCard: React.FC = () => {
 
     if (!latestMatchDayData?.content) {
         return (
-            <div className="rounded-2xl border border-gray-200 bg-white py-8 text-center shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+            <div className="rounded-2xl border border-gray-200 bg-white py-8 text-center shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                 <TrophyOutlined className="mb-2 text-3xl text-gray-300 dark:text-gray-600" />
                 <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming MatchDays</p>
             </div>
@@ -218,14 +218,14 @@ const LatestMatchDayCard: React.FC = () => {
     ];
 
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
             <div className="relative p-5 md:p-6">
             <div className="flex flex-col gap-4 lg:flex-row">
                 {/* Main column: header info on top, stat/your-call/squad row below */}
                 <div className="min-w-0 flex-1">
                     <div className="min-w-0">
                             <div className="flex items-center gap-1.5 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">
-                                <CalendarOutlined /> Next Match
+                                <CalendarOutlined /> Next Match Day
                             </div>
                             <div className="mt-0.5 flex flex-wrap items-center gap-2.5">
                                 <h5 className="truncate text-xl font-bold text-gray-800 dark:text-white/90">{matchDay.name}</h5>
@@ -236,7 +236,7 @@ const LatestMatchDayCard: React.FC = () => {
                             <div className="mt-1 flex flex-wrap items-center gap-3 text-theme-sm text-gray-500 dark:text-gray-400">
                                 <span className="flex items-center gap-1.5">
                                     <CalendarOutlined className="text-brand-500 dark:text-brand-400" />
-                                    {showBdLocalTime(matchDay.matchDayDate)}
+                                    {showBdLocalTimeRange(matchDay.matchDayDate, matchDay.durationMinutes)}
                                 </span>
                                 <span className="hidden h-3 w-px bg-gray-200 dark:bg-gray-700 sm:block" />
                                 <VenueLink
@@ -248,81 +248,45 @@ const LatestMatchDayCard: React.FC = () => {
                             </div>
                     </div>
 
-                    <div className="my-4 border-t border-gray-100 dark:border-gray-800" />
+                    <div className="my-4 border-t border-gray-100 dark:border-[var(--color-rule)]" />
 
-                    {/* Stats + Your call + Squad filled — single row */}
-                    <div className="flex flex-wrap items-center gap-4">
+                    {/* Stat boxes row */}
+                    <div className="flex flex-wrap gap-3">
                         {statCells.map((cell) => (
                             <button
                                 key={cell.key}
                                 type="button"
                                 disabled={!cell.onClick}
                                 onClick={cell.onClick}
-                                className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 ${cell.ring} ${cell.onClick ? 'cursor-pointer hover:brightness-95 dark:hover:brightness-125' : 'cursor-default'}`}
+                                className={`flex flex-1 min-w-[100px] flex-col items-center justify-center gap-1 rounded-xl border px-4 py-3.5 text-center ${cell.ring} ${cell.onClick ? 'cursor-pointer hover:brightness-95 dark:hover:brightness-125' : 'cursor-default'}`}
                             >
                                 <span className="text-lg">{cell.icon}</span>
-                                <span className="flex flex-col items-start leading-tight">
-                                    <span className="text-base font-bold text-gray-800 dark:text-white/90">{cell.value}</span>
-                                    <span className="text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{cell.label}</span>
-                                </span>
+                                <span className="text-lg font-bold text-gray-800 dark:text-white/90">{cell.value}</span>
+                                <span className="text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{cell.label}</span>
                             </button>
                         ))}
+                    </div>
 
-                        <span className="hidden h-10 w-px bg-gray-100 dark:bg-gray-800 lg:block" />
-
-                        <div>
-                            <div className="mb-1.5 text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">Your Call</div>
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    disabled={isUpdating}
-                                    onClick={() => handleParticipationChange('true')}
-                                    className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                                        participationValue === 'true'
-                                            ? 'border-success-500 bg-success-500 text-white'
-                                            : 'border-success-500/40 bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500'
-                                    }`}
-                                >
-                                    <CheckCircleOutlined /> Yes
-                                </button>
-                                <button
-                                    type="button"
-                                    disabled={isUpdating}
-                                    onClick={() => handleParticipationChange('false')}
-                                    className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                                        participationValue === 'false'
-                                            ? 'border-error-500 bg-error-500 text-white'
-                                            : 'border-error-500/40 bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-500'
-                                    }`}
-                                >
-                                    <CloseOutlined /> No
-                                </button>
-                            </div>
+                    {/* Squad Filled — full width, below the stat row */}
+                    <div className="mt-4">
+                        <div className="mb-1.5 flex items-center justify-between text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                            <span>Squad Filled</span>
+                            <span className="whitespace-nowrap font-semibold normal-case text-gray-800 dark:text-white/90">
+                                {confirmedCount}/{totalPlayer} &middot; {fillPercent}%
+                            </span>
                         </div>
-
-                        <span className="hidden h-10 w-px bg-gray-100 dark:bg-gray-800 lg:block" />
-
-                        <div className="min-w-[180px] flex-1">
-                            <div className="mb-1.5 text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">Squad Filled</div>
-                            <div className="flex items-center gap-2.5">
-                                <span className="whitespace-nowrap text-theme-sm font-bold text-gray-800 dark:text-white/90">
-                                    {confirmedCount}/{totalPlayer}
-                                </span>
-                                <span className="whitespace-nowrap text-theme-sm font-semibold text-brand-500 dark:text-brand-400">{fillPercent}%</span>
-                                <div className="h-2 w-full min-w-[80px] overflow-hidden rounded-full border border-gray-300 bg-gray-200 dark:border-white/15 dark:bg-white/10">
-                                    <div
-                                        className="h-full min-w-[3px] rounded-full bg-brand-500 transition-all duration-500"
-                                        style={{ width: `${Math.max(fillPercent, confirmedCount > 0 ? 3 : 0)}%` }}
-                                    />
-                                </div>
-                            </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full border border-gray-300 bg-gray-200 dark:border-white/15 dark:bg-white/10">
+                            <div
+                                className="h-full min-w-[3px] rounded-full bg-brand-500 transition-all duration-500"
+                                style={{ width: `${Math.max(fillPercent, confirmedCount > 0 ? 3 : 0)}%` }}
+                            />
                         </div>
                     </div>
                 </div>
 
-                {/* Right sidebar: Kick-off + actions, spans the card's full height */}
-                <div className="flex shrink-0 flex-row gap-4 border-gray-100 dark:border-gray-800 lg:w-52 lg:flex-col lg:border-l lg:pl-5">
-                    <div className="flex-1 lg:flex-none">
+                {/* Right sidebar: Kick-off + your call + actions, spans the card's full height */}
+                <div className="flex shrink-0 flex-col gap-3 border-gray-100 dark:border-[var(--color-rule)] lg:w-72 lg:border-l lg:pl-5">
+                    <div>
                         <div className="text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">Kick-Off</div>
                         <div className="mt-0.5 flex items-center gap-1.5 text-theme-sm text-gray-700 dark:text-gray-300">
                             <ClockCircleOutlined className="text-brand-500 dark:text-brand-400" />
@@ -330,13 +294,45 @@ const LatestMatchDayCard: React.FC = () => {
                             <span className="font-semibold text-brand-500 dark:text-brand-400">{countdown.text}</span>
                         </div>
                     </div>
+
+                    <div className="rounded-xl border border-gray-100 bg-gray-50 p-3.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
+                        <div className="mb-2.5 text-theme-xs text-gray-500 dark:text-gray-400">Your call for this Match Day</div>
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                disabled={isUpdating}
+                                onClick={() => handleParticipationChange('true')}
+                                className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                                    participationValue === 'true'
+                                        ? 'border-success-500 bg-success-500 text-white'
+                                        : 'border-success-500/40 bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500'
+                                }`}
+                            >
+                                <CheckCircleOutlined /> Yes
+                            </button>
+                            <button
+                                type="button"
+                                disabled={isUpdating}
+                                onClick={() => handleParticipationChange('false')}
+                                className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                                    participationValue === 'false'
+                                        ? 'border-error-500 bg-error-500 text-white'
+                                        : 'border-error-500/40 bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-500'
+                                }`}
+                            >
+                                <CloseOutlined /> No
+                            </button>
+                        </div>
+                    </div>
+
                     <AddToCalendarButton
                         size="sm"
                         event={{
-                            title: `BOFC Match: ${matchDay.name}`,
-                            description: `BOFC MatchDay. ${matchDay.venueName ? `Venue: ${matchDay.venueName}.` : ''}`,
+                            title: `BOFC Match Day: ${matchDay.name}`,
+                            description: `BOFC Match Day. ${matchDay.venueName ? `Venue: ${matchDay.venueName}.` : ''}`,
                             location: matchDay.venueName,
                             start: new Date(matchDay.matchDayDate),
+                            end: getMatchDayEndDate(matchDay.matchDayDate, matchDay.durationMinutes) ?? undefined,
                         }}
                     />
                     <Link to={`/match-days/join-match-day/${matchDay.id}`} className="hidden lg:block">
@@ -361,7 +357,7 @@ const LatestMatchDayCard: React.FC = () => {
                         {selectedPlayers.map((player, idx) => (
                             <div
                                 key={`${player.employeeId}-${idx}`}
-                                className="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2 dark:border-gray-800"
+                                className="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2 dark:border-[var(--color-rule)]"
                             >
                                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
                                     <UserOutlined />

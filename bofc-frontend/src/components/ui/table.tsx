@@ -16,7 +16,7 @@ export function Table({ children, className = "" }: { children: React.ReactNode;
 export function TableHead({ children }: { children: React.ReactNode }) {
   return (
     <thead>
-      <tr className="border-y border-gray-100 dark:border-gray-800">{children}</tr>
+      <tr className="border-y border-gray-100 dark:border-[var(--color-rule)]">{children}</tr>
     </thead>
   );
 }

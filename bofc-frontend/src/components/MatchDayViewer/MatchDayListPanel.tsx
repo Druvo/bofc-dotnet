@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { SearchOutlined, TrophyOutlined } from "@ant-design/icons";
 import { useGetMatchDaysQuery } from "../../state/features/matchDays/matchDaysSlice";
 import type { IoMatchDaySingleSummaryType } from "../../state/features/matchDays/matchDayTypes";
+import { showBdLocalTimeRange, getEffectiveMatchDayStatus } from "../../utils/utils";
 import Loader from "../ui/loader";
 
 interface MatchDayListPanelProps {
@@ -50,12 +51,17 @@ export default function MatchDayListPanel({
 
   const matchDays: IoMatchDaySingleSummaryType[] = useMemo(() => {
     const list = data?.content?.matchDays || [];
+    // The raw matchDayStatus only advances via a slow (3x/day) backend cron job, so a MatchDay
+    // whose actual window has ended can sit at a stale ONGOING for hours — derive the effective
+    // status the same way every other screen does, or this list disagrees with e.g. the content
+    // pane right next to it (showing a green "live" MatchDay the content pane already shows
+    // CONCLUDED).
     return [...list]
-      .sort(
-        (a, b) =>
-          (statusOrder[a.matchDayStatus?.toUpperCase() ?? ""] ?? 5) -
-          (statusOrder[b.matchDayStatus?.toUpperCase() ?? ""] ?? 5)
-      )
+      .sort((a, b) => {
+        const aStatus = getEffectiveMatchDayStatus(a.matchDayStatus, a.matchDayDate, a.durationMinutes);
+        const bStatus = getEffectiveMatchDayStatus(b.matchDayStatus, b.matchDayDate, b.durationMinutes);
+        return (statusOrder[aStatus.toUpperCase()] ?? 5) - (statusOrder[bStatus.toUpperCase()] ?? 5);
+      })
       .filter((t) =>
         t.name.toLowerCase().includes(search.toLowerCase())
       );
@@ -70,7 +76,7 @@ export default function MatchDayListPanel({
             placeholder="Search MatchDays..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-md border border-gray-300 bg-transparent pl-8 pr-3 text-theme-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90"
+            className="h-8 w-full rounded-md border border-gray-300 bg-transparent pl-8 pr-3 text-theme-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-[var(--color-rule)] dark:text-white/90"
           />
         </div>
       </div>
@@ -89,10 +95,13 @@ export default function MatchDayListPanel({
           ) : (
             matchDays.map((matchDay) => {
               const isSelected = matchDay.id === selectedId;
-              const isLive =
-                matchDay.matchDayStatus?.toUpperCase() === "ONGOING" ||
-                matchDay.matchDayStatus?.toUpperCase() === "ACTIVE";
-              const tone = matchDay.matchDayStatus ? statusColor(matchDay.matchDayStatus) : "default";
+              const effectiveStatus = getEffectiveMatchDayStatus(
+                matchDay.matchDayStatus,
+                matchDay.matchDayDate,
+                matchDay.durationMinutes
+              );
+              const isLive = effectiveStatus.toUpperCase() === "ONGOING" || effectiveStatus.toUpperCase() === "ACTIVE";
+              const tone = effectiveStatus ? statusColor(effectiveStatus) : "default";
 
               return (
                 <div
@@ -155,8 +164,17 @@ export default function MatchDayListPanel({
                               year: "numeric",
                             })
                           : "—"}
+                        {matchDay.matchDayDate && (
+                          <>
+                            {" · "}
+                            {showBdLocalTimeRange(matchDay.matchDayDate, matchDay.durationMinutes).replace(
+                              /^\d{2}\/\d{2}\/\d{4}, /,
+                              ""
+                            )}
+                          </>
+                        )}
                       </span>
-                      {matchDay.matchDayStatus && (
+                      {effectiveStatus && (
                         <span
                           style={{
                             fontSize: 10,
@@ -167,7 +185,7 @@ export default function MatchDayListPanel({
                             ...statusTone[tone],
                           }}
                         >
-                          {matchDay.matchDayStatus.toUpperCase()}
+                          {effectiveStatus.toUpperCase()}
                         </span>
                       )}
                     </div>

@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
-import { BarChartOutlined, AppstoreOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux";
+import { BarChartOutlined, AppstoreOutlined, UnorderedListOutlined, EditOutlined } from "@ant-design/icons";
 import useIsMobile from "../../hooks/useIsMobile";
+import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import {
     useGetPlayerStatisticsQuery,
     useGetPlayerMatchHistoryQuery,
@@ -12,9 +14,11 @@ import Button from "../ui/button";
 import FormSelect from "../ui/form-select";
 import Pagination from "../ui/pagination";
 import Loader from "../ui/loader";
+import Avatar from "../CommonAtoms/Avatar";
 import { IPlayerStatisticsData } from "../../state/features/statistics/statisticsTypes";
 import { computeRating } from "../../utils/playerRating";
 import PlayerStatsSidebar from "./PlayerStatsSidebar";
+import EditPlayerStatAdjustmentModal from "./EditPlayerStatAdjustmentModal";
 
 const FORM_SLOTS = 5;
 
@@ -24,9 +28,8 @@ const resultColor: Record<string, string> = {
     LOSS: "bg-error-500",
 };
 
-const PlayerStatCard: React.FC<{ record: IPlayerStatisticsData; photo?: string; rank: number }> = ({ record, photo, rank }) => {
+const PlayerStatCard: React.FC<{ record: IPlayerStatisticsData; photo?: string; rank: number; isAdmin: boolean; onEdit: () => void }> = ({ record, photo, isAdmin, onEdit }) => {
     const s = record.statistics;
-    const initial = record.playerName?.charAt(0)?.toUpperCase() || "?";
     const { data: historyData } = useGetPlayerMatchHistoryQuery({ playerId: record.playerId });
 
     // Oldest -> newest, left to right, same convention as most "form guide" strips.
@@ -38,14 +41,22 @@ const PlayerStatCard: React.FC<{ record: IPlayerStatisticsData; photo?: string; 
     }, [historyData]);
 
     return (
-        <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-white/[0.02]">
+        <div className="relative rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
+            {isAdmin && (
+                <button
+                    type="button"
+                    onClick={onEdit}
+                    title="Adjust stats"
+                    className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-300"
+                >
+                    <EditOutlined />
+                </button>
+            )}
             <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-brand-500 bg-brand-50 text-xl font-bold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
-                    {photo ? <img src={photo} alt="" className="h-full w-full object-cover" /> : initial}
-                </div>
+                <Avatar src={photo} name={record.playerName} seed={record.playerId} size={64} className="border-2 border-brand-500" />
                 <div className="flex min-w-0 flex-col">
                     <span className="truncate text-theme-sm font-bold text-gray-800 dark:text-white/90">{record.playerName}</span>
-                    <span className="text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{record.position || "—"}</span>
+                    <span className="truncate text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{record.position || "—"}</span>
                 </div>
             </div>
 
@@ -74,7 +85,7 @@ const PlayerStatCard: React.FC<{ record: IPlayerStatisticsData; photo?: string; 
                         })}
                     </div>
                 </div>
-                <div className="rounded-lg border border-gray-100 bg-white px-3 py-1.5 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+                <div className="rounded-lg border border-gray-100 bg-white px-3 py-1.5 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                     <div className="text-base font-bold leading-none text-brand-500 dark:text-brand-400">{computeRating(s).toFixed(1)}</div>
                     <div className="mt-1 text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Rating</div>
                 </div>
@@ -84,7 +95,7 @@ const PlayerStatCard: React.FC<{ record: IPlayerStatisticsData; photo?: string; 
 };
 
 const statChip = (label: string, value: number) => (
-    <div className="rounded-lg border border-gray-100 bg-white px-1 py-2 text-center dark:border-gray-800 dark:bg-white/[0.03]">
+    <div className="rounded-lg border border-gray-100 bg-white px-1 py-2 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
         <div className={`text-base font-bold leading-none ${value === 0 ? "text-gray-400 dark:text-gray-600" : statAccent[label] || "text-gray-800 dark:text-white/90"}`}>
             {value}
         </div>
@@ -127,6 +138,10 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 type SortKey = "goalsScored" | "assists" | "goalsAndAssists" | "matchesPlayed" | "yellowCards" | "redCards";
 
 const PlayerStatistics: React.FC = () => {
+    const loginInfo = useSelector(selectLoginInfo);
+    const isAdmin = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN");
+    const [editingPlayer, setEditingPlayer] = useState<{ id: number; name: string } | null>(null);
+
     const [selectedSeason, setSelectedSeason] = useState<string | undefined>(undefined);
     const [selectedMatchDay, setSelectedMatchDay] = useState<number | undefined>(undefined);
     const [position, setPosition] = useState<string | undefined>(undefined);
@@ -179,13 +194,15 @@ const PlayerStatistics: React.FC = () => {
         const paged = rows.slice(start, start + pageSize);
         return (
             <>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
                     {paged.map((record, idx) => (
                         <PlayerStatCard
                             key={record.playerId}
                             record={record}
                             photo={photoById[record.playerId]}
                             rank={start + idx + 1}
+                            isAdmin={isAdmin}
+                            onEdit={() => setEditingPlayer({ id: record.playerId, name: record.playerName })}
                         />
                     ))}
                 </div>
@@ -209,10 +226,10 @@ const PlayerStatistics: React.FC = () => {
         const paged = rows.slice(start, start + pageSize);
         return (
             <>
-                <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-800">
+                <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-[var(--color-rule)]">
                     <table className="w-full min-w-max border-collapse text-theme-sm">
                         <thead>
-                            <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-white/[0.02]">
+                            <tr className="border-b border-gray-100 bg-gray-50 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                                 <th className="px-3 py-3 text-left font-semibold text-gray-500 dark:text-gray-400">#</th>
                                 <th className="px-3 py-3 text-left font-semibold text-gray-500 dark:text-gray-400">Player</th>
                                 <th className="px-3 py-3 text-center font-semibold text-gray-500 dark:text-gray-400">MP</th>
@@ -222,11 +239,11 @@ const PlayerStatistics: React.FC = () => {
                                 <th className="px-3 py-3 text-center font-semibold text-gray-500 dark:text-gray-400">YC</th>
                                 <th className="px-3 py-3 text-center font-semibold text-gray-500 dark:text-gray-400">RC</th>
                                 <th className="px-3 py-3 text-center font-semibold text-gray-500 dark:text-gray-400">Rating</th>
+                                {isAdmin && <th className="px-3 py-3 text-center font-semibold text-gray-500 dark:text-gray-400"></th>}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                             {paged.map((record, idx) => {
-                                const initial = record.playerName?.charAt(0)?.toUpperCase() || "?";
                                 const s = record.statistics;
                                 const photo = photoById[record.playerId];
                                 return (
@@ -234,12 +251,10 @@ const PlayerStatistics: React.FC = () => {
                                         <td className="px-3 py-2.5 text-theme-xs font-bold text-brand-500 dark:text-brand-400">{start + idx + 1}</td>
                                         <td className="px-3 py-2.5">
                                             <div className="flex items-center gap-2.5">
-                                                <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-brand-500 bg-brand-50 text-theme-xs font-bold text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
-                                                    {photo ? <img src={photo} alt="" className="h-full w-full object-cover" /> : initial}
-                                                </div>
+                                                <Avatar src={photo} name={record.playerName} seed={record.playerId} size={36} className="border-2 border-brand-500" />
                                                 <div className="flex min-w-0 flex-col">
                                                     <span className="truncate font-semibold text-gray-800 dark:text-white/90">{record.playerName}</span>
-                                                    <span className="text-theme-xs text-gray-400 dark:text-gray-500">{record.position || "—"}</span>
+                                                    <span className="truncate text-theme-xs text-gray-400 dark:text-gray-500">{record.position || "—"}</span>
                                                 </div>
                                             </div>
                                         </td>
@@ -250,6 +265,18 @@ const PlayerStatistics: React.FC = () => {
                                         <td className={`px-3 py-2.5 text-center font-semibold ${s.yellowCards === 0 ? "text-gray-400 dark:text-gray-600" : statAccent.Yellow}`}>{s.yellowCards}</td>
                                         <td className={`px-3 py-2.5 text-center font-semibold ${s.redCards === 0 ? "text-gray-400 dark:text-gray-600" : statAccent.Red}`}>{s.redCards}</td>
                                         <td className="px-3 py-2.5 text-center font-bold text-brand-500 dark:text-brand-400">{computeRating(s).toFixed(1)}</td>
+                                        {isAdmin && (
+                                            <td className="px-3 py-2.5 text-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setEditingPlayer({ id: record.playerId, name: record.playerName })}
+                                                    title="Adjust stats"
+                                                    className="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-white/5 dark:hover:text-gray-300"
+                                                >
+                                                    <EditOutlined />
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 );
                             })}
@@ -277,8 +304,8 @@ const PlayerStatistics: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <div className="min-w-0 flex-1 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+        <div className="flex flex-col gap-4">
+        <div className="min-w-0 flex-1 rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h3 className="flex items-center gap-2 text-xl font-bold text-gray-800 dark:text-white/90">
@@ -287,7 +314,7 @@ const PlayerStatistics: React.FC = () => {
                     </h3>
                     <p className="text-theme-sm text-gray-500 dark:text-gray-400">Goals, assists and disciplinary records across MatchDays</p>
                 </div>
-                <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-700">
+                <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-[var(--color-rule)]">
                     <button
                         type="button"
                         onClick={() => {
@@ -319,8 +346,21 @@ const PlayerStatistics: React.FC = () => {
 
             <div className="mb-5 h-0.5 w-full rounded bg-gradient-to-r from-brand-500 to-transparent" />
 
+            <div className="mb-5">
+                <PlayerStatsSidebar
+                    layout="top"
+                    rows={sortedRows}
+                    photoById={photoById}
+                    onViewFullRanking={() => {
+                        setSortKey("goalsAndAssists");
+                        setViewMode("list");
+                        setCurrentPage(1);
+                    }}
+                />
+            </div>
+
             {/* Filter bar */}
-            <div className="mb-5 rounded-xl border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-white/[0.02]">
+            <div className="mb-5 rounded-xl border border-gray-100 bg-gray-50 p-3 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                 <div className={`flex flex-wrap items-center gap-2.5 ${isMobile ? "flex-col items-stretch" : ""}`}>
                     <FormSelect
                         className={`!h-10 ${isMobile ? "w-full" : "w-[150px]"}`}
@@ -368,15 +408,14 @@ const PlayerStatistics: React.FC = () => {
             {viewMode === "grid" ? renderCards() : renderList()}
         </div>
 
-        <PlayerStatsSidebar
-            rows={sortedRows}
-            photoById={photoById}
-            onViewFullRanking={() => {
-                setSortKey("goalsAndAssists");
-                setViewMode("list");
-                setCurrentPage(1);
-            }}
-        />
+        {editingPlayer && (
+            <EditPlayerStatAdjustmentModal
+                playerId={editingPlayer.id}
+                playerName={editingPlayer.name}
+                isOpen={!!editingPlayer}
+                onClose={() => setEditingPlayer(null)}
+            />
+        )}
         </div>
     );
 };

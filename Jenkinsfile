@@ -27,7 +27,7 @@ pipeline {
             steps {
                 dir('bofc-frontend') {
                     bat 'npm ci'
-                    bat 'set REACT_APP_API_URL=/api&& npm run build'
+                    bat 'set REACT_APP_API_URL=/api&& set CI=false&& npm run build'
                 }
             }
         }

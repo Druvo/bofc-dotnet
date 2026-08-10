@@ -18,7 +18,7 @@ namespace BofcBackend.Api.Migrations
                 defaultValue: 90);
 
             // Data migration: backfill each slot's new per-slot duration from the old shared
-            // global value BEFORE dropping it — a straight DropColumn here would silently lose
+            // global value BEFORE dropping it - a straight DropColumn here would silently lose
             // whatever the club had actually configured.
             migrationBuilder.Sql(@"
                 UPDATE wds

@@ -1,6 +1,6 @@
 namespace BofcBackend.Api.Features.Statistics.Models;
 
-/// <summary>The current manual correction stored for a player — all zero/null if an admin has
+/// <summary>The current manual correction stored for a player - all zero/null if an admin has
 /// never set one. Admin-only (see PlayerStatisticsController).</summary>
 public class PlayerStatAdjustmentResponse
 {

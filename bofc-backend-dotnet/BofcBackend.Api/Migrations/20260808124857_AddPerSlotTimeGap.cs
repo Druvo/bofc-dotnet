@@ -24,7 +24,7 @@ namespace BofcBackend.Api.Migrations
                 nullable: true);
 
             // Data migration: backfill each slot's new per-slot gap from the old shared global
-            // value BEFORE dropping it — a straight DropColumn here would silently lose whatever
+            // value BEFORE dropping it - a straight DropColumn here would silently lose whatever
             // the club had actually configured.
             migrationBuilder.Sql(@"
                 UPDATE wds

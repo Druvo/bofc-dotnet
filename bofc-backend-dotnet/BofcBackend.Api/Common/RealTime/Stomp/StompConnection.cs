@@ -6,7 +6,7 @@ namespace BofcBackend.Api.Common.RealTime.Stomp;
 /// <summary>
 /// One client's SockJS+STOMP session over a single raw WebSocket. Handles the STOMP subset this
 /// app actually needs: CONNECT -> CONNECTED, SUBSCRIBE/UNSUBSCRIBE, DISCONNECT, and periodic
-/// heartbeats. There is no SEND handling — this app only ever pushes server -> client (auction
+/// heartbeats. There is no SEND handling - this app only ever pushes server -> client (auction
 /// broadcasts); bids are placed over the regular REST API, matching the Java server's actual
 /// STOMP usage (it never received client SEND frames either, only used SimpMessagingTemplate to
 /// push).

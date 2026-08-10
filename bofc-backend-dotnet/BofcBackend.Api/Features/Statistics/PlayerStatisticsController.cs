@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BofcBackend.Api.Features.Statistics;
 
-/// <summary>Port of controller/PlayerStatisticsController.java. No class-level [AllowAnonymous] —
+/// <summary>Port of controller/PlayerStatisticsController.java. No class-level [AllowAnonymous] -
 /// the two read endpoints below opt in individually so the admin-only adjustment endpoints
 /// further down stay behind [Authorize] (AllowAnonymous on either the controller or the action
 /// overrides Authorize wherever it appears, so it can't sit at the class level here).</summary>
@@ -51,7 +51,7 @@ public class PlayerStatisticsController(IPlayerStatisticsService playerStatistic
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
     }
 
-    /// <summary>Admin-only manual correction on top of match-derived stats — see PlayerStatAdjustment.</summary>
+    /// <summary>Admin-only manual correction on top of match-derived stats - see PlayerStatAdjustment.</summary>
     [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
     [HttpGet("{playerId}/adjustment")]
     public async Task<IActionResult> GetPlayerStatAdjustment(long playerId)

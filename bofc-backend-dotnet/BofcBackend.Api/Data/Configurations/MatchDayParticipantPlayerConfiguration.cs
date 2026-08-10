@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace BofcBackend.Api.Data.Configurations;
 
 /// <summary>
-/// Read-only mapping (matches Java's @Immutable) — composite key (MatchDayId, PlayerId),
+/// Read-only mapping (matches Java's @Immutable) - composite key (MatchDayId, PlayerId),
 /// no navigation properties. Application code must never Add/Update/Remove this entity.
 /// </summary>
 public class MatchDayParticipantPlayerConfiguration : IEntityTypeConfiguration<MatchDayParticipantPlayer>

@@ -1,4 +1,4 @@
-/** Pure layout math for the Squad & Lineup pitch — no React/DOM here, just the
+/** Pure layout math for the Squad & Lineup pitch - no React/DOM here, just the
  * formula derived from design_handoff_squad_lineup's worked example (5-a-side,
  * "2-1-1": lines at top 62/38/14%, a 2-player line at left 25/75%). */
 
@@ -34,7 +34,7 @@ export function validateFormation(formation: string, squadSize: number): string 
 
 /** Goalkeeper is always slot 0, fixed at the bottom-center. Every other starter's
  * slot is derived purely from squadSize + formation (not from the player's real
- * position) — same manual-arrangement flexibility as the design doc. */
+ * position) - same manual-arrangement flexibility as the design doc. */
 export function computeSlots(squadSize: number, formation: string): PitchSlot[] {
   const lines = parseFormation(formation);
   const slots: PitchSlot[] = [{ left: 50, top: 88 }]; // goalkeeper

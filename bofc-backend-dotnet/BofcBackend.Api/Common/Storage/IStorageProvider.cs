@@ -1,7 +1,7 @@
 namespace BofcBackend.Api.Common.Storage;
 
 /// <summary>
-/// Port of storage/StorageProvider.java — generic multi-folder storage, backing the
+/// Port of storage/StorageProvider.java - generic multi-folder storage, backing the
 /// /files/presign + /files/view-url + /files/local/** endpoints (player-profile uploads).
 /// </summary>
 public interface IStorageProvider

@@ -101,8 +101,8 @@ export default function ManualFixturePanel({
       {isLoading && <Loader className="py-6" />}
       <Tabs active={activeTab} onChange={handleTabChange} items={tabItems} />
       {/* All three tabs stay mounted (each skips its own query fetch while
-          inactive via isActive) so live state — e.g. websocket connections in
-          the MatchDay tab — survives switching tabs, matching antd Tabs'
+          inactive via isActive) so live state - e.g. websocket connections in
+          the MatchDay tab - survives switching tabs, matching antd Tabs'
           default cached-pane behavior this replaced. */}
       <div style={{ display: activeTab === "overview" ? "block" : "none" }}>
         <OverviewTab

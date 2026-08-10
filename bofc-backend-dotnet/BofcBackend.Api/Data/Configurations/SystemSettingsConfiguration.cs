@@ -42,7 +42,7 @@ public class SystemSettingsConfiguration : IEntityTypeConfiguration<SystemSettin
         builder.HasOne(s => s.WeeklyMatchDayVenue).WithMany().HasForeignKey(s => s.WeeklyMatchDayVenueId).OnDelete(DeleteBehavior.SetNull);
 
         builder.Property(s => s.MatchDaysPerWeek).HasColumnName("match_days_per_week").HasDefaultValue(1).IsRequired();
-        // Remember: this replaced WeeklyMatchDayTeamCount (a fixed team count) — the stored
+        // Remember: this replaced WeeklyMatchDayTeamCount (a fixed team count) - the stored
         // meaning changed, not just the name, so the migration for this drops the old column
         // and adds this one fresh with a sensible default rather than reinterpreting old values.
         builder.Property(s => s.WeeklyMatchDayMaxPlayersPerTeam).HasColumnName("weekly_match_day_max_players_per_team").HasDefaultValue(6).ValueGeneratedNever().IsRequired();

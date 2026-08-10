@@ -10,7 +10,7 @@ const ILLUSTRATIONS = [MaleAvatar, DeveloperAvatar, ProfessorAvatar, FriendlyGuy
 interface AvatarProps {
   src?: string | null;
   name?: string | null;
-  /** Usually the player/team id — keeps the illustration stable even if two players share a name. Falls back to `name`. */
+  /** Usually the player/team id - keeps the illustration stable even if two players share a name. Falls back to `name`. */
   seed?: string | number | null;
   size?: number;
   fontSize?: number;

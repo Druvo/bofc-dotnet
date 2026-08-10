@@ -68,7 +68,7 @@ export default function GroupMatchGenerationModal({
 
   useEffect(() => {
     if (isModalVisible) {
-      // matchDayDate is naive-local already — see RoundManagement.tsx's identical fix.
+      // matchDayDate is naive-local already - see RoundManagement.tsx's identical fix.
       const defaultStartDateTime = matchDayDate ? dayjs(matchDayDate) : dayjs().add(1, "day").hour(15).minute(0);
       const matchDayVenue = venues.find((v) => v.name === matchDayVenueName);
 
@@ -168,8 +168,8 @@ export default function GroupMatchGenerationModal({
           value={fixtureFormat}
           disabled
           options={[
-            { value: "ROUND_ROBIN", label: "Round Robin — each pair plays once" },
-            { value: "DOUBLE_ROUND_ROBIN", label: "Double Round Robin — each pair plays twice" },
+            { value: "ROUND_ROBIN", label: "Round Robin - each pair plays once" },
+            { value: "DOUBLE_ROUND_ROBIN", label: "Double Round Robin - each pair plays twice" },
           ]}
         />
 

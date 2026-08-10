@@ -1,4 +1,4 @@
-// Real Web Push subscription flow — request permission, subscribe the service
+// Real Web Push subscription flow - request permission, subscribe the service
 // worker to the push service using the backend's VAPID public key, and hand
 // the subscription to the backend so NotificationService can target this
 // device. See public/sw.js for the "push"/"notificationclick" handlers.

@@ -7,7 +7,7 @@ public class SystemSettingsResponse
     public int SmtpPort { get; set; }
     public string? SmtpUsername { get; set; }
 
-    /// <summary>Never the real password — true if one is stored, so the UI can show a "•••• saved" placeholder without ever round-tripping the secret.</summary>
+    /// <summary>Never the real password - true if one is stored, so the UI can show a "•••• saved" placeholder without ever round-tripping the secret.</summary>
     public bool SmtpPasswordSet { get; set; }
 
     public string? SmtpFromEmail { get; set; }
@@ -33,7 +33,7 @@ public class SystemSettingsResponse
     public string WeeklyMatchDayNamePrefix { get; set; } = "Next Match";
     public string WeeklyMatchDayOfWeek { get; set; } = "Friday";
 
-    /// <summary>"HH:mm" — 24-hour local time.</summary>
+    /// <summary>"HH:mm" - 24-hour local time.</summary>
     public string WeeklyMatchTime { get; set; } = "19:00";
 
     public long? WeeklyMatchDayVenueId { get; set; }
@@ -46,7 +46,7 @@ public class SystemSettingsResponse
     public bool WeeklyMatchDayAutoTeamsEnabled { get; set; }
     public int WeeklyMatchDayAutoTeamsLeadHours { get; set; } = 24;
 
-    /// <summary>Effective code in use right now (Settings override, or the appsettings default if never set) — never null, so the UI always has something to show.</summary>
+    /// <summary>Effective code in use right now (Settings override, or the appsettings default if never set) - never null, so the UI always has something to show.</summary>
     public string CashChartCode { get; set; } = string.Empty;
     public string? CashChartName { get; set; }
     public string CollectionIncomeChartCode { get; set; } = string.Empty;
@@ -56,6 +56,6 @@ public class SystemSettingsResponse
     public bool CashChartCodeIsOverridden { get; set; }
     public bool CollectionIncomeChartCodeIsOverridden { get; set; }
 
-    /// <summary>The club-wide jersey colors matches are assigned from — a configurable list (any count), not hardcoded to 2.</summary>
+    /// <summary>The club-wide jersey colors matches are assigned from - a configurable list (any count), not hardcoded to 2.</summary>
     public List<string> JerseyColors { get; set; } = new();
 }

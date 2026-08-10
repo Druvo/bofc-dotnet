@@ -57,7 +57,7 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 
 // --- EF Core / SQL Server. Migrated off MySQL for tighter .NET/EF tooling
 // compatibility (native EF Core Migrations instead of hand-applied Flyway
-// SQL). No live-DB dependency at startup — the app starts even when SQL
+// SQL). No live-DB dependency at startup - the app starts even when SQL
 // Server isn't reachable yet.
 var connectionString = builder.Configuration.GetConnectionString("Default");
 if (!string.IsNullOrWhiteSpace(connectionString))
@@ -75,7 +75,7 @@ builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 builder.Services.Configure<VapidOptions>(builder.Configuration.GetSection("Vapid"));
 
 // --- Global admin settings (SMTP + email notification toggles) + the email sender that
-// reads them. SMTP password is encrypted at rest via Data Protection, not appsettings —
+// reads them. SMTP password is encrypted at rest via Data Protection, not appsettings -
 // this is deliberately DB-backed (not IOptions/appsettings) so an admin can change it from
 // the Settings page with no app restart.
 builder.Services.AddDataProtection();
@@ -125,7 +125,7 @@ builder.Services.AddScoped<BofcBackend.Api.Common.Scheduling.WeeklyMatchDayTeamG
 
 // --- Accounting/ledger domain. AcVoucherService is deliberately concrete (no interface,
 // matching Java) and sits below AcBillPaymentService/AcCollectionService in the dependency
-// graph — see AcVoucherService's class comment for why the circular Java wiring was flattened.
+// graph - see AcVoucherService's class comment for why the circular Java wiring was flattened.
 builder.Services.AddScoped<AcNatureService>();
 builder.Services.AddScoped<AcChartService>();
 builder.Services.AddScoped<AcVoucherTypeService>();
@@ -137,7 +137,7 @@ builder.Services.AddScoped<AccountReportService>();
 builder.Services.AddScoped<IPaymentAccountService, PaymentAccountService>();
 
 // --- Auction domain. WebSocket contract is STOMP-over-SockJS (@stomp/stompjs + sockjs-client
-// on the frontend, see useAuctionWebSocket.ts) — SignalR would speak a different wire protocol
+// on the frontend, see useAuctionWebSocket.ts) - SignalR would speak a different wire protocol
 // entirely and the frontend can't be touched, so this is a hand-rolled minimal SockJS+STOMP
 // server (see Common/RealTime/Stomp/) rather than the plan's original "swap to SignalR" idea.
 builder.Services.AddSingleton<AuctionStompHub>();
@@ -153,7 +153,7 @@ var jwtSecret = builder.Configuration["Jwt:Secret"];
 if (string.IsNullOrWhiteSpace(jwtSecret))
 {
     throw new InvalidOperationException(
-        "Jwt:Secret is not configured. Set it via user-secrets (dev) or the Jwt__Secret env var (prod) — " +
+        "Jwt:Secret is not configured. Set it via user-secrets (dev) or the Jwt__Secret env var (prod) - " +
         "do not hardcode it in appsettings.json.");
 }
 
@@ -278,7 +278,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Global exception handling — the .NET equivalent seam for
+// Global exception handling - the .NET equivalent seam for
 // exception/RestResponseEntityExceptionHandler.java's @ExceptionHandler methods.
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

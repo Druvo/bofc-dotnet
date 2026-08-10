@@ -35,7 +35,7 @@ const roleTagTone: Record<string, React.CSSProperties> = {
 };
 
 /**
- * Read-only, visually-forward player card — a real card (photo, name,
+ * Read-only, visually-forward player card - a real card (photo, name,
  * position, role badges as pills) rather than the compact single-line row
  * ViewerPlayersTab previously rendered inline. Does not touch
  * MatchDays/Atoms/PlayerCard.tsx, which stays the row-style atom the

@@ -68,7 +68,7 @@ export default function SquadLineupTab({ teams }: SquadLineupTabProps) {
   const [formationError, setFormationError] = useState<string | null>(null);
 
   // Every interaction here auto-saves (no Save button) by firing updateTeamLineup immediately,
-  // which invalidates and refetches the lineup — if the admin makes a second change before the
+  // which invalidates and refetches the lineup - if the admin makes a second change before the
   // first save's refetch lands, that refetch's server snapshot would otherwise flow straight
   // through this effect and silently overwrite the second, more-recent local edit. Skip re-
   // syncing from the server while any save is still in flight; local state already reflects the
@@ -112,7 +112,7 @@ export default function SquadLineupTab({ teams }: SquadLineupTabProps) {
         bench: next.bench.map((p) => ({ playerId: p.playerId, availability: p.availability })),
       }).unwrap();
     } catch {
-      toast.error("Failed to save lineup change — please retry");
+      toast.error("Failed to save lineup change - please retry");
     } finally {
       pendingSaveCount.current -= 1;
     }

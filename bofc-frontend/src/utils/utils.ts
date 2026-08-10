@@ -3,7 +3,7 @@ import { saveAs } from "file-saver";
 
 /**
  * The backend only assigns matchDayStatus once (at creation) and relies on a slow
- * cron job (3x/day) or an admin manually concluding it to advance it further — so a
+ * cron job (3x/day) or an admin manually concluding it to advance it further - so a
  * matchDay can sit at stale UPCOMING/ONGOING long past its actual window. Anywhere
  * a status is displayed, derive the effective status in real time from the MatchDay's
  * own start + duration instead of trusting the raw field:
@@ -14,13 +14,13 @@ import { saveAs } from "file-saver";
  * and never resurrected by date math. durationMinutes defaults to 90 when unset.
  */
 /**
- * Bangladesh has no DST and is a fixed UTC+6 — so "Dhaka wall-clock minus 6 hours" is always
+ * Bangladesh has no DST and is a fixed UTC+6 - so "Dhaka wall-clock minus 6 hours" is always
  * the true UTC instant a naive matchDayDate string represents. `new Date(matchDayDate)` on a
  * "YYYY-MM-DDTHH:mm:ss" string with no offset parses it as the *viewer's own* local time per
- * the JS spec, not Dhaka's — for any viewer not already in Asia/Dhaka, comparing that against
+ * the JS spec, not Dhaka's - for any viewer not already in Asia/Dhaka, comparing that against
  * `new Date()` (the real current instant) computes UPCOMING/ONGOING/CONCLUDED against the
  * wrong absolute instant. Building the UTC millis directly from the string's components sidesteps
- * the viewer's timezone entirely, unlike showBdLocalTime's regex approach — which only ever
+ * the viewer's timezone entirely, unlike showBdLocalTime's regex approach - which only ever
  * needs to relabel-and-display the given numbers, never compare them against "now".
  */
 const BD_UTC_OFFSET_HOURS = 6;
@@ -61,12 +61,12 @@ export const getEffectiveMatchDayStatus = (
 
 /**
  * The backend sends naive datetime strings ("2026-09-02T18:00:00", no offset) that already
- * represent Bangladesh wall-clock time — there is nothing to convert. Parsing this through
+ * represent Bangladesh wall-clock time - there is nothing to convert. Parsing this through
  * `new Date()` and re-formatting with an explicit timeZone would first localize it to
  * whatever timezone the *viewer's browser* happens to be in and only then reinterpret it as
  * Asia/Dhaka, silently shifting the displayed value for any viewer not already in that zone
  * (and previously this also added a redundant manual +6h on top, double-shifting even for
- * Dhaka-local viewers — e.g. 18:00 rendering as the next day's 00:00). Parse the components
+ * Dhaka-local viewers - e.g. 18:00 rendering as the next day's 00:00). Parse the components
  * directly instead so the displayed value is always exactly what the backend recorded.
  */
 export const showBdLocalTime = (timeString: string) => {
@@ -86,10 +86,10 @@ export const showBdLocalTime = (timeString: string) => {
 /**
  * Parses the same naive "YYYY-MM-DDTHH:mm[:ss]" backend string showBdLocalTime does, but
  * returns a real Date (via the local-component constructor, not the ISO-string one) so
- * duration arithmetic — add N minutes, roll over midnight/month/year — works correctly.
+ * duration arithmetic - add N minutes, roll over midnight/month/year - works correctly.
  * Reading it back with local getters (getHours/getDate/etc, never getUTCHours) always
  * reproduces the exact wall-clock numbers that were parsed, regardless of the viewer's
- * actual system timezone — same "don't convert, just relabel" contract as showBdLocalTime.
+ * actual system timezone - same "don't convert, just relabel" contract as showBdLocalTime.
  */
 const parseBdNaiveDateTime = (timeString?: string | null): Date | null => {
     if (!timeString) return null;

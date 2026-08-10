@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 namespace BofcBackend.Api.Common.Util;
 
 /// <summary>
-/// The club's jersey colors are a configurable list (SystemSettings.JerseyColors — any count,
-/// not hardcoded to 2) — a Match's home/away jersey colors must each be one of the configured
+/// The club's jersey colors are a configurable list (SystemSettings.JerseyColors - any count,
+/// not hardcoded to 2) - a Match's home/away jersey colors must each be one of the configured
 /// colors, and the two teams in the same match can't both be assigned the same one (nothing to
 /// tell them apart on the pitch). Shared by MatchManagementService.CreateMatchAsync and
 /// FixtureGenerationService.UpdateMatchFixtureAsync so both entry points agree.

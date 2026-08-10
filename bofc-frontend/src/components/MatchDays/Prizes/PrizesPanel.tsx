@@ -15,7 +15,7 @@ export default function PrizesPanel({ matchDayId }: PrizesPanelProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const userRoles = useSelector((state: RootState) => state.loginInfo.roles || []);
-  // COORDINATOR is a full manager everywhere else on this page (teams, lineup, fixtures) — this
+  // COORDINATOR is a full manager everywhere else on this page (teams, lineup, fixtures) - this
   // was the one tab still gated ADMIN/SUPERADMIN-only, an arbitrary capability gap.
   const isAdmin = canManagePrizes(userRoles);
 

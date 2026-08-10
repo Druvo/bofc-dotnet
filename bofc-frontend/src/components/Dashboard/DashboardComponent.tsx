@@ -26,7 +26,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
 
   return (
     <div>
-      {/* Finance Overview — balance card leads, KPI tiles alongside */}
+      {/* Finance Overview - balance card leads, KPI tiles alongside */}
       <div className="mb-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-6">
           <div className="min-w-0 md:col-span-6">
@@ -48,7 +48,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
         </div>
       </div>
 
-      {/* Live Auction (only shows when an auction is running) — the widget
+      {/* Live Auction (only shows when an auction is running) - the widget
           owns its own bottom margin so no empty gap is reserved when it
           renders null. */}
       <LiveAuctionStatusCard />

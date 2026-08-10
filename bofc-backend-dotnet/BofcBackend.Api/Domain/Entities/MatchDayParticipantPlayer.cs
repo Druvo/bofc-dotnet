@@ -1,10 +1,10 @@
 namespace BofcBackend.Api.Domain.Entities;
 
 /// <summary>
-/// Port of entity/MatchDayParticipantPlayer.java — a denormalized, read-only
+/// Port of entity/MatchDayParticipantPlayer.java - a denormalized, read-only
 /// (Hibernate @Immutable) flattened view of MatchDay participants. Composite key
 /// (MatchDayId, PlayerId) matches Java's @IdClass(MatchDayParticipantId). Not
-/// audited (no AuditBase in Java) and never written to by application code — Phase 3
+/// audited (no AuditBase in Java) and never written to by application code - Phase 3
 /// services must only query it, never Add/Update/Remove.
 /// </summary>
 public class MatchDayParticipantPlayer

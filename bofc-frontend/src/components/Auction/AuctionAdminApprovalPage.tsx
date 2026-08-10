@@ -40,7 +40,7 @@ interface RowState {
   basePrice: number;
 }
 
-const money = (v?: number) => (v != null ? formatCurrency(v, { decimals: 0 }) : "—");
+const money = (v?: number) => (v != null ? formatCurrency(v, { decimals: 0 }) : "-");
 
 const AuctionAdminApprovalPage: React.FC = () => {
   const tones = useStatTones();
@@ -172,7 +172,7 @@ const AuctionAdminApprovalPage: React.FC = () => {
                         <div className="text-theme-xs text-gray-400 dark:text-gray-500">{r.employeeId} • {r.email}</div>
                       </td>
                       <td className="px-3 py-2.5">
-                        {r.playingPosition ? <Badge variant="light">{r.playingPosition}</Badge> : <span className="text-gray-400">—</span>}
+                        {r.playingPosition ? <Badge variant="light">{r.playingPosition}</Badge> : <span className="text-gray-400">-</span>}
                       </td>
                       <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{money(r.preferredBasePrice)}</td>
                       <td className="px-3 py-2.5">
@@ -193,7 +193,7 @@ const AuctionAdminApprovalPage: React.FC = () => {
                       </td>
                       <td className="px-3 py-2.5">
                         {r.inAuctionPool ? (
-                          <span className="text-gray-400">—</span>
+                          <span className="text-gray-400">-</span>
                         ) : (
                           <input
                             type="number"

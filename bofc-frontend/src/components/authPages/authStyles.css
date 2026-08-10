@@ -40,12 +40,26 @@
 
 /* Enhanced Login Page Styles */
 /* Login pins its own accent/theme tokens rather than inheriting whatever
-   .light-mode/.dark-mode class DefaultLayout last left on <html> — that class
+   .light-mode/.dark-mode class DefaultLayout last left on <html> - that class
    is never cleaned up on logout (Login renders outside DefaultLayout), so
    without this the login button/checkbox color used to depend on whichever
    theme the user was last in as an authenticated user. Login is always one
    fixed dark theme with a gold accent, independent of the app-wide toggle. */
 .login-page-wrapper {
+    /* Every token Login actually uses, pinned to fixed dark values - not just the
+       accent. Login renders outside DefaultLayout, whose .light-mode/.dark-mode
+       toggle on <html> is never cleaned up on logout, so without this the card
+       background/text/rule/checkbox colors here silently depended on whichever
+       theme an earlier authenticated session last left behind (e.g. a stray
+       .light-mode class turned this into a cream card with tokens still tuned
+       for a dark one - unreadable placeholder text, near-invisible checkbox). */
+    --color-paper: #0a0f0c;
+    --color-paper-2: #0e1c14;
+    --color-paper-3: #12241a;
+    --color-ink: #f2f5f0;
+    --color-ink-2: #9fb3a5;
+    --color-rule: #2a3d31;
+    --color-muted: #6b8172;
     --color-accent: oklch(68.47% 0.1027 86.0);
     --color-accent-hover: oklch(76% 0.085 86.0);
     --color-accent-ink: oklch(14% 0.030 145.2);
@@ -89,7 +103,7 @@
     flex-direction: column;
     justify-content: center;
     /* Solid enough to guarantee input-text contrast regardless of whatever
-       background photo loads behind it — a near-transparent tint left
+       background photo loads behind it - a near-transparent tint left
        legibility up to chance depending on the photo's color at that spot. */
     background: color-mix(in oklch, var(--color-paper-2) 90%, transparent);
     backdrop-filter: blur(16px);
@@ -149,7 +163,7 @@
     background: transparent;
     outline: none;
     /* @tailwindcss/forms ships a default focus ring (box-shadow) on every form
-       element — fights with this component's own underline-only focus style. */
+       element - fights with this component's own underline-only focus style. */
     box-shadow: none;
     transition: border-color var(--dur-short) var(--ease-out);
     border-bottom: 2px solid var(--color-rule);
@@ -157,7 +171,20 @@
 }
 
 .underline-input:focus {
-    border-bottom-color: var(--color-accent);
+    /* @tailwindcss/forms sets its own border (all sides) + box-shadow ring on
+       :focus at the same specificity as this rule, so plain source order isn't
+       reliable - reassert every longhand explicitly (a shorthand containing
+       var() left border-bottom-color stuck at the unfocused value in testing,
+       even though box-shadow/outline from this same rule DID apply) so only
+       the underline responds, regardless of what the plugin's rule sets. */
+    border-top-style: none !important;
+    border-right-style: none !important;
+    border-left-style: none !important;
+    border-bottom-width: 2px !important;
+    border-bottom-style: solid !important;
+    border-bottom-color: var(--color-accent) !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 .underline-input::placeholder {
@@ -187,7 +214,7 @@
     padding-right: 40px;
 }
 
-/* Suppress the browser's own native reveal/clear icon on password fields —
+/* Suppress the browser's own native reveal/clear icon on password fields -
    it draws its own focus box inside the input, which looked like a stray
    border the email field (a plain text input) never shows. We already have
    our own eye-icon toggle. */
@@ -261,7 +288,7 @@
 
 /* Recolor the shared FormCheckbox's checked state to Login's gold accent
    (its default is the app's green brand-500) without touching the shared
-   component — every other page keeps its green checkbox. */
+   component - every other page keeps its green checkbox. */
 .login-form-container .border-brand-500 {
     border-color: var(--color-accent) !important;
 }
@@ -394,7 +421,7 @@
     }
 }
 
-/* Match history rows — professional scoreboard cards */
+/* Match history rows - professional scoreboard cards */
 .match-history-row {
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }

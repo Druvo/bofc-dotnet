@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 /**
  * TailAdmin Free v2.3.0 breadcrumb (src/partials/breadcrumb.html). Alpine's
- * `x-text="pageName"` (a page-scoped Alpine variable) becomes a plain prop —
+ * `x-text="pageName"` (a page-scoped Alpine variable) becomes a plain prop -
  * each page passes its own title, same as it would set its own `pageName`
  * in the original template.
  */

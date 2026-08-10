@@ -2,7 +2,7 @@ using BofcBackend.Api.Domain.Enums;
 
 namespace BofcBackend.Api.Domain.Entities;
 
-/// <summary>One player's slot within a <see cref="TeamLineup"/> — either a starter
+/// <summary>One player's slot within a <see cref="TeamLineup"/> - either a starter
 /// (OrderIndex = pitch slot order, 0 = goalkeeper) or a bench player (OrderIndex =
 /// display order in the bench list).</summary>
 public class TeamLineupPlayer : AuditableEntity

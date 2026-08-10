@@ -8,7 +8,7 @@ export const fmtMoney = (value: number | null | undefined): string =>
     });
 
 // Right-aligned tabular figure. When `colored` is set, positive values read
-// green, negative red, and zero muted — used for balance columns.
+// green, negative red, and zero muted - used for balance columns.
 export const amountCell = (value: number, colored = false): React.ReactNode => {
     const v = value ?? 0;
     const tone = !colored

@@ -5,15 +5,15 @@ import {
     MatchDayPlayerInfoType,
 } from "./matchDayTypes";
 
-// "matchDays" is also declared in matchDaysSlice.ts — declaring the same tag type again here is
+// "matchDays" is also declared in matchDaysSlice.ts - declaring the same tag type again here is
 // safe/idempotent (RTK Query merges tag-type declarations across every enhanceEndpoints call
 // against the same base apiSlice) and is what lets a team/roster mutation invalidate
 // getMatchDaySummary/getMatchDayById/getMatchDays too. Without this, those consumers (a second
 // browser tab, the MatchDayViewer team-count badge, etc.) stayed on the pre-mutation roster
-// until a manual page reload — SingleMatchDay.tsx/useMatchDayTeams.ts previously worked around
+// until a manual page reload - SingleMatchDay.tsx/useMatchDayTeams.ts previously worked around
 // this with a manual refetchMatchDay() call, which is a local patch, not a cache contract.
 const apiWithTags = apiSlice.enhanceEndpoints({
-    // "fixtures" is also declared in fixturesSlice.ts — generateTeamsByRank creates round-robin
+    // "fixtures" is also declared in fixturesSlice.ts - generateTeamsByRank creates round-robin
     // matches alongside the teams it drafts, so its cache invalidation needs to reach that tag too.
     addTagTypes: ["matchDayTeam", "matchDays", "fixtures"],
 });
@@ -87,7 +87,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                 isCaptain?: boolean;
                 teamPlayerRole?: string;
                 jerseyNumber?: number;
-                /** Existing TeamPlayer row's id — when set, backend treats this as a
+                /** Existing TeamPlayer row's id - when set, backend treats this as a
                  * reassignment (moving between teams) instead of a fresh add, since
                  * a player can only ever have one TeamPlayer row per matchDay. */
                 id?: number;
@@ -165,7 +165,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
             invalidatesTags: ["matchDayTeam", "matchDays"],
         }),
 
-        /** Manual on-demand rank-based team draft — same snake-draft-by-rank logic the weekly
+        /** Manual on-demand rank-based team draft - same snake-draft-by-rank logic the weekly
          * scheduler uses, admin-triggered with a max-players-per-team cap. The number of teams
          * is derived from confirmed participant turnout, not chosen directly. Only succeeds when
          * the MatchDay has zero teams yet (see TeamController.GenerateTeamsByRank). */

@@ -32,7 +32,7 @@ export function Card({
 
 /**
  * TailAdmin's stat tile (src/partials/metric-group/metric-group-01.html
- * pattern) — used for dashboard KPI cards (Total Collections, etc.).
+ * pattern) - used for dashboard KPI cards (Total Collections, etc.).
  */
 export function CardDataStats({
   title,

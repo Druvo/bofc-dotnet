@@ -50,12 +50,12 @@ public class TeamController(ITeamService teamService, WeeklyMatchDayTeamGenerato
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.DeleteOk);
     }
 
-    /// <summary>Manual on-demand rank-based team draft from the Team Building page — same
+    /// <summary>Manual on-demand rank-based team draft from the Team Building page - same
     /// snake-draft-by-rank logic the weekly scheduler uses (WeeklyMatchDayTeamGenerator), just
     /// admin-triggered for any MatchDay with an explicit max-players-per-team cap instead of the
     /// weekly scheduler's global Settings default. The number of teams is derived from confirmed
     /// participant turnout, not chosen directly. Refuses if the MatchDay already has any teams
-    /// (manual or auto) — same all-or-nothing rule GenerateAsync already enforces.</summary>
+    /// (manual or auto) - same all-or-nothing rule GenerateAsync already enforces.</summary>
     [HttpPost("matchday/{matchDayId}/generate")]
     public async Task<IActionResult> GenerateTeamsByRank(long matchDayId, [FromQuery] int maxPlayersPerTeam)
     {

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BofcBackend.Api.Features.LogicNodes;
 
-/// <summary>Port of service/LogicNodeExecutor.java — the rule-driven team-advancement engine.</summary>
+/// <summary>Port of service/LogicNodeExecutor.java - the rule-driven team-advancement engine.</summary>
 public class LogicNodeExecutor(BofcDbContext db, ILogger<LogicNodeExecutor> logger)
 {
     public async Task<AdvancedTeamsResponse?> ExecuteLogicNodeAsync(LogicNode logicNode)
@@ -157,7 +157,7 @@ public class LogicNodeExecutor(BofcDbContext db, ILogger<LogicNodeExecutor> logg
 
     /// <summary>
     /// Java's default tertiary rule is "HEAD_TO_HEAD", but the sort only special-cases "GOALS_FOR"
-    /// for the tertiary slot — the default HEAD_TO_HEAD tie-break is a no-op in Java, falling through
+    /// for the tertiary slot - the default HEAD_TO_HEAD tie-break is a no-op in Java, falling through
     /// straight to the Position comparison. Reproduced as-is (not fixed) to match existing behavior.
     /// </summary>
     private static List<GroupStanding> SortStandings(List<GroupStanding> standings, JsonElement ruleConfig)

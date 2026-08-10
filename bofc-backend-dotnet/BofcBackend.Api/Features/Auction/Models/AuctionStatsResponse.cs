@@ -2,7 +2,7 @@ namespace BofcBackend.Api.Features.Auction.Models;
 
 /// <summary>
 /// Port of model/auction/AuctionStatsResponse.java. MostActiveBiddingTeam/HighestBidWarCount/
-/// HighestBidWarPlayerName are never populated by Java's calculateStats either — kept for wire
+/// HighestBidWarPlayerName are never populated by Java's calculateStats either - kept for wire
 /// parity, always null.
 /// </summary>
 public class AuctionStatsResponse

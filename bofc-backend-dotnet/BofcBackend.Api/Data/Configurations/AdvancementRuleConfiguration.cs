@@ -25,7 +25,7 @@ public class AdvancementRuleConfiguration : IEntityTypeConfiguration<Advancement
         builder.Property(ar => ar.UpdatedDate).HasColumnName("updated_date");
 
         // TargetGroup has no inverse collection anywhere (Java's RoundGroup only declares
-        // the "sourceGroup"-mapped collection) — unidirectional, no WithMany needed.
+        // the "sourceGroup"-mapped collection) - unidirectional, no WithMany needed.
         builder.HasOne(ar => ar.TargetGroup).WithMany().HasForeignKey(ar => ar.TargetGroupId).OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 
 /**
- * TailAdmin Free v2.3.0 modal (src/partials/calendar-event-modal.html shell) —
+ * TailAdmin Free v2.3.0 modal (src/partials/calendar-event-modal.html shell) -
  * plain controlled overlay, no Radix dependency, so it drops in wherever the
  * old antd <Modal open/onCancel> was used.
  */
@@ -30,7 +30,7 @@ export default function Modal({
 
   if (!isOpen) return null;
 
-  // Portaled straight to <body> — rendering in place would make this fixed
+  // Portaled straight to <body> - rendering in place would make this fixed
   // overlay a descendant of whatever called it, and any ancestor with an
   // active `transform` (e.g. a card's hover:-translate-y lift) becomes the
   // containing block for `position: fixed`, trapping the modal inside that

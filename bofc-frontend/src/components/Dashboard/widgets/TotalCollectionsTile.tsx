@@ -4,7 +4,7 @@ import { useGetAccountSummaryQuery } from "../../../state/features/account/accou
 import FinanceStatTile from "./FinanceStatTile";
 
 // The "% vs last month" collections trend already lives on AccountBalanceCard
-// (same row) — this tile stays a plain total so the number isn't shown twice.
+// (same row) - this tile stays a plain total so the number isn't shown twice.
 const TotalCollectionsTile: React.FC = () => {
   const { data: summary } = useGetAccountSummaryQuery();
 

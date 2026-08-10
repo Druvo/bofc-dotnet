@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BofcBackend.Api.Features.Auction;
 
-/// <summary>Port of controller/auction/TeamBudgetController.java — raw responses, no envelope.</summary>
+/// <summary>Port of controller/auction/TeamBudgetController.java - raw responses, no envelope.</summary>
 [ApiController]
 [Route("match-days/{matchDayId}/auction/team-budgets")]
 public class TeamBudgetController(TeamBudgetService teamBudgetService, BofcDbContext db, ITeamService teamService) : ControllerBase

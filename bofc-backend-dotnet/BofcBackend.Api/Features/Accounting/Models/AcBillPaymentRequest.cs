@@ -5,7 +5,7 @@ namespace BofcBackend.Api.Features.Accounting.Models;
 
 /// <summary>
 /// Port of model/account/AcBillPaymentRequest.java. IsPaid is accepted but never read by
-/// AcBillPaymentServiceImpl.createOrUpdateBillPaymentEntity in Java — kept for wire parity, not wired up.
+/// AcBillPaymentServiceImpl.createOrUpdateBillPaymentEntity in Java - kept for wire parity, not wired up.
 /// </summary>
 public class AcBillPaymentRequest
 {
@@ -22,10 +22,10 @@ public class AcBillPaymentRequest
     [Required]
     public long? CostTypeId { get; set; }
 
-    /// <summary>Java's `private boolean isPaid` — Jackson strips the "is" prefix, wire property is "paid".</summary>
+    /// <summary>Java's `private boolean isPaid` - Jackson strips the "is" prefix, wire property is "paid".</summary>
     [JsonPropertyName("paid")]
     public bool IsPaid { get; set; }
 
-    /// <summary>Which real-world bank/bKash account actually paid this out — optional, informational only.</summary>
+    /// <summary>Which real-world bank/bKash account actually paid this out - optional, informational only.</summary>
     public long? PaymentAccountId { get; set; }
 }

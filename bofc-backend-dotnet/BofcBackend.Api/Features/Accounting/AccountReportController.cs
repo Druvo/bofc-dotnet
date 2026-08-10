@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BofcBackend.Api.Features.Accounting;
 
-/// <summary>Port of controller/account/AccountReportController.java — no @PreAuthorize in Java, so fully public here too.</summary>
+/// <summary>Port of controller/account/AccountReportController.java - no @PreAuthorize in Java, so fully public here too.</summary>
 [ApiController]
 [Route("ac/reports")]
 public class AccountReportController(AccountReportService service, AcCollectionService acCollectionService) : ControllerBase

@@ -122,7 +122,7 @@ const MatchDayAuctionCard: React.FC<{ matchDay: IoMatchDaySingleSummaryType; isA
         ) : (
           <>
             <EnvironmentOutlined style={{ color: ac.gold, fontSize: 13 }} />
-            <span className="truncate text-[12.5px]" style={{ color: ac.textMuted }}>—</span>
+            <span className="truncate text-[12.5px]" style={{ color: ac.textMuted }}>-</span>
           </>
         )}
       </div>
@@ -210,7 +210,7 @@ const AuctionHubPage: React.FC = () => {
         subtitle="Select a MatchDay to manage or participate in its player auction."
       />
 
-      {/* MatchDays first — the primary content */}
+      {/* MatchDays first - the primary content */}
       {auctionMatchDays.length === 0 ? (
         <PanelCard>
           <div className="py-10 text-center text-theme-sm" style={{ color: ac.textMuted }}>
@@ -226,7 +226,7 @@ const AuctionHubPage: React.FC = () => {
         </div>
       )}
 
-      {/* Admin quick guide — collapsed by default so it stays out of the way */}
+      {/* Admin quick guide - collapsed by default so it stays out of the way */}
       {isAdmin && (
         <div className="auction-guide-collapse overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
           <button
@@ -236,7 +236,7 @@ const AuctionHubPage: React.FC = () => {
           >
             <span className="inline-flex items-center gap-2 font-semibold" style={{ color: ac.textPrimary }}>
               <BulbOutlined style={{ color: ac.gold }} />
-              Admin Quick Guide — how to run an auction
+              Admin Quick Guide - how to run an auction
             </span>
             <DownOutlined
               style={{ color: ac.textMuted, transition: "transform 0.2s" }}

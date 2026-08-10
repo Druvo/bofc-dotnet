@@ -7,7 +7,7 @@ namespace BofcBackend.Api.Data.Configurations;
 /// <summary>
 /// Partial mapping for Phase 2 (only what Team's FK needs). Phase 3 extends this same
 /// configuration file with the round/group/advancement-rule/prize relations once those
-/// entities exist — do not duplicate a second IEntityTypeConfiguration&lt;MatchDay&gt;.
+/// entities exist - do not duplicate a second IEntityTypeConfiguration&lt;MatchDay&gt;.
 /// </summary>
 public class MatchDayConfiguration : IEntityTypeConfiguration<MatchDay>
 {
@@ -53,7 +53,7 @@ public class MatchDayConfiguration : IEntityTypeConfiguration<MatchDay>
             .HasConstraintName("fk_match_day_venue")
             .IsRequired();
 
-        // No MatchDay delete endpoint exists today, so this is currently unreachable — but note
+        // No MatchDay delete endpoint exists today, so this is currently unreachable - but note
         // for whoever adds one: this Cascade is inconsistent with MatchDayParticipantConfiguration
         // and MatchDayRoundConfiguration, which both use Restrict against MatchDay. As written, a
         // future delete would either always fail with an FK violation (once any participant/round
@@ -65,7 +65,7 @@ public class MatchDayConfiguration : IEntityTypeConfiguration<MatchDay>
             .OnDelete(DeleteBehavior.Cascade);
 
         // App-level "clear every other default, then set this one" (MatchDayService) is a
-        // check-then-act race under concurrent writes — this filtered unique index is the real
+        // check-then-act race under concurrent writes - this filtered unique index is the real
         // backstop: at most one row can have is_default = 1 no matter how two transactions
         // interleave, and the loser's SaveChangesAsync throws instead of silently leaving two.
         builder.HasIndex(t => t.DefaultMatchDay)

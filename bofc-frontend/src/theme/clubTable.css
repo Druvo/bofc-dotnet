@@ -25,7 +25,7 @@
   background: linear-gradient(90deg, var(--color-accent) 0%, transparent 60%);
 }
 
-/* ── Table — clean header with accent underline ─────────────────── */
+/* ── Table - clean header with accent underline ─────────────────── */
 .bofc-club-table .ant-table {
   border-radius: 12px;
 }
@@ -115,7 +115,7 @@
   border: 1px solid rgba(107, 114, 128, 0.25);
 }
 
-/* ── Edit / row action button — gold outline ─────────────────────── */
+/* ── Edit / row action button - gold outline ─────────────────────── */
 .bofc-act-btn.ant-btn {
   border-radius: 8px;
   font-weight: 600;
@@ -131,7 +131,7 @@
   background: color-mix(in oklch, var(--color-accent) 10%, transparent) !important;
 }
 
-/* ── Monetary amounts — right-aligned, tabular figures ──────────── */
+/* ── Monetary amounts - right-aligned, tabular figures ──────────── */
 .bofc-amount {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";

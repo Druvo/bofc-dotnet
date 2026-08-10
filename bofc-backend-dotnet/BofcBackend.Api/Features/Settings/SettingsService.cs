@@ -72,7 +72,7 @@ public class SettingsService(
         settings.WeeklyMatchDayAutoTeamsEnabled = request.WeeklyMatchDayAutoTeamsEnabled;
         settings.WeeklyMatchDayAutoTeamsLeadHours = request.WeeklyMatchDayAutoTeamsLeadHours;
 
-        // Full replace — this is a small config list (max ~7 rows), not worth diffing.
+        // Full replace - this is a small config list (max ~7 rows), not worth diffing.
         db.WeeklyMatchDaySlots.RemoveRange(settings.WeeklyMatchDaySlots);
         settings.WeeklyMatchDaySlots = request.WeeklyMatchDaySlots.Select((s, i) => new WeeklyMatchDaySlot
         {
@@ -98,14 +98,14 @@ public class SettingsService(
 
             if (normalizedColors.Count < 2)
             {
-                throw new BadRequestException("At least 2 jersey colors are required — the club needs 2 distinct colors to tell the teams in a match apart.");
+                throw new BadRequestException("At least 2 jersey colors are required - the club needs 2 distinct colors to tell the teams in a match apart.");
             }
             if (normalizedColors.Distinct(StringComparer.OrdinalIgnoreCase).Count() != normalizedColors.Count)
             {
-                throw new BadRequestException("Jersey colors must be unique — no duplicates.");
+                throw new BadRequestException("Jersey colors must be unique - no duplicates.");
             }
 
-            // Full replace — this is a small config list, not worth diffing.
+            // Full replace - this is a small config list, not worth diffing.
             db.JerseyColors.RemoveRange(settings.JerseyColors);
             settings.JerseyColors = normalizedColors.Select((c, i) => new JerseyColor
             {
@@ -138,15 +138,15 @@ public class SettingsService(
         var settings = await LoadOrCreateAsync();
         if (!settings.SmtpEnabled)
         {
-            throw new BadRequestException("SMTP is not enabled — enable and save it before sending a test email.");
+            throw new BadRequestException("SMTP is not enabled - enable and save it before sending a test email.");
         }
 
-        var result = await emailSender.SendAsync([toEmail], "BOFC — SMTP test email",
+        var result = await emailSender.SendAsync([toEmail], "BOFC - SMTP test email",
             "<p>This is a test email from the BOFC admin Settings page.</p><p>If you received this, your SMTP configuration is working.</p>");
 
         if (result.Sent == 0)
         {
-            throw new BadRequestException("Failed to send the test email — check the SMTP host/port/credentials and try again.");
+            throw new BadRequestException("Failed to send the test email - check the SMTP host/port/credentials and try again.");
         }
     }
 

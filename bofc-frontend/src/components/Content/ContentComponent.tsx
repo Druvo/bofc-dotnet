@@ -78,7 +78,7 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
     } = useGetMyGoalkeepingHistoryQuery();
 
     // The goalkeeping-history drawer is opened from the TailAdmin Header (via
-    // AppShellContext) rather than a dropdown menu built here — this component still
+    // AppShellContext) rather than a dropdown menu built here - this component still
     // owns the actual query data/refetch, since it's what the Drawer below renders.
     useEffect(() => {
         if (appShell.goalkeepingHistoryOpen) {

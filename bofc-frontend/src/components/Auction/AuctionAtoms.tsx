@@ -130,7 +130,7 @@ export const CategoryPill: React.FC<{ category?: string }> = ({ category }) => {
       style={{ background: `${color}22`, border: `1px solid ${color}66`, color }}
       className="inline-flex items-center whitespace-nowrap rounded-md px-2 py-0.5 text-[10.5px] font-extrabold uppercase tracking-wide leading-4"
     >
-      {(category || "—").replace(/_/g, " ")}
+      {(category || "-").replace(/_/g, " ")}
     </span>
   );
 };
@@ -197,7 +197,7 @@ export const StatTile: React.FC<{
 );
 
 // ── Signing tile (shared by the live board, squad modal & results) ───────────
-const taka = (v?: number) => (v != null ? formatCurrency(v, { decimals: 0 }) : "—");
+const taka = (v?: number) => (v != null ? formatCurrency(v, { decimals: 0 }) : "-");
 
 export const metaMuted: React.CSSProperties = { fontSize: 11, color: ac.textMuted, whiteSpace: "nowrap" };
 export const teamChip: React.CSSProperties = {

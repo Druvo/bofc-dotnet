@@ -68,7 +68,7 @@
 /*
  * Active-branch parent titles: when a leaf is selected, Ant reuses the leaf's
  * "selected color" (navy, meant for text on the gold pill) on the ancestor
- * submenu titles too — which sit on the navy panel and would vanish. Force the
+ * submenu titles too - which sit on the navy panel and would vanish. Force the
  * open/active parent titles to gold so the whole branch stays legible.
  */
 .ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title,

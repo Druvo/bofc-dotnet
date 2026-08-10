@@ -5,7 +5,7 @@ namespace BofcBackend.Api.Domain.Entities;
 /// <summary>
 /// Port of entity/Match.java. Carries both the legacy flat round/group fields
 /// (LegacyRound, GroupName) and the new relational round/group system side-by-side,
-/// matching the Java entity exactly — not our place to drop the legacy columns.
+/// matching the Java entity exactly - not our place to drop the legacy columns.
 /// </summary>
 public class Match : AuditableEntity
 {
@@ -46,7 +46,7 @@ public class Match : AuditableEntity
     public int HomeTeamScore { get; set; }
     public int AwayTeamScore { get; set; }
 
-    /// <summary>Which of the club's 2 physical jerseys each side wears for THIS match — the
+    /// <summary>Which of the club's 2 physical jerseys each side wears for THIS match - the
     /// club only owns 2, so teams swap between them match to match. Set manually per match
     /// (Add/Edit Fixture), never auto-assigned by fixture generation.</summary>
     public string? HomeJerseyColor { get; set; }

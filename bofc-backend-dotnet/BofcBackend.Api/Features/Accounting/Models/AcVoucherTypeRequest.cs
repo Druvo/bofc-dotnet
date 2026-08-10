@@ -18,7 +18,7 @@ public class AcVoucherTypeRequest
     [Required(ErrorMessage = "Transaction type is required.")]
     public AcTransactionType? AcTransactionType { get; set; }
 
-    /// <summary>Java's `private boolean isDefault` — Jackson strips the "is" prefix, wire property is "default".</summary>
+    /// <summary>Java's `private boolean isDefault` - Jackson strips the "is" prefix, wire property is "default".</summary>
     [JsonPropertyName("default")]
     public bool IsDefault { get; set; }
 }

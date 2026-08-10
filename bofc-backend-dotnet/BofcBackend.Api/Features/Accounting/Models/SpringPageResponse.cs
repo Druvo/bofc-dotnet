@@ -1,7 +1,7 @@
 namespace BofcBackend.Api.Features.Accounting.Models;
 
 /// <summary>
-/// Mirrors the shape of Spring Data's Page&lt;T&gt; JSON serialization — Java's
+/// Mirrors the shape of Spring Data's Page&lt;T&gt; JSON serialization - Java's
 /// AcBillPaymentController.getAcBillPayments returns a raw Page directly (bypassing the app's
 /// usual ResponseBuilder envelope), so this reproduces that same wire shape rather than the
 /// normal {message, statusCode, content} envelope used everywhere else.

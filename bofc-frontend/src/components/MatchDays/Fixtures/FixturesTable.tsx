@@ -139,7 +139,7 @@ export default function FixturesTable({
             <VenueLink name={fixture.venueName} mapLink={fixture.venueMapLink} showIcon={false} className="hover:text-brand-500 hover:underline" title={venue}>
               {venue.length > 15 ? `${venue.substring(0, 15)}...` : venue}
             </VenueLink>
-          ) : "—"}
+          ) : "-"}
         </td>
         <td className="px-3 py-2.5 text-gray-500 dark:text-gray-400">
           {formatMatchTimeRange(fixture.matchDate, fixture.matchDurationMinutes)}

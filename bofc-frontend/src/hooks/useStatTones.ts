@@ -3,7 +3,7 @@
 // (Players.tsx, LiveAuctionPage.tsx, AuctionTeamBudgetsPage.tsx,
 // AuctionResultsPage.tsx, AuctionAdminApprovalPage.tsx) were each importing
 // `theme` and destructuring the same 5 token names to color StatTile/segment
-// accents — any future re-mapping (e.g. a different token for "warning")
+// accents - any future re-mapping (e.g. a different token for "warning")
 // meant editing all 5. One hook, one place.
 export const useStatTones = () => ({
   primary: "#28552B",

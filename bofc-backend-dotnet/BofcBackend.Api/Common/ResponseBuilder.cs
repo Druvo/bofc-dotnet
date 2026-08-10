@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace BofcBackend.Api.Common;
 
 /// <summary>
-/// Port of util/ResponseBuilder.java — kept as a static helper (not middleware-wrapped
+/// Port of util/ResponseBuilder.java - kept as a static helper (not middleware-wrapped
 /// success responses) so each ported controller action builds its envelope explicitly,
 /// same as the Java controllers do today.
 /// </summary>

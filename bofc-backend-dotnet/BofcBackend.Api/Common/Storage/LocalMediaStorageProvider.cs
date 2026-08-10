@@ -4,7 +4,7 @@ namespace BofcBackend.Api.Common.Storage;
 
 /// <summary>
 /// Port of storage/teamlogo/TeamLogoLocalStorageProvider.java and
-/// storage/playerphoto/PlayerPhotoLocalStorageProvider.java — those were identical
+/// storage/playerphoto/PlayerPhotoLocalStorageProvider.java - those were identical
 /// except for keyPrefix ("team-logo-"/"player-photo-") and routeSegment
 /// ("team-logos"/"player-photos"), which are now constructor parameters.
 /// </summary>
@@ -83,7 +83,7 @@ public partial class LocalMediaStorageProvider : IMediaStorageProvider
         }
         catch
         {
-            // Swallow — matches Java's catch-and-ignore delete behavior.
+            // Swallow - matches Java's catch-and-ignore delete behavior.
         }
         return Task.CompletedTask;
     }

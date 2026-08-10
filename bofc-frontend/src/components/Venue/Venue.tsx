@@ -168,7 +168,7 @@ function Venue() {
                                             >
                                                 {record.address}
                                             </a>
-                                        ) : "—"}
+                                        ) : "-"}
                                     </td>
                                     <td className="px-4 py-3">
                                         <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-theme-xs font-medium ${record.active ? "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500" : "bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400"}`}>

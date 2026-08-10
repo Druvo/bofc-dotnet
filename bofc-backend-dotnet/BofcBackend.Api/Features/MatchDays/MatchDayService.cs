@@ -31,12 +31,12 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
             MatchDayDate = request.MatchDayDate!.Value,
             DurationMinutes = request.DurationMinutes,
             VenueId = venue.Id,
-            // MatchDayDate is always authored/displayed as local (Dhaka) wall-clock time —
-            // by the admin's date picker here, and by the scheduler elsewhere — never UTC.
+            // MatchDayDate is always authored/displayed as local (Dhaka) wall-clock time -
+            // by the admin's date picker here, and by the scheduler elsewhere - never UTC.
             // Comparing it against DateTime.UtcNow is a 6-hour-off comparison; use DateTime.Now
             // (matches ComputeNextOccurrence/GenerateForCurrentMonthAsync's own convention).
             // A MatchDay created with a date already past its own end window (start+duration)
-            // should land straight at CONCLUDED, not ONGOING — e.g. back-dating a historical
+            // should land straight at CONCLUDED, not ONGOING - e.g. back-dating a historical
             // MatchDay a year in the past would otherwise sit at ONGOING until the next
             // scheduler tick corrects it.
             MatchDayStatus = ComputeInitialStatus(request.MatchDayDate.Value, request.DurationMinutes),
@@ -49,7 +49,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         };
 
         // Transaction: clearing every other matchDay's default flag and saving this one as the
-        // new default must succeed together — ExecuteUpdateAsync commits immediately on its own,
+        // new default must succeed together - ExecuteUpdateAsync commits immediately on its own,
         // so without a shared transaction, a failure in the SaveChangesAsync below would leave
         // every matchDay with the default flag cleared and none actually set.
         await using var transaction = await db.Database.BeginTransactionAsync();
@@ -68,10 +68,10 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         }
         catch (DbUpdateException) when (defaultMatchDay)
         {
-            // ux_match_day_single_default caught a concurrent "set as default" race — the other
+            // ux_match_day_single_default caught a concurrent "set as default" race - the other
             // request won, so this one just isn't the default (still created successfully).
             throw new MatchDayServiceException(
-                "Another MatchDay was just set as default — please retry.", HttpStatusCode.Conflict);
+                "Another MatchDay was just set as default - please retry.", HttpStatusCode.Conflict);
         }
         await transaction.CommitAsync();
 
@@ -93,14 +93,14 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         var query = db.MatchDays.Include(t => t.Venue).AsQueryable();
 
         // Java's MatchDaySpecification is only ever invoked with these two hardcoded
-        // column names (see MatchDayServiceImpl.getAllMatchDay) — the "dynamic by
+        // column names (see MatchDayServiceImpl.getAllMatchDay) - the "dynamic by
         // column name" specification pattern never actually receives arbitrary columns
         // in practice, so this is a faithful behavioral port, not a simplification that
         // drops functionality.
         if (string.Equals(searchColumn, "matchDayDate", StringComparison.OrdinalIgnoreCase) && searchValue != null)
         {
             // MatchDayDate always carries a non-midnight time-of-day, so exact equality against
-            // a date-only search value could never match — filter by calendar day instead.
+            // a date-only search value could never match - filter by calendar day instead.
             // A malformed searchValue previously threw an unhandled FormatException (masked 500);
             // treat it as "no match" the same way an out-of-range page number would.
             if (DateTime.TryParse(searchValue, out var searchDate))
@@ -155,7 +155,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         matchDay.RoadmapImageUrl = request.RoadmapImageUrl;
 
         // An admin manually moving an auto-generated slot's date/time means the scheduler must
-        // never re-create that (week, slot) pair again — see AutoGenSlotDayOfWeek/AutoGenWeekStart
+        // never re-create that (week, slot) pair again - see AutoGenSlotDayOfWeek/AutoGenWeekStart
         // doc comments on MatchDay for why those fields (not this date) are what the scheduler checks.
         if (matchDay.IsWeeklyMatchDay && matchDay.MatchDayDate != request.MatchDayDate!.Value)
         {
@@ -180,7 +180,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         }
         matchDay.AuctionMode = request.AuctionMode;
 
-        // Transaction — see SaveMatchDayAsync's remarks; same reasoning applies to updates.
+        // Transaction - see SaveMatchDayAsync's remarks; same reasoning applies to updates.
         await using var transaction = await db.Database.BeginTransactionAsync();
 
         if (request.DefaultMatchDay != null)
@@ -202,7 +202,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         catch (DbUpdateException) when (request.DefaultMatchDay == true)
         {
             throw new MatchDayServiceException(
-                "Another MatchDay was just set as default — please retry.", HttpStatusCode.Conflict);
+                "Another MatchDay was just set as default - please retry.", HttpStatusCode.Conflict);
         }
         await transaction.CommitAsync();
 
@@ -218,11 +218,11 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         // COMPLETED for MatchDays whose own status never actually got updated.
         await using var transaction = await db.Database.BeginTransactionAsync();
 
-        // MatchDayDate is local (Dhaka) wall-clock time everywhere it's written — comparing
+        // MatchDayDate is local (Dhaka) wall-clock time everywhere it's written - comparing
         // against DateTime.UtcNow here is a 6-hour-off comparison (see SaveMatchDayAsync).
         var now = DateTime.Now;
 
-        // MatchDays without fixtures yet — date-based conclusion only.
+        // MatchDays without fixtures yet - date-based conclusion only.
         var withoutMatches = await db.MatchDays
             .Where(t => t.IsActive && !db.Matches.Any(m => m.MatchDayId == t.Id))
             .ToListAsync();
@@ -232,7 +232,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
             matchDay.IsActive = false;
         }
 
-        // MatchDays with fixtures — match-based status logic.
+        // MatchDays with fixtures - match-based status logic.
         var withMatches = await db.MatchDays
             .Where(t => t.IsActive && db.Matches.Any(m => m.MatchDayId == t.Id))
             .ToListAsync();
@@ -273,7 +273,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         var matchDay = await GetMatchDayEntityAsync(matchDayId);
 
         // Transaction: bulk-completing matches (ExecuteUpdateAsync, commits immediately) and
-        // marking the matchDay CONCLUDED must succeed together — otherwise a failed save
+        // marking the matchDay CONCLUDED must succeed together - otherwise a failed save
         // leaves every match COMPLETED while the matchDay still looks ONGOING.
         await using var transaction = await db.Database.BeginTransactionAsync();
 
@@ -300,7 +300,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
             throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
         }
 
-        // Children before parents, mirroring the full FK graph rooted at MatchDay/Team/Match —
+        // Children before parents, mirroring the full FK graph rooted at MatchDay/Team/Match -
         // most of these FKs are NO_ACTION (not cascading), so a plain MatchDays.Remove() would
         // fail; delete every dependent table explicitly instead. Wrapped in one transaction so a
         // failure partway through never leaves the MatchDay half-deleted.
@@ -354,10 +354,10 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
     public async Task<MatchDayResponse?> GetMostRecentActiveMatchDayAsync()
     {
         // ONGOING is set once at creation and only ever cleared by an admin
-        // manually marking the matchDay CONCLUDED — so a matchDay whose
+        // manually marking the matchDay CONCLUDED - so a matchDay whose
         // date has rolled into a previous day can sit at ONGOING forever.
         // Exclude those stale rows here instead of surfacing them as "latest".
-        // MatchDayDate is local (Dhaka) wall-clock — DateTime.Now.Date, not UtcNow.Date, or this
+        // MatchDayDate is local (Dhaka) wall-clock - DateTime.Now.Date, not UtcNow.Date, or this
         // filter is itself off by up to 6h (the exact bug it exists to guard against).
         var today = DateTime.Now.Date;
         var matchDay = await db.MatchDays.Include(t => t.Venue)

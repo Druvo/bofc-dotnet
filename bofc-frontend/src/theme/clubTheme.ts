@@ -1,12 +1,12 @@
 import type { CSSProperties } from 'react';
 
-// BOFC crest palette — deep shield green + champagne gold, pixel-sampled
+// BOFC crest palette - deep shield green + champagne gold, pixel-sampled
 // from the real club logo (src/assets/logo.png: #28552B / #B69549 / #E6DFBA).
 // Matches the brand-* Tailwind scale (tailwind.config.js) and the
-// --color-accent/--color-paper* tokens (styles/tokens.css) — this file, the
+// --color-accent/--color-paper* tokens (styles/tokens.css) - this file, the
 // Tailwind config, and tokens.css should always describe the same identity.
 export const club = {
-  // Primary accent — brand-500
+  // Primary accent - brand-500
   navy: '#28552B',
   navyDeep: '#092C0D',    // brand-700, deep accent
   navySoft: '#547A55',    // brand-400, lighter/hover accent
@@ -17,7 +17,7 @@ export const club = {
   accent: 'var(--color-accent)',
   accentSoft: 'var(--color-accent-hover)',
 
-  // Broadcast-style surfaces — token-driven
+  // Broadcast-style surfaces - token-driven
   panel: 'var(--color-paper-2)',
   panelBorder: 'var(--color-rule)',
 

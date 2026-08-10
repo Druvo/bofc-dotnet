@@ -1,4 +1,4 @@
-// "Add to calendar" — pure client-side, no backend involved. Produces a
+// "Add to calendar" - pure client-side, no backend involved. Produces a
 // downloadable .ics file plus a Google Calendar prefill link for any event
 // with a start/end time.
 

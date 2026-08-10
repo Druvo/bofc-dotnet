@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 namespace BofcBackend.Api.Common.Scheduling;
 
 /// <summary>
-/// Auto-drafts confirmed participants of an auto-generated MatchDay into balanced teams — the
-/// number of teams is derived from turnout and a max-players-per-team cap, not fixed — and
+/// Auto-drafts confirmed participants of an auto-generated MatchDay into balanced teams - the
+/// number of teams is derived from turnout and a max-players-per-team cap, not fixed - and
 /// auto-schedules their round-robin fixtures. Called by MatchDaySchedulerBackgroundService once a
 /// MatchDay is within its configured lead time, and by the admin "Generate now" action for
 /// on-demand testing.
@@ -17,8 +17,8 @@ namespace BofcBackend.Api.Common.Scheduling;
 public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationService fixtureGenerationService)
 {
     /// <summary>No-op (Success=false, Reason explains why) if there aren't enough confirmed
-    /// participants to fill every team, or if teams/fixtures already exist for this MatchDay —
-    /// safe to call repeatedly. Does not itself check how close the MatchDay is to kickoff — the
+    /// participants to fill every team, or if teams/fixtures already exist for this MatchDay -
+    /// safe to call repeatedly. Does not itself check how close the MatchDay is to kickoff - the
     /// scheduler applies that lead-time filter before calling this; the admin "test" action calls
     /// it directly to bypass that wait.</summary>
     public async Task<TeamGenerationResult> GenerateAsync(long matchDayId, int maxPlayersPerTeam)
@@ -30,7 +30,7 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
 
         // DurationMinutes/TimeGapMinutes/MatchDurationMinutes are denormalized onto MatchDay from
         // its originating WeeklyMatchDaySlot. Re-sync them from the CURRENT slot config every time
-        // generation is attempted (not just once, and not only when null) — this only ever runs
+        // generation is attempted (not just once, and not only when null) - this only ever runs
         // BEFORE teams exist (see the guard below), so there's no "already-scheduled fixtures"
         // to contradict, and it means an admin tweaking the slot's duration/gap on the Settings
         // page and then clicking Generate always gets what they just configured, rather than
@@ -48,7 +48,7 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
             }
         }
 
-        // Team existence, not the AutoTeamsGenerated flag, is the real source of truth — an admin
+        // Team existence, not the AutoTeamsGenerated flag, is the real source of truth - an admin
         // manually deleting every auto-generated team should make this regeneratable, but the
         // flag alone can't tell "already generated and still has teams" apart from "was generated,
         // then teams got deleted" (DeleteTeamAsync clears the flag when the last team goes, but
@@ -67,14 +67,14 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
             .Select(p => p.Player)
             .ToListAsync();
 
-        // Team COUNT is derived from turnout, not fixed — maxPlayersPerTeam is a cap (e.g. 6
+        // Team COUNT is derived from turnout, not fixed - maxPlayersPerTeam is a cap (e.g. 6
         // including goalkeeper for casual 5/6/7-a-side), so a big week gets more teams instead
         // of overstuffing a fixed number of them, and a small week still gets at least 2 (you
         // can't schedule a match with only one team). Floor division would let the last team
         // overflow past the cap when participants doesn't divide evenly, so this rounds up.
         var teamCount = Math.Max(2, (int)Math.Ceiling(participants.Count / (double)maxPlayersPerTeam));
 
-        // Teams and their rosters are independent — more players can always be assigned to a
+        // Teams and their rosters are independent - more players can always be assigned to a
         // team later by hand from Team Building, so this only needs enough confirmed
         // participants to seed every team with at least one player, not a full/even roster
         // upfront (previously required 2 per team, blocking generation whenever RSVPs were
@@ -89,7 +89,7 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
         // same MatchDay (the hourly scheduler tick racing an admin's manual "Generate now", or
         // two scaled-out app instances each running their own hourly timer) must not both pass
         // the checks above and both draft a full set of teams. ExecuteUpdateAsync's WHERE clause
-        // is the real guard — it's an atomic compare-and-set at the DB row level, not a
+        // is the real guard - it's an atomic compare-and-set at the DB row level, not a
         // check-then-act read+write, so only one concurrent caller can ever flip the flag.
         // Wrapping the rest in the same transaction also means a failure anywhere below (e.g.
         // fixture generation conflicting with matches added manually in the meantime) rolls the
@@ -98,7 +98,7 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
         await using var transaction = await db.Database.BeginTransactionAsync();
 
         // Claim on "no teams exist right now" (a NOT EXISTS subquery, evaluated atomically as
-        // part of this single UPDATE) rather than on the AutoTeamsGenerated flag — this is what
+        // part of this single UPDATE) rather than on the AutoTeamsGenerated flag - this is what
         // makes the claim self-healing even if the flag itself is stuck true from before
         // DeleteTeamAsync started clearing it (or from any other path that ever leaves it stale):
         // there's nothing to "un-stick", the next generation attempt just re-derives the true
@@ -138,14 +138,14 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
         return TeamGenerationResult.Ok();
     }
 
-    /// <summary>Last-resort fallbacks — only used if a matching WeeklyMatchDaySlot couldn't be
+    /// <summary>Last-resort fallbacks - only used if a matching WeeklyMatchDaySlot couldn't be
     /// found to backfill from above (e.g. it was since deleted). Same defaults as the admin's own
     /// manual "Generate Fixtures" button on the Team Building page (see FixtureGenerationModal.tsx),
     /// so an unbackfillable MatchDay still behaves the same as a fresh manual generation.</summary>
     private const int DefaultMatchDurationMinutes = 13;
     private const int DefaultTimeGapMinutes = 2;
 
-    /// <summary>Fits as many round-robin cycles as the MatchDay's own duration allows — same
+    /// <summary>Fits as many round-robin cycles as the MatchDay's own duration allows - same
     /// repeat-to-fill-capacity logic as the manual "Generate Fixtures" flow (see
     /// FixtureGenerationService.GenerateFixturesAsync). Deliberately NOT stretching a single cycle
     /// to exactly fill the whole window (the original approach here): that meant a 2-team MatchDay
@@ -156,13 +156,13 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
         var timeGapMinutes = matchDay.TimeGapMinutes ?? DefaultTimeGapMinutes;
         var matchDurationMinutes = matchDay.MatchDurationMinutes ?? DefaultMatchDurationMinutes;
 
-        // Match.MatchDate is a genuinely UTC-shifted value everywhere else it's written — every
+        // Match.MatchDate is a genuinely UTC-shifted value everywhere else it's written - every
         // manual/round/group match-creation path on the frontend (AddMatchModal, EditFixtureModal,
         // RoundMatchGenerationModal, GroupMatchGenerationModal) converts the admin's entered
         // wall-clock time via dayjs(...).utc() before submitting, and every reader (FixturesTable,
         // FixtureCardView, ElectricTeamBanner, etc.) reads it back via moment.utc(...).local() on
         // that same assumption. matchDay.MatchDayDate, by contrast, is naive-local Dhaka wall-clock
-        // (see MatchDay.cs) with NO conversion — passing it straight through here previously seeded
+        // (see MatchDay.cs) with NO conversion - passing it straight through here previously seeded
         // every auto-generated weekly MatchDay's matches with Dhaka-local numbers mislabeled as
         // UTC, silently shifting their displayed time by Dhaka's fixed 6-hour offset everywhere
         // that reads it with the (correct, for every other match-creation path) .utc().local() convention.
@@ -181,7 +181,7 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
     /// <summary>
     /// Sorts by rank (nulls = lowest tier, shuffled within tied ranks so results aren't stuck in
     /// player-ID order), then deals players to teams in a 1→2→3...→3→2→1 snake pattern so the
-    /// strongest and weakest players spread evenly instead of clustering on one team — robust even
+    /// strongest and weakest players spread evenly instead of clustering on one team - robust even
     /// when the player count doesn't divide evenly by team count, unlike a strict
     /// "no same rank on one team" rule.
     /// </summary>

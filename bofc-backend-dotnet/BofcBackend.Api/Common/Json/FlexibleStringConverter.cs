@@ -5,7 +5,7 @@ namespace BofcBackend.Api.Common.Json;
 
 /// <summary>
 /// Jackson (the Java backend's JSON library) silently coerces a JSON number into a
-/// Java String field by default. System.Text.Json does not — it throws
+/// Java String field by default. System.Text.Json does not - it throws
 /// "The JSON value could not be converted to System.String" instead. Some frontend
 /// form fields send string-typed values (e.g. employeeId) through an Ant Design
 /// InputNumber, so the wire payload is a JSON number even though the DTO property

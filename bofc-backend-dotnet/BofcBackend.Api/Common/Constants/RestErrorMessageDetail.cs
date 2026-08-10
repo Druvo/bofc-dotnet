@@ -43,7 +43,7 @@ public static class RestErrorMessageDetail
     public const string GroupIsNotFound = "Group is not found";
     public const string MatchIsNotFound = "Match is not found";
 
-    /// <summary>Java's UNAUTHORIZED constant — distinct from the generic 401-challenge Unauthorized text above.</summary>
+    /// <summary>Java's UNAUTHORIZED constant - distinct from the generic 401-challenge Unauthorized text above.</summary>
     public const string NotAuthorizedForAction = "You are not authorized to do this action";
 
     public const string ParticipantNotFound = "Participant is not Found";
@@ -81,7 +81,7 @@ public static class RestErrorMessageDetail
     public const string AcCollectionNotFound = "Collection is not found!";
     public const string PaymentAccountNotFound = "Payment account is not found!";
 
-    /// <summary>Java's AC_BILL_PAYMENT_NOT_FOUND constant is copy-paste identical to AC_COLLECTION_NOT_FOUND — reproduced verbatim, not fixed.</summary>
+    /// <summary>Java's AC_BILL_PAYMENT_NOT_FOUND constant is copy-paste identical to AC_COLLECTION_NOT_FOUND - reproduced verbatim, not fixed.</summary>
     public const string AcBillPaymentNotFound = "Collection is not found!";
 
     public const string AcVoucherDrCrAmountNotSame = "Voucher amount Cr/Dr is not same!";

@@ -19,7 +19,7 @@ import { toAbsolutePlayerPhotoUrl } from "../../utils/playerPhotoUtils";
 import Loader from "../ui/loader";
 import { formatCurrency } from "../../utils/formatCurrency";
 
-const fmt = (n?: number) => (n != null ? formatCurrency(n, { decimals: 0 }) : "—");
+const fmt = (n?: number) => (n != null ? formatCurrency(n, { decimals: 0 }) : "-");
 const panel: React.CSSProperties = {
   background: ac.panel,
   border: `1px solid ${ac.panelBorder}`,
@@ -311,7 +311,7 @@ const ViewerAuctionTab: React.FC<Props> = ({ matchDayId }) => {
       ? String(currentPlayer.playingPosition).replace(/_/g, " ")
       : "Player";
 
-  // One row per team — their highest (current) bid — leader first.
+  // One row per team - their highest (current) bid - leader first.
   const feedBids = Array.from(
     bids
       .reduce((map, b) => {
@@ -332,7 +332,7 @@ const ViewerAuctionTab: React.FC<Props> = ({ matchDayId }) => {
         <StatusPill status={status} />
       </div>
 
-      {/* On the block + bid feed — only when a player is actually up */}
+      {/* On the block + bid feed - only when a player is actually up */}
       {currentPlayer && (
         <div className={`grid grid-cols-1 gap-3.5 ${showBidFeed ? "lg:grid-cols-[16fr_8fr]" : ""}`}>
           <div style={{ ...panel, textAlign: "center", position: "relative" }}>
@@ -382,7 +382,7 @@ const ViewerAuctionTab: React.FC<Props> = ({ matchDayId }) => {
             </div>
           </div>
 
-          {/* Bid feed — only when there are bids */}
+          {/* Bid feed - only when there are bids */}
           {showBidFeed && (
             <div style={panel}>
               <div style={panelHeader}><DollarOutlined /> Bid Feed</div>

@@ -73,7 +73,7 @@ public class FixtureGenerationService(
         var timeGapMinutes = request.TimeGapMinutes ?? 120;
         var matchDurationMinutes = request.MatchDurationMinutes ?? 90;
 
-        // The gap is time AFTER one match ends and BEFORE the next starts — the full
+        // The gap is time AFTER one match ends and BEFORE the next starts - the full
         // slot each match occupies on the schedule is duration + gap, not gap alone
         // (previously this ignored duration entirely, silently overlapping matches
         // whenever gap < duration).
@@ -93,7 +93,7 @@ public class FixtureGenerationService(
 
         var startDate = request.MatchDates[0];
 
-        // One full round-robin cycle — each selected team plays every other once.
+        // One full round-robin cycle - each selected team plays every other once.
         var basePairings = new List<(Team Home, Team Away)>();
         for (var i = 0; i < selectedTeams.Count; i++)
         {
@@ -106,7 +106,7 @@ public class FixtureGenerationService(
         // A single round-robin cycle usually only fills a fraction of the MatchDay's own
         // duration (e.g. 3 teams -> 1 cycle -> 3 matches -> 45 min of a 90-min window). For a
         // single-day request, repeat the cycle to use up the remaining time instead of leaving
-        // it empty — spreading a REPEATED cycle across multiple days would instead just be
+        // it empty - spreading a REPEATED cycle across multiple days would instead just be
         // padding an intentionally multi-day request with duplicate fixtures, so this only
         // applies when generating for exactly one day.
         var pairings = basePairings;
@@ -126,7 +126,7 @@ public class FixtureGenerationService(
 
         // The club's jersey colors are a configurable list (any count, not hardcoded to 2).
         // Two assignment modes:
-        //  - Colors == teams: enough jerseys for one each — assign every team a FIXED color for
+        //  - Colors == teams: enough jerseys for one each - assign every team a FIXED color for
         //    the whole MatchDay (never changes match to match), so a team is always recognizable
         //    by the same shirt across its whole slate.
         //  - Otherwise (fewer physical jerseys than teams, the original "club owns 2 jerseys, 3+
@@ -205,10 +205,10 @@ public class FixtureGenerationService(
         }
 
         // Nothing here checks the generated slate against the MatchDay's own advertised
-        // DurationMinutes window — a full round-robin easily overruns it (e.g. 6 matches at
+        // DurationMinutes window - a full round-robin easily overruns it (e.g. 6 matches at
         // 90+120min slots vs. a 90-minute MatchDay) with no signal to the admin who requested
         // it. Not a hard validation error (multi-day generation is a legitimate, expected use of
-        // this same method — see matchesPerDay/dayOffset above), just a log line for same-day
+        // this same method - see matchesPerDay/dayOffset above), just a log line for same-day
         // overruns so it's at least visible in the logs instead of silently wrong.
         if (matches.Count > 0)
         {

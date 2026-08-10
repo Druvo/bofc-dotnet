@@ -5,7 +5,7 @@ namespace BofcBackend.Api.Common.Storage;
 
 /// <summary>
 /// Port of storage/R2StorageProvider.java. Talks to Cloudflare R2 (S3-compatible),
-/// not real AWS S3 — same as the Java side (endpoint override + region "auto").
+/// not real AWS S3 - same as the Java side (endpoint override + region "auto").
 /// </summary>
 public class R2StorageProvider : IStorageProvider
 {
@@ -63,7 +63,7 @@ public class R2StorageProvider : IStorageProvider
         }
         catch
         {
-            // Swallow delete errors — matches Java's log-and-continue behavior.
+            // Swallow delete errors - matches Java's log-and-continue behavior.
         }
     }
 

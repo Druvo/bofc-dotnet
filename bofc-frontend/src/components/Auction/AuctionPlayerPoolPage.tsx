@@ -210,7 +210,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <CheckCircleOutlined className="text-brand-500" />
-            <span className="font-semibold text-gray-800 dark:text-white/90">Approved Players — Ready to Add</span>
+            <span className="font-semibold text-gray-800 dark:text-white/90">Approved Players - Ready to Add</span>
             <Badge variant="info">{availableRegistrations.length} available</Badge>
           </div>
           {availableRegistrations.length > 0 && (
@@ -370,7 +370,7 @@ const AuctionPlayerPoolPage: React.FC = () => {
         }
       >
         <p className="mb-4 text-theme-sm text-gray-500 dark:text-gray-400">
-          Add a club player straight into the auction pool — no registration required.
+          Add a club player straight into the auction pool - no registration required.
         </p>
         <div className="flex flex-col gap-4">
           <FormSelect

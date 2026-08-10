@@ -180,7 +180,7 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
         }
       >
         <p className="mb-3 text-theme-sm text-gray-600 dark:text-gray-400">
-          This permanently deletes <strong>{record.name}</strong> and everything under it — teams, fixtures, lineups,
+          This permanently deletes <strong>{record.name}</strong> and everything under it - teams, fixtures, lineups,
           rounds/groups, auction data, prizes and participants. <strong>This cannot be undone.</strong>
         </p>
         <p className="mb-2 text-theme-sm text-gray-600 dark:text-gray-400">

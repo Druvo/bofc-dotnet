@@ -73,7 +73,7 @@ const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "F
 
 /** My Account (Change Password / Update Player Data) is visible to every logged-in
  * user. Everything else on this page (SMTP, notifications, push, auction, accounting,
- * Next Match, Jersey Colors) is admin/superadmin-only — the backend's
+ * Next Match, Jersey Colors) is admin/superadmin-only - the backend's
  * SettingsController is already role-gated on every action, so `skip` below just
  * avoids firing a request every non-admin would get a 403 back from. */
 function SettingsPage() {
@@ -141,7 +141,7 @@ function SettingsPage() {
     };
 
     const handleGenerateNow = async () => {
-        // Slots/settings only exist in the DB after Save — generating against unsaved
+        // Slots/settings only exist in the DB after Save - generating against unsaved
         // in-browser state would silently use whatever was last persisted.
         const saved = await handleSave();
         if (!saved) return;
@@ -183,7 +183,7 @@ function SettingsPage() {
     );
     const weeklyMatchDayOptionsList = (matchDaysData?.content?.matchDays ?? [])
         .filter((m) => m.isWeeklyMatchDay)
-        .map((m) => ({ value: m.id, label: `${m.name} — ${showBdLocalTimeRange(m.matchDayDate, m.durationMinutes)}` }));
+        .map((m) => ({ value: m.id, label: `${m.name} - ${showBdLocalTimeRange(m.matchDayDate, m.durationMinutes)}` }));
 
     const handleTestGenerateTeams = async () => {
         if (!testMatchDayId) {
@@ -251,11 +251,11 @@ function SettingsPage() {
             return false;
         }
         if (jerseyColors.length < 2) {
-            toast.error("At least 2 jersey colors are required — the club needs 2 distinct colors to tell the teams in a match apart");
+            toast.error("At least 2 jersey colors are required - the club needs 2 distinct colors to tell the teams in a match apart");
             return false;
         }
         if (new Set(jerseyColors).size !== jerseyColors.length) {
-            toast.error("Jersey colors must be unique — no duplicates");
+            toast.error("Jersey colors must be unique - no duplicates");
             return false;
         }
         try {
@@ -362,7 +362,7 @@ function SettingsPage() {
                     <FormInput
                         label="SMTP Password"
                         type="password"
-                        placeholder={smtpPasswordSet ? "•••••••• (saved — leave blank to keep)" : "Enter password"}
+                        placeholder={smtpPasswordSet ? "•••••••• (saved - leave blank to keep)" : "Enter password"}
                         value={smtpPassword}
                         onChange={(e) => setSmtpPassword(e.target.value)}
                     />
@@ -395,7 +395,7 @@ function SettingsPage() {
                     Automated Email Notifications
                 </h2>
                 <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    Turn individual automated notifications on or off. Each still requires SMTP to be enabled above to actually send email — in-app notifications go out regardless.
+                    Turn individual automated notifications on or off. Each still requires SMTP to be enabled above to actually send email - in-app notifications go out regardless.
                 </p>
 
                 <div className="flex flex-col gap-5">
@@ -450,7 +450,7 @@ function SettingsPage() {
                     Push Notifications
                 </h2>
                 <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    Master switch for browser/device push delivery. When off, nothing is pushed to any player's device regardless of their individual subscription — in-app notifications are unaffected.
+                    Master switch for browser/device push delivery. When off, nothing is pushed to any player's device regardless of their individual subscription - in-app notifications are unaffected.
                 </p>
 
                 <FormSwitch label="Enable push notifications" checked={pushNotificationsEnabled} onChange={setPushNotificationsEnabled} />
@@ -474,7 +474,7 @@ function SettingsPage() {
                     Scheduler
                 </h2>
                 <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    How often the background job re-checks MatchDays and concludes any that are overdue. Takes effect after the current wait finishes — no restart needed.
+                    How often the background job re-checks MatchDays and concludes any that are overdue. Takes effect after the current wait finishes - no restart needed.
                 </p>
 
                 <div className="w-48">
@@ -495,7 +495,7 @@ function SettingsPage() {
                     Accounting
                 </h2>
                 <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    Which chart of account every collection and bill payment posts to. Changing this here takes effect immediately — no restart needed. Leave unset to use the deployment default from appsettings.
+                    Which chart of account every collection and bill payment posts to. Changing this here takes effect immediately - no restart needed. Leave unset to use the deployment default from appsettings.
                 </p>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -509,7 +509,7 @@ function SettingsPage() {
                             options={(chartsData?.content ?? []).map((c: any) => ({ value: String(c.code), label: `${c.name} (${c.code})` }))}
                         />
                         <p className="mt-1.5 text-theme-xs text-gray-400 dark:text-gray-500">
-                            {cashChartCode ? "Overriding the default." : `Currently using: ${data?.content?.cashChartName ?? data?.content?.cashChartCode ?? "—"} (default)`}
+                            {cashChartCode ? "Overriding the default." : `Currently using: ${data?.content?.cashChartName ?? data?.content?.cashChartCode ?? "-"} (default)`}
                         </p>
                     </div>
                     <div>
@@ -522,7 +522,7 @@ function SettingsPage() {
                             options={(chartsData?.content ?? []).map((c: any) => ({ value: String(c.code), label: `${c.name} (${c.code})` }))}
                         />
                         <p className="mt-1.5 text-theme-xs text-gray-400 dark:text-gray-500">
-                            {collectionIncomeChartCode ? "Overriding the default." : `Currently using: ${data?.content?.collectionIncomeChartName ?? data?.content?.collectionIncomeChartCode ?? "—"} (default)`}
+                            {collectionIncomeChartCode ? "Overriding the default." : `Currently using: ${data?.content?.collectionIncomeChartName ?? data?.content?.collectionIncomeChartCode ?? "-"} (default)`}
                         </p>
                     </div>
                 </div>
@@ -534,7 +534,7 @@ function SettingsPage() {
                     Jersey Colors
                 </h2>
                 <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    The club's physical jerseys — configure as many as the club owns (at least 2).
+                    The club's physical jerseys - configure as many as the club owns (at least 2).
                     These are the colors available when assigning a jersey to each team per match
                     on the Next Match fixtures panel.
                 </p>
@@ -639,7 +639,7 @@ function SettingsPage() {
                                         />
                                         <FormInput
                                             label="Total duration (min)"
-                                            hint="Whole Match Day's length (e.g. 6:00–7:30pm = 90) — not any single match's length."
+                                            hint="Whole Match Day's length (e.g. 6:00–7:30pm = 90) - not any single match's length."
                                             type="number"
                                             min={15}
                                             max={300}
@@ -648,14 +648,14 @@ function SettingsPage() {
                                         />
                                     </div>
 
-                                    {/* Match-level: applies to each individual match auto-generated inside this Match Day — separated from the fields above so it doesn't read as another Match Day property. */}
+                                    {/* Match-level: applies to each individual match auto-generated inside this Match Day - separated from the fields above so it doesn't read as another Match Day property. */}
                                     <p className="mb-2 mt-3 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">
                                         Matches within Match Day {index + 1}
                                     </p>
                                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                         <FormInput
                                             label="Match duration (min)"
-                                            hint="Length of each individual auto-generated match — not this Match Day's own total duration above."
+                                            hint="Length of each individual auto-generated match - not this Match Day's own total duration above."
                                             type="number"
                                             min={5}
                                             max={180}
@@ -664,14 +664,14 @@ function SettingsPage() {
                                         />
                                         <FormInput
                                             label="Gap between matches (min)"
-                                            hint="Breather between one auto-generated match ending and the next starting — a per-match setting, not this Match Day's own total duration above."
+                                            hint="Breather between one auto-generated match ending and the next starting - a per-match setting, not this Match Day's own total duration above."
                                             type="number"
                                             min={0}
                                             max={120}
                                             value={slot.timeGapMinutes}
                                             onChange={(e) => {
                                                 // `|| 15` would treat 0 as falsy and silently snap it back to
-                                                // 15 — 0 (no gap) is a valid, intentional choice (matches the
+                                                // 15 - 0 (no gap) is a valid, intentional choice (matches the
                                                 // manual fixture-generation modal, which allows it too).
                                                 const parsed = Number(e.target.value);
                                                 updateSlot(index, { timeGapMinutes: Number.isNaN(parsed) ? 15 : parsed });
@@ -687,7 +687,7 @@ function SettingsPage() {
                         <div className="mb-3">
                             <FormInput
                                 label="Players per Team (max)"
-                                hint="Includes the goalkeeper — e.g. 6 for 5-a-side + 1 GK."
+                                hint="Includes the goalkeeper - e.g. 6 for 5-a-side + 1 GK."
                                 type="number"
                                 min={2}
                                 max={11}
@@ -695,7 +695,7 @@ function SettingsPage() {
                                 onChange={(e) => setWeeklyMatchDayMaxPlayersPerTeam(Number(e.target.value) || 6)}
                             />
                             <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
-                                The number of teams is worked out automatically from how many players confirm — e.g. 13 confirmed at a cap of 6 makes 3 teams — rather than a fixed team count. An admin can still add/remove players by hand afterward on any given Match Day.
+                                The number of teams is worked out automatically from how many players confirm - e.g. 13 confirmed at a cap of 6 makes 3 teams - rather than a fixed team count. An admin can still add/remove players by hand afterward on any given Match Day.
                             </p>
                         </div>
 
@@ -724,7 +724,7 @@ function SettingsPage() {
                                 <div className="mt-4 rounded-lg border border-dashed border-gray-300 p-3 dark:border-[var(--color-rule)]">
                                     <p className="mb-2 text-theme-xs text-gray-500 dark:text-gray-400">
                                         Test team + fixture auto-generation on a specific Match Day right now, bypassing the
-                                        lead-time wait above — drafts teams, schedules their round-robin matches, and assigns
+                                        lead-time wait above - drafts teams, schedules their round-robin matches, and assigns
                                         jerseys in one step.
                                     </p>
                                     <div className="flex flex-wrap items-end gap-2">
@@ -754,7 +754,7 @@ function SettingsPage() {
 
                     <div className="flex items-center justify-between rounded-lg border border-dashed border-gray-300 p-4 dark:border-[var(--color-rule)]">
                         <p className="text-theme-xs text-gray-500 dark:text-gray-400">
-                            Saves the settings above, then runs the generator right now instead of waiting for the hourly check — useful to verify the configuration works as expected.
+                            Saves the settings above, then runs the generator right now instead of waiting for the hourly check - useful to verify the configuration works as expected.
                         </p>
                         <Button variant="outline" onClick={handleGenerateNow} disabled={isGenerating || isSaving}>
                             {isGenerating || isSaving ? "Working..." : "Save & Generate for this month"}

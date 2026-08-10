@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 
 /**
  * Generic TailAdmin dropdown shell (pattern already inlined in Header.tsx's
- * notification/user menus) — trigger + click-outside-closes panel.
+ * notification/user menus) - trigger + click-outside-closes panel.
  *
  * Menu is portaled to <body> and positioned from the trigger's own rect
  * instead of being an in-flow `absolute` descendant. List items (e.g.

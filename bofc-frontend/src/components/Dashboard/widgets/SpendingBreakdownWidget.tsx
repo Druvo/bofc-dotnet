@@ -9,7 +9,7 @@ ChartJS.register(ArcElement, Tooltip);
 
 // Same accent family used across the dashboard (brand/success/warning/error)
 // plus a couple of neutral extras for whatever categories overflow the top 5.
-// First slot is the club gold accent rather than brand-green — sitting next to
+// First slot is the club gold accent rather than brand-green - sitting next to
 // the success-green slice, two greens back to back would be hard to tell apart.
 const SLICE_COLORS = ["#b69549", "#12b76a", "#f79009", "#0ba5ec", "#f04438", "#98a2b3"];
 

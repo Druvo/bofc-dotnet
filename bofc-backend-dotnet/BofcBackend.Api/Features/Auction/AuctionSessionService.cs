@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BofcBackend.Api.Features.Auction;
 
 /// <summary>
-/// Port of service/auction/AuctionSessionServiceImpl.java — the auction state machine.
+/// Port of service/auction/AuctionSessionServiceImpl.java - the auction state machine.
 /// Java's pessimistic row locking (findByIdForUpdate / findByMatchDayIdAndTeamIdForUpdate via
 /// @Lock(PESSIMISTIC_WRITE)) has no declarative EF Core equivalent, so PlaceBidAsync and
 /// ExecuteSaleAsync run inside an explicit transaction wrapping a raw "SELECT ... FOR UPDATE"

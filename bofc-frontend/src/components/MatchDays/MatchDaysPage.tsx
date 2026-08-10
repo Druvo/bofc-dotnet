@@ -47,7 +47,7 @@ const MatchDaysPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  // Status filtering happens client-side (the backend has no status-filter query param) — with
+  // Status filtering happens client-side (the backend has no status-filter query param) - with
   // pure server pagination that meant filtering the current 12-item page down to a couple of
   // matches while the pager still advertised page counts from the server's UNFILTERED total,
   // so a matching MatchDay sitting on a page that was never fetched was simply unreachable.
@@ -95,7 +95,7 @@ const MatchDaysPage: React.FC = () => {
     [matchDaySummaries, statusFilter, searchText]
   );
 
-  // Server pagination already sliced the page when no filter is active — only slice here for
+  // Server pagination already sliced the page when no filter is active - only slice here for
   // the client-paginated (filtered) path, where the query above fetched everything at once.
   const filteredMatchDays = hasActiveFilter
     ? allFilteredMatchDays.slice((currentPage - 1) * pageSize, currentPage * pageSize)
@@ -219,7 +219,7 @@ const MatchDaysPage: React.FC = () => {
                     <div className="flex flex-col gap-2">
                       <span className="flex items-center gap-2 text-theme-xs text-gray-500 dark:text-gray-400">
                         <CalendarOutlined className="shrink-0 text-brand-500 dark:text-brand-400" />
-                        {t.matchDayDate ? showBdLocalTimeRange(t.matchDayDate, t.durationMinutes) : "—"}
+                        {t.matchDayDate ? showBdLocalTimeRange(t.matchDayDate, t.durationMinutes) : "-"}
                       </span>
                       {t.venueName ? (
                         <VenueLink
@@ -231,7 +231,7 @@ const MatchDaysPage: React.FC = () => {
                       ) : (
                         <span className="flex items-center gap-2 truncate text-theme-xs text-gray-500 dark:text-gray-400">
                           <EnvironmentOutlined className="shrink-0 text-brand-500 dark:text-brand-400" />
-                          —
+                          -
                         </span>
                       )}
                     </div>

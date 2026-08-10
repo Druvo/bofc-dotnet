@@ -23,7 +23,7 @@ public class PushSubscriptionConfiguration : IEntityTypeConfiguration<PushSubscr
 
         // No unique index on (PlayerId, Endpoint): endpoint is nvarchar(1000) and some
         // browsers' push endpoints run long enough to risk SQL Server's ~900-byte index
-        // key limit. Upsert-by-equality is handled in NotificationService instead — a
+        // key limit. Upsert-by-equality is handled in NotificationService instead - a
         // player has at most a handful of subscribed devices, so the linear check is cheap.
         // The FK below already gives PlayerId its own index by EF Core convention.
         builder.HasOne(ps => ps.Player).WithMany().HasForeignKey(ps => ps.PlayerId);

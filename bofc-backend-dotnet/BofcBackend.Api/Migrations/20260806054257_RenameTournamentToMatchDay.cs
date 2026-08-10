@@ -80,7 +80,7 @@ namespace BofcBackend.Api.Migrations
                 table: "team_budgets");
 
             // The 5 tournament-* tables carry live data (rows confirmed present before this
-            // migration was written) — renamed in place via RenameTable/RenameColumn instead of
+            // migration was written) - renamed in place via RenameTable/RenameColumn instead of
             // the auto-scaffolded DropTable+CreateTable, which would have silently destroyed
             // every row. Their own internal FKs/PK/indexes are dropped and re-added under the
             // new names around the rename, same pattern EF already uses below for plain
@@ -113,7 +113,7 @@ namespace BofcBackend.Api.Migrations
                 name: "FK_tournament_round_tournament_tournament_id",
                 table: "tournament_round");
 
-            // tournament_participant_players is NOT a real table — it's a hand-written SQL
+            // tournament_participant_players is NOT a real table - it's a hand-written SQL
             // VIEW (created directly via sqlcmd outside of migrations) whose body references
             // tournament/tournament_participant/tournament_date by name internally. A plain
             // table/column rename would leave it pointing at objects that no longer exist, so
@@ -712,7 +712,7 @@ namespace BofcBackend.Api.Migrations
                 newName: "IX_auction_bids_tournament_id");
 
             // Reverse of the rename-in-place performed in Up() for the 5 tables that carry
-            // live data — mirrors it with RenameTable/RenameColumn instead of DropTable, so a
+            // live data - mirrors it with RenameTable/RenameColumn instead of DropTable, so a
             // rollback does not destroy data either.
             migrationBuilder.DropForeignKey(
                 name: "fk_match_day_venue",
@@ -782,7 +782,7 @@ namespace BofcBackend.Api.Migrations
             migrationBuilder.Sql("EXEC sp_rename N'dbo.PK_match_day_prize', N'PK_tournament_prize', N'OBJECT';");
             migrationBuilder.Sql("EXEC sp_rename N'dbo.PK_match_day_round', N'PK_tournament_round', N'OBJECT';");
 
-            // match_day_participant_players is the hand-written view, not a table — see the
+            // match_day_participant_players is the hand-written view, not a table - see the
             // matching comment in Up(). Drop it before the columns/tables it joins are renamed
             // back, then recreate it against the old names.
             migrationBuilder.Sql("DROP VIEW [match_day_participant_players];");

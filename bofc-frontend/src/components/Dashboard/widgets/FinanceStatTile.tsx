@@ -16,10 +16,10 @@ interface FinanceStatTileProps {
   variant: TileVariant;
   /** Numeric tile shows ৳ + CountUp; set `value` for that. */
   value?: number;
-  /** Non-numeric tile (e.g. a plain count) — set `display` instead of `value`. */
+  /** Non-numeric tile (e.g. a plain count) - set `display` instead of `value`. */
   display?: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** Metric implies the user needs to act (e.g. unpaid dues) — amber left-border
+  /** Metric implies the user needs to act (e.g. unpaid dues) - amber left-border
    * accent + tinted value, distinct from purely informational metrics. */
   actionable?: boolean;
 }

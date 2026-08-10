@@ -131,7 +131,7 @@ const LatestMatchDayCard: React.FC = () => {
 
     const fillPercent = totalPlayer > 0 ? Math.round((confirmedCount / totalPlayer) * 100) : 0;
 
-    // Returns { prefix, text } instead of one blended string — "Happening now"
+    // Returns { prefix, text } instead of one blended string - "Happening now"
     // and "Match started" are complete phrases, not durations, so they can't
     // share the "Starts in ___" prefix the duration branches need.
     const getCountdown = (): { prefix: string | null; text: string } => {
@@ -267,7 +267,7 @@ const LatestMatchDayCard: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Squad Filled — full width, below the stat row */}
+                    {/* Squad Filled - full width, below the stat row */}
                     <div className="mt-4">
                         <div className="mb-1.5 flex items-center justify-between text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">
                             <span>Squad Filled</span>

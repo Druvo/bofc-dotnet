@@ -26,9 +26,9 @@ const FIELDS: { key: "goalsAdjustment" | "assistsAdjustment" | "yellowCardsAdjus
 ];
 
 // A player's goals/assists/cards/matches-played are always computed live from recorded match
-// events (see PlayerStatisticsService) — there's no other field to type a number into directly.
+// events (see PlayerStatisticsService) - there's no other field to type a number into directly.
 // This adds a flat correction on top of that computed total (e.g. to backfill history from
-// before this app tracked matches), rather than replacing it — so "+3" here means "3 more than
+// before this app tracked matches), rather than replacing it - so "+3" here means "3 more than
 // whatever the matches say", not "exactly 3".
 export default function EditPlayerStatAdjustmentModal({ playerId, playerName, isOpen, onClose }: EditPlayerStatAdjustmentModalProps) {
     const { data, isFetching } = useGetPlayerStatAdjustmentQuery({ playerId }, { skip: !isOpen });
@@ -72,7 +72,7 @@ export default function EditPlayerStatAdjustmentModal({ playerId, playerName, is
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={<>Adjust Stats — <strong>{playerName}</strong></>}
+            title={<>Adjust Stats - <strong>{playerName}</strong></>}
             className="max-w-[440px]"
             footer={
                 <>
@@ -88,7 +88,7 @@ export default function EditPlayerStatAdjustmentModal({ playerId, playerName, is
             ) : (
                 <>
                     <p className="mb-4 text-theme-sm text-gray-600 dark:text-gray-400">
-                        Added on top of what's already computed from recorded matches — e.g. entering{" "}
+                        Added on top of what's already computed from recorded matches - e.g. entering{" "}
                         <strong>+3</strong> here for Goals means this player's total shows 3 more than what
                         their matches alone add up to. Use negative numbers to correct an over-count.
                         Doesn't touch any match or event data.

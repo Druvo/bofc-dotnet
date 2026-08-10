@@ -25,10 +25,10 @@ const NOTIF_PREVIEW_LIMIT = 5;
  * Alpine.js to React. Real data/behavior wired in: user info + avatar from
  * Redux (selectLoginInfo/selectUserImage, same source the old header used),
  * dark mode from App.tsx's existing isDarkMode state (unchanged source of
- * truth — just a new consumer), logout from useAuthHook (existing).
+ * truth - just a new consumer), logout from useAuthHook (existing).
  *
  * The search box was TailAdmin's own decorative demo data (readOnly input,
- * no backend to query) — now does a real client-side search across players,
+ * no backend to query) - now does a real client-side search across players,
  * matchDays, and venues using the same list queries those pages already
  * fetch (RTK Query cache means this doesn't cost an extra round-trip once
  * the user's visited any of them). The notification bell is wired to the
@@ -69,7 +69,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
   const isOnStatisticsPage = location.pathname === "/player-statistics";
   const isOnDashboard = location.pathname === "/" || location.pathname === "/dashboard";
 
-  // Global search — client-side over already-cached lists, no dedicated
+  // Global search - client-side over already-cached lists, no dedicated
   // search endpoint needed for a dataset this small.
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -345,7 +345,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
 
                     {notifEntries.length === 0 ? (
                       <p className="px-1 py-4 text-center text-theme-sm text-gray-500 dark:text-gray-400">
-                        Nothing yet — notifications sent to you will show up here.
+                        Nothing yet - notifications sent to you will show up here.
                       </p>
                     ) : (
                       <div className="flex max-h-[320px] flex-col gap-1.5 overflow-y-auto">

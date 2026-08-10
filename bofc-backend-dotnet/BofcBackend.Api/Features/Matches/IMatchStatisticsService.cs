@@ -14,7 +14,7 @@ public interface IMatchStatisticsService
     Task<List<MatchStatisticsResponse>> GetTopAssistProvidersByMatchDayAsync(long matchDayId);
     Task<List<MatchDayStandingResponse>> GetMatchDayStandingsAsync(long matchDayId);
 
-    /// <summary>Aggregates statistics from match events to update player statistics — also called by MatchManagementService lifecycle transitions.</summary>
+    /// <summary>Aggregates statistics from match events to update player statistics - also called by MatchManagementService lifecycle transitions.</summary>
     Task AggregateMatchStatisticsAsync(long matchId);
 
     Task<long> GetTeamTotalGoalsInMatchDayAsync(long matchDayId, long teamId);

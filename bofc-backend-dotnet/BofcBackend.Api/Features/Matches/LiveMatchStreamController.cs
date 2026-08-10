@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BofcBackend.Api.Features.Matches;
 
-/// <summary>Port of controller/LiveMatchStreamController.java — Server-Sent Events, not WebSocket.</summary>
+/// <summary>Port of controller/LiveMatchStreamController.java - Server-Sent Events, not WebSocket.</summary>
 [ApiController]
 [Route("matches/live")]
 [AllowAnonymous]
@@ -30,7 +30,7 @@ public class LiveMatchStreamController(ILiveMatchUpdatePublisher publisher) : Co
         }
         catch (OperationCanceledException)
         {
-            // Client disconnected — expected, not an error.
+            // Client disconnected - expected, not an error.
         }
         finally
         {

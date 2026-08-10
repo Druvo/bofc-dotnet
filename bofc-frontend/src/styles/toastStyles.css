@@ -13,7 +13,7 @@
 }
 
 :root {
-    /* Named z-index scale (tailwind.config.js zIndex) — toast sits above
+    /* Named z-index scale (tailwind.config.js zIndex) - toast sits above
        z-modal so it clears dialogs and the sticky header alike. */
     --z-toast: 500;
 }

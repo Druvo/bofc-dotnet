@@ -8,11 +8,11 @@ import { AppShellProvider } from "./AppShellContext";
  * `<div class="flex h-screen overflow-hidden">` + content-area/overlay/main
  * structure), ported from Alpine.js to React.
  *
- * isDarkMode/setIsDarkMode are passed in from App.tsx — that's the existing
+ * isDarkMode/setIsDarkMode are passed in from App.tsx - that's the existing
  * source of truth (already drives AntD's ConfigProvider + localStorage
  * persistence there), not a new state. This component's only job re: dark
  * mode is applying Tailwind's expected `dark` class to <html> so `dark:`
- * utilities activate — the pre-existing AdminLayout.tsx already established
+ * utilities activate - the pre-existing AdminLayout.tsx already established
  * this exact pattern, reused here rather than re-invented.
  */
 
@@ -56,7 +56,7 @@ export default function DefaultLayout({ children, isDarkMode, setIsDarkMode }: D
         />
 
         <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          {/* Small-device overlay/scrim — closes the sidebar on outside tap */}
+          {/* Small-device overlay/scrim - closes the sidebar on outside tap */}
           <div
             onClick={() => setSidebarToggle(false)}
             className={`fixed z-raised h-screen w-full bg-gray-900/50 ${sidebarToggle ? "block lg:hidden" : "hidden"}`}

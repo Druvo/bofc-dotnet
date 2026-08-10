@@ -103,7 +103,7 @@ const PlayerStatsSidebar: React.FC<PlayerStatsSidebarProps> = ({ rows, photoById
                 </button>
             </div>
 
-            {/* Player spotlight — current #1 by G+A */}
+            {/* Player spotlight - current #1 by G+A */}
             {spotlight && (
                 <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                     <h4 className="mb-4 text-theme-sm font-bold text-gray-800 dark:text-white/90">Player Spotlight</h4>
@@ -111,7 +111,7 @@ const PlayerStatsSidebar: React.FC<PlayerStatsSidebarProps> = ({ rows, photoById
                         <PlayerAvatarCircle photo={photoById[spotlight.playerId]} name={spotlight.playerName} seed={spotlight.playerId} size={56} />
                         <div className="flex min-w-0 flex-col">
                             <span className="truncate font-bold text-brand-500 dark:text-brand-400">{spotlight.playerName}</span>
-                            <span className="text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{spotlight.position || "—"}</span>
+                            <span className="text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{spotlight.position || "-"}</span>
                         </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
@@ -147,7 +147,7 @@ const PlayerStatsSidebar: React.FC<PlayerStatsSidebarProps> = ({ rows, photoById
                 </div>
             )}
 
-            {/* Quick insights — aggregate across all currently-loaded players */}
+            {/* Quick insights - aggregate across all currently-loaded players */}
             <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                 <h4 className="mb-4 text-theme-sm font-bold text-gray-800 dark:text-white/90">Quick Insights</h4>
                 <div className="grid grid-cols-2 gap-3">

@@ -4,7 +4,7 @@ import { BasicResType } from "../../responesTypes";
 const apiWithTags = apiSlice.enhanceEndpoints({
     // matchDays/matchDayTeam/fixtures aren't this slice's own data, but generateWeeklyMatchesNow
     // and generateTeamsNow mutate them server-side (new MatchDays, drafted teams+players,
-    // round-robin matches) — without invalidating those tags here too, the Team Building/Fixtures
+    // round-robin matches) - without invalidating those tags here too, the Team Building/Fixtures
     // tabs keep showing whatever they'd already cached before the admin clicked "generate now".
     addTagTypes: ["systemSettings", "matchDays", "matchDayTeam", "fixtures"],
 });
@@ -13,13 +13,13 @@ export interface WeeklyMatchDaySlot {
     dayOfWeek: string;
     /** "HH:mm" */
     time: string;
-    /** How long THIS weekly MatchDay runs, in minutes — each slot has its own (e.g. Wednesday
+    /** How long THIS weekly MatchDay runs, in minutes - each slot has its own (e.g. Wednesday
      * 90 min, Saturday 120 min); previously a single duration was shared across every slot. */
     durationMinutes: number;
-    /** Length of each individual auto-generated MATCH within this slot's MatchDays — not the
+    /** Length of each individual auto-generated MATCH within this slot's MatchDays - not the
      * same as durationMinutes above, which is the whole MatchDay's length. */
     matchDurationMinutes: number;
-    /** Gap between each auto-generated match's start time within THIS slot's MatchDays —
+    /** Gap between each auto-generated match's start time within THIS slot's MatchDays -
      * each slot has its own; previously a single gap was shared across every slot. */
     timeGapMinutes: number;
 }
@@ -50,7 +50,7 @@ export interface SystemSettings {
     weeklyMatchDaySportType: string;
     matchDaysPerWeek: number;
     weeklyMatchDaySlots: WeeklyMatchDaySlot[];
-    /** Max squad size (including goalkeeper) per auto-drafted team — team COUNT is derived from
+    /** Max squad size (including goalkeeper) per auto-drafted team - team COUNT is derived from
      * confirmed participant turnout at generation time, not fixed here. */
     weeklyMatchDayMaxPlayersPerTeam: number;
     weeklyMatchDayAutoTeamsEnabled: boolean;
@@ -61,7 +61,7 @@ export interface SystemSettings {
     collectionIncomeChartName?: string | null;
     cashChartCodeIsOverridden: boolean;
     collectionIncomeChartCodeIsOverridden: boolean;
-    /** The club's configured jersey colors — any count (not hardcoded to 2). */
+    /** The club's configured jersey colors - any count (not hardcoded to 2). */
     jerseyColors: string[];
 }
 
@@ -96,7 +96,7 @@ export interface UpdateSystemSettingsRequest {
     weeklyMatchDaySportType: string;
     matchDaysPerWeek: number;
     weeklyMatchDaySlots: WeeklyMatchDaySlot[];
-    /** Max squad size (including goalkeeper) per auto-drafted team — team COUNT is derived from
+    /** Max squad size (including goalkeeper) per auto-drafted team - team COUNT is derived from
      * confirmed participant turnout at generation time, not fixed here. */
     weeklyMatchDayMaxPlayersPerTeam: number;
     weeklyMatchDayAutoTeamsEnabled: boolean;
@@ -105,7 +105,7 @@ export interface UpdateSystemSettingsRequest {
     cashChartCode?: string | null;
     /** Null/omitted to clear the override and fall back to the appsettings default. */
     collectionIncomeChartCode?: string | null;
-    /** At least 2 required (server-validated) — need 2 distinct colors to tell the teams in a match apart. */
+    /** At least 2 required (server-validated) - need 2 distinct colors to tell the teams in a match apart. */
     jerseyColors: string[];
 }
 

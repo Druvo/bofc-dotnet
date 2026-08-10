@@ -9,7 +9,7 @@ namespace BofcBackend.Api.Features.Auction;
 /// <summary>
 /// Port of controller/auction/AuctionSessionController.java. Unlike the rest of the app, every
 /// action here returns the DTO directly (Ok(x)), NOT the usual {message,statusCode,content}
-/// envelope — Java's controller returns raw ResponseEntity&lt;T&gt; throughout, and the frontend's
+/// envelope - Java's controller returns raw ResponseEntity&lt;T&gt; throughout, and the frontend's
 /// auction slice reads the response body as the DTO itself, not response.data.content.
 /// </summary>
 [ApiController]

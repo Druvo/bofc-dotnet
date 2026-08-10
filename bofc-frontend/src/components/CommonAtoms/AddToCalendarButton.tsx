@@ -7,7 +7,7 @@ import { Dropdown, DropdownItem } from "../ui/dropdown";
 interface AddToCalendarButtonProps {
   event: CalendarEventInput;
   size?: "sm" | "md";
-  /** Extra classes merged onto the trigger button — e.g. dark-card overrides. */
+  /** Extra classes merged onto the trigger button - e.g. dark-card overrides. */
   buttonClassName?: string;
 }
 

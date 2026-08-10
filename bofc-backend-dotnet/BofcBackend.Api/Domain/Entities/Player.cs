@@ -19,11 +19,11 @@ public class Player : AuditableEntity
     public string? ProfilePhoto { get; set; }
     public string? PhotoKey { get; set; }
 
-    /// <summary>"light" | "dark" | null (no explicit preference — client falls back to OS/browser preference). Synced across devices since it lives on the player, not localStorage.</summary>
+    /// <summary>"light" | "dark" | null (no explicit preference - client falls back to OS/browser preference). Synced across devices since it lives on the player, not localStorage.</summary>
     public string? ThemePreference { get; set; }
 
     /// <summary>Admin-only skill/seniority rank used purely to balance auto-generated teams
-    /// (snake-draft assignment — see WeeklyMatchDayTeamGenerator). Never surfaced to non-admin
+    /// (snake-draft assignment - see WeeklyMatchDayTeamGenerator). Never surfaced to non-admin
     /// player-facing responses. Null = treated as the lowest tier for drafting purposes.</summary>
     public int? Rank { get; set; }
 

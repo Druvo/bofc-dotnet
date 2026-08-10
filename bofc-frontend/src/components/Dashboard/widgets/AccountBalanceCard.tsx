@@ -59,7 +59,7 @@ const AccountBalanceCard: React.FC = () => {
   const trend = useMemo(() => {
     const now = new Date();
     const thisMonthIdx = now.getMonth() + 1;
-    if (thisMonthIdx < 2) return null; // January — no same-year prior month to compare
+    if (thisMonthIdx < 2) return null; // January - no same-year prior month to compare
 
     const thisMonth = monthlyTotals[thisMonthIdx - 1];
     const lastMonth = monthlyTotals[thisMonthIdx - 2];

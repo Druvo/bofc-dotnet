@@ -37,7 +37,7 @@ public class ClubRuleController(IClubRuleService clubRuleService) : ControllerBa
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, updated);
     }
 
-    // NOTE: Java's ClubRuleController maps this to GET too, under @PreAuthorize(ADMIN/SUPERADMIN) —
+    // NOTE: Java's ClubRuleController maps this to GET too, under @PreAuthorize(ADMIN/SUPERADMIN) -
     // reproduced as-is even though a GET-by-id gated to admins while the list endpoint is public
     // looks like an inconsistency; not this port's place to silently change access rules.
     [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]

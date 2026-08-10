@@ -9,7 +9,7 @@ public class CostTypeResponse
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
 
-    /// <summary>Java's `private boolean isActive` — Jackson strips the "is" prefix, wire property is "active" (see PlayerResponse.cs).</summary>
+    /// <summary>Java's `private boolean isActive` - Jackson strips the "is" prefix, wire property is "active" (see PlayerResponse.cs).</summary>
     [JsonPropertyName("active")]
     public bool IsActive { get; set; }
 }

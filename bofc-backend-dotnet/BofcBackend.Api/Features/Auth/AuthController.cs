@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BofcBackend.Api.Features.Auth;
 
-/// <summary>Port of controller/AuthController.java. Route has no "api" prefix — see the
+/// <summary>Port of controller/AuthController.java. Route has no "api" prefix - see the
 /// frontend contract notes in the migration plan (proxy strips /api before it reaches here).</summary>
 [ApiController]
 [Route("auth")]

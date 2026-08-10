@@ -43,7 +43,7 @@ export const authApi = apiWithTags.injectEndpoints({
                 body: data,
             }),
         }),
-        // Mandatory first-login/expired-password reset — no oldPassword, unlike
+        // Mandatory first-login/expired-password reset - no oldPassword, unlike
         // changePassword above (that one's for the voluntary profile/settings flow).
         forcePasswordReset: build.mutation<BasicResType, { newPassword: string }>({
             query: (data) => ({
@@ -97,7 +97,7 @@ export const authApi = apiWithTags.injectEndpoints({
                 body: { email, newPassword },
             }),
         }),
-        // Synced across devices via the player row — logging in on a different browser/machine
+        // Synced across devices via the player row - logging in on a different browser/machine
         // picks up the same theme instead of defaulting back to light/system.
         updateThemePreference: build.mutation<BasicResType, { themePreference: "light" | "dark" | null }>({
             query: (data) => ({

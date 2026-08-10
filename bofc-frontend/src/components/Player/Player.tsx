@@ -33,7 +33,7 @@ interface PlayerFormValues {
     playingPosition: string;
     jerseyNumber: string;
     active: boolean;
-    /** Admin-only — never returned by the public player endpoints, fetched/saved separately. */
+    /** Admin-only - never returned by the public player endpoints, fetched/saved separately. */
     rank: string;
 }
 
@@ -418,7 +418,7 @@ function Player() {
                             </div>
                             {isAdmin && formState === "UPDATE" && (
                                 <p className="mt-2 text-theme-xs text-gray-500 dark:text-gray-400">
-                                    Used only to balance auto-generated Match Day teams — never shown to players.
+                                    Used only to balance auto-generated Match Day teams - never shown to players.
                                 </p>
                             )}
 

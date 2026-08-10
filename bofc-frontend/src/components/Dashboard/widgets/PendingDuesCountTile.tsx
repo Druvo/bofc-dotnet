@@ -5,7 +5,7 @@ import { PlayerMetric } from "../../../interfaces/IPlayerCollectionMetrics";
 import FinanceStatTile from "./FinanceStatTile";
 
 // Same "current month, no contribution yet, active player" rule as
-// UpcomingDuesWidget — there's no stored fee amount to total up (see
+// UpcomingDuesWidget - there's no stored fee amount to total up (see
 // UpcomingDuesWidget's own comment), so this stays a headcount, not a ৳ figure.
 const PendingDuesCountTile: React.FC = () => {
   const now = new Date();

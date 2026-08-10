@@ -212,7 +212,7 @@ public class RoundGroupService(BofcDbContext db) : IRoundGroupService
     }
 
     /// <summary>
-    /// Recomputes ranking in memory but does NOT persist — matches Java's getGroupStandings,
+    /// Recomputes ranking in memory but does NOT persist - matches Java's getGroupStandings,
     /// which is not @Transactional and never calls save/saveAll, so the recomputed positions
     /// are display-only for this response (RecalculateGroupStandingsAsync above is the
     /// persisting equivalent).

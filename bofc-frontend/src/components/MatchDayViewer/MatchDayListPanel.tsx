@@ -52,7 +52,7 @@ export default function MatchDayListPanel({
   const matchDays: IoMatchDaySingleSummaryType[] = useMemo(() => {
     const list = data?.content?.matchDays || [];
     // The raw matchDayStatus only advances via a slow (3x/day) backend cron job, so a MatchDay
-    // whose actual window has ended can sit at a stale ONGOING for hours — derive the effective
+    // whose actual window has ended can sit at a stale ONGOING for hours - derive the effective
     // status the same way every other screen does, or this list disagrees with e.g. the content
     // pane right next to it (showing a green "live" MatchDay the content pane already shows
     // CONCLUDED).
@@ -163,7 +163,7 @@ export default function MatchDayListPanel({
                               month: "short",
                               year: "numeric",
                             })
-                          : "—"}
+                          : "-"}
                         {matchDay.matchDayDate && (
                           <>
                             {" · "}

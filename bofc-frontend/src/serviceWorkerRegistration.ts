@@ -1,5 +1,5 @@
 // Registers public/sw.js. Only runs in production builds served over HTTPS
-// (or localhost) — standard CRA pattern, trimmed to what this app needs.
+// (or localhost) - standard CRA pattern, trimmed to what this app needs.
 
 export function register(): void {
   if (process.env.NODE_ENV !== "production") return;

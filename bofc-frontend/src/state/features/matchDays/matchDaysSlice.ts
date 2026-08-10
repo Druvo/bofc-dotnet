@@ -91,7 +91,7 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
       invalidatesTags: ["matchDays"],
     }),
 
-    /** Permanently deletes the MatchDay and everything under it — cannot be undone. */
+    /** Permanently deletes the MatchDay and everything under it - cannot be undone. */
     hardDeleteMatchDay: builder.mutation<BasicResType, { id: number }>({
       query: ({ id }) => ({
         url: `match-days/${id}`,

@@ -5,7 +5,7 @@ import { useGetNextActiveMatchDayQuery } from "../../state/features/matchDays/ma
 import Loader from "../ui/loader";
 
 // Same "next active" pick as the Dashboard's Next Match Day card (any upcoming/
-// not-stale-ongoing matchDay, not just the auto-created weekly Match Day) —
+// not-stale-ongoing matchDay, not just the auto-created weekly Match Day) -
 // otherwise a manually created matchDay dated sooner than the recurring
 // Match Day never shows up here, and once the weekly one's date passes this
 // page falls back to displaying it stale/concluded instead of whatever's

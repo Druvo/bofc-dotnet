@@ -6,9 +6,9 @@ namespace BofcBackend.Api.Common.Scheduling;
 
 /// <summary>
 /// Runs IMatchDayService.UpdateMatchDayStatusesAsync() (MatchDayService.cs) on a repeating
-/// interval — fires immediately on startup, then waits SystemSettings.MatchDayStatusCheckIntervalHours
+/// interval - fires immediately on startup, then waits SystemSettings.MatchDayStatusCheckIntervalHours
 /// before the next run. That setting is re-read every cycle (not just once at startup), so an
-/// admin changing it in Settings takes effect after the current wait finishes — no restart needed.
+/// admin changing it in Settings takes effect after the current wait finishes - no restart needed.
 /// </summary>
 public class MatchDayStatusSchedulerBackgroundService(
     IServiceScopeFactory scopeFactory,

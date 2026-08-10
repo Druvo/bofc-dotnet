@@ -8,7 +8,7 @@ public class PlayerCollectionReport
     public long PlayerId { get; set; }
     public string PlayerName { get; set; } = string.Empty;
 
-    /// <summary>Java's `private boolean isActive` — Jackson strips the "is" prefix, wire property is "active" (confirmed against frontend IPlayerCollectionMetrics.PlayerMetric.active).</summary>
+    /// <summary>Java's `private boolean isActive` - Jackson strips the "is" prefix, wire property is "active" (confirmed against frontend IPlayerCollectionMetrics.PlayerMetric.active).</summary>
     [JsonPropertyName("active")]
     public bool IsActive { get; set; }
 

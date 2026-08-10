@@ -5,7 +5,7 @@ import { useGetFixturesQuery } from "../../state/features/fixtures/fixturesSlice
 
 /**
  * Small header pill that surfaces "there's a live match right now" from
- * anywhere in the app — added so an admin buried in Finance work doesn't
+ * anywhere in the app - added so an admin buried in Finance work doesn't
  * have to navigate away to notice. Renders nothing when there's no active
  * matchDay or no match currently ONGOING/PAUSED.
  */

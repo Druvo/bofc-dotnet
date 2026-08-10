@@ -11,7 +11,7 @@ namespace BofcBackend.Api.Features.Accounting;
 /// <summary>
 /// Port of controller/account/AcBillPaymentController.java. Roles are applied per-action (not
 /// at the class level) because Java's class-level @PreAuthorize is fully OVERRIDDEN by any
-/// method-level @PreAuthorize (three GETs here widen to PLAYER) — ASP.NET Core's [Authorize]
+/// method-level @PreAuthorize (three GETs here widen to PLAYER) - ASP.NET Core's [Authorize]
 /// instead ANDs class-level and action-level attributes together, which would have silently
 /// narrowed those three actions back down to admin-only. Same class of bug as the
 /// AllowAnonymous/Authorize fix made earlier in StatisticsController.
@@ -31,7 +31,7 @@ public class AcBillPaymentController(AcBillPaymentService service) : ControllerB
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.Created, RestResponseMessage.CreateOk, id);
     }
 
-    /// <summary>Returns a raw Spring-Data-Page-shaped body (not the usual envelope) — matches Java exactly.</summary>
+    /// <summary>Returns a raw Spring-Data-Page-shaped body (not the usual envelope) - matches Java exactly.</summary>
     [Authorize(Roles = AdminSuperAdminPlayer)]
     [HttpGet("ajax-collections")]
     public async Task<IActionResult> GetAcBillPayments(

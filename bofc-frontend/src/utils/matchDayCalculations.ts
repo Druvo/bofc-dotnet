@@ -228,7 +228,7 @@ export function generateKnockoutPairings(teamIds: number[]): MatchPairing[] {
  * Estimate matchDay duration based on match count and scheduling parameters.
  *
  * Mirrors FixtureGenerationService.GenerateFixturesAsync on the backend: each match
- * occupies a slot of (duration + gap) minutes — timeGapMinutes is the time AFTER one
+ * occupies a slot of (duration + gap) minutes - timeGapMinutes is the time AFTER one
  * match ends and BEFORE the next starts, not the full start-to-start interval.
  *
  * @param matchCount - Total number of matches
@@ -264,7 +264,7 @@ export function estimateMatchDayDuration(
 
 /**
  * Check if scheduling parameters are valid and safe. With the corrected model, the gap
- * is purely the breather AFTER a match — any non-negative value is valid; this only
+ * is purely the breather AFTER a match - any non-negative value is valid; this only
  * nudges towards leaving at least a couple of minutes for teams to swap onto the pitch.
  *
  * @param timeGapMinutes - Minutes between the end of one match and the start of the next
@@ -282,7 +282,7 @@ export function validateSchedulingParameters(
   if (timeGapMinutes === 0) {
     return {
       isValid: true,
-      warning: "No gap between matches — the next match starts the instant the previous one ends.",
+      warning: "No gap between matches - the next match starts the instant the previous one ends.",
     };
   }
 
@@ -301,12 +301,12 @@ export interface ScheduledMatch extends MatchPairing {
 }
 
 /**
- * Compute the real per-match schedule for a round-robin MatchDay — same formula as
+ * Compute the real per-match schedule for a round-robin MatchDay - same formula as
  * FixtureGenerationService.GenerateFixturesAsync, so the preview always matches what
  * generation will actually produce.
  *
  * @param targetMatchCount - When larger than one full round-robin cycle, the cycle is repeated
- * to reach it — mirrors the backend's repeat-to-fill-the-MatchDay's-duration behavior instead
+ * to reach it - mirrors the backend's repeat-to-fill-the-MatchDay's-duration behavior instead
  * of previewing only the first (shorter) cycle.
  */
 export function generateRoundRobinSchedule(

@@ -8,12 +8,12 @@ import {
 } from "../../utils/browserNotifications";
 
 /**
- * Shared "app shell" UI state — was local useState inside ContentComponent
+ * Shared "app shell" UI state - was local useState inside ContentComponent
  * back when it owned both the header chrome AND these drawer/modal triggers.
  * Now that TailAdmin's Header (in DefaultLayout) is a sibling of
  * ContentComponent rather than its parent, the trigger buttons and the
  * drawer/modal that respond to them need a shared place to live. Business
- * logic (query refetching, permission requests) is unchanged — only *where*
+ * logic (query refetching, permission requests) is unchanged - only *where*
  * the boolean visibility state is held has moved.
  */
 
@@ -29,7 +29,7 @@ interface AppShellContextValue {
   canInstall: boolean;
   promptInstall: () => void;
 
-  /** Opens the sidebar drawer — the state itself lives in DefaultLayout (it also
+  /** Opens the sidebar drawer - the state itself lives in DefaultLayout (it also
    * owns the desktop icon-rail collapse behavior), passed in via onOpenSidebar so
    * that deeply-nested triggers like MobileTabBar's "More" button (a sibling of
    * Sidebar, not a descendant, so it can't just receive the setter as a prop) can

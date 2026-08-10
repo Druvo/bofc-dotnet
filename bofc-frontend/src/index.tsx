@@ -79,6 +79,6 @@ root.render(
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
 
-// Enables installability (Add to Home Screen / desktop install) — see
+// Enables installability (Add to Home Screen / desktop install) - see
 // public/sw.js for what it does and, importantly, does not cache.
 serviceWorkerRegistration.register();

@@ -24,14 +24,14 @@ public class MatchDayParticipantService(
     public async Task SaveOrUpdateMatchDayParticipantAsync(MatchDayParticipantRequest request)
     {
         var playerId = request.PlayerId!.Value;
-        // COORDINATOR manages teams/lineup/fixtures/prizes for a MatchDay elsewhere in the app —
+        // COORDINATOR manages teams/lineup/fixtures/prizes for a MatchDay elsewhere in the app -
         // excluding it here (Admin/SuperAdmin only) was an arbitrary gap for editing another
         // player's RSVP on their behalf.
         if (!currentUser.IsUserAuthorizedForSelf(playerId)
             && !currentUser.IsInRole(PlayerRoleNames.Admin) && !currentUser.IsInRole(PlayerRoleNames.SuperAdmin)
             && !currentUser.IsInRole(PlayerRoleNames.Coordinator))
         {
-            // Java calls `throw new SecurityException(UNAUTHORIZED)` with a single argument —
+            // Java calls `throw new SecurityException(UNAUTHORIZED)` with a single argument -
             // only compiles against java.lang.SecurityException (the app's own SecurityException
             // requires message+HttpStatus), so this is the same likely-accidental wrong-class
             // import as PlayerServiceImpl.updatePlayer. Using BofcSecurityException for a real
@@ -44,7 +44,7 @@ public class MatchDayParticipantService(
         var player = await db.Players.FirstOrDefaultAsync(p => p.Id == playerId)
             ?? throw new PlayerServiceException(RestErrorMessageDetail.PlayerIsNotFound, HttpStatusCode.NotFound);
 
-        // MatchDayDate is naive-local (Dhaka wall-clock, see MatchDay.cs) — compare against
+        // MatchDayDate is naive-local (Dhaka wall-clock, see MatchDay.cs) - compare against
         // DateTime.Now, not UtcNow, matching TeamService.ValidateMatchDayDateAsync's convention.
         // Comparing against UtcNow here previously let RSVPs happen up to ~6h after real kickoff.
         if (matchDay.MatchDayDate < DateTime.Now)
@@ -63,7 +63,7 @@ public class MatchDayParticipantService(
                 ?? throw new MatchDayServiceException(RestErrorMessageDetail.ParticipantNotFound, HttpStatusCode.NotFound);
 
             // Fetching purely by Id let any caller who passed the self-check above (their own
-            // PlayerId) repurpose a DIFFERENT player's participant row by supplying its Id —
+            // PlayerId) repurpose a DIFFERENT player's participant row by supplying its Id -
             // verify the row actually belongs to this player and this MatchDay before touching it.
             if (participant.PlayerId != playerId || participant.MatchDayId != matchDay.Id)
             {
@@ -92,7 +92,7 @@ public class MatchDayParticipantService(
         catch (DbUpdateException) when (request.MatchDayParticipantId == null)
         {
             // Two concurrent first-time RSVPs from the same player both pass the AnyAsync check
-            // above before either commits — the unique index on (MatchDayId, PlayerId) is the
+            // above before either commits - the unique index on (MatchDayId, PlayerId) is the
             // real guard; map its violation to the same friendly 409 instead of a masked 500.
             throw new MatchDayServiceException(RestErrorMessageDetail.AlreadyParticipant, HttpStatusCode.Conflict);
         }
@@ -132,7 +132,7 @@ public class MatchDayParticipantService(
             .Select(p => p.PlayerId).ToListAsync();
 
         // For each candidate player, count how many times they've played goalkeeper for teams
-        // NOT in the excluded list (i.e. teams already formed for this MatchDay) — fewer =
+        // NOT in the excluded list (i.e. teams already formed for this MatchDay) - fewer =
         // higher priority for a new goalkeeper assignment.
         return await db.Players.Where(p => playerIds.Contains(p.Id))
             .Select(p => new GoalkeeperStatsResponse

@@ -77,7 +77,7 @@ public class R2MediaStorageProvider : IMediaStorageProvider
         }
         catch
         {
-            // Swallow — matches Java's log-and-continue.
+            // Swallow - matches Java's log-and-continue.
         }
     }
 

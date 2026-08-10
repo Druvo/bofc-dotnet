@@ -19,6 +19,6 @@ public class LineupPlayerRequest
     [Required(ErrorMessage = "Player ID is mandatory")]
     public long? PlayerId { get; set; }
 
-    /// <summary>"FIT" | "DOUBTFUL" | "INJURED" — defaults to FIT if omitted.</summary>
+    /// <summary>"FIT" | "DOUBTFUL" | "INJURED" - defaults to FIT if omitted.</summary>
     public string? Availability { get; set; }
 }

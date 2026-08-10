@@ -1,6 +1,6 @@
 namespace BofcBackend.Api.Domain.Entities;
 
-/// <summary>Port of entity/Role.java. Not audited in Java (no AuditBase) — matched here.</summary>
+/// <summary>Port of entity/Role.java. Not audited in Java (no AuditBase) - matched here.</summary>
 public class Role
 {
     public long Id { get; set; }

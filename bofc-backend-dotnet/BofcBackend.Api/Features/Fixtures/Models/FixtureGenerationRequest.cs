@@ -4,7 +4,7 @@ namespace BofcBackend.Api.Features.Fixtures.Models;
 
 /// <summary>
 /// Port of model/FixtureGenerationRequest.java. Several fields (StartDate/MatchesPerDay/DaysRest/
-/// MaxTeamsPerGroup/CustomMatchPairings) are dead in Java's FixtureGenerationServiceImpl — never
+/// MaxTeamsPerGroup/CustomMatchPairings) are dead in Java's FixtureGenerationServiceImpl - never
 /// read by generateFixtures, only TeamIds/MatchDates/TimeGapMinutes/MatchDurationMinutes/VenueId
 /// are used. Kept here anyway for wire-shape parity with anything the frontend might still send.
 /// </summary>
@@ -26,7 +26,7 @@ public class FixtureGenerationRequest
     public List<CustomMatchPairing>? CustomMatchPairings { get; set; }
 
     /// <summary>Insert a one-time break after this match number (1-based) in the generated
-    /// schedule — e.g. 3 means the break falls between match 3 and match 4. Null/0 = no break.</summary>
+    /// schedule - e.g. 3 means the break falls between match 3 and match 4. Null/0 = no break.</summary>
     public int? BreakAfterMatchNumber { get; set; }
 
     /// <summary>Length of the one-time break, added on top of the normal gap after

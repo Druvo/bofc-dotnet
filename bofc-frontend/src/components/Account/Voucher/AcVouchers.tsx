@@ -238,7 +238,7 @@ function AcVouchers() {
                                         </td>
                                         <td className="px-3 py-2.5"><Badge variant="light">{record.voucherType.name}</Badge></td>
                                         <td className="px-3 py-2.5 text-right font-semibold text-gray-800 dark:text-white/90"><FormatCurrencyWithSymbol amount={record.amount} /></td>
-                                        <td className="px-3 py-2.5">{ref ? <Badge variant="light">{ref}</Badge> : <span className="text-gray-400">—</span>}</td>
+                                        <td className="px-3 py-2.5">{ref ? <Badge variant="light">{ref}</Badge> : <span className="text-gray-400">-</span>}</td>
                                     </tr>
                                 );
                             })}

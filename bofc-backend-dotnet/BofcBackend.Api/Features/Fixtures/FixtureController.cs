@@ -13,12 +13,12 @@ using Microsoft.EntityFrameworkCore;
 namespace BofcBackend.Api.Features.Fixtures;
 
 /// <summary>
-/// Port of controller/FixtureController.java — the legacy auto-fixture-generation controller.
+/// Port of controller/FixtureController.java - the legacy auto-fixture-generation controller.
 /// Marked @deprecated in Java in favor of the manual fixture system (MatchDayRoundController /
 /// RoundGroupController / LogicNodeController) but still live, so ported as-is.
 ///
 /// Has its own convertToResponse (with disciplinary-card counts from MatchEvents) distinct from
-/// MatchManagementService's — matches Java's actual duplication rather than reusing that mapper.
+/// MatchManagementService's - matches Java's actual duplication rather than reusing that mapper.
 /// </summary>
 [ApiController]
 [Route("fixtures")]

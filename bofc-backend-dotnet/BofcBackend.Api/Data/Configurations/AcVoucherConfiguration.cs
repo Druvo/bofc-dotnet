@@ -21,7 +21,7 @@ public class AcVoucherConfiguration : IEntityTypeConfiguration<AcVoucher>
         builder.Property(v => v.PostDate).HasColumnName("post_date").HasColumnType("date");
         builder.Property(v => v.VoucherTypeId).HasColumnName("voucher_type_id").IsRequired();
 
-        // Java's @JoinColumn(name = "payment_id") on the FK — not "bill_payment_id".
+        // Java's @JoinColumn(name = "payment_id") on the FK - not "bill_payment_id".
         builder.Property(v => v.BillPaymentId).HasColumnName("payment_id");
         builder.Property(v => v.CollectionId).HasColumnName("collection_id");
 
@@ -33,7 +33,7 @@ public class AcVoucherConfiguration : IEntityTypeConfiguration<AcVoucher>
         builder.HasOne(v => v.PostedBy).WithMany().HasForeignKey(v => v.PostedById).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(v => v.VoucherType).WithMany().HasForeignKey(v => v.VoucherTypeId).OnDelete(DeleteBehavior.Restrict);
 
-        // Deleting the AcCollection/AcBillPayment cascades to its 1:1 AcVoucher — matches Java's
+        // Deleting the AcCollection/AcBillPayment cascades to its 1:1 AcVoucher - matches Java's
         // cascade=ALL,orphanRemoval=true declared on the mappedBy (inverse/principal) side.
         builder.HasOne(v => v.Collection).WithOne(c => c!.Voucher)
             .HasForeignKey<AcVoucher>(v => v.CollectionId).OnDelete(DeleteBehavior.Cascade);

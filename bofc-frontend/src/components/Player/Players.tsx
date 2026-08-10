@@ -52,7 +52,7 @@ function Players() {
   const playersQuery = useGetPlayersQuery();
   const { data: playersData, isLoading, refetch } = playersQuery;
 
-  // TEMP DEBUG — remove after root-causing the empty-render bug.
+  // TEMP DEBUG - remove after root-causing the empty-render bug.
   // eslint-disable-next-line react-hooks/rules-of-hooks
   React.useEffect(() => {
     // eslint-disable-next-line no-console
@@ -229,7 +229,7 @@ function Players() {
 
   const hasText = (value?: string | null) => {
     const trimmed = value?.trim();
-    return !!trimmed && trimmed !== "—" && trimmed !== "-";
+    return !!trimmed && trimmed !== "-" && trimmed !== "-";
   };
 
   const canManagePlayers = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN");
@@ -325,7 +325,7 @@ function Players() {
                   </span>
                 )}
                 <span className="flex items-center gap-1.5 text-theme-xs text-gray-500 dark:text-gray-400">
-                  <span className="text-[10px] uppercase tracking-wide text-brand-500 dark:text-brand-400">ID</span> {record.employeeId || "—"}
+                  <span className="text-[10px] uppercase tracking-wide text-brand-500 dark:text-brand-400">ID</span> {record.employeeId || "-"}
                 </span>
               </div>
 
@@ -445,11 +445,11 @@ function Players() {
                           </span>
                         )}
                         {!hasText(record.teamsId) && !hasText(record.mobileNo) && (
-                          <span className="text-theme-xs text-gray-400 dark:text-gray-500">—</span>
+                          <span className="text-theme-xs text-gray-400 dark:text-gray-500">-</span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{record.employeeId || "—"}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{record.employeeId || "-"}</td>
                     <td className="px-4 py-3">
                       <StatusBadge active={!!record.active} />
                     </td>

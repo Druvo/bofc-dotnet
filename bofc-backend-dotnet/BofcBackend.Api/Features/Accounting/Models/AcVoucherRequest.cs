@@ -5,7 +5,7 @@ namespace BofcBackend.Api.Features.Accounting.Models;
 /// <summary>
 /// Port of model/account/AcVoucherRequest.java. Java's Collection/BillPayment fields carry full
 /// JPA entities (set internally by AcCollectionService/AcBillPaymentService before delegating to
-/// AcVoucherService) — modeled here as plain nullable ids instead, since only the id is ever used
+/// AcVoucherService) - modeled here as plain nullable ids instead, since only the id is ever used
 /// to set the FK; the public endpoint never populates them (a client has no entity graph to send).
 /// </summary>
 public class AcVoucherRequest

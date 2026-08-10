@@ -259,10 +259,10 @@ export default function JoinMatchDay() {
             <GoalKeeperDrawer matchDayId={matchDayId} triggerIcon={<TrophyOutlined />} />
             <p className="text-theme-xs text-gray-500 dark:text-gray-400">
               {myParticipation?.participationStatus === true
-                ? "You're confirmed — check back here for your team assignment."
+                ? "You're confirmed - check back here for your team assignment."
                 : myParticipation?.participationStatus === false
                 ? "You are currently marked as unavailable for this MatchDay."
-                : "Awaiting your response — let us know if you're in."}
+                : "Awaiting your response - let us know if you're in."}
             </p>
           </div>
 
@@ -336,7 +336,7 @@ export default function JoinMatchDay() {
             {filteredTableData.map((r) => {
               const isMe = r.playerId === Number(loginInfo.userId);
               // COORDINATOR manages this MatchDay's teams/lineup/fixtures/prizes elsewhere in the
-              // app — excluding it here was an arbitrary gap for editing another player's RSVP.
+              // app - excluding it here was an arbitrary gap for editing another player's RSVP.
               const canEdit = canManageTeams(loginInfo.roles) || isMe;
               const photoUrl = toAbsolutePlayerPhotoUrl(r.photoUrl);
               return (

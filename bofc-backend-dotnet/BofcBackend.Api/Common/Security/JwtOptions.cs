@@ -1,6 +1,6 @@
 namespace BofcBackend.Api.Common.Security;
 
-/// <summary>Bound from the "Jwt" config section — mirrors jwt.secret / jwt.expiration in application.yml.</summary>
+/// <summary>Bound from the "Jwt" config section - mirrors jwt.secret / jwt.expiration in application.yml.</summary>
 public class JwtOptions
 {
     public string Secret { get; set; } = string.Empty;

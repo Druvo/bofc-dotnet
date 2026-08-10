@@ -24,7 +24,7 @@ interface TeamIdentityCellProps {
 /**
  * Rank badge + team crest + team name, matching ViewerTableTab's exact
  * avatar/logo/initials rendering (same teamLogoUtils helpers) so any
- * consumer gets a real team crest instead of text-only. Layout only —
+ * consumer gets a real team crest instead of text-only. Layout only -
  * callers own everything else in their row (stat columns, click handlers).
  */
 export function TeamIdentityCell({

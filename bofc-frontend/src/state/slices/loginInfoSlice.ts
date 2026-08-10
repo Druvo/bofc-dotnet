@@ -23,7 +23,7 @@ const blankState: LoginInfoState = {
 
 // Hydrate synchronously from localStorage so the very first render already
 // knows whether the user is logged in. Without this, the store starts blank
-// and only picks up the token in a useLayoutEffect after mount — during that
+// and only picks up the token in a useLayoutEffect after mount - during that
 // gap, App renders its "logged out" routes, whose catch-all redirects to
 // /login, which itself isn't a valid route once the real auth state lands a
 // moment later, bouncing to "/". Net effect: any deep link (a pasted/shared

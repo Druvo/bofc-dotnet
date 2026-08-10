@@ -8,7 +8,7 @@ namespace BofcBackend.Api.Common.Scheduling;
 /// <summary>
 /// Port of schedules/AuctionTimerScheduler.java's @Scheduled(fixedDelay = 1000). Checks every
 /// second for auction timers that have expired; when one has, clears the timer and broadcasts
-/// TIMER_EXPIRED. The admin must still manually mark sold/unsold — no auto-resolution.
+/// TIMER_EXPIRED. The admin must still manually mark sold/unsold - no auto-resolution.
 /// </summary>
 public class AuctionTimerBackgroundService(IServiceScopeFactory scopeFactory, ILogger<AuctionTimerBackgroundService> logger)
     : BackgroundService

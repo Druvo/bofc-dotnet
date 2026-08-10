@@ -13,16 +13,16 @@ namespace BofcBackend.Api.Features.Accounting;
 /// <summary>
 /// Port of service/account/AcChartServiceImpl.java. The chart-of-accounts table is a small,
 /// config-like reference table (not expected to grow into the thousands), so response
-/// conversion loads every chart + nature once and resolves the parent chain in memory —
+/// conversion loads every chart + nature once and resolves the parent chain in memory -
 /// avoids either an unbounded EF Include chain or N+1 queries for an arbitrarily deep hierarchy.
 /// </summary>
 public class AcChartService(BofcDbContext db, AcNatureService acNatureService, IOptions<AccountingOptions> accountingOptions)
 {
-    /// <summary>The "cash" chart every collection debits and every bill payment credits — resolved from Settings (admin-editable, live) falling back to the Accounting:CashChartCode appsettings default.</summary>
+    /// <summary>The "cash" chart every collection debits and every bill payment credits - resolved from Settings (admin-editable, live) falling back to the Accounting:CashChartCode appsettings default.</summary>
     public async Task<AcChart> GetCashChartAsync() =>
         await GetAcChartByCodeAsync(await ResolveCodeAsync(s => s.CashChartCode, accountingOptions.Value.CashChartCode));
 
-    /// <summary>The income chart credited when a player collection is recorded — resolved the same way as GetCashChartAsync.</summary>
+    /// <summary>The income chart credited when a player collection is recorded - resolved the same way as GetCashChartAsync.</summary>
     public async Task<AcChart> GetCollectionIncomeChartAsync() =>
         await GetAcChartByCodeAsync(await ResolveCodeAsync(s => s.CollectionIncomeChartCode, accountingOptions.Value.CollectionIncomeChartCode));
 
@@ -45,14 +45,14 @@ public class AcChartService(BofcDbContext db, AcNatureService acNatureService, I
 
     /// <summary>
     /// Resolves a chart by its business-meaningful Code (e.g. "1001") rather than its surrogate
-    /// database Id — used wherever application code needs to reference a specific well-known
+    /// database Id - used wherever application code needs to reference a specific well-known
     /// account (e.g. "the cash account") without hardcoding an Id that shifts every time the
     /// chart of accounts is reseeded or reordered.
     /// </summary>
     public async Task<AcChart> GetAcChartByCodeAsync(string code) =>
         await db.AcCharts.Include(c => c.Nature).FirstOrDefaultAsync(c => c.Code == code)
         ?? throw new ResourceNotFoundException(
-            $"{RestErrorMessageDetail.AcChartNotFound} (configured code: '{code}' — check Accounting:CashChartCode / Accounting:CollectionIncomeChartCode)",
+            $"{RestErrorMessageDetail.AcChartNotFound} (configured code: '{code}' - check Accounting:CashChartCode / Accounting:CollectionIncomeChartCode)",
             HttpStatusCode.NotFound);
 
     public async Task<AcChartResponse> GetAcChartResponseByIdAsync(long id)

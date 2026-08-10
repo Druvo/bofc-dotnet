@@ -5,7 +5,7 @@ import { PlayerMetric } from "../../../interfaces/IPlayerCollectionMetrics";
 import { Spinner } from "../../ui/loader";
 
 // Reuses the same "current month, no contribution yet, active player" rule
-// PlayerCollectionMetricsTable uses to flag a cell "Due" — surfaced here as a
+// PlayerCollectionMetricsTable uses to flag a cell "Due" - surfaced here as a
 // standalone list so it doesn't require opening the full table to see who's
 // behind this month.
 const UpcomingDuesWidget: React.FC = () => {

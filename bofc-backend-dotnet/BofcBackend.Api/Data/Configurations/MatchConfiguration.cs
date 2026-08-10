@@ -9,7 +9,7 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
     public void Configure(EntityTypeBuilder<Match> builder)
     {
         // Java escapes this table name with backticks (`match`) since MATCH is a MySQL
-        // reserved word for full-text search syntax — same table name here, Pomelo
+        // reserved word for full-text search syntax - same table name here, Pomelo
         // backtick-quotes identifiers automatically.
         builder.ToTable("match");
         builder.HasKey(m => m.Id);

@@ -14,7 +14,7 @@ public class MatchResponse
     public string? VenueMapLink { get; set; }
     public DateTime MatchDate { get; set; }
 
-    /// <summary>MatchDate + MatchDurationMinutes — null when duration isn't set.</summary>
+    /// <summary>MatchDate + MatchDurationMinutes - null when duration isn't set.</summary>
     public DateTime? EndTime { get; set; }
     public string MatchStatus { get; set; } = string.Empty;
     public int? MatchOrder { get; set; }
@@ -29,11 +29,11 @@ public class MatchResponse
     public int HomeTeamScore { get; set; }
     public int AwayTeamScore { get; set; }
 
-    /// <summary>Which of the club's 2 physical jerseys each side wears for this match — null until set via Add/Edit Fixture.</summary>
+    /// <summary>Which of the club's 2 physical jerseys each side wears for this match - null until set via Add/Edit Fixture.</summary>
     public string? HomeJerseyColor { get; set; }
     public string? AwayJerseyColor { get; set; }
 
-    // Unused by Java's convertToResponse mapping today (never populated) — kept for wire
+    // Unused by Java's convertToResponse mapping today (never populated) - kept for wire
     // compatibility in case the frontend already reads them as optional fields.
     public int? HomeYellowCards { get; set; }
     public int? HomeRedCards { get; set; }

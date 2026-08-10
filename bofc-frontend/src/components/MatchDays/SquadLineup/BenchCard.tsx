@@ -39,7 +39,7 @@ export default function BenchCard({
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
-      <div className="mb-1 text-theme-sm font-bold text-gray-800 dark:text-white/90">Bench — {teamName}</div>
+      <div className="mb-1 text-theme-sm font-bold text-gray-800 dark:text-white/90">Bench - {teamName}</div>
       <div className="mb-3.5 text-theme-xs text-gray-400 dark:text-gray-500">{canManage ? hint : "Bench"}</div>
 
       <div className="flex flex-col gap-2">

@@ -3,7 +3,7 @@ using BofcBackend.Api.Domain.Enums;
 namespace BofcBackend.Api.Features.Teams.Models;
 
 /// <summary>
-/// Port of the MatchDayResponse shape as built by TeamManagementServiceImpl.getMatchDaysSummery —
+/// Port of the MatchDayResponse shape as built by TeamManagementServiceImpl.getMatchDaysSummery -
 /// same fields as Features.MatchDays.Models.MatchDayResponse plus the nested team/player list, kept
 /// as its own type here since the two builders populate a different field subset in Java.
 /// </summary>

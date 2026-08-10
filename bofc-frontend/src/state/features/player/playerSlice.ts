@@ -82,7 +82,7 @@ export const playerApi = apiWithTags.injectEndpoints({
             providesTags: ["player"],
         }),
 
-        // Board owns its own optimistic local state (see PlayerRankBoard) — no invalidatesTags,
+        // Board owns its own optimistic local state (see PlayerRankBoard) - no invalidatesTags,
         // an in-flight getPlayerRanks refetch would otherwise clobber a drag that hasn't saved yet.
         setPlayerRank: builder.mutation<BasicResType, { playerId: number; rank: number | null }>({
             query: ({ playerId, rank }) => ({

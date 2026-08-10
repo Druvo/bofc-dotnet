@@ -2,7 +2,7 @@ namespace BofcBackend.Api.Common.Storage;
 
 /// <summary>
 /// One options shape shared by all 3 storage profiles (player-profile, player-photo,
-/// team-logo) — consolidates config/StorageConfig.java, config/PlayerPhotoStorageConfig.java
+/// team-logo) - consolidates config/StorageConfig.java, config/PlayerPhotoStorageConfig.java
 /// and config/TeamLogoStorageConfig.java, which were near-identical.
 /// </summary>
 public class StorageOptions

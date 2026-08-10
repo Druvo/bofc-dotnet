@@ -68,7 +68,7 @@ export default function GroupTiebreakModal({
       title={
         <Space>
           <TrophyOutlined />
-          <span>Manual Tiebreak — {groupName}</span>
+          <span>Manual Tiebreak - {groupName}</span>
         </Space>
       }
       open={open}
@@ -81,7 +81,7 @@ export default function GroupTiebreakModal({
       <Paragraph type="secondary">
         Use this only to break a tie that points, goal difference, goals for,
         head-to-head and fair play could not resolve (e.g. a penalty shootout).
-        Arrange the teams in their final finishing order — the top team ranks
+        Arrange the teams in their final finishing order - the top team ranks
         highest.
       </Paragraph>
       <List

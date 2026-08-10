@@ -3,7 +3,7 @@ using System.Net;
 namespace BofcBackend.Api.Common.Exceptions;
 
 /// <summary>
-/// Base for the ported exception/{...}ServiceException.java hierarchy — each carries
+/// Base for the ported exception/{...}ServiceException.java hierarchy - each carries
 /// its own HttpStatusCode, same pattern as the Java @Getter HttpStatus field.
 /// </summary>
 public abstract class AppException : Exception
@@ -21,7 +21,7 @@ public class ResourceNotFoundException(string message, HttpStatusCode statusCode
 
 /// <summary>
 /// Named Bofc*SecurityException (not SecurityException) to avoid colliding with
-/// System.Security.SecurityException — the Java class shadows java.lang.SecurityException,
+/// System.Security.SecurityException - the Java class shadows java.lang.SecurityException,
 /// which isn't a naming collision worth reproducing in .NET.
 /// </summary>
 public class BofcSecurityException(string message, HttpStatusCode statusCode) : AppException(message, statusCode);

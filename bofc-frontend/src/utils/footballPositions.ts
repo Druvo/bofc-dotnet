@@ -1,8 +1,8 @@
 /** Short on-pitch labels for the backend's 12-value FootballPosition enum
- * (Domain/Enums/FootballPosition.cs) — used on Squad & Lineup pitch tokens and
+ * (Domain/Enums/FootballPosition.cs) - used on Squad & Lineup pitch tokens and
  * bench rows instead of a generic GK/DEF/MID/FWD line label. */
 const POSITION_ABBREVIATIONS: Record<string, string> = {
-  UNASSIGNED: "—",
+  UNASSIGNED: "-",
   GOALKEEPER: "GK",
   RIGHT_BACK: "RB",
   LEFT_BACK: "LB",
@@ -17,6 +17,6 @@ const POSITION_ABBREVIATIONS: Record<string, string> = {
 };
 
 export function getPositionAbbreviation(position?: string | null): string {
-  if (!position) return "—";
-  return POSITION_ABBREVIATIONS[position] || "—";
+  if (!position) return "-";
+  return POSITION_ABBREVIATIONS[position] || "-";
 }

@@ -23,8 +23,8 @@ interface GroupManagementProps {
 }
 
 const GROUP_FORMAT_OPTIONS = [
-  { value: GroupFormat.ROUND_ROBIN_SINGLE, label: "Round Robin (Single) — each pair plays once" },
-  { value: GroupFormat.ROUND_ROBIN_DOUBLE, label: "Round Robin (Double) — each pair plays twice" },
+  { value: GroupFormat.ROUND_ROBIN_SINGLE, label: "Round Robin (Single) - each pair plays once" },
+  { value: GroupFormat.ROUND_ROBIN_DOUBLE, label: "Round Robin (Double) - each pair plays twice" },
 ];
 
 interface FormValues {

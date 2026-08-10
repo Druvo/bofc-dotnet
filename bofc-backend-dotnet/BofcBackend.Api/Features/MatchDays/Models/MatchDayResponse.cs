@@ -13,7 +13,7 @@ public class MatchDayResponse
     public string? RoadmapImageUrl { get; set; }
     public DateTime MatchDayDate { get; set; }
 
-    /// <summary>How long the MatchDay runs, in minutes — null if not set when created.</summary>
+    /// <summary>How long the MatchDay runs, in minutes - null if not set when created.</summary>
     public int? DurationMinutes { get; set; }
     public long VenueId { get; set; }
     public string VenueName { get; set; } = string.Empty;

@@ -39,7 +39,7 @@ function PlayerChip({ player, index, isDisabled }: { player: PlayerRankListItem;
   );
 }
 
-// Admin-only drag-and-drop rank board — a tier board, not a single ordered list: many players
+// Admin-only drag-and-drop rank board - a tier board, not a single ordered list: many players
 // can share the same rank (1-10), so it's two panels (an unranked pool + 10 rank rows) rather
 // than one reorderable list. Separate from the plain Player List/edit pages, which don't expose
 // this at all.
@@ -68,7 +68,7 @@ function PlayerRankBoard() {
     if (!result.destination) return;
     const sourceRank = rankFromDroppableId(result.source.droppableId);
     const destRank = rankFromDroppableId(result.destination.droppableId);
-    if (sourceRank === destRank) return; // Reordering within the same bucket has nothing to save — rank has no internal order.
+    if (sourceRank === destRank) return; // Reordering within the same bucket has nothing to save - rank has no internal order.
 
     const playerId = Number(result.draggableId);
     const previous = players;

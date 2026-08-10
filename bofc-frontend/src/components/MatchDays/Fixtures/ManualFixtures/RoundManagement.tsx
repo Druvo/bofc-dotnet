@@ -112,7 +112,7 @@ export default function RoundManagement({
       });
     } else if (isModalVisible && !isEditing) {
       // matchDayDate is naive-local already (Dhaka wall-clock, see utils.ts's showBdLocalTime
-      // doc comment) — no .utc()/.local() conversion, or this pre-fill silently disagrees with
+      // doc comment) - no .utc()/.local() conversion, or this pre-fill silently disagrees with
       // every other screen reading the same MatchDay.
       const tdt = matchDayDate ? dayjs(matchDayDate) : null;
       setValues({

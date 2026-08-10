@@ -1,7 +1,7 @@
 namespace BofcBackend.Api.Domain.Entities;
 
 /// <summary>
-/// One row per (notification, recipient) — this is what makes a recipient's
+/// One row per (notification, recipient) - this is what makes a recipient's
 /// notification history permanent and per-account (unlike the old client-side
 /// localStorage log it replaces).
 /// </summary>

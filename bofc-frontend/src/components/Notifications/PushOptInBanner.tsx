@@ -8,7 +8,7 @@ import { setNotificationsEnabled } from "../../utils/browserNotifications";
 const DISMISS_KEY = "bofc.pushOptInDismissed";
 
 // Browsers require a user gesture to prompt for Notification permission, so
-// this can't be automatic — a small dismissible banner on the one page users
+// this can't be automatic - a small dismissible banner on the one page users
 // visit specifically for notifications.
 const PushOptInBanner: React.FC = () => {
   const [visible, setVisible] = useState(false);

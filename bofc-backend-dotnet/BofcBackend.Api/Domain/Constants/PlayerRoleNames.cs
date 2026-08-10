@@ -3,7 +3,7 @@ namespace BofcBackend.Api.Domain.Constants;
 /// <summary>
 /// Port of enums/PlayerRole.java. Roles are stored as free-text rows in the `roles`
 /// table (Role.Name), not a DB enum, so these are well-known constants for
-/// [Authorize(Roles = "...")] attributes and role comparisons — same role as the
+/// [Authorize(Roles = "...")] attributes and role comparisons - same role as the
 /// Java enum's .name() usage (e.g. PlayerRole.ADMIN.name()).
 /// </summary>
 public static class PlayerRoleNames

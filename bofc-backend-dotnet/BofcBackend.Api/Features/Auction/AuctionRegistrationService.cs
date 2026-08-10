@@ -159,7 +159,7 @@ public class AuctionRegistrationService(
             ?? throw new ResourceNotFoundException("Current user not found");
 
         // Transaction: creating the player account (if needed) and approving the registration
-        // must succeed together — otherwise a failure here leaves a real, active login account
+        // must succeed together - otherwise a failure here leaves a real, active login account
         // permanently orphaned with no registration ever linked to it.
         await using var transaction = await db.Database.BeginTransactionAsync();
 
@@ -227,7 +227,7 @@ public class AuctionRegistrationService(
         }
 
         // Transaction: approving the registration (which may create a real player account),
-        // and adding that player to the auction pool, must succeed together — otherwise a
+        // and adding that player to the auction pool, must succeed together - otherwise a
         // failure partway through leaves an orphaned player account or an approved
         // registration that never actually made it into the pool.
         await using var transaction = await db.Database.BeginTransactionAsync();
@@ -253,7 +253,7 @@ public class AuctionRegistrationService(
 
         if (!await db.AuctionPlayers.AnyAsync(p => p.MatchDayId == matchDayId && p.PlayerId == player.Id))
         {
-            // Java: playerType = registration.getApprovedBy() != null ? OUTSIDE : EXISTING — replicated
+            // Java: playerType = registration.getApprovedBy() != null ? OUTSIDE : EXISTING - replicated
             // as-is even though this reads oddly (ApprovedBy is set on nearly every approval path).
             var playerType = registration.ApprovedById != null ? AuctionPlayerType.OUTSIDE : AuctionPlayerType.EXISTING;
 

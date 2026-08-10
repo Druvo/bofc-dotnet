@@ -169,7 +169,7 @@ export default function UserProfile() {
             </div>
             <div className="flex min-w-0 flex-col">
                 <span className="text-[11px] uppercase tracking-wide text-gray-400">{label}</span>
-                <span className={`truncate text-theme-sm ${value ? "text-gray-800 dark:text-white/90" : "text-gray-400"}`}>{value || "—"}</span>
+                <span className={`truncate text-theme-sm ${value ? "text-gray-800 dark:text-white/90" : "text-gray-400"}`}>{value || "-"}</span>
             </div>
         </div>
     );
@@ -293,7 +293,7 @@ export default function UserProfile() {
                                 >
                                     {m.teamScore} - {m.opponentScore}
                                 </span>
-                                <span className="flex-1 truncate text-theme-base text-gray-500 dark:text-gray-400">{m.opponentTeamName || "—"}</span>
+                                <span className="flex-1 truncate text-theme-base text-gray-500 dark:text-gray-400">{m.opponentTeamName || "-"}</span>
                             </div>
 
                             <div className="mt-2 flex flex-wrap items-center justify-between gap-2.5 pl-[42px]">

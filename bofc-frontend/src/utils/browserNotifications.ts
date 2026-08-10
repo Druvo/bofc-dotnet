@@ -1,6 +1,6 @@
 // Notification permission helpers. History/delivery now live server-side
 // (see state/features/notifications/notificationSlice.ts + public/sw.js's
-// "push" handler) — this file used to also keep a localStorage-backed log,
+// "push" handler) - this file used to also keep a localStorage-backed log,
 // replaced by the backend's permanent per-account history.
 
 const STORAGE_KEY = "bofc.notificationsEnabled";
@@ -19,7 +19,7 @@ export const requestNotificationPermission = async (): Promise<NotificationPermi
   return Notification.requestPermission();
 };
 
-// User-level opt-in, separate from browser permission — lets someone grant
+// User-level opt-in, separate from browser permission - lets someone grant
 // permission once but still turn alerts off from the app's own UI.
 export const isNotificationsEnabled = (): boolean =>
   localStorage.getItem(STORAGE_KEY) === "true" && getNotificationPermission() === "granted";
@@ -33,7 +33,7 @@ interface ShowNotificationOptions extends NotificationOptions {
 }
 
 // In-tab-only popup for live events (auction bids/sales) that aren't part of
-// the admin-broadcast/permanent-history system — nothing persisted here.
+// the admin-broadcast/permanent-history system - nothing persisted here.
 export const showBrowserNotification = (
   title: string,
   options?: ShowNotificationOptions

@@ -5,7 +5,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-// Captures the browser's install prompt so a UI button can trigger it later —
+// Captures the browser's install prompt so a UI button can trigger it later -
 // Chrome/Edge suppress the automatic mini-infobar once preventDefault() runs,
 // so this is the only way to offer an "Install App" action from our own UI.
 export const usePwaInstall = () => {

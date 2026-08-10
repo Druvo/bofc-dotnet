@@ -1,6 +1,6 @@
 namespace BofcBackend.Api.Domain.Entities;
 
-/// <summary>One of the club's physical jerseys — SystemSettings owns a configurable-length list
+/// <summary>One of the club's physical jerseys - SystemSettings owns a configurable-length list
 /// (previously hardcoded to exactly 2, JerseyColorA/JerseyColorB) so a club with 3+ jerseys can
 /// configure all of them. Match-day jersey assignment (Match.HomeJerseyColor/AwayJerseyColor) is
 /// constrained to whatever's configured here. Not audited (small config table owned entirely by

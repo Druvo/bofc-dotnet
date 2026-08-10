@@ -17,7 +17,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-// Named "Collections Trend" rather than "income vs expense" — the backend has
+// Named "Collections Trend" rather than "income vs expense" - the backend has
 // no expense time-series endpoint (only current-total and per-account
 // listings, see IAccountsReport), so a true income-vs-expense chart would
 // have to fabricate the expense side. This shows the one real monthly trend

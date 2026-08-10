@@ -15,7 +15,7 @@ public class JwtTokenService : IJwtTokenService
     {
         _options = options.Value;
         // Java's Keys.hmacShaKeyFor(secret.getBytes()) uses the raw UTF-8 bytes of the
-        // configured string directly — it does NOT base64-decode it, even though the
+        // configured string directly - it does NOT base64-decode it, even though the
         // configured value looks base64-ish. Must match exactly for token interop.
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret));
     }

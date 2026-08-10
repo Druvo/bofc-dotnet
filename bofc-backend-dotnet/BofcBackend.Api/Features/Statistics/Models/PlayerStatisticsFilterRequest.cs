@@ -7,7 +7,7 @@ public class PlayerStatisticsFilterRequest
     /// <summary>Filter by MatchDay participation (null = all players; provided = only players in teams for that MatchDay).</summary>
     public long? MatchDayId { get; set; }
 
-    /// <summary>Season-cumulative leaderboard across every auto-created Match Day (IsWeeklyMatchDay=true), ignoring MatchDayId. Mutually exclusive with MatchDayId in practice — if both are set, MatchDayId wins.</summary>
+    /// <summary>Season-cumulative leaderboard across every auto-created Match Day (IsWeeklyMatchDay=true), ignoring MatchDayId. Mutually exclusive with MatchDayId in practice - if both are set, MatchDayId wins.</summary>
     public bool WeeklyMatchDaysOnly { get; set; }
 
     public FootballPosition? Position { get; set; }

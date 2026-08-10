@@ -22,7 +22,7 @@ public class CostTypeService(BofcDbContext db)
         {
             Name = request.Name!,
             Description = request.Description,
-            // Admin-only endpoint, always created active — matches Java's hardcoded isActive(true).
+            // Admin-only endpoint, always created active - matches Java's hardcoded isActive(true).
             IsActive = true,
         };
 

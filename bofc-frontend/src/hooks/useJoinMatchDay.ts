@@ -23,7 +23,7 @@ export default function useJoinMatchDay(matchDayId: number) {
     const [players, setPlayers] = useState<MatchDayPlayerInfoType[]>([]);
 
     // For a first-time joiner, `players` (and the matchDayParticipantId lookup below) only
-    // reflects reality again once the in-flight request's .then() runs — a second click for the
+    // reflects reality again once the in-flight request's .then() runs - a second click for the
     // SAME player fired before that lands would read the same stale "no participant row yet"
     // snapshot and also omit matchDayParticipantId, racing to create two rows for one player
     // (or applying the earlier click's value last, since whichever response resolves second
@@ -44,7 +44,7 @@ export default function useJoinMatchDay(matchDayId: number) {
             if (pendingPlayerIds.current.has(playerId)) return;
             pendingPlayerIds.current.add(playerId);
 
-            // No `players.find(...)` gate here on purpose — a brand-new matchDay
+            // No `players.find(...)` gate here on purpose - a brand-new matchDay
             // has zero participant rows, and this is the call that creates the
             // very first one. Gating on an existing row made a first-time joiner
             // unable to ever respond (see useJoinMatchDay callers).

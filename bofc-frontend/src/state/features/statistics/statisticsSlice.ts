@@ -166,7 +166,7 @@ export const statisticsApi = apiWithTags.injectEndpoints({
     }),
 
     /**
-     * Admin-only manual correction added on top of a player's match-derived stats — e.g. to
+     * Admin-only manual correction added on top of a player's match-derived stats - e.g. to
      * backfill history from before this app tracked matches. All zero if never set.
      */
     getPlayerStatAdjustment: builder.query<

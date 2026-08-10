@@ -87,7 +87,7 @@ export default function ClubRules() {
                         Club Rules
                     </h2>
                     <p className="max-w-[640px] text-theme-sm text-white/85 max-sm:text-xs" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
-                        Guidelines every member is expected to follow — on and off the pitch.
+                        Guidelines every member is expected to follow - on and off the pitch.
                     </p>
                 </div>
             </div>

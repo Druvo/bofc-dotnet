@@ -104,12 +104,12 @@ export default function PitchCard({
       </div>
       {formationError && <div className="mb-2.5 text-theme-xs text-error-500">{formationError}</div>}
 
-      {/* Pitch — deliberately kept as a fixed dark-green field with bright markers regardless of
-          app theme (a football pitch illustration, not theme-reactive chrome) — the neon accent
+      {/* Pitch - deliberately kept as a fixed dark-green field with bright markers regardless of
+          app theme (a football pitch illustration, not theme-reactive chrome) - the neon accent
           on player tokens is a genuine contrast/visibility choice against the dark field, not
           just styling, so it's left as-is while the surrounding card above was reskinned. */}
       <div
-        // Standard FIFA pitch is 105m x 68m — drawn goal-to-goal vertically, that's a
+        // Standard FIFA pitch is 105m x 68m - drawn goal-to-goal vertically, that's a
         // height:width ratio of ~1.54:1, not the near-square box a plain h-[460px]/w-full
         // produced on wide containers. Capping the width and deriving height from
         // aspect-ratio keeps it looking like an actual slim, tall field at any screen size.

@@ -45,7 +45,7 @@ public class MatchManagementService(
 
         // Plain read-check-write here would let two concurrent "start" clicks both pass the
         // SCHEDULED check above and both log a MATCH_STARTED event. ExecuteUpdateAsync's WHERE
-        // clause is an atomic compare-and-set at the DB row level — only one concurrent caller
+        // clause is an atomic compare-and-set at the DB row level - only one concurrent caller
         // can ever see claimed == 1.
         var startedAt = DateTime.UtcNow;
         var claimed = await db.Matches
@@ -70,7 +70,7 @@ public class MatchManagementService(
             MatchId = match.Id,
             EventType = MatchEventType.MATCH_STARTED,
             PlayerId = adminPlayer.Id,
-            TeamId = match.HomeTeamId, // placeholder — DB requires team_id even for system events
+            TeamId = match.HomeTeamId, // placeholder - DB requires team_id even for system events
             EventTime = 0,
             Description = $"Match started by {adminPlayer.Name}",
         });
@@ -177,7 +177,7 @@ public class MatchManagementService(
             throw new MatchDayServiceException($"Unknown match status '{request.MatchStatus}'", HttpStatusCode.BadRequest);
         }
 
-        // This endpoint is for score/elapsed-time corrections, not lifecycle transitions —
+        // This endpoint is for score/elapsed-time corrections, not lifecycle transitions -
         // setting MatchStatus to anything other than the match's current status here would
         // bypass StartMatchAsync/PauseMatchAsync/ResumeMatchAsync/CompleteMatchAsync entirely
         // (skipping the round-started check, MATCH_STARTED/COMPLETED event logging, stats
@@ -186,12 +186,12 @@ public class MatchManagementService(
         if (newStatus != match.MatchStatus)
         {
             throw new MatchDayServiceException(
-                "Match status can't be changed here — use the start/pause/resume/complete actions instead",
+                "Match status can't be changed here - use the start/pause/resume/complete actions instead",
                 HttpStatusCode.Conflict);
         }
 
         // Route through the same "must match recorded GOAL events" rule UpdateTeamScoreAsync
-        // enforces — this was previously a THIRD, unconstrained way to set the score (alongside
+        // enforces - this was previously a THIRD, unconstrained way to set the score (alongside
         // UpdateTeamScoreAsync's strict check and the event CRUD paths' +1/recompute), letting a
         // score silently drift out of sync with the actual goal events.
         if (request.HomeTeamScore != null)
@@ -231,12 +231,12 @@ public class MatchManagementService(
         var match = await GetMatchEntityAsync(request.MatchId!.Value);
 
         // UpdateMatchEventAsync/DeleteMatchEventAsync already lock a COMPLETED match's events to
-        // SUPERADMIN — recording a brand-new event had no equivalent check at all, letting anyone
+        // SUPERADMIN - recording a brand-new event had no equivalent check at all, letting anyone
         // who could reach this endpoint add goals/cards to a match that hasn't started yet or is
         // already finished, circumventing that lock and skewing stats after the fact.
         if (match.MatchStatus == MatchStatus.SCHEDULED)
         {
-            throw new MatchDayServiceException("Match hasn't started yet — start it before recording events", HttpStatusCode.Conflict);
+            throw new MatchDayServiceException("Match hasn't started yet - start it before recording events", HttpStatusCode.Conflict);
         }
         if (match.MatchStatus == MatchStatus.COMPLETED && !currentUser.IsInRole(Domain.Constants.PlayerRoleNames.SuperAdmin))
         {
@@ -635,12 +635,12 @@ public class MatchManagementService(
             VenueMapLink = match.Venue?.MapLink,
             MatchDate = match.MatchDate,
             // Once the match has actually started, project the end from when it really started
-            // rather than the originally-scheduled MatchDate — a match that kicked off late would
+            // rather than the originally-scheduled MatchDate - a match that kicked off late would
             // otherwise show a projected end time that's already wrong the moment it starts.
             // StartedAt is true UTC (DateTime.UtcNow) while MatchDate is naive-local Dhaka
-            // wall-clock (see MatchDay.MatchDayDate's doc comment — Match inherits the same
+            // wall-clock (see MatchDay.MatchDayDate's doc comment - Match inherits the same
             // convention from FixtureGenerationService/WeeklyMatchDayTeamGenerator, which build
-            // it directly off MatchDayDate with no conversion) — ConvertTimeFromUtc against the
+            // it directly off MatchDayDate with no conversion) - ConvertTimeFromUtc against the
             // host's local timezone (the same "host is configured for Dhaka" assumption every
             // DateTime.Now call in this codebase already relies on) brings it into the same
             // naive-local space instead of mixing two different absolute epochs.
@@ -680,7 +680,7 @@ public class MatchManagementService(
     private static MatchEventResponse ToResponse(MatchEvent matchEvent, Player? player, Team? team, Player? relatedPlayer)
     {
         // System events (MATCH_STARTED/MATCH_COMPLETED) carry the admin as "player" and the
-        // home team as a DB-constraint placeholder — hide the placeholder team in the response.
+        // home team as a DB-constraint placeholder - hide the placeholder team in the response.
         var isSystemEvent = matchEvent.EventType is MatchEventType.MATCH_STARTED or MatchEventType.MATCH_COMPLETED;
 
         return new MatchEventResponse

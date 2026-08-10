@@ -56,7 +56,7 @@ const PlayerStatCard: React.FC<{ record: IPlayerStatisticsData; photo?: string; 
                 <Avatar src={photo} name={record.playerName} seed={record.playerId} size={64} className="border-2 border-brand-500" />
                 <div className="flex min-w-0 flex-col">
                     <span className="truncate text-theme-sm font-bold text-gray-800 dark:text-white/90">{record.playerName}</span>
-                    <span className="truncate text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{record.position || "—"}</span>
+                    <span className="truncate text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{record.position || "-"}</span>
                 </div>
             </div>
 
@@ -254,7 +254,7 @@ const PlayerStatistics: React.FC = () => {
                                                 <Avatar src={photo} name={record.playerName} seed={record.playerId} size={36} className="border-2 border-brand-500" />
                                                 <div className="flex min-w-0 flex-col">
                                                     <span className="truncate font-semibold text-gray-800 dark:text-white/90">{record.playerName}</span>
-                                                    <span className="truncate text-theme-xs text-gray-400 dark:text-gray-500">{record.position || "—"}</span>
+                                                    <span className="truncate text-theme-xs text-gray-400 dark:text-gray-500">{record.position || "-"}</span>
                                                 </div>
                                             </div>
                                         </td>

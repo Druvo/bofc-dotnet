@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BofcBackend.Api.Features.Auction;
 
-/// <summary>Port of controller/auction/AuctionSettingsController.java — raw responses, no envelope.</summary>
+/// <summary>Port of controller/auction/AuctionSettingsController.java - raw responses, no envelope.</summary>
 [ApiController]
 [Route("match-days/{matchDayId}/auction/settings")]
 public class AuctionSettingsController(AuctionSettingsService auctionSettingsService) : ControllerBase

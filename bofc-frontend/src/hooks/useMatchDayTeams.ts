@@ -138,7 +138,7 @@ const useMatchDayTeams = (matchDayId: number) => {
             // Use PUT for updates (player already in same team), POST for new additions or moves
             if (isUpdate) {
                 // Player is already in this team - update their details (PUT)
-                // Optimistic update for better UX — applied for every position change
+                // Optimistic update for better UX - applied for every position change
                 // (including GOALKEEPER) so the card updates instantly instead of
                 // waiting for the round-trip + refetch to jump the UI afterward.
                 setTeams((prevTeams) =>
@@ -333,7 +333,7 @@ const useMatchDayTeams = (matchDayId: number) => {
             );
             await refetchMatchDay();
         } catch {
-            // Error toast already shown globally by apiSlice's baseQuery — just
+            // Error toast already shown globally by apiSlice's baseQuery - just
             // revert the optimistic rename so the UI doesn't keep showing a name
             // that was never actually saved.
             await refetchMatchDay();

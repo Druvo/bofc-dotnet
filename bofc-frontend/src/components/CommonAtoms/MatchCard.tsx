@@ -4,7 +4,7 @@ import styles from "../MatchDayViewer/ViewerFixturesTab.module.css";
 /**
  * Canonical status→class mapper. ViewerFixturesTab and ViewerResultsTab each
  * had their own copy (getMatchCardClassName / getResultCardClassName) with
- * identical bodies — this is the single source of truth now.
+ * identical bodies - this is the single source of truth now.
  */
 export const getMatchCardClassName = (status: string): string => {
   if (status === "COMPLETED") return `${styles.matchCard} ${styles.matchCardCompleted}`;
@@ -28,7 +28,7 @@ const tagPillBase: React.CSSProperties = {
 /**
  * Canonical UPCOMING/LIVE/PAUSED/FT badge, previously private to
  * ViewerFixturesTab. ViewerResultsTab keeps its own richer variant (embeds
- * the live match timer inline) rather than being forced through this one —
+ * the live match timer inline) rather than being forced through this one -
  * see that file's status tag for why.
  */
 export const matchStatusTag = (status: string): React.ReactNode => {
@@ -57,7 +57,7 @@ interface MatchCardShellProps {
 
 /**
  * The outer card wrapper shared verbatim by every match/result card in the
- * matchDay viewer — status-driven className, and the mobile/desktop body
+ * matchDay viewer - status-driven className, and the mobile/desktop body
  * padding split. Callers own everything inside (top row, team block, score,
  * event breakdown) since that content differs enough between a fixture and a
  * result to stay bespoke per tab.

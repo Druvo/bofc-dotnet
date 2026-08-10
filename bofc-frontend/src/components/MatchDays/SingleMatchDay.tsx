@@ -89,7 +89,7 @@ function SingleMatchDay() {
 
   // activeMainTab lives in a global slice (shared across every MatchDay's page, not
   // just this one), so without this it carries over from whatever tab was last open
-  // on a DIFFERENT MatchDay — always land back on Team Building for a fresh MatchDay.
+  // on a DIFFERENT MatchDay - always land back on Team Building for a fresh MatchDay.
   useEffect(() => {
     dispatch(setActiveMainTab("team-building"));
     // eslint-disable-next-line react-hooks/exhaustive-deps

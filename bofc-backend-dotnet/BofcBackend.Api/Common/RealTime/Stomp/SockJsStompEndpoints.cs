@@ -1,10 +1,10 @@
 namespace BofcBackend.Api.Common.RealTime.Stomp;
 
 /// <summary>
-/// Port of config/WebSocketConfig.java's registry.addEndpoint("/ws/auction").withSockJS() —
+/// Port of config/WebSocketConfig.java's registry.addEndpoint("/ws/auction").withSockJS() -
 /// hand-rolled since ASP.NET Core has no built-in SockJS+STOMP server and the frontend's
 /// useAuctionWebSocket hook (@stomp/stompjs + sockjs-client) speaks that exact wire protocol,
-/// not SignalR's. Only the "websocket" SockJS transport is implemented (see SockJsFraming) —
+/// not SignalR's. Only the "websocket" SockJS transport is implemented (see SockJsFraming) -
 /// sufficient because sockjs-client always prefers it when the browser supports raw WebSocket.
 /// </summary>
 public static class SockJsStompEndpoints

@@ -14,7 +14,7 @@ namespace BofcBackend.Api.Features.Statistics;
 /// <summary>
 /// Port of controller/StatisticsController.java. [AllowAnonymous] is applied per-action
 /// (not at the controller level) because ASP.NET Core's AllowAnonymous always wins over
-/// Authorize regardless of scope — a controller-level AllowAnonymous would silently disable
+/// Authorize regardless of scope - a controller-level AllowAnonymous would silently disable
 /// the auth gate on the one admin-only action (AggregateMatchDayStatistics) below.
 /// </summary>
 [ApiController]
@@ -88,7 +88,7 @@ public class StatisticsController(
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, statistics);
     }
 
-    /// <summary>Admin-only manual correction on top of this one Match's derived stats — see PlayerStatAdjustment.</summary>
+    /// <summary>Admin-only manual correction on top of this one Match's derived stats - see PlayerStatAdjustment.</summary>
     [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
     [HttpGet("matches/{matchId}/players/{playerId}/adjustment")]
     public async Task<IActionResult> GetMatchPlayerStatAdjustment(long matchId, long playerId)

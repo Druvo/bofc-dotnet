@@ -18,7 +18,7 @@ const monthCellClasses = {
   empty: "border-gray-100 bg-gray-50 text-gray-400 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)] dark:text-gray-600",
 };
 
-// The dashboard's "your own" slice of the full Monthly Contributions table —
+// The dashboard's "your own" slice of the full Monthly Contributions table -
 // one card, this year, no year picker. The full multi-player table/card view
 // still lives at the bottom of the dashboard for admins who need everyone's.
 const MyContributionsCard: React.FC = () => {

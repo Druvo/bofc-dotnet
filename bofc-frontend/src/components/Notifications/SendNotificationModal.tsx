@@ -15,7 +15,7 @@ type TargetMode = "SPECIFIC" | "SELECTED" | "ALL";
 interface SendNotificationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Pre-target players (e.g. from a row/selection on the Players page) — still editable once open. */
+  /** Pre-target players (e.g. from a row/selection on the Players page) - still editable once open. */
   presetUserIds?: number[];
 }
 
@@ -192,7 +192,7 @@ const SendNotificationModal: React.FC<SendNotificationModalProps> = ({ isOpen, o
           />
           {!emailAvailable && (
             <p className="mt-1.5 text-theme-xs text-gray-400">
-              Email notifications are turned off in Settings — enable "Allow email on custom notifications" there to use this.
+              Email notifications are turned off in Settings - enable "Allow email on custom notifications" there to use this.
             </p>
           )}
         </div>

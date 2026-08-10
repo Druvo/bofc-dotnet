@@ -45,7 +45,7 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.StatusUpdateOk);
     }
 
-    /// <summary>Admin-only — Rank is never exposed via the anonymous-readable PlayerResponse endpoints above.</summary>
+    /// <summary>Admin-only - Rank is never exposed via the anonymous-readable PlayerResponse endpoints above.</summary>
     [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
     [HttpGet("{id}/rank")]
     public async Task<IActionResult> GetPlayerRank(long id)
@@ -62,7 +62,7 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
     }
 
-    /// <summary>Feeds the admin drag-and-drop rank board — separate from the plain player list/edit page.</summary>
+    /// <summary>Feeds the admin drag-and-drop rank board - separate from the plain player list/edit page.</summary>
     [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
     [HttpGet("ranks")]
     public async Task<IActionResult> GetPlayerRanks()
@@ -71,7 +71,7 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, ranks);
     }
 
-    // Was [AllowAnonymous] — PlayerService.UpdatePlayerAsync's self-or-admin check only ever
+    // Was [AllowAnonymous] - PlayerService.UpdatePlayerAsync's self-or-admin check only ever
     // blocked anonymous callers as a side effect of GetPlayerId() throwing on a missing claim,
     // not because this endpoint declared it needs authentication. Explicit [Authorize] now
     // fails safely at the boundary regardless of how that internal check evolves.
@@ -83,7 +83,7 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, response);
     }
 
-    /// <summary>Self-service only — always the caller's own row (no id param), so any authenticated player can set it, not just admins.</summary>
+    /// <summary>Self-service only - always the caller's own row (no id param), so any authenticated player can set it, not just admins.</summary>
     [Authorize]
     [HttpPut("me/theme-preference")]
     public async Task<IActionResult> UpdateOwnThemePreference([FromBody] ThemePreferenceRequest request)
@@ -108,7 +108,7 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, history);
     }
 
-    // Mirrors GetPlayerMatchHistory (StatisticsController) — same [AllowAnonymous] openness,
+    // Mirrors GetPlayerMatchHistory (StatisticsController) - same [AllowAnonymous] openness,
     // since goalkeeping appearances are non-sensitive roster/history info like match history.
     [AllowAnonymous]
     [HttpGet("{playerId}/goalkeeping-history")]

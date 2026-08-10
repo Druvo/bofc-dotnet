@@ -21,7 +21,7 @@
   margin-bottom: 12px;
 }
 
-/* Gold divider under the header — matches the match days page */
+/* Gold divider under the header - matches the match days page */
 .player-gold-divider {
   height: 2px;
   border-radius: 2px;
@@ -88,7 +88,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Players table — navy header with gold underline ────────────── */
+/* ── Players table - navy header with gold underline ────────────── */
 .bofc-players-table .ant-table {
   border-radius: 10px;
 }
@@ -181,7 +181,7 @@
   border-color: rgba(135, 146, 168, 0.3);
 }
 
-/* ── Action buttons — cohesive gold / neutral / green outlines ──── */
+/* ── Action buttons - cohesive gold / neutral / green outlines ──── */
 .bofc-act-btn.ant-btn {
   border-radius: 6px;
   font-weight: 600;

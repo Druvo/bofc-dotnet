@@ -11,14 +11,14 @@ public interface IMatchDayService
         string sortDirection, string? searchColumn, string? searchValue);
     Task<MatchDayResponse> UpdateMatchDayAsync(long id, MatchDayUpdateRequest request);
 
-    /// <summary>Port of MatchDayServiceImpl.updateMatchDayStatuses — invoked by the
+    /// <summary>Port of MatchDayServiceImpl.updateMatchDayStatuses - invoked by the
     /// daily/scheduled job (see Phase 3's MatchDaySchedulerService port).</summary>
     Task UpdateMatchDayStatusesAsync();
 
     Task ConcludeMatchDayAsync(long matchDayId);
 
     /// <summary>Permanently deletes a MatchDay and every row that references it (fixtures, teams,
-    /// lineups, rounds/groups, auction data, prizes, participants, goalkeeping history) — cannot
+    /// lineups, rounds/groups, auction data, prizes, participants, goalkeeping history) - cannot
     /// be undone. Unlike ConcludeMatchDayAsync/UpdateMatchDayStatusAsync, this actually removes
     /// rows rather than just changing status.</summary>
     Task HardDeleteMatchDayAsync(long matchDayId);
@@ -26,7 +26,7 @@ public interface IMatchDayService
     Task<MatchDayResponse> GetMostRecentMatchDayAsync();
     Task<MatchDayResponse?> GetMostRecentActiveMatchDayAsync();
 
-    /// <summary>The current/upcoming auto-created "Match Day" (IsWeeklyMatchDay=true) — null if the scheduler hasn't created one yet (e.g. the feature was just enabled).</summary>
+    /// <summary>The current/upcoming auto-created "Match Day" (IsWeeklyMatchDay=true) - null if the scheduler hasn't created one yet (e.g. the feature was just enabled).</summary>
     Task<MatchDayResponse?> GetCurrentMatchDayAsync();
     Task<List<MatchDayListResponse>> GetMatchDayListAsync(string? year);
     Task<List<string>> GetMatchDaySessionsAsync();

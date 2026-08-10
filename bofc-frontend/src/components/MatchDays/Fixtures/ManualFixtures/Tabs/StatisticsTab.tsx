@@ -33,7 +33,7 @@ const PlayerCardForScorers: React.FC<{
     if (rank === 1) return "#FFD700"; // Gold
     if (rank === 2) return "#C0C0C0"; // Silver
     if (rank === 3) return "#CD7F32"; // Bronze
-    return "#28552B"; // Default — brand green
+    return "#28552B"; // Default - brand green
   };
 
   return (
@@ -140,7 +140,7 @@ const PlayerCardForAssists: React.FC<{
     if (rank === 1) return "#FFD700"; // Gold
     if (rank === 2) return "#C0C0C0"; // Silver
     if (rank === 3) return "#CD7F32"; // Bronze
-    return "#28552B"; // Default — brand green
+    return "#28552B"; // Default - brand green
   };
 
   return (

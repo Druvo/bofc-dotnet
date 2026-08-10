@@ -4,7 +4,7 @@ export function getPlayerInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-/** First name (or first word) only — pitch tokens show just this under the avatar. */
+/** First name (or first word) only - pitch tokens show just this under the avatar. */
 export function getFirstName(name: string): string {
   return name.trim().split(/\s+/)[0] || name;
 }

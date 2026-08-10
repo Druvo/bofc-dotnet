@@ -2,7 +2,7 @@ namespace BofcBackend.Api.Common.Storage;
 
 /// <summary>
 /// Consolidates storage/playerphoto/PlayerPhotoStorageProvider.java and
-/// storage/teamlogo/TeamLogoStorageProvider.java — those two Java interfaces were
+/// storage/teamlogo/TeamLogoStorageProvider.java - those two Java interfaces were
 /// byte-for-byte identical in shape (only the key prefix and route segment differed),
 /// so this single interface + two named instances (see Program.cs) replaces both.
 /// </summary>

@@ -341,7 +341,7 @@ function AcCollection() {
                                 <>
                                     <tr key={record.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                                         <td className="px-3 py-2.5">
-                                            {record.transactionId ? <Badge variant="light">{record.transactionId}</Badge> : <span className="text-gray-400">—</span>}
+                                            {record.transactionId ? <Badge variant="light">{record.transactionId}</Badge> : <span className="text-gray-400">-</span>}
                                         </td>
                                         <td className="px-3 py-2.5">
                                             <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
@@ -361,10 +361,10 @@ function AcCollection() {
                                         </td>
                                         <td className="px-3 py-2.5 text-right font-semibold text-gray-800 dark:text-white/90"><FormatCurrencyWithSymbol amount={record.amount} /></td>
                                         <td className="px-3 py-2.5">
-                                            {record.voucherCode ? <Badge variant="light">{record.voucherCode}</Badge> : <span className="text-gray-400">—</span>}
+                                            {record.voucherCode ? <Badge variant="light">{record.voucherCode}</Badge> : <span className="text-gray-400">-</span>}
                                         </td>
                                         <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">
-                                            {record.paymentAccountName || <span className="text-gray-400">—</span>}
+                                            {record.paymentAccountName || <span className="text-gray-400">-</span>}
                                         </td>
                                         <td className="px-3 py-2.5 text-right font-bold text-brand-500 dark:text-brand-400"><FormatCurrencyWithSymbol amount={record.totalAmount} /></td>
                                         {canManage && (

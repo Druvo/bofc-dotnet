@@ -1,7 +1,7 @@
 namespace BofcBackend.Api.Domain.Entities;
 
 /// <summary>A team's starting XI + bench for the MatchDay it belongs to (one lineup per
-/// team, not per individual fixture — see design_handoff_squad_lineup for the feature spec).</summary>
+/// team, not per individual fixture - see design_handoff_squad_lineup for the feature spec).</summary>
 public class TeamLineup : AuditableEntity
 {
     public long Id { get; set; }

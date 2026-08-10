@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BofcBackend.Api.Features.Accounting;
 
-/// <summary>Port of service/account/AccountReportService.java — read-only ledger reports.</summary>
+/// <summary>Port of service/account/AccountReportService.java - read-only ledger reports.</summary>
 public class AccountReportService(BofcDbContext db, AcChartService acChartService)
 {
     /// <summary>
-    /// Income and Liability accounts are credit-normal — their natural, positive balance is
+    /// Income and Liability accounts are credit-normal - their natural, positive balance is
     /// Cr − Dr, the opposite of debit-normal accounts (Asset, Expense). Reporting Dr − Cr
     /// unconditionally for every account type made Income accounts display as negative
     /// (rendered in red as if something were wrong) even when the club took in real money.
@@ -89,7 +89,7 @@ public class AccountReportService(BofcDbContext db, AcChartService acChartServic
         }).ToList();
     }
 
-    /// <summary>Cash chart's own Dr − Cr — see GetAccountSummaryAsync's remarks; same reasoning applies here.</summary>
+    /// <summary>Cash chart's own Dr − Cr - see GetAccountSummaryAsync's remarks; same reasoning applies here.</summary>
     public async Task<decimal> GetCurrentBalanceAsync()
     {
         var cashChart = await acChartService.GetCashChartAsync();
@@ -99,7 +99,7 @@ public class AccountReportService(BofcDbContext db, AcChartService acChartServic
     }
 
     /// <summary>
-    /// Tracks the designated cash chart's own Dr/Cr — not "every Asset-nature Dr minus every
+    /// Tracks the designated cash chart's own Dr/Cr - not "every Asset-nature Dr minus every
     /// Expense-nature Dr". That older calculation only produced the right number by coincidence
     /// (cash happened to be the only asset account anyone posted to); it would silently drift the
     /// moment a second asset account (equipment, receivables) or a liability account got any
@@ -127,7 +127,7 @@ public class AccountReportService(BofcDbContext db, AcChartService acChartServic
     }
 
     /// <summary>
-    /// Scoped to the cash chart only — summing every Cr/Dr in the ledger regardless of which
+    /// Scoped to the cash chart only - summing every Cr/Dr in the ledger regardless of which
     /// chart it hit made TotalCollection always exactly equal TotalExpense (double-entry
     /// vouchers balance by construction, so summing the whole ledger nets to zero every time),
     /// so CurrentBalance was always 0.00 for every month regardless of real activity.
@@ -159,7 +159,7 @@ public class AccountReportService(BofcDbContext db, AcChartService acChartServic
         }).ToList();
     }
 
-    /// <summary>Scoped to the cash chart only — see GetMonthlyAccountSummaryAsync's remarks; same fix.</summary>
+    /// <summary>Scoped to the cash chart only - see GetMonthlyAccountSummaryAsync's remarks; same fix.</summary>
     public async Task<List<MonthWiseSummaryResponse>> GetMonthlyIncomeAndExpenseSummaryAsync(int? year)
     {
         var targetYear = year ?? DateTime.Now.Year;

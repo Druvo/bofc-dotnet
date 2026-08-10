@@ -19,6 +19,6 @@ public class TeamBudget : AuditableEntity
     public int TotalSpent { get; set; }
     public int PlayersBought { get; set; }
 
-    /// <summary>Optimistic-concurrency token (Java's @Version) — not the pessimistic FOR UPDATE lock used during bidding.</summary>
+    /// <summary>Optimistic-concurrency token (Java's @Version) - not the pessimistic FOR UPDATE lock used during bidding.</summary>
     public int Version { get; set; }
 }

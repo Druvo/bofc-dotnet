@@ -40,7 +40,7 @@ public class MatchDayController(IMatchDayService matchDayService, ITeamService t
     public async Task<IActionResult> GetMatchDayById(long id)
     {
         var response = await matchDayService.GetMatchDayByIdAsync(id);
-        // Java returns HttpStatus.FOUND (302) here with a JSON body — unusual for a GET-by-id
+        // Java returns HttpStatus.FOUND (302) here with a JSON body - unusual for a GET-by-id
         // but reproduced as-is since changing it is a behavior change, not a straight port.
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.Found, RestResponseMessage.CreateOk, response);
     }
@@ -70,7 +70,7 @@ public class MatchDayController(IMatchDayService matchDayService, ITeamService t
     }
 
     /// <summary>Permanently deletes the MatchDay and everything under it (fixtures, teams,
-    /// lineups, rounds/groups, auction data, prizes, participants) — cannot be undone. Restricted
+    /// lineups, rounds/groups, auction data, prizes, participants) - cannot be undone. Restricted
     /// to SuperAdmin, unlike every other MatchDay action here, given the blast radius.</summary>
     [Authorize(Roles = PlayerRoleNames.SuperAdmin)]
     [HttpDelete("{id}")]
@@ -96,7 +96,7 @@ public class MatchDayController(IMatchDayService matchDayService, ITeamService t
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
     }
 
-    /// <summary>The next non-concluded match — ONGOING (not stale) first, then soonest UPCOMING. Same pick as the Dashboard's "Next Match" card. Content is null when nothing qualifies.</summary>
+    /// <summary>The next non-concluded match - ONGOING (not stale) first, then soonest UPCOMING. Same pick as the Dashboard's "Next Match" card. Content is null when nothing qualifies.</summary>
     [AllowAnonymous]
     [HttpGet("next-active")]
     public async Task<IActionResult> GetNextActiveMatchDay()
@@ -105,7 +105,7 @@ public class MatchDayController(IMatchDayService matchDayService, ITeamService t
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
     }
 
-    /// <summary>The current/upcoming auto-created "Match Day" — content is null (not a 404) when the scheduler hasn't created one yet.</summary>
+    /// <summary>The current/upcoming auto-created "Match Day" - content is null (not a 404) when the scheduler hasn't created one yet.</summary>
     [AllowAnonymous]
     [HttpGet("current-match-day")]
     public async Task<IActionResult> GetCurrentMatchDay()

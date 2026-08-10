@@ -56,7 +56,7 @@ public class AcBillPaymentService(
     {
         var billPayment = await CreateOrUpdateBillPaymentEntityAsync(null, request);
 
-        // Transaction: a bill payment row must never persist without its ledger voucher —
+        // Transaction: a bill payment row must never persist without its ledger voucher -
         // if voucher creation fails (e.g. a bad chart-of-account reference), the whole
         // thing rolls back instead of leaving an orphaned, un-vouchered payment.
         await using var transaction = await db.Database.BeginTransactionAsync();
@@ -97,7 +97,7 @@ public class AcBillPaymentService(
     {
         var costType = await costTypeService.GetCostTypeEntityAsync(billPayment.CostTypeId);
 
-        // Resolved by Code (Settings, falling back to appsettings), not a hardcoded chart Id — see AcChartService.
+        // Resolved by Code (Settings, falling back to appsettings), not a hardcoded chart Id - see AcChartService.
         var cashChart = await acChartService.GetCashChartAsync();
 
         var voucherRequest = new AcVoucherRequest

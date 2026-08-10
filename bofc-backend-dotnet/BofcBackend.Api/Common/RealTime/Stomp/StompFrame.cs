@@ -9,7 +9,7 @@ public class StompFrame
 
     public static StompFrame Parse(string raw)
     {
-        // A lone newline (or empty string) is a heartbeat — not a real frame.
+        // A lone newline (or empty string) is a heartbeat - not a real frame.
         var lines = raw.Split('\n');
         var frame = new StompFrame { Command = lines[0].Trim() };
 

@@ -61,7 +61,7 @@ public class NotificationService(
         var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
         if (settings is not { NotifyCustomEmailEnabled: true })
         {
-            logger.LogInformation("Custom email notifications are disabled in Settings — skipping email for notification {NotificationId}", notification.Id);
+            logger.LogInformation("Custom email notifications are disabled in Settings - skipping email for notification {NotificationId}", notification.Id);
             return;
         }
 
@@ -80,14 +80,14 @@ public class NotificationService(
         var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
         if (settings is { PushNotificationsEnabled: false })
         {
-            logger.LogInformation("Push notifications are disabled in Settings — skipping push for notification {NotificationId}", notification.Id);
+            logger.LogInformation("Push notifications are disabled in Settings - skipping push for notification {NotificationId}", notification.Id);
             return;
         }
 
         var vapid = vapidOptions.Value;
         if (string.IsNullOrWhiteSpace(vapid.PublicKey) || string.IsNullOrWhiteSpace(vapid.PrivateKey))
         {
-            logger.LogWarning("Vapid keys are not configured — skipping push delivery for notification {NotificationId}", notification.Id);
+            logger.LogWarning("Vapid keys are not configured - skipping push delivery for notification {NotificationId}", notification.Id);
             return;
         }
 
@@ -110,7 +110,7 @@ public class NotificationService(
             }
             catch (WebPushException ex) when (ex.StatusCode is HttpStatusCode.NotFound or HttpStatusCode.Gone)
             {
-                // Subscription expired or the user unsubscribed at the browser level — prune it.
+                // Subscription expired or the user unsubscribed at the browser level - prune it.
                 deadSubscriptionIds.Add(subscription.Id);
             }
             catch (WebPushException ex)

@@ -27,11 +27,11 @@ public class MatchDayRoundConfiguration : IEntityTypeConfiguration<MatchDayRound
         builder.Property(r => r.UpdatedDate).HasColumnName("updated_date");
 
         // Note: cascade-delete is intentionally NOT wired at the EF Core level for the
-        // round/group/match graph — several entities (AdvancementRule, LogicNode) have
+        // round/group/match graph - several entities (AdvancementRule, LogicNode) have
         // two FKs into MatchDayRound (source + target), and EF Core rejects the
         // resulting multiple-cascade-paths model outright. Cross-cutting deletes for this
         // subtree need explicit application code in the Phase 3 service layer, not
-        // DB-level ON DELETE CASCADE — see the same note repeated on the affected configs.
+        // DB-level ON DELETE CASCADE - see the same note repeated on the affected configs.
         builder.HasOne(r => r.MatchDay).WithMany().HasForeignKey(r => r.MatchDayId).OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(r => r.Groups).WithOne(g => g.Round).HasForeignKey(g => g.RoundId).OnDelete(DeleteBehavior.Restrict);

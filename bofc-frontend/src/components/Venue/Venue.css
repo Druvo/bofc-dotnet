@@ -1,5 +1,5 @@
 /* ============================================================
-   Venues page — navy & gold club theme
+   Venues page - navy & gold club theme
    (mirrors the players list table styling)
    ============================================================ */
 
@@ -25,7 +25,7 @@
   background: linear-gradient(90deg, #c6a15b 0%, rgba(198, 161, 91, 0) 60%);
 }
 
-/* ── Venues table — navy header with gold underline ─────────────── */
+/* ── Venues table - navy header with gold underline ─────────────── */
 .bofc-venue-table .ant-table {
   border-radius: 10px;
 }
@@ -85,7 +85,7 @@
   border: 1px solid rgba(224, 115, 107, 0.38);
 }
 
-/* ── Edit action button — gold outline ──────────────────────────── */
+/* ── Edit action button - gold outline ──────────────────────────── */
 .bofc-act-btn.ant-btn {
   border-radius: 6px;
   font-weight: 600;

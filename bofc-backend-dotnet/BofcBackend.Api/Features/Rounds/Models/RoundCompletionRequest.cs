@@ -10,6 +10,6 @@ public class RoundCompletionRequest
     /// <summary>Whether to recalculate group standings (default: true).</summary>
     public bool? RecalculateStandings { get; set; }
 
-    /// <summary>Manual team selection for advancement — teams to advance to the next round. If empty, the round completes without advancement.</summary>
+    /// <summary>Manual team selection for advancement - teams to advance to the next round. If empty, the round completes without advancement.</summary>
     public List<long>? SelectedTeamIds { get; set; }
 }

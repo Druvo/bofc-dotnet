@@ -2,7 +2,7 @@ import React from "react";
 
 /**
  * TailAdmin Free v2.3.0 button (src/partials/buttons/button-*.html).
- * variant/size control which of TailAdmin's exact class combinations apply —
+ * variant/size control which of TailAdmin's exact class combinations apply -
  * no new visual patterns invented, just parameterized.
  */
 type ButtonVariant = "primary" | "outline" | "danger";

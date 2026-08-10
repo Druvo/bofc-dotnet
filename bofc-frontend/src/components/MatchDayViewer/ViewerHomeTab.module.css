@@ -41,7 +41,7 @@
   word-break: break-word;
 }
 
-/* Single one-time reveal on mount — not a forever-looping animation */
+/* Single one-time reveal on mount - not a forever-looping animation */
 .titleReveal {
   display: block;
   opacity: 0;

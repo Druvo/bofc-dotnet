@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace BofcBackend.Api.Features.Auction.Models;
 
 /// <summary>
-/// Port of model/auction/BidRequest.java — deliberately just these two fields. The frontend's
+/// Port of model/auction/BidRequest.java - deliberately just these two fields. The frontend's
 /// BidRequest TS type also sends an auctionPlayerId, but Java's model doesn't declare it (bids
 /// always target session.currentAuctionPlayer server-side, never a client-specified id) and
 /// silently ignores the extra JSON property; System.Text.Json does the same by default, so

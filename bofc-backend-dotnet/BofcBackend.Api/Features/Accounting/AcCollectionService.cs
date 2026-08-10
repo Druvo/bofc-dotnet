@@ -35,7 +35,7 @@ public class AcCollectionService(
             PaymentAccountId = paymentAccountId,
         };
 
-        // Transaction: a collection row must never persist without its ledger voucher —
+        // Transaction: a collection row must never persist without its ledger voucher -
         // if voucher creation fails (e.g. a bad chart-of-account reference), the whole
         // thing rolls back instead of leaving an orphaned, un-vouchered collection.
         await using var transaction = await db.Database.BeginTransactionAsync();
@@ -178,7 +178,7 @@ public class AcCollectionService(
     {
         var totalAmount = request.Amount!.Value * players.Count;
 
-        // Resolved by Code (Settings, falling back to appsettings), not a hardcoded chart Id — see AcChartService.
+        // Resolved by Code (Settings, falling back to appsettings), not a hardcoded chart Id - see AcChartService.
         var cashChart = await acChartService.GetCashChartAsync();
         var incomeChart = await acChartService.GetCollectionIncomeChartAsync();
 
@@ -225,7 +225,7 @@ public class AcCollectionService(
 
         var reportMap = new Dictionary<long, PlayerCollectionReport>();
 
-        // Seed every player first (not just ones who've ever paid) — otherwise
+        // Seed every player first (not just ones who've ever paid) - otherwise
         // a player who has never made a collection is simply absent from this
         // report instead of showing a zero, and any "who hasn't paid this
         // month" check downstream (e.g. UpcomingDuesWidget) can never see them.

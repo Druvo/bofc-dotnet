@@ -5,7 +5,7 @@ import FinanceStatTile from "./FinanceStatTile";
 
 // Sourced from the same monthOfPayment-keyed aggregation as the trend/sparkline
 // on AccountBalanceCard (not the raw AcCollection.date field) so "this month"
-// means the same thing everywhere on the dashboard — a collection recorded
+// means the same thing everywhere on the dashboard - a collection recorded
 // late but credited to an earlier month counts toward that earlier month here too.
 const ThisMonthCollectionsTile: React.FC = () => {
   const currentYear = new Date().getFullYear();

@@ -75,7 +75,7 @@ public class PlayerService(
         {
             // Java throws the JDK's own java.lang.SecurityException here (unhandled by the
             // global exception handler, which only maps the app's own SecurityException type)
-            // — almost certainly an accidental wrong-class import rather than an intentional
+            // - almost certainly an accidental wrong-class import rather than an intentional
             // "let it 500" design, since every other unauthorized-action check in this codebase
             // uses the app exception. Using BofcSecurityException here for a real 403 response.
             throw new BofcSecurityException(RestErrorMessageDetail.NotAuthorizedForAction, HttpStatusCode.Forbidden);
@@ -108,7 +108,7 @@ public class PlayerService(
         player.Position = request.PlayingPosition!.Value;
         player.JerseyNumber = request.JerseyNumber;
 
-        // Capture old storage keys but don't delete the files yet — deleting before the DB
+        // Capture old storage keys but don't delete the files yet - deleting before the DB
         // commit succeeds would leave a dangling reference if SaveChangesAsync fails.
         string? oldProfilePhotoKey = null;
         if (!string.IsNullOrWhiteSpace(request.ProfilePhoto))
@@ -143,7 +143,7 @@ public class PlayerService(
             await playerPhotoStorageProvider.DeleteAsync(oldPhotoKey);
         }
 
-        // Roles are intentionally not touched here — only admin-specific role management
+        // Roles are intentionally not touched here - only admin-specific role management
         // (not yet ported) should change a player's roles.
         return ToResponse(player);
     }
@@ -323,7 +323,7 @@ public class PlayerService(
             var consecutiveMissedMatchDays = await CountConsecutiveMissedMatchDaysBeforeCurrentAsync(player.Id, matchDayId);
 
             // All GK dates for display, excluding the current MatchDay and any future ones
-            // relative to it — only past MatchDays count.
+            // relative to it - only past MatchDays count.
             var allGoalKeeperDates = await db.PlayerGoalkeepingHistories
                 .Where(h => h.PlayerId == player.Id && h.MatchDayId != matchDayId && h.PlayedDate < matchDay.MatchDayDate)
                 .OrderByDescending(h => h.PlayedDate)
@@ -450,7 +450,7 @@ public class PlayerService(
     }
 
     /// <summary>
-    /// Port of MatchDayParticipantRepository.countConsecutiveMissedMatchDaysBeforeCurrent —
+    /// Port of MatchDayParticipantRepository.countConsecutiveMissedMatchDaysBeforeCurrent -
     /// Java's one native-SQL query. No rewrite needed: the target DB stays MySQL (never moved
     /// to SQL Server), so DATE_SUB/NOW() work as-is via Pomelo/MySqlConnector.
     /// </summary>

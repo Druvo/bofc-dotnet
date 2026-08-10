@@ -40,7 +40,7 @@ import Loader from "../ui/loader";
 import Pagination from "../ui/pagination";
 import { formatCurrency } from "../../utils/formatCurrency";
 
-const fmt = (n?: number) => n != null ? formatCurrency(n, { decimals: 0 }) : "—";
+const fmt = (n?: number) => n != null ? formatCurrency(n, { decimals: 0 }) : "-";
 const hasRole = (roles: string[] | undefined, role: string) =>
   !!roles?.some(r => r === role || r === `ROLE_${role}`);
 
@@ -153,7 +153,7 @@ const LiveAuctionPage: React.FC = () => {
       refetchPlayers();
     }, 300);
 
-    // Only notify while the tab is backgrounded — visible bid feed / hero
+    // Only notify while the tab is backgrounded - visible bid feed / hero
     // panel already surfaces this live, a duplicate notification would be noise.
     if (!document.hidden) return;
     const p = msg.payload || {};
@@ -217,7 +217,7 @@ const LiveAuctionPage: React.FC = () => {
     );
   };
 
-  // Bid button amounts — respect configured bidIncrement
+  // Bid button amounts - respect configured bidIncrement
   const bidIncrement = auctionSettings?.bidIncrement ?? 5000;
   const currentBid = currentPlayer?.currentBid;
   const basePrice = currentPlayer?.basePrice ?? 0;
@@ -490,7 +490,7 @@ const LiveAuctionPage: React.FC = () => {
 
                 <div style={{ height: 1, background: "rgba(255,255,255,0.1)", margin: "12px 0" }} />
 
-                {/* Base price + current bid — compact scoreboard tiles */}
+                {/* Base price + current bid - compact scoreboard tiles */}
                 <div style={{ display: "flex", justifyContent: "center", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
                   <div style={{ background: ac.tileBg, border: ac.tileBorder, borderRadius: 10, padding: "8px 18px", minWidth: 130 }}>
                     <div style={{ ...kicker, color: ac.textMuted, fontSize: 9 }}>Base Price</div>
@@ -530,7 +530,7 @@ const LiveAuctionPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Timer expired — player still on screen, admin decides */}
+                {/* Timer expired - player still on screen, admin decides */}
                 {session?.status === "RUNNING" && !session?.currentTimerEndsAt && (
                   <div style={{ margin: "0 auto 12px", maxWidth: 320, textAlign: "center" }}>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, padding: "3px 14px", borderRadius: 20, background: `${ac.red}22`, border: `1px solid ${ac.red}59`, color: ac.red, fontWeight: 700 }}>
@@ -543,12 +543,12 @@ const LiveAuctionPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Bid section — shown to all TEAM_OWNERs */}
+                {/* Bid section - shown to all TEAM_OWNERs */}
                 {canParticipateInBidding && (
                   <>
                     {myTeam ? (
                       <>
-                        {/* Bid buttons — only while timer is actively running */}
+                        {/* Bid buttons - only while timer is actively running */}
                         {session?.status === "RUNNING" && session?.currentTimerEndsAt && secondsLeft > 0 ? (
                           <>
                             <div style={{ marginTop: 8 }} className="flex flex-wrap items-center justify-center gap-3">
@@ -583,7 +583,7 @@ const LiveAuctionPage: React.FC = () => {
                           </>
                         ) : (
                           session?.status === "RUNNING" && !session?.currentTimerEndsAt && (
-                            <span style={{ marginTop: 8, display: "inline-block", fontSize: 12, color: ac.textMuted, background: ac.tileBg, border: ac.tileBorder, borderRadius: 999, padding: "2px 10px" }}>Bidding closed — time expired</span>
+                            <span style={{ marginTop: 8, display: "inline-block", fontSize: 12, color: ac.textMuted, background: ac.tileBg, border: ac.tileBorder, borderRadius: 999, padding: "2px 10px" }}>Bidding closed - time expired</span>
                           )
                         )}
                         <div style={{ marginTop: 12 }}>
@@ -697,7 +697,7 @@ const LiveAuctionPage: React.FC = () => {
                       <td className="px-3 py-2.5 font-semibold text-gray-800 dark:text-white/90">{r.playerName}</td>
                       <td className="px-3 py-2.5"><CategoryPill category={r.category} /></td>
                       <td className="px-3 py-2.5"><StatusPill status={r.status} /></td>
-                      <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{r.playingPosition || "—"}</td>
+                      <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{r.playingPosition || "-"}</td>
                       <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{fmt(r.basePrice)}</td>
                       {isAdmin && (
                         <td className="px-3 py-2.5">
@@ -758,7 +758,7 @@ const LiveAuctionPage: React.FC = () => {
                     <td className="px-3 py-2.5 font-semibold text-gray-800 dark:text-white/90">{record.playerName}</td>
                     <td className="px-3 py-2.5"><CategoryPill category={record.category} /></td>
                     <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{fmt(record.basePrice)}</td>
-                    <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{record.playingPosition || "—"}</td>
+                    <td className="px-3 py-2.5 text-gray-600 dark:text-gray-300">{record.playingPosition || "-"}</td>
                     {isAdmin && (
                       <td className="px-3 py-2.5">
                         <Button
@@ -791,7 +791,7 @@ const LiveAuctionPage: React.FC = () => {
         title={
           <div className="flex flex-wrap items-center gap-2">
             <TeamOutlined />
-            <span>{squadModal.team?.teamName} — Squad</span>
+            <span>{squadModal.team?.teamName} - Squad</span>
             <span style={{ fontSize: 11, fontWeight: 700, color: tones.info, background: `${tones.info}22`, border: `1px solid ${tones.info}59`, borderRadius: 999, padding: "1px 8px" }}>{squadModal.team?.playersBought ?? 0} players</span>
             <span style={{ fontSize: 11, fontWeight: 700, color: tones.success, background: `${tones.success}22`, border: `1px solid ${tones.success}59`, borderRadius: 999, padding: "1px 8px" }}>Budget left: {fmt(squadModal.team?.remainingBudget)}</span>
           </div>

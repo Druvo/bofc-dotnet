@@ -14,7 +14,7 @@ interface AnalyticsCardProps {
   value: number;
   variant: AnalyticsCardVariant;
   icon: React.ReactNode;
-  /** Icon sits inline beside the title instead of a floating tile — use on
+  /** Icon sits inline beside the title instead of a floating tile - use on
    * one card in a row so the row doesn't repeat the same icon-tile shape
    * three times. */
   inline?: boolean;

@@ -5,7 +5,7 @@ namespace BofcBackend.Api.Common.RealTime.Stomp;
 /// <summary>
 /// Tracks which live STOMP connections are subscribed to which destination ("/topic/auction/{id}")
 /// and fans out published messages to them. Port of Spring's SimpMessagingTemplate.convertAndSend
-/// for this app's one topic pattern — registered as a singleton so AuctionSessionService can
+/// for this app's one topic pattern - registered as a singleton so AuctionSessionService can
 /// publish without knowing about individual WebSocket connections.
 /// </summary>
 public class AuctionStompHub(ILogger<AuctionStompHub> logger)

@@ -75,7 +75,7 @@ export default function MatchDayViewerPage({
   const { matchDayId: matchDayIdParam, tab: tabParam } = useParams();
 
   // Tab/matchDay selection lives in the URL (/match-day-viewer/:matchDayId/:tab)
-  // instead of useState+localStorage — makes a specific result/table/fixture
+  // instead of useState+localStorage - makes a specific result/table/fixture
   // view shareable and back-button-navigable. selectedId/activeTab below are
   // pure reads of the URL; the effects further down are what keep the URL
   // itself valid (defaulting to a matchDay, correcting an unavailable tab).
@@ -125,7 +125,7 @@ export default function MatchDayViewerPage({
   const hasAuction = Boolean(selectedMatchDay?.auctionMode);
 
   // Missing tab segment (bare /match-day-viewer/:id) reads as "home" without
-  // forcing a redirect — only an actually-invalid tab (e.g. "rules" on a
+  // forcing a redirect - only an actually-invalid tab (e.g. "rules" on a
   // matchDay with none, or a stale link to "auction" once it's over)
   // gets corrected below.
   const activeTab =
@@ -134,7 +134,7 @@ export default function MatchDayViewerPage({
       : "home";
 
   // No matchDay in the URL yet, or the URL points at one that no longer
-  // exists — pick the next non-concluded match (same "ONGOING-not-stale,
+  // exists - pick the next non-concluded match (same "ONGOING-not-stale,
   // else soonest UPCOMING" pick as the Dashboard's Next Match card), falling
   // back to the most recent match overall if nothing qualifies (e.g. every
   // match has already concluded), and settle the URL onto it. The viewer's
@@ -150,7 +150,7 @@ export default function MatchDayViewerPage({
 
   // The URL's tab segment is present but not valid for this matchDay
   // (e.g. deep-linked to "rules" before rules data loaded, or a stale link
-  // to a tab that no longer applies) — settle the URL onto "home" instead
+  // to a tab that no longer applies) - settle the URL onto "home" instead
   // of silently rendering a tab that doesn't match what's in the address bar.
   useEffect(() => {
     if (!selectedId || !tabParam) return;

@@ -15,10 +15,10 @@ public class PlayerResponse
     public string? ProfilePhoto { get; set; }
 
     /// <summary>
-    /// Java's field is `private boolean isActive` — Lombok's boolean getter isActive() gets its
+    /// Java's field is `private boolean isActive` - Lombok's boolean getter isActive() gets its
     /// "is" prefix stripped by Jackson's default bean-property naming, so the real wire property
     /// is "active", not "isActive". Confirmed against real (non-stale) frontend usage in
-    /// Players.tsx (record.active, response.data.content.active) — not just the TS interface.
+    /// Players.tsx (record.active, response.data.content.active) - not just the TS interface.
     /// </summary>
     [JsonPropertyName("active")]
     public bool IsActive { get; set; }

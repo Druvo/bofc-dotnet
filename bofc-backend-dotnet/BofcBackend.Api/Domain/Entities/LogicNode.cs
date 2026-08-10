@@ -13,15 +13,15 @@ public class LogicNode : AuditableEntity
     public string NodeName { get; set; } = string.Empty;
     public LogicNodeType NodeType { get; set; }
 
-    /// <summary>Nullable — advancement can come from a round instead.</summary>
+    /// <summary>Nullable - advancement can come from a round instead.</summary>
     public long? SourceRoundId { get; set; }
     public MatchDayRound? SourceRound { get; set; }
 
-    /// <summary>Nullable — advancement can come from a group instead.</summary>
+    /// <summary>Nullable - advancement can come from a group instead.</summary>
     public long? SourceGroupId { get; set; }
     public RoundGroup? SourceGroup { get; set; }
 
-    /// <summary>Required — teams always advance to a round.</summary>
+    /// <summary>Required - teams always advance to a round.</summary>
     public long TargetRoundId { get; set; }
     public MatchDayRound TargetRound { get; set; } = null!;
 

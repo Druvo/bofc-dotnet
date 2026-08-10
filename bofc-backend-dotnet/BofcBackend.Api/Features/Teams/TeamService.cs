@@ -36,7 +36,7 @@ public class TeamService(
 
         await db.SaveChangesAsync();
 
-        // Only delete the old logo once the DB update has actually committed — deleting it
+        // Only delete the old logo once the DB update has actually committed - deleting it
         // beforehand would leave a dangling reference if SaveChangesAsync failed.
         if (oldLogoKeyToDelete != null)
         {
@@ -83,7 +83,7 @@ public class TeamService(
 
         db.Teams.Remove(team);
 
-        // If this was the last team on the MatchDay, clear the auto-team-generation flag too —
+        // If this was the last team on the MatchDay, clear the auto-team-generation flag too -
         // otherwise it stays stuck true forever with zero actual teams, permanently blocking the
         // "Generate Teams Now" test action (and the hourly scheduler) from ever regenerating.
         var isLastTeam = await db.Teams.CountAsync(t => t.MatchDayId == team.MatchDayId) == 1;
@@ -98,7 +98,7 @@ public class TeamService(
 
         await db.SaveChangesAsync();
 
-        // Best-effort cleanup — the team is already gone from the DB; a storage failure here
+        // Best-effort cleanup - the team is already gone from the DB; a storage failure here
         // must not make this operation look like it failed.
         if (!string.IsNullOrWhiteSpace(team.LogoKey))
         {

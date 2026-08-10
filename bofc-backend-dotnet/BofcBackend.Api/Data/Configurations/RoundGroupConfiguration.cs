@@ -24,7 +24,7 @@ public class RoundGroupConfiguration : IEntityTypeConfiguration<RoundGroup>
         builder.Property(g => g.LastModifiedBy).HasColumnName("last_modified_by");
         builder.Property(g => g.UpdatedDate).HasColumnName("updated_date");
 
-        // See the cascade-path note in MatchDayRoundConfiguration — same reasoning applies
+        // See the cascade-path note in MatchDayRoundConfiguration - same reasoning applies
         // to the self-referencing parent/child group tree.
         builder.HasOne(g => g.ParentGroup)
             .WithMany(g => g.ChildGroups)

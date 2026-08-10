@@ -107,7 +107,7 @@ const AuctionResultsPage: React.FC = () => {
     <AuctionPage>
       <AuctionHeader
         icon={<TrophyOutlined />}
-        title={`Auction Results — ${results.matchDayName}`}
+        title={`Auction Results - ${results.matchDayName}`}
         backTo="/auction"
         actions={session?.status ? <StatusPill status={session.status} /> : undefined}
       />

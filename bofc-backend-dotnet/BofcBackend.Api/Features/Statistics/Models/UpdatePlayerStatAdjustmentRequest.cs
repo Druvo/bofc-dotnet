@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BofcBackend.Api.Features.Statistics.Models;
 
-/// <summary>Replaces the player's whole manual-adjustment row — full replace, not a delta on top
+/// <summary>Replaces the player's whole manual-adjustment row - full replace, not a delta on top
 /// of whatever was there before, so the admin always sees and edits the actual stored numbers.</summary>
 public class UpdatePlayerStatAdjustmentRequest
 {

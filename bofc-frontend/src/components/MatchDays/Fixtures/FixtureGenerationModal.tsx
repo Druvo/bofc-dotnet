@@ -48,11 +48,11 @@ interface FixtureGenerationModalProps {
   handleSetIsModalVisible: (value: boolean) => void;
   teams: Array<{ teamId: number; teamName: string }>;
   onSuccess?: () => void;
-  /** The MatchDay's own start date/time — the only date the backend actually reads
+  /** The MatchDay's own start date/time - the only date the backend actually reads
    * (GenerateFixturesAsync uses request.MatchDates[0]), so there's nothing for the
    * admin to enter here; every match's start is computed from it plus duration/gap. */
   matchDayStartDate?: string;
-  /** The MatchDay's own total duration — used only to project how many matches fit
+  /** The MatchDay's own total duration - used only to project how many matches fit
    * and flag it if the current duration/gap choice would run over. Venue similarly
    * isn't asked for here: the backend already defaults to the MatchDay's own venue
    * when none is passed. */
@@ -72,7 +72,7 @@ export default function FixtureGenerationModal({
   const loginInfo = useSelector(selectLoginInfo);
   const [selectedTeams, setSelectedTeams] = useState<number[]>([]);
 
-  // Scheduling parameters — gap is the breather AFTER one match ends and BEFORE the
+  // Scheduling parameters - gap is the breather AFTER one match ends and BEFORE the
   // next starts (not the full start-to-start interval; see matchDayCalculations.ts).
   const [timeGapMinutes, setTimeGapMinutes] = useState<number>(2);
   const [matchDurationMinutes, setMatchDurationMinutes] = useState<number>(13);
@@ -89,15 +89,15 @@ export default function FixtureGenerationModal({
     [matchDayStartDate]
   );
 
-  // One full cycle — each selected team plays every other once (or twice, for double
-  // round-robin — though that type is currently disabled in the Select below).
+  // One full cycle - each selected team plays every other once (or twice, for double
+  // round-robin - though that type is currently disabled in the Select below).
   const oneCycleMatchCount = useMemo(() => {
     if (selectedTeams.length < 2) return 0;
     return calculateMatchCount(selectedTeams.length, matchDayType);
   }, [selectedTeams.length, matchDayType]);
 
   // How many matches actually fit inside the MatchDay's own duration, at the
-  // currently chosen match duration + gap — the "project how many matches can be
+  // currently chosen match duration + gap - the "project how many matches can be
   // played" the admin asked for, computed live as they adjust either value.
   const maxMatchesThatFit = useMemo(() => {
     if (!matchDayDurationMinutes || matchDayDurationMinutes <= 0) return null;
@@ -107,7 +107,7 @@ export default function FixtureGenerationModal({
   }, [matchDayDurationMinutes, matchDurationMinutes, timeGapMinutes]);
 
   // A single round-robin cycle usually only fills a fraction of the MatchDay's own duration
-  // (e.g. 3 teams -> 1 cycle -> 3 matches -> 45 min of a 90-min window) — repeat the cycle to
+  // (e.g. 3 teams -> 1 cycle -> 3 matches -> 45 min of a 90-min window) - repeat the cycle to
   // use up the remaining time instead of generating a slate that stops halfway through the
   // MatchDay, matching FixtureGenerationService.GenerateFixturesAsync's identical repeat-to-fill
   // logic for a single-day request (this modal always targets exactly one day/MatchDay).
@@ -122,7 +122,7 @@ export default function FixtureGenerationModal({
     return estimateMatchDayDuration(estimatedMatchCount, timeGapMinutes, matchDurationMinutes);
   }, [estimatedMatchCount, timeGapMinutes, matchDurationMinutes]);
 
-  // estimatedDuration.matchesPerDay is a raw CAPACITY figure — how many matches would fit in a
+  // estimatedDuration.matchesPerDay is a raw CAPACITY figure - how many matches would fit in a
   // 12-hour day at this pace, independent of how many are actually being scheduled. Displaying
   // it as-is under "Matches/Day" (and gating the density warning on it) was misleading: e.g. 2
   // teams -> 1 real match still showed "48" and fired "High Match Density" purely because the
@@ -136,7 +136,7 @@ export default function FixtureGenerationModal({
     matchDayType !== MatchDayType.ROUND_ROBIN &&
     maxMatchesThatFit !== null && estimatedMatchCount > maxMatchesThatFit;
 
-  // Real per-match schedule — same formula the backend uses, so this is exactly
+  // Real per-match schedule - same formula the backend uses, so this is exactly
   // what will be generated, not just an aggregate estimate.
   const schedule = useMemo(() => {
     if (selectedTeams.length < 2 || !combinedStart) return [];
@@ -184,7 +184,7 @@ export default function FixtureGenerationModal({
     }
 
     if (!combinedStart) {
-      message.error("This MatchDay has no date set — set one before generating fixtures");
+      message.error("This MatchDay has no date set - set one before generating fixtures");
       return;
     }
 
@@ -197,7 +197,7 @@ export default function FixtureGenerationModal({
     try {
       // Match.MatchDate is a genuinely UTC-shifted value on every other match-creation path
       // (AddMatchModal, EditFixtureModal, RoundMatchGenerationModal, GroupMatchGenerationModal
-      // all convert via .utc() before submitting) — combinedStart itself is deliberately parsed
+      // all convert via .utc() before submitting) - combinedStart itself is deliberately parsed
       // WITHOUT conversion (matchDayStartDate/matchDayDate is naive-local Dhaka, see utils.ts),
       // so convert it to UTC here, at the point of sending, rather than displaying it converted.
       // Sending the naive value straight through previously seeded generated matches with
@@ -301,7 +301,7 @@ export default function FixtureGenerationModal({
                     title={
                       type === MatchDayType.ROUND_ROBIN
                         ? getMatchDayTypeDescription(type)
-                        : "Not implemented yet — fixture generation only produces round-robin pairings today"
+                        : "Not implemented yet - fixture generation only produces round-robin pairings today"
                     }
                     placement="right"
                   >
@@ -388,7 +388,7 @@ export default function FixtureGenerationModal({
           </div>
         </Card>
 
-        {/* Match Scheduling Card — start date/time and venue aren't asked for here:
+        {/* Match Scheduling Card - start date/time and venue aren't asked for here:
             both already come from the MatchDay itself. Only per-match duration and
             the gap between matches are set here, and the count of matches that fit
             is projected live below from the MatchDay's own total duration. */}
@@ -405,7 +405,7 @@ export default function FixtureGenerationModal({
           {combinedStart && (
             <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 12 }}>
               Kicks off {combinedStart.format("DD MMM YYYY, hh:mm A")}
-              {matchDayDurationMinutes ? ` — MatchDay runs for ${matchDayDurationMinutes} min` : ""}, from the MatchDay's own schedule.
+              {matchDayDurationMinutes ? ` - MatchDay runs for ${matchDayDurationMinutes} min` : ""}, from the MatchDay's own schedule.
             </Text>
           )}
 
@@ -473,7 +473,7 @@ export default function FixtureGenerationModal({
         {exceedsMatchDayDuration && (
           <Alert
             message="Won't fit in the MatchDay's duration"
-            description={`${estimatedMatchCount} matches selected, but only ${maxMatchesThatFit} fit within ${matchDayDurationMinutes} minutes at this duration/gap — shorten matches, reduce the gap, or select fewer teams.`}
+            description={`${estimatedMatchCount} matches selected, but only ${maxMatchesThatFit} fit within ${matchDayDurationMinutes} minutes at this duration/gap - shorten matches, reduce the gap, or select fewer teams.`}
             type="warning"
             showIcon
             closable

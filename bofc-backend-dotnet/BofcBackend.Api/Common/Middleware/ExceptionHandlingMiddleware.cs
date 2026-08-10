@@ -9,7 +9,7 @@ using Microsoft.Data.SqlClient;
 namespace BofcBackend.Api.Common.Middleware;
 
 /// <summary>
-/// Port of exception/RestResponseEntityExceptionHandler.java's @ExceptionHandler methods —
+/// Port of exception/RestResponseEntityExceptionHandler.java's @ExceptionHandler methods -
 /// ASP.NET Core has no @ControllerAdvice equivalent, so this middleware is the single seam
 /// that turns any exception into the same ApiResponse envelope shape.
 /// Model-binding/validation errors are handled separately via ApiBehaviorOptions

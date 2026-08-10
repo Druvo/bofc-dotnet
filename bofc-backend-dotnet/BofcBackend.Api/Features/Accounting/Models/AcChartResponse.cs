@@ -14,7 +14,7 @@ public class AcChartResponse
     public AcNatureResponse Nature { get; set; } = null!;
     public long NatureNo { get; set; }
 
-    /// <summary>Java's `private boolean isActive` — Jackson strips the "is" prefix, wire property is "active" (confirmed against frontend IAcChart.active).</summary>
+    /// <summary>Java's `private boolean isActive` - Jackson strips the "is" prefix, wire property is "active" (confirmed against frontend IAcChart.active).</summary>
     [JsonPropertyName("active")]
     public bool IsActive { get; set; }
 }

@@ -1,10 +1,10 @@
 import { MatchStatus } from "../state/features/fixtures/fixtureTypes";
 
 /**
- * Single source of truth for what each match status looks like — SCHEDULED/ONGOING/PAUSED/
+ * Single source of truth for what each match status looks like - SCHEDULED/ONGOING/PAUSED/
  * COMPLETED previously had 3 independently-hardcoded color mappings (matchStatusUtils.getStatusColor's
  * antd color names, FixturesTable's own ui/Badge variant map, and FixturesCalendarView's/
- * FixturesTimelineView's own hex maps) that disagreed with each other — e.g. ONGOING showed
+ * FixturesTimelineView's own hex maps) that disagreed with each other - e.g. ONGOING showed
  * green in the table view but orange everywhere else, and PAUSED showed orange in the table but
  * purple everywhere else. Every consumer should derive from this map instead of hardcoding its
  * own.

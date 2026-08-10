@@ -8,6 +8,6 @@ public interface IAuthService
     Task ChangePasswordAsync(ChangePasswordRequest request);
     Task ResetPasswordAsync(ResetPasswordRequest request);
 
-    /// <summary>Mandatory first-login/expired-password reset — no OldPassword check (see ForcePasswordResetRequest doc comment).</summary>
+    /// <summary>Mandatory first-login/expired-password reset - no OldPassword check (see ForcePasswordResetRequest doc comment).</summary>
     Task ForcePasswordResetAsync(ForcePasswordResetRequest request);
 }

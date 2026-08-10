@@ -30,6 +30,6 @@ public class AuctionPlayer : AuditableEntity
     public decimal? PlayerRating { get; set; }
     public int? SequenceOrder { get; set; }
 
-    /// <summary>Optimistic-concurrency token (Java's @Version) — not the pessimistic FOR UPDATE lock used for bids/budget.</summary>
+    /// <summary>Optimistic-concurrency token (Java's @Version) - not the pessimistic FOR UPDATE lock used for bids/budget.</summary>
     public int Version { get; set; }
 }

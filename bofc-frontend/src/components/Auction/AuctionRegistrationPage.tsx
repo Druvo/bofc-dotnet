@@ -180,7 +180,7 @@ const AuctionRegistrationPage: React.FC = () => {
               title="Your profile data will be used automatically"
               className="w-full text-left"
             >
-              No need to fill any form — your name, email, employee ID and position are already on file.
+              No need to fill any form - your name, email, employee ID and position are already on file.
             </Alert>
             {isRegistrationClosed && (
               <Alert variant="warning" title="Auction registration is closed" className="w-full text-left">

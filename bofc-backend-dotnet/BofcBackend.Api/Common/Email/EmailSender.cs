@@ -20,7 +20,7 @@ public class EmailSender(BofcDbContext db, IDataProtectionProvider dataProtectio
         var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
         if (settings is not { SmtpEnabled: true } || string.IsNullOrWhiteSpace(settings.SmtpHost) || string.IsNullOrWhiteSpace(settings.SmtpFromEmail))
         {
-            logger.LogWarning("SMTP is not enabled/configured — skipping email delivery for {Count} recipient(s)", recipients.Count);
+            logger.LogWarning("SMTP is not enabled/configured - skipping email delivery for {Count} recipient(s)", recipients.Count);
             return new EmailSendResult(0, recipients.Count, false);
         }
 
@@ -33,7 +33,7 @@ public class EmailSender(BofcDbContext db, IDataProtectionProvider dataProtectio
             }
             catch (CryptographicException ex)
             {
-                logger.LogError(ex, "Stored SMTP password could not be decrypted — was it saved under a different data-protection key ring?");
+                logger.LogError(ex, "Stored SMTP password could not be decrypted - was it saved under a different data-protection key ring?");
             }
         }
 

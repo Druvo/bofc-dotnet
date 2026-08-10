@@ -58,7 +58,7 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
     public async Task<List<PlayerMatchHistoryResponse>> GetPlayerMatchHistoryAsync(long playerId)
     {
         // Scope to matches of teams the player actually belongs to (via TeamPlayer roster),
-        // falling back to all of his stat rows if he has no roster entries at all — matches
+        // falling back to all of his stat rows if he has no roster entries at all - matches
         // Java's findPlayerMatchHistory query exactly.
         var rows = await db.MatchStatistics
             .Include(s => s.Match).ThenInclude(m => m.MatchDay)
@@ -152,7 +152,7 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
 
     /// <summary>
     /// Aggregates raw MatchStatistics rows by player (first-seen row supplies player/team
-    /// context — matches Java's Map-based aggregation exactly, including the quirk that a
+    /// context - matches Java's Map-based aggregation exactly, including the quirk that a
     /// player who played for multiple teams in the MatchDay shows only the first team seen).
     /// </summary>
     private async Task<List<MatchStatisticsResponse>> AggregateByMatchDayAsync(long matchDayId)
@@ -337,7 +337,7 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
     }
 
     // Manual corrections (PlayerStatAdjustment) here are scoped to this one Match (MatchId set),
-    // as opposed to PlayerStatisticsService's lifetime-scope adjustments — summed on top of the
+    // as opposed to PlayerStatisticsService's lifetime-scope adjustments - summed on top of the
     // computed totals the same way, since MatchStatistics rows are destructively rebuilt from
     // MatchEvents on every lifecycle transition and are therefore unsafe to edit directly.
     private static MatchStatisticsResponse ToResponse(MatchStatistics stats, PlayerStatAdjustment? adjustment) => new()

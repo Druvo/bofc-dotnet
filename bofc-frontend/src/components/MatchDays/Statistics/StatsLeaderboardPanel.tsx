@@ -208,7 +208,7 @@ function LeaderboardSection({
               {showCompletedMatchesHelp && completedMatches && completedMatches.length > 0 && (
                 <div className="rounded-xl border border-gray-100 p-3 dark:border-[var(--color-rule)]">
                   <div className="mb-2 flex items-center gap-1.5 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
-                    <EditOutlined /> Completed matches — record events here
+                    <EditOutlined /> Completed matches - record events here
                   </div>
                   <div className="flex flex-col gap-2">
                     {completedMatches.map((match) => (

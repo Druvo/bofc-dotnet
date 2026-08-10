@@ -213,7 +213,7 @@ const PaymentAccountsModal: React.FC<PaymentAccountsModalProps> = ({ isOpen, onC
                             A/C: {account.accountNumber} <CopyOutlined className="text-theme-xs" />
                           </button>
                           <div className="mt-0.5 text-theme-xs text-gray-400 dark:text-gray-500">
-                            {[account.bankName, account.branch].filter(Boolean).join(" — ")}
+                            {[account.bankName, account.branch].filter(Boolean).join(" - ")}
                           </div>
                         </>
                       )}

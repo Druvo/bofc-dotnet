@@ -38,7 +38,7 @@ public class PlayerStatAdjustmentConfiguration : IEntityTypeConfiguration<Player
         // One adjustment row per player scoped to either "lifetime" (MatchId null) or one
         // specific Match. SQL Server unique indexes treat NULLs as distinct (not duplicate), so
         // a single composite index on (PlayerId, MatchId) would only constrain match-scoped rows
-        // and let a player accumulate unlimited lifetime rows — hence two filtered indexes: one
+        // and let a player accumulate unlimited lifetime rows - hence two filtered indexes: one
         // per (player, match) pair, one per player among lifetime-only rows.
         builder.HasIndex(a => new { a.PlayerId, a.MatchId })
             .IsUnique()

@@ -14,7 +14,7 @@ public class AcCollectionConfiguration : IEntityTypeConfiguration<AcCollection>
 
         // Java's entity declares @Column(name = "transactionId") (camelCase), but the actual
         // Flyway-owned column (V16__create_ac_collections.sql) is transaction_id (snake_case,
-        // matching every other column in this schema) — trusting the migration SQL as the
+        // matching every other column in this schema) - trusting the migration SQL as the
         // authoritative schema over the entity annotation, which looks like a Java-side typo.
         builder.Property(c => c.TransactionId).HasColumnName("transaction_id").HasMaxLength(30).IsRequired();
         builder.HasIndex(c => c.TransactionId).IsUnique();
@@ -33,7 +33,7 @@ public class AcCollectionConfiguration : IEntityTypeConfiguration<AcCollection>
         builder.Property(c => c.PaymentAccountId).HasColumnName("payment_account_id");
         builder.HasOne(c => c.PaymentAccount).WithMany().HasForeignKey(c => c.PaymentAccountId).OnDelete(DeleteBehavior.Restrict);
 
-        // V16__create_ac_collections.sql: collection_players(collection_id, player_id) —
+        // V16__create_ac_collections.sql: collection_players(collection_id, player_id) -
         // both shadow FK columns need an explicit name, not just the "Players" nav side
         // (EF's default shadow column name for the AcCollection side would be "AcCollectionId").
         builder.HasMany(c => c.Players)

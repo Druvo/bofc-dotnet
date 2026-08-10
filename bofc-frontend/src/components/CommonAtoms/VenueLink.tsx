@@ -10,13 +10,13 @@ interface VenueLinkProps {
   iconClassName?: string;
   showIcon?: boolean;
   style?: React.CSSProperties;
-  /** Tooltip text — defaults to "Open location in Maps". */
+  /** Tooltip text - defaults to "Open location in Maps". */
   title?: string;
-  /** Override the displayed text — defaults to name, falling back to address. */
+  /** Override the displayed text - defaults to name, falling back to address. */
   children?: React.ReactNode;
 }
 
-// Opens the venue's location in Google Maps, in a new tab — mobile OS/browsers
+// Opens the venue's location in Google Maps, in a new tab - mobile OS/browsers
 // hand `google.com/maps` links off to the native Maps app on their own.
 // `stopPropagation` matters here: this is almost always rendered inside a
 // clickable card/row (matchDay card, fixture row), and without it, clicking

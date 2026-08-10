@@ -2,7 +2,7 @@ namespace BofcBackend.Api.Domain.Enums;
 
 /// <summary>
 /// Port of enums/FootballPosition.java's description map + getPositionOrDefault. Matches by the
-/// human-readable description text (case-insensitive), not the enum constant name — replicated
+/// human-readable description text (case-insensitive), not the enum constant name - replicated
 /// as-is, including the quirk that multi-word constants only match their spaced description
 /// (e.g. RIGHT_BACK matches "Right Back", not "RIGHT_BACK").
 /// </summary>

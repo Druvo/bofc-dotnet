@@ -12,7 +12,7 @@ namespace BofcBackend.Api.Features.Statistics;
 /// Port of service/PlayerStatisticsServiceImpl.java. The two backing JPQL queries in Java
 /// (MatchEventRepository.findAggregatedPlayerStatisticsFromEvents /findTopScorersByMatchDay)
 /// use a LEFT JOIN with a non-equality ON clause (player OR relatedPlayer, further ANDed with
-/// an optional MatchDay filter) plus a correlated COUNT(DISTINCT) subquery — that shape has
+/// an optional MatchDay filter) plus a correlated COUNT(DISTINCT) subquery - that shape has
 /// no direct LINQ equivalent (EF Core LEFT JOINs key off equality). Restructured here as one
 /// independent correlated subquery per metric instead of a single combined join+GROUP BY;
 /// this is semantically identical (each metric already summed a mutually-exclusive per-row
@@ -84,7 +84,7 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
         }
 
         // Manual corrections (PlayerStatAdjustment) represent a lifetime/overall total, not any
-        // single MatchDay's play — folding them into a single-MatchDay view (matchDayId set)
+        // single MatchDay's play - folding them into a single-MatchDay view (matchDayId set)
         // would misattribute them to that one day, so they only apply to the "all MatchDays"
         // aggregate (whether or not WeeklyMatchDaysOnly narrows which MatchDays count).
         var adjustments = matchDayId == null
@@ -160,7 +160,7 @@ public class PlayerStatisticsService(BofcDbContext db) : IPlayerStatisticsServic
                     && me.PlayerId == tp.PlayerId && me.Match.MatchDayId == matchDayId),
                 Assists = db.MatchEvents.Count(me => me.EventType == MatchEventType.GOAL
                     && me.RelatedPlayerId == tp.PlayerId && me.Match.MatchDayId == matchDayId),
-                // Team's total completed matches in the MatchDay — not scoped to matches the
+                // Team's total completed matches in the MatchDay - not scoped to matches the
                 // player personally appeared in. This mirrors a quirk already present in the
                 // Java query (matchesPlayed here is team-wide, unlike the per-player subquery
                 // used in the other aggregation method above); not this port's place to fix it.

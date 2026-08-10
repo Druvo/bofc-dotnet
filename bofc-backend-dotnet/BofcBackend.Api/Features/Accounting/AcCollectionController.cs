@@ -10,7 +10,7 @@ namespace BofcBackend.Api.Features.Accounting;
 
 /// <summary>
 /// Port of controller/account/AcCollectionController.java. Same per-action Authorize rationale
-/// as AcBillPaymentController — two GETs here widen to PLAYER, which a class-level attribute
+/// as AcBillPaymentController - two GETs here widen to PLAYER, which a class-level attribute
 /// would incorrectly AND back down to admin-only in ASP.NET Core.
 /// </summary>
 [ApiController]

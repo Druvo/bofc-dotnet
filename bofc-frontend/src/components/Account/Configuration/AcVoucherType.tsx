@@ -41,10 +41,10 @@ function AcVoucherType() {
                             {sorted.map((record: IAcVoucherType) => (
                                 <tr key={record.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                                     <td className="px-3 py-2.5 font-semibold text-gray-800 dark:text-white/90">{record.name}</td>
-                                    <td className="px-3 py-2.5">{record.alias ? <Badge variant="light">{record.alias}</Badge> : <span className="text-gray-400">—</span>}</td>
-                                    <td className="px-3 py-2.5 text-gray-500 dark:text-gray-400">{record.description || "—"}</td>
+                                    <td className="px-3 py-2.5">{record.alias ? <Badge variant="light">{record.alias}</Badge> : <span className="text-gray-400">-</span>}</td>
+                                    <td className="px-3 py-2.5 text-gray-500 dark:text-gray-400">{record.description || "-"}</td>
                                     <td className="px-3 py-2.5 text-center">
-                                        {record.default ? <Badge variant="warning">Default</Badge> : <span className="text-gray-400">—</span>}
+                                        {record.default ? <Badge variant="warning">Default</Badge> : <span className="text-gray-400">-</span>}
                                     </td>
                                 </tr>
                             ))}

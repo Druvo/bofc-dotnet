@@ -26,7 +26,7 @@
   color: rgba(245, 247, 250, 0.55) ;
 }
 
-/* Total / summary row — scoreboard footer */
+/* Total / summary row - scoreboard footer */
 .tableData :global(.ant-table-summary) {
   background: rgba(198, 161, 91, 0.08);
 }
@@ -38,14 +38,14 @@
 }
 
 /* Ant renders sticky/fixed-left columns as a separate cloned cell that doesn't
-   always nest under .ant-table-summary > tr > td the same way — force it here
+   always nest under .ant-table-summary > tr > td the same way - force it here
    too so the "Total" footer cell in the frozen Name column isn't left on the
    unthemed literal gold. */
 .tableData :global(.ant-table-summary .ant-table-cell-fix-left) {
   color: var(--color-accent) !important;
 }
 
-/* Filter buttons — selected state uses club gold instead of blue */
+/* Filter buttons - selected state uses club gold instead of blue */
 .styledRadioGroup :global(.ant-radio-button-wrapper-checked) {
   background: #C6A15B !important;
   border-color: var(--color-accent) !important;

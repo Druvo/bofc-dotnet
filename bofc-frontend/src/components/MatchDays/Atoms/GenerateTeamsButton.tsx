@@ -7,7 +7,7 @@ import Button from "../../ui/button";
 import Modal from "../../ui/modal";
 import FormInput from "../../ui/form-input";
 
-// Only rendered while the MatchDay has zero teams — WeeklyMatchDayTeamGenerator.GenerateAsync
+// Only rendered while the MatchDay has zero teams - WeeklyMatchDayTeamGenerator.GenerateAsync
 // (the same snake-draft-by-rank logic the weekly scheduler uses) refuses outright once any
 // team exists, manual or auto-generated, so there's no "regenerate"/"top up" mode to offer here.
 export default function GenerateTeamsButton({
@@ -58,10 +58,10 @@ export default function GenerateTeamsButton({
             >
                 <p className="mb-4 text-theme-sm text-gray-600 dark:text-gray-400">
                     Drafts confirmed participants into balanced teams using each player's admin-set
-                    rank (snake draft — strongest and weakest spread evenly across teams), then
+                    rank (snake draft - strongest and weakest spread evenly across teams), then
                     schedules their round-robin matches and assigns jerseys. The number of teams is
-                    worked out automatically from turnout — e.g. 13 confirmed at a cap of 6 makes 3
-                    teams — rather than chosen directly.
+                    worked out automatically from turnout - e.g. 13 confirmed at a cap of 6 makes 3
+                    teams - rather than chosen directly.
                 </p>
                 <FormInput
                     label="Players per team (max, including goalkeeper)"

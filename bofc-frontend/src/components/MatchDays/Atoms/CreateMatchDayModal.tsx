@@ -96,7 +96,7 @@ export default function CreateMatchDay({
         if (!validate()) return;
 
         // The backend stores matchDayDate as a naive string that already represents Bangladesh
-        // wall-clock time — there is nothing to convert (see utils.ts's showBdLocalTime doc
+        // wall-clock time - there is nothing to convert (see utils.ts's showBdLocalTime doc
         // comment for the exact bug this caused before: converting through .utc() here shifted
         // an admin's entered kickoff time by their browser's offset before it was ever persisted).
         const matchDayDateNaive = `${values.matchDayDate}T${values.matchDayTime}:00`;
@@ -175,7 +175,7 @@ export default function CreateMatchDay({
 
     useEffect(() => {
         if (matchDayData && venuesData) {
-            // Plain dayjs(...) parse — no .utc()/.local() conversion. matchDayDate is naive-local
+            // Plain dayjs(...) parse - no .utc()/.local() conversion. matchDayDate is naive-local
             // already (see the write side above); running it through .utc().local() here applied
             // a second, opposite conversion and could even roll the date to the wrong calendar day.
             const matchDayDateTime = dayjs(matchDayData.matchDayDate);
@@ -188,7 +188,7 @@ export default function CreateMatchDay({
                 season: matchDayData.season || "",
                 description: matchDayData.description || "",
                 rules: matchDayData.rules || "",
-                // Matched by id, not by name — matching by name silently failed to preselect
+                // Matched by id, not by name - matching by name silently failed to preselect
                 // (or preselected the wrong venue) if a venue was ever renamed or two venues
                 // shared a display name.
                 venueId: String(matchDayData.venueId ?? ""),
@@ -200,7 +200,7 @@ export default function CreateMatchDay({
 
     const closeModal = () => {
         setOpen(false);
-        // Only reset the blank "create" form — the "edit" form is re-hydrated from matchDayData
+        // Only reset the blank "create" form - the "edit" form is re-hydrated from matchDayData
         // by the effect above, which doesn't re-run just because the modal re-opens (matchDayData
         // is the same cached object), so resetting it here would leave a blank form next open.
         if (!matchDayId) {
@@ -263,8 +263,8 @@ export default function CreateMatchDay({
                                 values.matchDayDate && values.matchDayTime && values.durationMinutes
                                     ? `Ends at ${dayjs(`${values.matchDayDate}T${values.matchDayTime}:00`)
                                           .add(Number(values.durationMinutes) || 0, "minute")
-                                          .format("MMM D, YYYY h:mm A")} — drives whether it shows as Upcoming, Ongoing, or Concluded.`
-                                    : "How long the MatchDay runs from its start time — drives whether it shows as Upcoming, Ongoing, or Concluded."
+                                          .format("MMM D, YYYY h:mm A")} - drives whether it shows as Upcoming, Ongoing, or Concluded.`
+                                    : "How long the MatchDay runs from its start time - drives whether it shows as Upcoming, Ongoing, or Concluded."
                             }
                             value={values.durationMinutes}
                             onChange={(e) => setField("durationMinutes", e.target.value)}

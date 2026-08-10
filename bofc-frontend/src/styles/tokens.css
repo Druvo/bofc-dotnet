@@ -5,7 +5,7 @@
  * axes: dark / grotesk-sans / chromatic-other (chromatic-gold ~86°)
  * studied: no · context: user-confirmed · source-of-truth: real crest logo
  * (src/assets/logo.png, pixel-sampled: shield green #28552B, gold #B69549,
- * cream #E6DFBA — replaces earlier hand-picked approximations of this palette)
+ * cream #E6DFBA - replaces earlier hand-picked approximations of this palette)
  */
 
 :root {
@@ -21,7 +21,7 @@
   --color-rule:       #2a3d31;  /* cardBorder */
   --color-rule-2:     #1c2b21;  /* sidebarBorder */
   --color-muted:      #6b8172;  /* textMuted */
-  --color-accent:     #2f6b45; /* mockup's flat brand green — same value both themes */
+  --color-accent:     #2f6b45; /* mockup's flat brand green - same value both themes */
   --color-accent-hover: #3d8759;
   --color-accent-ink: #ffffff;
   --color-gold:       #c9a24b; /* Login / crest accent only, not the general UI accent */
@@ -82,7 +82,7 @@
   --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -4px rgba(0, 0, 0, 0.24);
 }
 
-/* ---- Color: light mode — toggled via the app's existing .light-mode class ----
+/* ---- Color: light mode - toggled via the app's existing .light-mode class ----
  * Exact hex from THEMES.light in the design handoff HTML.
  */
 .light-mode {

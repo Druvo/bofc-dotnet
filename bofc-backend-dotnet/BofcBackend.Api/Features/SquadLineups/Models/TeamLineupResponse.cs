@@ -4,7 +4,7 @@ public class TeamLineupResponse
 {
     public long TeamId { get; set; }
 
-    /// <summary>Null when no lineup has been saved for this team yet — the client applies its own default.</summary>
+    /// <summary>Null when no lineup has been saved for this team yet - the client applies its own default.</summary>
     public int? SquadSize { get; set; }
     public string? Formation { get; set; }
     public List<LineupPlayerResponse> Starters { get; set; } = [];

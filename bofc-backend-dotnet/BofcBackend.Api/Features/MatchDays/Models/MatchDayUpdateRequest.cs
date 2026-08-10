@@ -15,7 +15,7 @@ public class MatchDayUpdateRequest
     [Required(ErrorMessage = "MatchDay date is mandatory")]
     public DateTime? MatchDayDate { get; set; }
 
-    /// <summary>How long the MatchDay runs, in minutes — drives the derived ONGOING/CONCLUDED window. Null = unknown, client falls back to a default.</summary>
+    /// <summary>How long the MatchDay runs, in minutes - drives the derived ONGOING/CONCLUDED window. Null = unknown, client falls back to a default.</summary>
     [Range(1, 1440, ErrorMessage = "Duration must be between 1 and 1440 minutes")]
     public int? DurationMinutes { get; set; }
 

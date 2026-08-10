@@ -16,7 +16,7 @@ import PushOptInBanner from "./PushOptInBanner";
 
 const PAGE_SIZE = 20;
 
-// Full-page version of the header bell's history — the bell dropdown only
+// Full-page version of the header bell's history - the bell dropdown only
 // shows a handful of recent entries with a "See more" link into this page.
 const NotificationsPage: React.FC = () => {
   const loginInfo = useSelector(selectLoginInfo);
@@ -71,7 +71,7 @@ const NotificationsPage: React.FC = () => {
           <Loader className="py-10" />
         ) : entries.length === 0 ? (
           <p className="py-10 text-center text-theme-sm text-gray-400 dark:text-gray-500">
-            Nothing yet — notifications sent to you will show up here.
+            Nothing yet - notifications sent to you will show up here.
           </p>
         ) : (
           <>

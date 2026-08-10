@@ -17,7 +17,7 @@ public class WeeklyMatchDaySlotConfiguration : IEntityTypeConfiguration<WeeklyMa
         // ValueGeneratedNever() on all three below is load-bearing, not decoration: HasDefaultValue
         // alone marks a property as database-generated, and EF Core's SaveChanges then omits any
         // property from the INSERT whenever its value equals the CLR default for its type (0 for
-        // int) — "assume unset, let the DB default apply." TimeGapMinutes' valid range legitimately
+        // int) - "assume unset, let the DB default apply." TimeGapMinutes' valid range legitimately
         // includes 0 (no gap), which IS int's default, so admins saving a 0 gap had it silently
         // discarded and replaced by the column's DEFAULT 15 on every insert (this service always
         // fully replaces the slot list, so every save is a fresh INSERT). ValueGeneratedNever forces

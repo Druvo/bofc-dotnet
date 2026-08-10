@@ -21,6 +21,6 @@ public class PaymentCollectionRequest
 
     public string? Description { get; set; }
 
-    /// <summary>Which real-world bank/bKash account the money came into — optional, informational only.</summary>
+    /// <summary>Which real-world bank/bKash account the money came into - optional, informational only.</summary>
     public long? PaymentAccountId { get; set; }
 }

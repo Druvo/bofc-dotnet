@@ -17,8 +17,8 @@ namespace BofcBackend.Api.Features.Accounting;
 /// triangle (Spring tolerates it via lazy proxies; .NET's DI container does not support
 /// constructor-cycle dependencies at all). Flattened per the migration plan: this service
 /// builds the nested BillPayment/Collection response DTOs itself, inline, duplicating the small
-/// conversion logic that also lives in AcBillPaymentService/AcCollectionService — rather than
-/// calling back into those services — so the dependency graph is one-directional
+/// conversion logic that also lives in AcBillPaymentService/AcCollectionService - rather than
+/// calling back into those services - so the dependency graph is one-directional
 /// (AcBillPaymentService/AcCollectionService -&gt; AcVoucherService, never the reverse).
 /// </summary>
 public class AcVoucherService(
@@ -163,7 +163,7 @@ public class AcVoucherService(
         return response;
     }
 
-    /// <summary>Duplicates AcCollectionServiceImpl.convertToPaymentResponse's shape (voucher/code omitted — caller already has them).</summary>
+    /// <summary>Duplicates AcCollectionServiceImpl.convertToPaymentResponse's shape (voucher/code omitted - caller already has them).</summary>
     private AcCollectionResponse ConvertCollectionToResponse(AcCollection collection)
     {
         var playerResponses = playerService.GetPlayerResponses(collection.Players).ToList();
@@ -183,7 +183,7 @@ public class AcVoucherService(
         };
     }
 
-    /// <summary>Duplicates AcBillPaymentServiceImpl.convertBillPaymentDto's shape (voucher/code omitted — caller already has them).</summary>
+    /// <summary>Duplicates AcBillPaymentServiceImpl.convertBillPaymentDto's shape (voucher/code omitted - caller already has them).</summary>
     private AcBillPaymentResponse ConvertBillPaymentToResponse(AcBillPayment billPayment) => new()
     {
         Id = billPayment.Id,

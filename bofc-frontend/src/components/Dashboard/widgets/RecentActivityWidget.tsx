@@ -7,7 +7,7 @@ import { formatCurrency } from "../../../utils/formatCurrency";
 
 const fmt = (n: number) => formatCurrency(n, { decimals: 0 });
 
-// Scoped to payment collections — the only cross-player event stream with a
+// Scoped to payment collections - the only cross-player event stream with a
 // reliable timestamp available today. A true cross-domain activity log (bids,
 // approvals, fixture changes) needs a backend audit table that doesn't exist
 // yet; this is the honest version of that feature with what's real now.

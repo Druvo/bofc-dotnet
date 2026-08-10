@@ -37,7 +37,7 @@ namespace BofcBackend.Api.Migrations
                 column: "system_settings_id");
 
             // Data migration: seed the new table from the existing jersey_color_a/b columns
-            // BEFORE dropping them — a straight DropColumn here would silently lose whatever the
+            // BEFORE dropping them - a straight DropColumn here would silently lose whatever the
             // club had actually configured (confirmed non-default data: white/yellow).
             migrationBuilder.Sql(@"
                 INSERT INTO jersey_color (system_settings_id, color, sort_order)

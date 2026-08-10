@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BofcBackend.Api.Features.Storage;
 
-/// <summary>Port of controller/StorageController.java — generic multi-folder storage (player-profile uploads).</summary>
+/// <summary>Port of controller/StorageController.java - generic multi-folder storage (player-profile uploads).</summary>
 [ApiController]
 [Route("files")]
 public class StorageController([FromKeyedServices("player-profile")] IStorageProvider storageProvider) : ControllerBase

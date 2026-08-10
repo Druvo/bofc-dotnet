@@ -26,9 +26,9 @@ const FIELDS: { key: "goalsAdjustment" | "assistsAdjustment" | "yellowCardsAdjus
 ];
 
 // Same manual-correction concept as EditPlayerStatAdjustmentModal, but scoped to this one Match
-// instead of the player's lifetime total — e.g. to correct a goal that was recorded against the
+// instead of the player's lifetime total - e.g. to correct a goal that was recorded against the
 // wrong player in this specific match. Added on top of what's already computed from this match's
-// recorded events, not a replacement. No "Matches" field here — that only makes sense lifetime.
+// recorded events, not a replacement. No "Matches" field here - that only makes sense lifetime.
 export default function EditMatchPlayerStatAdjustmentModal({ matchId, playerId, playerName, isOpen, onClose }: EditMatchPlayerStatAdjustmentModalProps) {
     const { data, isFetching } = useGetMatchPlayerStatAdjustmentQuery({ matchId, playerId }, { skip: !isOpen });
     const [updateAdjustment, { isLoading: isSaving }] = useUpdateMatchPlayerStatAdjustmentMutation();
@@ -70,7 +70,7 @@ export default function EditMatchPlayerStatAdjustmentModal({ matchId, playerId, 
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={<>Adjust Match Stats — <strong>{playerName}</strong></>}
+            title={<>Adjust Match Stats - <strong>{playerName}</strong></>}
             className="max-w-[440px]"
             footer={
                 <>
@@ -86,7 +86,7 @@ export default function EditMatchPlayerStatAdjustmentModal({ matchId, playerId, 
             ) : (
                 <>
                     <p className="mb-4 text-theme-sm text-gray-600 dark:text-gray-400">
-                        Added on top of what's already computed from this match's recorded events — e.g.
+                        Added on top of what's already computed from this match's recorded events - e.g.
                         entering <strong>+1</strong> here for Goals means this player's total for this match
                         shows 1 more than the recorded events alone add up to. Use negative numbers to
                         correct an over-count. Doesn't touch any recorded event data.

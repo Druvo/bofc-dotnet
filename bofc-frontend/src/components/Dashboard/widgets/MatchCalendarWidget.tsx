@@ -11,7 +11,7 @@ const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const localDateKey = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
-// Lightweight month grid — antd's <Calendar> pulled in a whole grid/picker
+// Lightweight month grid - antd's <Calendar> pulled in a whole grid/picker
 // subsystem for what this widget only ever needed: current month, a dot on
 // days with a Match Day, click-through to that Match Day.
 const MatchCalendarWidget: React.FC = () => {

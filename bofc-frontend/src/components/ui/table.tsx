@@ -2,7 +2,7 @@ import React from "react";
 
 /**
  * TailAdmin Free v2.3.0 table primitives (src/partials/table/table-01.html,
- * src/basic-tables.html). Thin wrapper components — callers compose
+ * src/basic-tables.html). Thin wrapper components - callers compose
  * <Table><TableHead>...<TableRow><TableCell>...
  */
 export function Table({ children, className = "" }: { children: React.ReactNode; className?: string }) {

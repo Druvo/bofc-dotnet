@@ -17,7 +17,7 @@ public class MatchDayParticipantPlayerService(BofcDbContext db) : IMatchDayParti
             ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
 
         // Full active roster, left-joined with whatever participation rows already
-        // exist for this MatchDay — not just the players who've already responded.
+        // exist for this MatchDay - not just the players who've already responded.
         // The old MatchDayParticipantPlayers view only ever reflected existing rows,
         // so anyone who hadn't opted in yet (or an admin trying to set status on their
         // behalf) was invisible here.

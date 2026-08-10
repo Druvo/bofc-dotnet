@@ -5,7 +5,7 @@ import { useGetLatestMatchDayWithUserStatusQuery } from "../../../state/features
 import { useGetAuctionSessionQuery } from "../../../state/features/auction/auctionSlice";
 
 // Only renders anything when the latest matchDay's auction is actually
-// RUNNING or PAUSED — stays invisible otherwise rather than showing an empty
+// RUNNING or PAUSED - stays invisible otherwise rather than showing an empty
 // "no auction" card, since that's the common case and not worth a whole tile.
 const LiveAuctionStatusCard: React.FC = () => {
   const navigate = useNavigate();

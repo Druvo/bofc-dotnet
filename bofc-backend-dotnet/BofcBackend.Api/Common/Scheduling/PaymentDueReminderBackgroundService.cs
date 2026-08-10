@@ -9,7 +9,7 @@ namespace BofcBackend.Api.Common.Scheduling;
 /// <summary>
 /// Once a day, on/after Settings.PaymentDueReminderDayOfMonth, emails and in-app-notifies every
 /// active player who has no AcCollection recorded for the current calendar month. Guarded by
-/// Settings.LastPaymentReminderSentMonth ("yyyy-MM") so it only actually fires once per month —
+/// Settings.LastPaymentReminderSentMonth ("yyyy-MM") so it only actually fires once per month -
 /// checking on every tick past the trigger day (rather than only exactly on that day) means a
 /// missed day (app down) still catches up instead of silently skipping the month.
 /// </summary>
@@ -60,7 +60,7 @@ public class PaymentDueReminderBackgroundService(IServiceScopeFactory scopeFacto
 
         if (duePlayers.Count > 0)
         {
-            var title = $"Payment due — {today:MMMM yyyy}";
+            var title = $"Payment due - {today:MMMM yyyy}";
             var body = $"You haven't paid your club dues for {today:MMMM yyyy} yet. Please settle it at your earliest convenience.";
 
             var notification = new Notification { Title = title, Body = body, TargetType = NotificationTargetType.ALL };

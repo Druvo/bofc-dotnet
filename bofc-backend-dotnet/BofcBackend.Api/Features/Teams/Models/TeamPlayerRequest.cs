@@ -15,7 +15,7 @@ public class TeamPlayerRequest
 
     /// <summary>
     /// Matched against FootballPosition's description text (case-insensitive), not the enum
-    /// constant name — mirrors Java's FootballPosition.getPositionOrDefault exactly, including
+    /// constant name - mirrors Java's FootballPosition.getPositionOrDefault exactly, including
     /// its quirk that multi-word constants (e.g. RIGHT_BACK) only match their spaced description
     /// ("Right Back"), not the underscored constant name.
     /// </summary>

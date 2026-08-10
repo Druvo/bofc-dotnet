@@ -25,7 +25,7 @@ export function getInitials(name?: string | null): string {
     return parts.slice(0, 2).map((p) => p[0]!.toUpperCase()).join("");
 }
 
-// Deterministic hash — same seed (player/team id, or name as a fallback)
+// Deterministic hash - same seed (player/team id, or name as a fallback)
 // always lands on the same palette/illustration entry, so a given player's
 // avatar stays stable across sessions instead of flickering on every render.
 function hashSeed(seed: string | number): number {

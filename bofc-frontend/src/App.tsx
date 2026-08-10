@@ -25,7 +25,7 @@ function App() {
     // true and flipping in an effect after mount. That two-pass mount (dark
     // commit, then light commit) let antd's cssinjs style injection leak
     // dark-theme rules through for some components (Menu, Button-default,
-    // Tabs observed) that never got invalidated on the second pass — the
+    // Tabs observed) that never got invalidated on the second pass - the
     // root cause of several "text invisible in light mode" reports this
     // session. Reading it synchronously means the app only ever mounts once,
     // in the correct theme.
@@ -39,7 +39,7 @@ function App() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // Same-browser persistence (the localStorage write-back was previously missing entirely —
+    // Same-browser persistence (the localStorage write-back was previously missing entirely -
     // toggling only ever changed in-memory state, so a refresh/relogin always fell back to
     // whatever "isDarkMode" last happened to be in storage, i.e. never anything you'd set).
     useEffect(() => {
@@ -52,9 +52,9 @@ function App() {
 
     // Cross-device persistence: the player's own themePreference on the server. Only applied
     // when the server actually has one set (null means "never explicitly chosen on any device"
-    // — leave the local/OS default alone rather than forcing light on a brand-new device).
+    // - leave the local/OS default alone rather than forcing light on a brand-new device).
     // Safe to depend on this re-running after every toggle: the mutation below invalidates this
-    // query, so it refetches and converges on the value we just saved — not a fight, a no-op.
+    // query, so it refetches and converges on the value we just saved - not a fight, a no-op.
     const { data: ownProfile } = useGetUserProfileQuery(
         { id: user?.userId ?? "" },
         { skip: !user?.token || !user?.userId }
@@ -71,7 +71,7 @@ function App() {
     const handleSetIsDarkMode = (value: boolean) => {
         setIsDarkMode(value);
         // Fire-and-forget: RTK Query mutation triggers resolve (not reject) even on API
-        // error, so a failed server sync just means the next device won't pick it up yet —
+        // error, so a failed server sync just means the next device won't pick it up yet -
         // the local toggle above already applied, not worth interrupting the user over.
         if (user?.token) {
             updateThemePreference({ themePreference: value ? "dark" : "light" });
@@ -79,11 +79,11 @@ function App() {
     };
 
     // Clicking a push notification posts {type, url} from public/sw.js's
-    // "notificationclick" handler to an already-open tab — route there via
+    // "notificationclick" handler to an already-open tab - route there via
     // the SPA router instead of a full page load. Also invalidate the
     // notification cache: RTK Query otherwise serves whatever was last
     // fetched for /notifications (stale by however long the tab's been
-    // open) instead of the item that was just pushed — this forces a
+    // open) instead of the item that was just pushed - this forces a
     // refetch whether the page is already mounted or about to be.
     useEffect(() => {
         if (!("serviceWorker" in navigator)) return;
@@ -214,7 +214,7 @@ function App() {
                     colorText: isDarkMode ? '#F2F5F0' : '#16241A',
                     colorTextSecondary: isDarkMode ? '#9FB3A5' : '#6B7D70',
 
-                    // Semantic status colors — colorInfo intentionally stays a
+                    // Semantic status colors - colorInfo intentionally stays a
                     // genuine blue (the app's own "blue-light" scale), distinct
                     // from the green brand accent, so info states don't read as
                     // just another shade of the primary color.
@@ -239,7 +239,7 @@ function App() {
                     colorFillTertiary: isDarkMode ? '#16281C' : '#EAF3EC',
                     colorFillQuaternary: isDarkMode ? '#0E1C14' : '#F4F6F2',
 
-                    // Border radius — TailAdmin uses 12px
+                    // Border radius - TailAdmin uses 12px
                     borderRadius: 12,
                     borderRadiusLG: 12,
                     borderRadiusSM: 8,

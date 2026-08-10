@@ -5,7 +5,7 @@ import { useGetTopScorersQuery } from "../../../state/features/statistics/statis
 import Loader, { Spinner } from "../../ui/loader";
 import Avatar from "../../CommonAtoms/Avatar";
 
-const MEDAL_COLOR = ["text-[#D4AF37]", "text-[#B8B8B8]", "text-[#B87333]"]; // gold/silver/bronze — universal medal convention, not a status color
+const MEDAL_COLOR = ["text-[#D4AF37]", "text-[#B8B8B8]", "text-[#B87333]"]; // gold/silver/bronze - universal medal convention, not a status color
 
 const TopScorersWidget: React.FC = () => {
   const { data: latest } = useGetLatestMatchDayWithUserStatusQuery();

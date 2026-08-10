@@ -15,10 +15,10 @@ public class LogicNodeRequest
     [Required(ErrorMessage = "Node type is required")]
     public string? NodeType { get; set; }
 
-    /// <summary>Nullable — can be from group instead.</summary>
+    /// <summary>Nullable - can be from group instead.</summary>
     public long? SourceRoundId { get; set; }
 
-    /// <summary>Nullable — can be from round instead.</summary>
+    /// <summary>Nullable - can be from round instead.</summary>
     public long? SourceGroupId { get; set; }
 
     [Required(ErrorMessage = "Target round ID is required")]

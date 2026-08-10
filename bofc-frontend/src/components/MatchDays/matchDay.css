@@ -337,7 +337,7 @@
     transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-/* Club "matchday" panel — navy gradient + gold trim (matches dashboard) */
+/* Club "matchday" panel - navy gradient + gold trim (matches dashboard) */
 .jt-card--panel {
     background: linear-gradient(160deg, var(--color-paper-3) 0%, var(--color-paper-2) 55%, var(--color-paper) 100%) !important;
     border: 1px solid color-mix(in oklch, var(--color-accent) 28%, transparent) !important;
@@ -349,7 +349,7 @@
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45) !important;
 }
 
-/* Primary action card — gold ring to signal the main call-to-action */
+/* Primary action card - gold ring to signal the main call-to-action */
 .jt-card--primary {
     box-shadow: 0 0 0 1px rgba(198, 161, 91, 0.45), 0 4px 16px rgba(0, 0, 0, 0.35) !important;
 }
@@ -431,7 +431,7 @@
     line-height: 1.4;
 }
 
-/* MatchDay grid cards — navy matchday panel with gold trim */
+/* MatchDay grid cards - navy matchday panel with gold trim */
 .match-day-grid-card {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
@@ -443,7 +443,7 @@
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* Participants — mobile card list (replaces the horizontal-scroll table) */
+/* Participants - mobile card list (replaces the horizontal-scroll table) */
 .jt-mplayer-card {
     background: var(--ant-color-fill-quaternary);
     border: 1px solid var(--ant-color-border-secondary);
@@ -460,7 +460,7 @@
     box-shadow: 0 2px 10px rgba(198, 161, 91, 0.18);
 }
 
-/* ── Participation Yes/No select — themed for the adaptive card ──── */
+/* ── Participation Yes/No select - themed for the adaptive card ──── */
 .jt-part-select .ant-select-selector {
     background: color-mix(in oklch, var(--color-ink) 6%, transparent) !important;
     border: 1px solid color-mix(in oklch, var(--color-accent) 30%, transparent) !important;
@@ -497,7 +497,7 @@
     color: var(--color-muted) !important;
 }
 
-/* Dropdown popup — matches the card surface */
+/* Dropdown popup - matches the card surface */
 .jt-part-dropdown {
     background: var(--color-paper-2) !important;
     border: 1px solid color-mix(in oklch, var(--color-accent) 30%, transparent) !important;
@@ -512,7 +512,7 @@
     background: color-mix(in oklch, var(--color-accent) 16%, transparent) !important;
 }
 
-/* ── Comment field — same subtle boxed style as the select ──────── */
+/* ── Comment field - same subtle boxed style as the select ──────── */
 .jt-part-comment.ant-input,
 .jt-part-comment .ant-input {
     background: color-mix(in oklch, var(--color-ink) 4%, transparent) !important;
@@ -541,7 +541,7 @@
     color: var(--color-muted) !important;
 }
 
-/* ── Participation filter segmented — gold thumb on adaptive track ─ */
+/* ── Participation filter segmented - gold thumb on adaptive track ─ */
 .jt-part-segmented.ant-segmented {
     background: color-mix(in oklch, var(--color-ink) 6%, transparent) !important;
     border: 1px solid color-mix(in oklch, var(--color-accent) 30%, transparent);
@@ -571,7 +571,7 @@
     border-radius: 6px !important;
 }
 
-/* Participants table — surface header with gold underline (matches dashboard) */
+/* Participants table - surface header with gold underline (matches dashboard) */
 .jt-participants-table .ant-table-thead > tr > th {
     background: var(--color-paper-2) !important;
     color: var(--color-ink) !important;

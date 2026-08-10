@@ -1,10 +1,10 @@
 namespace BofcBackend.Api.Common.Security;
 
 /// <summary>
-/// Bound from the "Vapid" config section — the keypair Web Push uses to sign
+/// Bound from the "Vapid" config section - the keypair Web Push uses to sign
 /// push messages. Dev keys live in appsettings.Development.json; production
 /// must supply these via user-secrets/env vars (Vapid__PrivateKey etc.), same
-/// rule as Jwt:Secret — never commit a real private key.
+/// rule as Jwt:Secret - never commit a real private key.
 /// </summary>
 public class VapidOptions
 {

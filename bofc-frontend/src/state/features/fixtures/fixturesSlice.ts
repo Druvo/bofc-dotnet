@@ -30,7 +30,7 @@ import {
 } from "./fixtureTypes";
 
 const apiWithTags = apiSlice.enhanceEndpoints({
-  // "standings" is also declared in manualFixturesSlice.ts — a group/bracket match completed or
+  // "standings" is also declared in manualFixturesSlice.ts - a group/bracket match completed or
   // corrected through this slice's start/complete/score/event endpoints previously left
   // GetGroupStandingsQuery (tagged {type:"standings", id: groupId}) stale until someone
   // explicitly hit "Recalculate Standings"; invalidating the bare "standings" tag (no id) below

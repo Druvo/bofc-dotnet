@@ -27,7 +27,7 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.Property(p => p.ProfilePhoto).HasColumnName("profile_photo").HasMaxLength(500);
         builder.Property(p => p.PhotoKey).HasColumnName("photo_key");
         builder.Property(p => p.ThemePreference).HasColumnName("theme_preference").HasMaxLength(10);
-        // "rank" is a reserved word in SQL Server — use a non-reserved column name to be safe.
+        // "rank" is a reserved word in SQL Server - use a non-reserved column name to be safe.
         builder.Property(p => p.Rank).HasColumnName("player_rank");
 
         builder.Property(p => p.CreatedBy).HasColumnName("created_by").IsRequired();

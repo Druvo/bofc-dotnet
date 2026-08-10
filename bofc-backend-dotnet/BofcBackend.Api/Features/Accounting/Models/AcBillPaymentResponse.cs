@@ -16,7 +16,7 @@ public class AcBillPaymentResponse
     public long? PaymentAccountId { get; set; }
     public string? PaymentAccountName { get; set; }
 
-    /// <summary>Java's `private boolean isPaid` — Jackson strips the "is" prefix, wire property is "paid" (confirmed against frontend IAcBillPayment.paid).</summary>
+    /// <summary>Java's `private boolean isPaid` - Jackson strips the "is" prefix, wire property is "paid" (confirmed against frontend IAcBillPayment.paid).</summary>
     [JsonPropertyName("paid")]
     public bool IsPaid { get; set; }
 }

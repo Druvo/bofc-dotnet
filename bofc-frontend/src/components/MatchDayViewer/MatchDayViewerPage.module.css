@@ -54,7 +54,7 @@
   gap: var(--space-md);
 }
 
-/* Giant stat figure — the Stat-Led hero numeral (real team count, tabular) */
+/* Giant stat figure - the Stat-Led hero numeral (real team count, tabular) */
 .statFigure {
   flex-shrink: 0;
   display: flex;

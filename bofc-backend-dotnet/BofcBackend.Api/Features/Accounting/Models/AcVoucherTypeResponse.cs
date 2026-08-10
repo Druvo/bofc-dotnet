@@ -10,7 +10,7 @@ public class AcVoucherTypeResponse
     public string Alias { get; set; } = string.Empty;
     public string? Description { get; set; }
 
-    /// <summary>Java's `private boolean isDefault` — Jackson strips the "is" prefix, wire property is "default" (confirmed against frontend IAcVoucherType.default).</summary>
+    /// <summary>Java's `private boolean isDefault` - Jackson strips the "is" prefix, wire property is "default" (confirmed against frontend IAcVoucherType.default).</summary>
     [JsonPropertyName("default")]
     public bool IsDefault { get; set; }
 }

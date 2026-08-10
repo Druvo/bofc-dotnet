@@ -1,6 +1,6 @@
 namespace BofcBackend.Api.Features.Players.Models;
 
-/// <summary>One row of the admin-only drag-and-drop rank board — just enough to render a
+/// <summary>One row of the admin-only drag-and-drop rank board - just enough to render a
 /// draggable player card (name/photo/jersey) plus its current rank slot.</summary>
 public class PlayerRankListItemResponse
 {

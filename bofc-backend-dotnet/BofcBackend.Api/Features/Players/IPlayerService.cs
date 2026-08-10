@@ -12,18 +12,18 @@ public interface IPlayerService
     Task UpdatePlayerStatusAsync(long id, bool active);
     Task<PlayerResponse> UpdatePlayerAsync(long id, PlayerUpdateRequest request);
 
-    /// <summary>Admin-only skill/seniority rank used to balance auto-generated Match Day teams — never surfaced through the public PlayerResponse (GetAllPlayers/GetPlayerById are anonymous-readable).</summary>
+    /// <summary>Admin-only skill/seniority rank used to balance auto-generated Match Day teams - never surfaced through the public PlayerResponse (GetAllPlayers/GetPlayerById are anonymous-readable).</summary>
     Task<int?> GetPlayerRankAsync(long id);
 
-    /// <summary>Admin-only — see Player.Rank for what this drives.</summary>
+    /// <summary>Admin-only - see Player.Rank for what this drives.</summary>
     Task SetPlayerRankAsync(long id, int? rank);
 
-    /// <summary>Every player plus its current Rank, ordered by rank (unranked last) — feeds the
+    /// <summary>Every player plus its current Rank, ordered by rank (unranked last) - feeds the
     /// admin drag-and-drop rank board. Multiple players can share the same Rank (it's a tier,
     /// e.g. 1-10, not a unique position), so this is a plain list, not a ranking.</summary>
     Task<List<PlayerRankListItemResponse>> GetPlayerRanksAsync();
 
-    /// <summary>Sets the logged-in caller's own theme preference — synced across devices via the player row instead of localStorage.</summary>
+    /// <summary>Sets the logged-in caller's own theme preference - synced across devices via the player row instead of localStorage.</summary>
     Task UpdateOwnThemePreferenceAsync(string? themePreference);
     Task<int> CountActivePlayersAsync();
     Task<Dictionary<int, List<GoalKeeperHistoryDto>>> GoalKeepingHistoryAsync();
@@ -31,7 +31,7 @@ public interface IPlayerService
     Task<List<GoalKeeperHistoryDto>> GetGoalKeeperHistoryByPlayerIdAsync(long playerId);
     Task<GoalKeeperQueueResponseDto> GetGoalKeeperPriorityQueueAsync(long matchDayId);
 
-    /// <summary>Port of PlayerService.getPlayerEntity(Long) — used by other domains (e.g. accounting) that need the raw entity.</summary>
+    /// <summary>Port of PlayerService.getPlayerEntity(Long) - used by other domains (e.g. accounting) that need the raw entity.</summary>
     Task<Player> GetPlayerEntityAsync(long id);
 
     /// <summary>Port of PlayerService.getPlayerResponse(Player).</summary>

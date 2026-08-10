@@ -13,7 +13,7 @@ namespace BofcBackend.Api.Features.Rounds;
 /// <summary>
 /// Port of service/MatchDayRoundServiceImpl.java. Two Java methods are intentionally NOT
 /// ported: advanceTeamsToNextRound (automatic rule-based advancement) and its helper
-/// determineTeamsToAdvance — the latter is a literal stub in the Java source ("Implementation
+/// determineTeamsToAdvance - the latter is a literal stub in the Java source ("Implementation
 /// depends on rule type... For now, returning empty list") and is never actually invoked from
 /// completeRound (only the manual-selection path, advanceSelectedTeamsToNextRound, is). Dead
 /// code in the source, so nothing is lost by leaving it out here. LogicNodeService is injected
@@ -31,7 +31,7 @@ public class MatchDayRoundService(BofcDbContext db, IRoundGroupService roundGrou
             throw new RoundServiceException(RestErrorMessageDetail.RoundNumberAlreadyExists, HttpStatusCode.Conflict);
         }
 
-        // Auto-calculate sequenceOrder to prevent duplicates/races — ignore whatever the
+        // Auto-calculate sequenceOrder to prevent duplicates/races - ignore whatever the
         // frontend sent for it, same as Java.
         var maxSequenceOrder = await db.MatchDayRounds.Where(r => r.MatchDayId == request.MatchDayId)
             .Select(r => (int?)r.SequenceOrder).MaxAsync() ?? 0;
@@ -94,7 +94,7 @@ public class MatchDayRoundService(BofcDbContext db, IRoundGroupService roundGrou
         }
 
         // RoundGroups/RoundTeams/AdvancementRules/LogicNodes are all DeleteBehavior.Restrict
-        // against MatchDayRound — a round can reach this point with groups or manually-assigned
+        // against MatchDayRound - a round can reach this point with groups or manually-assigned
         // teams but no matches yet (AssignTeamsToRoundAsync allows that), and deleting it would
         // otherwise throw a raw FK-constraint DbUpdateException (masked as a 500).
         var hasDependents = await db.RoundGroups.AnyAsync(g => g.RoundId == roundId)
@@ -176,7 +176,7 @@ public class MatchDayRoundService(BofcDbContext db, IRoundGroupService roundGrou
         }
 
         // Transaction: marking the round COMPLETED and advancing the selected teams must
-        // succeed together — if team advancement fails (e.g. a bad team ID), the round must
+        // succeed together - if team advancement fails (e.g. a bad team ID), the round must
         // not be left stuck as COMPLETED with nothing actually advanced.
         await using var transaction = await db.Database.BeginTransactionAsync();
 
@@ -206,7 +206,7 @@ public class MatchDayRoundService(BofcDbContext db, IRoundGroupService roundGrou
         }
 
         // Gate on the round's actual feeder rounds (bracket logic-node edges), not the adjacent
-        // sequence number — keeps parallel brackets independent (e.g. Plate Final only waits on
+        // sequence number - keeps parallel brackets independent (e.g. Plate Final only waits on
         // the Plate Semifinal, never the Cup Final). A round with no feeders is an entry round.
         foreach (var sourceRoundId in await FindSourceRoundIdsAsync(round))
         {
@@ -396,7 +396,7 @@ public class MatchDayRoundService(BofcDbContext db, IRoundGroupService roundGrou
         var format = request.FixtureFormat!.Value;
         if (format == FixtureFormat.SINGLE_ELIMINATION)
         {
-            // GenerateSingleEliminationMatchesAsync pairs teams two at a time — an odd team count
+            // GenerateSingleEliminationMatchesAsync pairs teams two at a time - an odd team count
             // previously left the last (lowest-seeded) team silently unpaired and un-advanced,
             // vanishing from the bracket with no match, no bye, and no error. This engine has no
             // bye-advancement mechanism (a bye has no match to attach a winner-advances rule to),
@@ -404,7 +404,7 @@ public class MatchDayRoundService(BofcDbContext db, IRoundGroupService roundGrou
             if (teams.Count % 2 != 0)
             {
                 throw new RoundServiceException(
-                    $"Single-elimination requires an even number of teams (got {teams.Count}) — add or remove a team first.",
+                    $"Single-elimination requires an even number of teams (got {teams.Count}) - add or remove a team first.",
                     HttpStatusCode.BadRequest);
             }
             matches = await GenerateSingleEliminationMatchesAsync(round, teams, request.StartDate!.Value, matchTimeGap, matchDuration, venue);
@@ -453,7 +453,7 @@ public class MatchDayRoundService(BofcDbContext db, IRoundGroupService roundGrou
     // === Private helpers ===
 
     /// <summary>
-    /// GROUP_BASED: all matches in every leaf group (groups without child groups — parent
+    /// GROUP_BASED: all matches in every leaf group (groups without child groups - parent
     /// groups are containers with no matches of their own) must be completed.
     /// DIRECT_KNOCKOUT: all matches directly in the round must be completed. A round/group with
     /// zero matches is never considered complete.

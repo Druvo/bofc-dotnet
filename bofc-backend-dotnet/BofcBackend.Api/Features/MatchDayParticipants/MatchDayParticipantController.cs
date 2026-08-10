@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace BofcBackend.Api.Features.MatchDayParticipants;
 
 /// <summary>Port of controller/MatchDayParticipantController.java. No endpoint here is
-/// role-gated in Java — self/admin authorization for the write endpoint is enforced inside
+/// role-gated in Java - self/admin authorization for the write endpoint is enforced inside
 /// the service instead.</summary>
 [ApiController]
 [Route("match-day-participants")]

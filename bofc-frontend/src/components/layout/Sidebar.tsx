@@ -12,14 +12,14 @@ import companyLogo from "../../assets/logo.png";
 /**
  * TailAdmin Free v2.3.0 sidebar (src/partials/sidebar.html), ported from
  * Alpine.js to React. Menu content is BOFC's own IA, not TailAdmin's demo
- * pages — only the visual
+ * pages - only the visual
  * shell/interaction pattern is TailAdmin's. Icons are TailAdmin's own inline
  * SVGs, reassigned to the closest-fitting BOFC concept.
  *
  * Alpine's single shared `selected` (persisted to localStorage, only one
  * dropdown group open at a time) becomes useState + a small localStorage
  * read/write here. Alpine's `page === '...'` string comparisons become
- * useLocation() path matching — the natural React equivalent.
+ * useLocation() path matching - the natural React equivalent.
  */
 
 const SELECTED_GROUP_STORAGE_KEY = "tailadmin.sidebar.selectedGroup";
@@ -88,11 +88,11 @@ const TablesIcon = (
   </svg>
 );
 /** Sourced straight from the icon pack (@ant-design/icons) instead of a hand-drawn
- * glyph — matches the AntD icons used everywhere else in the app (page headers,
+ * glyph - matches the AntD icons used everywhere else in the app (page headers,
  * content pages). Was previously a hand-built calendar shape. */
 const NextMatchIcon = <CalendarOutlined style={{ fontSize: 20 }} />;
 /** The icon pack has no literal "football pitch" glyph, so this stays hand-built
- * (rounded pitch boundary + halfway line + center circle) — every other sidebar
+ * (rounded pitch boundary + halfway line + center circle) - every other sidebar
  * icon now comes straight from @ant-design/icons. Was previously a whistle. */
 const FieldIcon = (
   <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
@@ -101,9 +101,9 @@ const FieldIcon = (
     <circle cx="12" cy="12" r="2.75" />
   </svg>
 );
-/** Sourced from the icon pack (@ant-design/icons) — was previously a hand-built gear. */
+/** Sourced from the icon pack (@ant-design/icons) - was previously a hand-built gear. */
 const SettingsIcon = <SettingOutlined style={{ fontSize: 20 }} />;
-/** Reuses the "forms" glyph for Club Rules only now — document/lines already fits. */
+/** Reuses the "forms" glyph for Club Rules only now - document/lines already fits. */
 const ArrowDownIcon = (
   <path d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 );
@@ -122,7 +122,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
 
   // Closing after every nav pick is a no-op on desktop (lg:translate-x-0 keeps the rail
   // visible regardless of sidebarToggle there) but is the only way the mobile/tablet
-  // drawer ever dismisses itself after picking a destination — without it, tapping a
+  // drawer ever dismisses itself after picking a destination - without it, tapping a
   // link just navigates behind the still-open drawer.
   const go = (path: string) => {
     navigate(path);
@@ -243,10 +243,10 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
 
   // Plain startsWith would make e.g. "/match-days" (Match Management) match the
   // "/match-day" prefix (Next Match Day) too, since "/match-days" literally starts with
-  // "/match-day" — highlighting both groups at once. Require an exact match or a "/"
+  // "/match-day" - highlighting both groups at once. Require an exact match or a "/"
   // boundary right after the prefix so sibling routes with a shared stem don't collide.
   const pathMatchesPrefix = (pathname: string, prefix: string) => {
-    // "/" is the root Dashboard route, not a namespace every path lives under —
+    // "/" is the root Dashboard route, not a namespace every path lives under -
     // require an exact match there instead of the usual "/" boundary rule (which
     // would make it match every route, since every path starts with "/").
     if (prefix === "/") return pathname === "/";
@@ -261,7 +261,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
     if (active && active.key !== selectedGroup) {
       setSelectedGroup(active.key);
     }
-    // Only re-run when the route changes — opening/closing a group manually
+    // Only re-run when the route changes - opening/closing a group manually
     // shouldn't be fought by this sync.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
@@ -284,7 +284,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
   };
 
   // On desktop, collapsing shrinks the rail to icons-only and hides dropdown
-  // sub-menus (no room to show them) — clicking a multi-child group icon
+  // sub-menus (no room to show them) - clicking a multi-child group icon
   // navigates to its first child instead of opening the dropdown. Mobile
   // ignores this entirely: it's always full-width, shown/hidden via translate.
   const collapsed = !sidebarExpanded;
@@ -301,7 +301,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
           <img src={companyLogo} alt="BOFC" className="h-12 w-12 shrink-0" />
           <span className={`ml-2 text-3xl font-semibold text-gray-800 dark:text-white ${collapsed ? "lg:hidden" : ""}`}>BOFC</span>
         </button>
-        {/* Closes the drawer on mobile/tablet (<lg) — Header (the desktop-only home for
+        {/* Closes the drawer on mobile/tablet (<lg) - Header (the desktop-only home for
             this) is hidden below md, so this is the only in-drawer way to dismiss it
             besides tapping the scrim outside. */}
         <button
@@ -315,7 +315,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
         </button>
       </div>
 
-      {/* Mobile/tablet-only (<lg) account strip — Header (the usual home for dark
+      {/* Mobile/tablet-only (<lg) account strip - Header (the usual home for dark
           mode/notifications/sign out) is hidden below md, and even between md-lg where
           Header still shows, having this here too is harmless since it's lg:hidden. */}
       <div className="mb-4 flex items-center justify-between border-b border-[var(--color-rule)] pb-4 lg:hidden">
@@ -413,7 +413,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
                                     type="button"
                                     onClick={() => go(child.path)}
                                     className={`menu-dropdown-item group w-full text-left ${
-                                      // Exact match, not pathMatchesPrefix's "starts with" — these are
+                                      // Exact match, not pathMatchesPrefix's "starts with" - these are
                                       // sibling leaf pages (e.g. "/players" vs "/players/ranks"), not
                                       // nested namespaces, so the prefix check was lighting up both at
                                       // once whenever one leaf's path happened to prefix another's.
@@ -459,7 +459,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
                                           type="button"
                                           onClick={() => go(leaf.path)}
                                           className={`menu-dropdown-item group w-full text-left ${
-                                            // Exact match — see the sibling-leaf note above.
+                                            // Exact match - see the sibling-leaf note above.
                                             location.pathname === leaf.path
                                               ? "menu-dropdown-item-active"
                                               : "menu-dropdown-item-inactive"

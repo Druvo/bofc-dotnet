@@ -292,6 +292,57 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
             .ExecuteUpdateAsync(setters => setters.SetProperty(m => m.MatchStatus, MatchStatus.COMPLETED));
     }
 
+    public async Task HardDeleteMatchDayAsync(long matchDayId)
+    {
+        var exists = await db.MatchDays.AnyAsync(t => t.Id == matchDayId);
+        if (!exists)
+        {
+            throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
+        }
+
+        // Children before parents, mirroring the full FK graph rooted at MatchDay/Team/Match —
+        // most of these FKs are NO_ACTION (not cascading), so a plain MatchDays.Remove() would
+        // fail; delete every dependent table explicitly instead. Wrapped in one transaction so a
+        // failure partway through never leaves the MatchDay half-deleted.
+        await using var transaction = await db.Database.BeginTransactionAsync();
+
+        await db.MatchEvents.Where(e => e.Match.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.MatchStatistics.Where(s => s.Match.MatchDayId == matchDayId).ExecuteDeleteAsync();
+
+        await db.AuctionBids.Where(b => b.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.AuctionPlayerRegistrations.Where(r => r.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.AuctionPlayers.Where(p => p.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.AuctionSessions.Where(s => s.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.AuctionSettingsSet.Where(s => s.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.TeamBudgets.Where(b => b.MatchDayId == matchDayId).ExecuteDeleteAsync();
+
+        await db.TeamLineupPlayers.Where(p => p.TeamLineup.Team.MatchDayId == matchDayId).ExecuteDeleteAsync();
+
+        await db.GroupStandings.Where(s => s.Group.Round.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.RoundGroupTeams.Where(t => t.Group.Round.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.RoundTeams.Where(t => t.Round.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.AdvancementRules
+            .Where(r => r.SourceRound.MatchDayId == matchDayId || r.TargetRound.MatchDayId == matchDayId)
+            .ExecuteDeleteAsync();
+        await db.LogicNodes.Where(n => n.MatchDayId == matchDayId).ExecuteDeleteAsync();
+
+        await db.Matches.Where(m => m.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.RoundGroups.Where(g => g.Round.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.MatchDayRounds.Where(r => r.MatchDayId == matchDayId).ExecuteDeleteAsync();
+
+        await db.MatchDayPrizes.Where(p => p.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.MatchDayParticipants.Where(p => p.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.PlayerGoalkeepingHistories.Where(h => h.MatchDayId == matchDayId).ExecuteDeleteAsync();
+
+        await db.TeamLineups.Where(l => l.Team.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.TeamPlayers.Where(p => p.Team.MatchDayId == matchDayId).ExecuteDeleteAsync();
+        await db.Teams.Where(t => t.MatchDayId == matchDayId).ExecuteDeleteAsync();
+
+        await db.MatchDays.Where(t => t.Id == matchDayId).ExecuteDeleteAsync();
+
+        await transaction.CommitAsync();
+    }
+
     public async Task<MatchDayResponse> GetMostRecentMatchDayAsync()
     {
         var matchDay = await db.MatchDays.Include(t => t.Venue)

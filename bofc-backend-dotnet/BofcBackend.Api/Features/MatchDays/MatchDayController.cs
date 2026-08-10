@@ -69,6 +69,17 @@ public class MatchDayController(IMatchDayService matchDayService, ITeamService t
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, response);
     }
 
+    /// <summary>Permanently deletes the MatchDay and everything under it (fixtures, teams,
+    /// lineups, rounds/groups, auction data, prizes, participants) — cannot be undone. Restricted
+    /// to SuperAdmin, unlike every other MatchDay action here, given the blast radius.</summary>
+    [Authorize(Roles = PlayerRoleNames.SuperAdmin)]
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> HardDeleteMatchDay(long id)
+    {
+        await matchDayService.HardDeleteMatchDayAsync(id);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, "MatchDay permanently deleted");
+    }
+
     [AllowAnonymous]
     [HttpGet("details")]
     public async Task<IActionResult> GetMatchDaysSummery([FromQuery, BindRequired] long matchDayId)

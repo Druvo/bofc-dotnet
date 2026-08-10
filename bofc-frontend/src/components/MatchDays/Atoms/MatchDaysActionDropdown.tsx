@@ -3,13 +3,14 @@ import { toast } from "react-toastify";
 import { MoreOutlined } from "@ant-design/icons";
 import { IoMatchDaySingleSummaryType } from "../../../state/features/matchDays/matchDayTypes";
 import CreateMatchDay from "./CreateMatchDayModal";
-import { useUpdateMatchDayActiveStatusMutation, useConcludeMatchDayMutation } from "../../../state/features/matchDays/matchDaysSlice";
+import { useUpdateMatchDayActiveStatusMutation, useConcludeMatchDayMutation, useHardDeleteMatchDayMutation } from "../../../state/features/matchDays/matchDaysSlice";
 import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import { Dropdown, DropdownItem } from "../../ui/dropdown";
 import Button from "../../ui/button";
 import Modal from "../../ui/modal";
 import FormSelect from "../../ui/form-select";
+import FormInput from "../../ui/form-input";
 import useAuctionEnabled from "../../../hooks/useAuctionEnabled";
 
 interface MatchDaysActionDropdownProps {
@@ -25,9 +26,12 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
 }) => {
   const [updateMatchDayActiveStatus] = useUpdateMatchDayActiveStatusMutation();
   const [concludeMatchDay] = useConcludeMatchDayMutation();
+  const [hardDeleteMatchDay, { isLoading: isDeleting }] = useHardDeleteMatchDayMutation();
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
   const [isActiveStatusModalVisible, setIsActiveStatusModalVisible] = useState(false);
   const [isConcludeModalVisible, setIsConcludeModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [activeStatus, setActiveStatus] = useState(record.activeStatus);
 
   const loginInfo = useSelector(selectLoginInfo);
@@ -39,6 +43,7 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
     if (key === "update") setIsUpdateModalVisible(true);
     else if (key === "active-status") setIsActiveStatusModalVisible(true);
     else if (key === "conclude") setIsConcludeModalVisible(true);
+    else if (key === "delete") { setDeleteConfirmText(""); setIsDeleteModalVisible(true); }
     onMenuClick({ key }, record);
   };
 
@@ -60,6 +65,18 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
       })
       .catch(() => {
         toast.error("Failed to conclude MatchDay");
+      });
+  };
+
+  const handleHardDelete = () => {
+    hardDeleteMatchDay({ id: record.id })
+      .unwrap()
+      .then(() => {
+        toast.success("MatchDay permanently deleted");
+        setIsDeleteModalVisible(false);
+      })
+      .catch(() => {
+        toast.error("Failed to delete MatchDay");
       });
   };
 
@@ -85,6 +102,11 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
             {loginInfo.roles.includes("SUPERADMIN") && (
               <DropdownItem className="text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10" onClick={() => fireMenuClick("conclude", close)}>
                 Conclude MatchDay
+              </DropdownItem>
+            )}
+            {loginInfo.roles.includes("SUPERADMIN") && (
+              <DropdownItem className="text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10" onClick={() => fireMenuClick("delete", close)}>
+                Delete MatchDay Permanently
               </DropdownItem>
             )}
           </>
@@ -136,6 +158,39 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
         <p className="text-theme-sm text-gray-600 dark:text-gray-400">
           Are you sure you want to conclude <strong>{record.name}</strong>? This will mark all unfinished matches as completed and cannot be undone.
         </p>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalVisible}
+        onClose={() => setIsDeleteModalVisible(false)}
+        title="Delete MatchDay Permanently"
+        className="max-w-[420px]"
+        footer={
+          <>
+            <Button variant="outline" size="sm" onClick={() => setIsDeleteModalVisible(false)}>Cancel</Button>
+            <Button
+              variant="danger"
+              size="sm"
+              disabled={deleteConfirmText !== record.name || isDeleting}
+              onClick={handleHardDelete}
+            >
+              {isDeleting ? "Deleting..." : "Permanently Delete"}
+            </Button>
+          </>
+        }
+      >
+        <p className="mb-3 text-theme-sm text-gray-600 dark:text-gray-400">
+          This permanently deletes <strong>{record.name}</strong> and everything under it — teams, fixtures, lineups,
+          rounds/groups, auction data, prizes and participants. <strong>This cannot be undone.</strong>
+        </p>
+        <p className="mb-2 text-theme-sm text-gray-600 dark:text-gray-400">
+          Type <strong>{record.name}</strong> to confirm:
+        </p>
+        <FormInput
+          value={deleteConfirmText}
+          onChange={(e) => setDeleteConfirmText(e.target.value)}
+          placeholder={record.name}
+        />
       </Modal>
     </>
   );

@@ -16,6 +16,13 @@ public interface IMatchDayService
     Task UpdateMatchDayStatusesAsync();
 
     Task ConcludeMatchDayAsync(long matchDayId);
+
+    /// <summary>Permanently deletes a MatchDay and every row that references it (fixtures, teams,
+    /// lineups, rounds/groups, auction data, prizes, participants, goalkeeping history) — cannot
+    /// be undone. Unlike ConcludeMatchDayAsync/UpdateMatchDayStatusAsync, this actually removes
+    /// rows rather than just changing status.</summary>
+    Task HardDeleteMatchDayAsync(long matchDayId);
+
     Task<MatchDayResponse> GetMostRecentMatchDayAsync();
     Task<MatchDayResponse?> GetMostRecentActiveMatchDayAsync();
 

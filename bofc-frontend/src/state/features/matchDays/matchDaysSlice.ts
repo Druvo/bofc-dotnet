@@ -91,6 +91,15 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
       invalidatesTags: ["matchDays"],
     }),
 
+    /** Permanently deletes the MatchDay and everything under it — cannot be undone. */
+    hardDeleteMatchDay: builder.mutation<BasicResType, { id: number }>({
+      query: ({ id }) => ({
+        url: `match-days/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["matchDays"],
+    }),
+
     presignRoadmapImageUpload: builder.mutation<
       BasicResType & { content: { key: string; url: string; uploadUrl: string; expiresInSeconds: number } },
       { fileName: string; contentType: string }
@@ -233,6 +242,7 @@ export const {
   useGetMatchDaysQuery,
   useUpdateMatchDayActiveStatusMutation,
   useConcludeMatchDayMutation,
+  useHardDeleteMatchDayMutation,
   usePresignRoadmapImageUploadMutation,
   useGetMatchDayParticipantsListQuery,
   useAddParticipationToMatchDayMutation,

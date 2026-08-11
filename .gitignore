@@ -35,3 +35,6 @@ graphify-out/
 
 # Skills lock
 skills-lock.json
+
+publish-*/
+

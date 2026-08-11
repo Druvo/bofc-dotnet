@@ -53,6 +53,9 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
       .then(() => {
         toast.success("Active status updated successfully");
         setIsActiveStatusModalVisible(false);
+      })
+      .catch(() => {
+        toast.error("Failed to update active status");
       });
   };
 

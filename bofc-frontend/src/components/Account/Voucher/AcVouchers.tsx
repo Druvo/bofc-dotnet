@@ -5,6 +5,8 @@ import IAcVoucher from "../../../interfaces/IAcVoucher";
 import IPlayer from "../../../interfaces/IPlayer";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import FormatCurrencyWithSymbol from "../../Util/FormatCurrencyWithSymbol";
+import { showErrorNotification } from "../../../utils/errorNotification";
+import { normalizeErrorMessage } from "../../../utils/normalizeErrorMessage";
 import axiosApi from "../../../state/api/axiosBase";
 import { SearchOutlined, PlusOutlined, CalendarOutlined, FileTextOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -62,7 +64,7 @@ function AcVouchers() {
                 setTableSpinLoading(false);
             })
             .catch((err) => {
-                console.log("server error", err);
+                showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to load vouchers") });
                 setTableSpinLoading(false);
             });
     };
@@ -149,7 +151,8 @@ function AcVouchers() {
                     setModalConfirmLoading(false);
                     getAcVoucherList();
                 })
-                .catch(() => {
+                .catch((err) => {
+                    showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to create voucher") });
                     setModalConfirmLoading(false);
                 });
         } else {
@@ -162,7 +165,8 @@ function AcVouchers() {
                     getAcVoucherList();
                     setModalState("CREATE");
                 })
-                .catch(() => {
+                .catch((err) => {
+                    showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to update voucher") });
                     setModalConfirmLoading(false);
                 });
         }
@@ -176,7 +180,8 @@ function AcVouchers() {
                 if (response.data?.content) setPlayers(response.data.content);
                 setPlayerApiLoading(false);
             })
-            .catch(() => {
+            .catch((err) => {
+                showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to load players") });
                 setPlayerApiLoading(false);
             });
     };

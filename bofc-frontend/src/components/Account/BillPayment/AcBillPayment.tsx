@@ -9,6 +9,8 @@ import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import FormatCurrencyWithSymbol from "../../Util/FormatCurrencyWithSymbol";
 import { useDispatch, useSelector } from "react-redux";
+import { showErrorNotification } from "../../../utils/errorNotification";
+import { normalizeErrorMessage } from "../../../utils/normalizeErrorMessage";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import IAcBillPayment from "../../../interfaces/IAcBillPayment";
 import ICostType from "../../../interfaces/ICostType";
@@ -72,7 +74,7 @@ function AcBillPayment() {
                 setTableSpinLoading(false);
             })
             .catch((err) => {
-                console.log("server error", err);
+                showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to load bill payments") });
                 setTableSpinLoading(false);
             });
     };
@@ -167,7 +169,8 @@ function AcBillPayment() {
                     // Invalidate it so those consumers refetch too.
                     dispatch(acCollectionApi.util.invalidateTags(["acBillPayment"]));
                 })
-                .catch(() => {
+                .catch((err) => {
+                    showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to create bill payment") });
                     setModalConfirmLoading(false);
                 });
         } else {
@@ -181,7 +184,8 @@ function AcBillPayment() {
                     dispatch(acCollectionApi.util.invalidateTags(["acBillPayment"]));
                     setModalState("CREATE");
                 })
-                .catch(() => {
+                .catch((err) => {
+                    showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to update bill payment") });
                     setModalConfirmLoading(false);
                 });
         }
@@ -195,7 +199,8 @@ function AcBillPayment() {
                 if (response.data?.content) setCostTypes(response.data.content);
                 setCostTypeApiLoading(false);
             })
-            .catch(() => {
+            .catch((err) => {
+                showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to load cost types") });
                 setCostTypeApiLoading(false);
             });
     };
@@ -206,7 +211,9 @@ function AcBillPayment() {
             .then((response) => {
                 if (response.data?.content) setPaymentAccounts(response.data.content);
             })
-            .catch(() => {});
+            .catch((err) => {
+                showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to load payment accounts") });
+            });
     };
 
     const updateAction = (id: number) => {
@@ -226,8 +233,10 @@ function AcBillPayment() {
                 setSelectedPaymentAccountId(c.paymentAccountId || "");
                 setModalSpinLoading(false);
             })
-            .catch(() => {
+            .catch((err) => {
+                showErrorNotification({ statusCode: err?.response?.status, message: normalizeErrorMessage(err?.response?.data, "Failed to load bill payment") });
                 setModalSpinLoading(false);
+                setModalOpen(false);
             });
     };
 

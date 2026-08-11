@@ -204,7 +204,8 @@ function Player() {
                         .catch(() => {});
                 }
             })
-            .catch(() => {
+            .catch((err: any) => {
+                toast.error(normalizeErrorMessage(err?.response?.data || err, "Error loading player"));
                 setPlayerLoading(false);
             });
     };
@@ -213,7 +214,9 @@ function Player() {
         axiosApi
             .get(`football-positions`)
             .then((response) => setFootballPositions(response.data.content))
-            .catch(() => {});
+            .catch((err: any) => {
+                toast.error(normalizeErrorMessage(err?.response?.data || err, "Error loading playing positions"));
+            });
     };
 
     useEffect(() => {

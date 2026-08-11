@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import IAcVoucher from "../../../interfaces/IAcVoucher";
 import IPlayer from "../../../interfaces/IPlayer";
-import { API_URL } from "../../../settings";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import FormatCurrencyWithSymbol from "../../Util/FormatCurrencyWithSymbol";
 import axiosApi from "../../../state/api/axiosBase";
@@ -57,7 +56,7 @@ function AcVouchers() {
     const getAcVoucherList = () => {
         setTableSpinLoading(true);
         axiosApi
-            .get(`${API_URL}/ac/vouchers`)
+            .get(`ac/vouchers`)
             .then((response) => {
                 setAcVouchers(response.data.content);
                 setTableSpinLoading(false);
@@ -143,7 +142,7 @@ function AcVouchers() {
 
         if (modalState === "CREATE") {
             axiosApi
-                .post(`${API_URL}/ac/vouchers`, payload)
+                .post(`ac/vouchers`, payload)
                 .then(() => {
                     setModalOpen(false);
                     clearModalField();
@@ -155,7 +154,7 @@ function AcVouchers() {
                 });
         } else {
             axiosApi
-                .put(`${API_URL}/ac/vouchers/${acVoucherId}`, payload)
+                .put(`ac/vouchers/${acVoucherId}`, payload)
                 .then(() => {
                     clearModalField();
                     setModalOpen(false);
@@ -172,7 +171,7 @@ function AcVouchers() {
     const getPlayers = () => {
         setPlayerApiLoading(true);
         axiosApi
-            .get(`${API_URL}/players`)
+            .get(`players`)
             .then((response) => {
                 if (response.data?.content) setPlayers(response.data.content);
                 setPlayerApiLoading(false);

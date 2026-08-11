@@ -6,7 +6,6 @@ import {
     WalletOutlined,
 } from "@ant-design/icons";
 import { useEffect, useMemo, useState } from "react";
-import { API_URL } from "../../../settings";
 import dayjs from "dayjs";
 import FormatCurrencyWithSymbol from "../../Util/FormatCurrencyWithSymbol";
 import { useDispatch, useSelector } from "react-redux";
@@ -67,7 +66,7 @@ function AcBillPayment() {
     const getAcBillPaymentList = () => {
         setTableSpinLoading(true);
         axiosApi
-            .get(`${API_URL}/ac/bill-payments`)
+            .get(`ac/bill-payments`)
             .then((response) => {
                 setAcBillPayments(response.data.content);
                 setTableSpinLoading(false);
@@ -156,7 +155,7 @@ function AcBillPayment() {
 
         if (modalState === "CREATE") {
             axiosApi
-                .post(`${API_URL}/ac/bill-payments`, requestData)
+                .post(`ac/bill-payments`, requestData)
                 .then(() => {
                     setModalOpen(false);
                     clearModalField();
@@ -173,7 +172,7 @@ function AcBillPayment() {
                 });
         } else {
             axiosApi
-                .put(`${API_URL}/ac/bill-payments/${acBillPaymentId}`, requestData)
+                .put(`ac/bill-payments/${acBillPaymentId}`, requestData)
                 .then(() => {
                     clearModalField();
                     setModalOpen(false);
@@ -191,7 +190,7 @@ function AcBillPayment() {
     const getCostTypes = () => {
         setCostTypeApiLoading(true);
         axiosApi
-            .get(`${API_URL}/cost-types`)
+            .get(`cost-types`)
             .then((response) => {
                 if (response.data?.content) setCostTypes(response.data.content);
                 setCostTypeApiLoading(false);
@@ -203,7 +202,7 @@ function AcBillPayment() {
 
     const getPaymentAccounts = () => {
         axiosApi
-            .get(`${API_URL}/payment-accounts`)
+            .get(`payment-accounts`)
             .then((response) => {
                 if (response.data?.content) setPaymentAccounts(response.data.content);
             })
@@ -216,7 +215,7 @@ function AcBillPayment() {
         setModalOpen(true);
         setModalSpinLoading(true);
         axiosApi
-            .get(`${API_URL}/ac/bill-payments/${id}`)
+            .get(`ac/bill-payments/${id}`)
             .then((response) => {
                 const c = response.data.content;
                 setCode(c.code || "");

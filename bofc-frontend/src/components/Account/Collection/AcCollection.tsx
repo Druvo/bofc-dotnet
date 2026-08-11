@@ -8,7 +8,6 @@ import { normalizeErrorMessage } from "../../../utils/normalizeErrorMessage";
 import IAcCollection from "../../../interfaces/IAcCollection";
 import IPlayer from "../../../interfaces/IPlayer";
 import IPaymentAccount from "../../../interfaces/IPaymentAccount";
-import { API_URL } from "../../../settings";
 import axiosApi from "../../../state/api/axiosBase";
 import { acCollectionApi } from "../../../state/features/account/accountSlice";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
@@ -73,7 +72,7 @@ function AcCollection() {
     const getAcCollectionList = () => {
         setTableSpinLoading(true);
         axiosApi
-            .get(`${API_URL}/ac/collections`)
+            .get(`ac/collections`)
             .then((response) => {
                 setAcCollections(response.data.content);
                 setTableSpinLoading(false);
@@ -183,7 +182,7 @@ function AcCollection() {
 
         if (modalState === "CREATE") {
             axiosApi
-                .post(`${API_URL}/ac/collections`, requestData)
+                .post(`ac/collections`, requestData)
                 .then(() => {
                     setModalOpen(false);
                     clearModalField();
@@ -202,7 +201,7 @@ function AcCollection() {
                 });
         } else {
             axiosApi
-                .put(`${API_URL}/ac/collections/${acCollectionId}`, requestData)
+                .put(`ac/collections/${acCollectionId}`, requestData)
                 .then(() => {
                     clearModalField();
                     setModalOpen(false);
@@ -222,7 +221,7 @@ function AcCollection() {
     const getPlayers = () => {
         setPlayerApiLoading(true);
         axiosApi
-            .get(`${API_URL}/players`)
+            .get(`players`)
             .then((response) => {
                 if (response.data?.content) setPlayers(response.data.content);
                 setPlayerApiLoading(false);
@@ -235,7 +234,7 @@ function AcCollection() {
 
     const getPaymentAccounts = () => {
         axiosApi
-            .get(`${API_URL}/payment-accounts`)
+            .get(`payment-accounts`)
             .then((response) => {
                 if (response.data?.content) setPaymentAccounts(response.data.content);
             })
@@ -250,7 +249,7 @@ function AcCollection() {
         setModalOpen(true);
         setModalSpinLoading(true);
         axiosApi
-            .get(`${API_URL}/ac/collections/${id}`)
+            .get(`ac/collections/${id}`)
             .then((response) => {
                 const c = response.data.content;
                 setSelectedDate(dayjs(c.date).format("YYYY-MM-DD"));

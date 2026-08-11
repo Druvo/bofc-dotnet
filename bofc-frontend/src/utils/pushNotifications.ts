@@ -3,7 +3,6 @@
 // the subscription to the backend so NotificationService can target this
 // device. See public/sw.js for the "push"/"notificationclick" handlers.
 import axiosApi from "../state/api/axiosBase";
-import { API_URL } from "../settings";
 import { requestNotificationPermission, isNotificationSupported } from "./browserNotifications";
 
 export const isPushSupported = (): boolean =>
@@ -27,7 +26,7 @@ export async function subscribeToPush(): Promise<boolean> {
 
   let subscription = await registration.pushManager.getSubscription();
   if (!subscription) {
-    const { data } = await axiosApi.get(`${API_URL}/notifications/vapid-public-key`);
+    const { data } = await axiosApi.get(`notifications/vapid-public-key`);
     const publicKey: string = data.content.publicKey;
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -36,7 +35,7 @@ export async function subscribeToPush(): Promise<boolean> {
   }
 
   const json = subscription.toJSON();
-  await axiosApi.post(`${API_URL}/notifications/subscribe`, {
+  await axiosApi.post(`notifications/subscribe`, {
     endpoint: json.endpoint,
     p256dh: json.keys?.p256dh,
     auth: json.keys?.auth,
@@ -54,7 +53,7 @@ export async function unsubscribeFromPush(): Promise<void> {
 
   const endpoint = subscription.endpoint;
   await subscription.unsubscribe();
-  await axiosApi.delete(`${API_URL}/notifications/subscribe?endpoint=${encodeURIComponent(endpoint)}`);
+  await axiosApi.delete(`notifications/subscribe?endpoint=${encodeURIComponent(endpoint)}`);
 }
 
 export async function isPushSubscribed(): Promise<boolean> {

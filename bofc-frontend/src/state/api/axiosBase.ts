@@ -3,8 +3,14 @@ import { selectLoginInfo } from "../slices/loginInfoSlice";
 import store from "../store";
 
 // Create an axios instance
+// Falls back to "/api" so a plain `npm start` (no REACT_APP_API_URL set) behaves the same
+// as production, instead of leaving baseURL empty and forcing every caller here to hand-prepend
+// API_URL itself - the two conventions coexisting was what caused a real double "/api/api/..."
+// 404 in production (REACT_APP_API_URL="/api" baked in at build time, PLUS callers doing
+// axiosApi.get(`${API_URL}/players/${id}`)). Callers of this instance must pass bare paths
+// ("players/123"), never prefixed with API_URL.
 const axiosApi = axios.create({
-    baseURL: process.env.REACT_APP_API_URL, // Your API URL
+    baseURL: process.env.REACT_APP_API_URL || "/api",
 });
 
 // Add a request interceptor

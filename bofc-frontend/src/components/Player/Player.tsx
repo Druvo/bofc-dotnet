@@ -11,7 +11,7 @@ import {
     LoadingOutlined,
 } from "@ant-design/icons";
 import IFootballPosition from "../../interfaces/IFootballPosition";
-import { API_URL, COMMON_PLAYER_PASSWORD } from "../../settings";
+import { COMMON_PLAYER_PASSWORD } from "../../settings";
 import { checkTockenValidity } from "../../utils/utils";
 import { useSelector, useDispatch } from "react-redux";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
@@ -131,7 +131,7 @@ function Player() {
 
         if (!id) {
             axiosApi
-                .post(`${API_URL}/players`, playerData)
+                .post(`players`, playerData)
                 .then((response) => {
                     toast.success(response.data.message);
                     dispatch(playerApi.util.invalidateTags(["player"]));
@@ -142,11 +142,11 @@ function Player() {
                 });
         } else {
             axiosApi
-                .put(`${API_URL}/players/${id}`, playerData)
+                .put(`players/${id}`, playerData)
                 .then((response) => {
-                    const followUps = [axiosApi.put(`${API_URL}/players/${id}/status?active=${values.active}`, {})];
+                    const followUps = [axiosApi.put(`players/${id}/status?active=${values.active}`, {})];
                     if (isAdmin) {
-                        followUps.push(axiosApi.put(`${API_URL}/players/${id}/rank`, {
+                        followUps.push(axiosApi.put(`players/${id}/rank`, {
                             rank: values.rank ? Number(values.rank) : null,
                         }));
                     }
@@ -169,7 +169,7 @@ function Player() {
     const getPlayer = () => {
         setPlayerLoading(true);
         axiosApi
-            .get(`${API_URL}/players/${id}`, {
+            .get(`players/${id}`, {
                 headers: { Authorization: `Bearer ${getTokenFromLocalStorage(tokenContent)}` },
             })
             .then((response) => {
@@ -194,7 +194,7 @@ function Player() {
 
                 if (isAdmin) {
                     axiosApi
-                        .get(`${API_URL}/players/${id}/rank`, {
+                        .get(`players/${id}/rank`, {
                             headers: { Authorization: `Bearer ${getTokenFromLocalStorage(tokenContent)}` },
                         })
                         .then((rankResponse) => {
@@ -211,7 +211,7 @@ function Player() {
 
     const getFootballPositions = () => {
         axiosApi
-            .get(`${API_URL}/football-positions`)
+            .get(`football-positions`)
             .then((response) => setFootballPositions(response.data.content))
             .catch(() => {});
     };

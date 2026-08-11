@@ -1,4 +1,3 @@
-import { API_URL } from "../settings";
 import axiosApi from "../state/api/axiosBase";
 
 interface PresignResponse {
@@ -23,7 +22,7 @@ export async function uploadImageToStorage(file: File, folder: string): Promise<
   }
 
   const presignRes = await axiosApi.post(
-    `${API_URL}/files/presign`,
+    `files/presign`,
     null,
     {
       params: {
@@ -52,7 +51,7 @@ export async function uploadImageToStorage(file: File, folder: string): Promise<
 }
 
 export async function getStorageViewUrl(key: string): Promise<string> {
-  const res = await axiosApi.get(`${API_URL}/files/view-url`, {
+  const res = await axiosApi.get(`files/view-url`, {
     params: { key },
   });
   const content = extractContent<{ url: string }>(res.data);

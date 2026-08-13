@@ -1,7 +1,10 @@
 import React, { useMemo } from "react";
-import { UserOutlined, WarningOutlined } from "@ant-design/icons";
+import { WarningOutlined } from "@ant-design/icons";
 import { useGetPlayerCollectionMetricsQuery } from "../../../state/features/account/playerCollectionMetricsSlice";
+import { useGetPlayersQuery } from "../../../state/features/player/playerSlice";
 import { PlayerMetric } from "../../../interfaces/IPlayerCollectionMetrics";
+import { toAbsolutePlayerPhotoUrl } from "../../../utils/playerPhotoUtils";
+import Avatar from "../../CommonAtoms/Avatar";
 import { Spinner } from "../../ui/loader";
 
 // Reuses the same "current month, no contribution yet, active player" rule
@@ -15,6 +18,15 @@ const UpcomingDuesWidget: React.FC = () => {
 
   const { data, isLoading } = useGetPlayerCollectionMetricsQuery({ year: currentYear });
   const metrics = data?.content?.metrics || [];
+
+  const { data: playersData } = useGetPlayersQuery();
+  const photoById = useMemo(() => {
+    const map: Record<number, string | undefined> = {};
+    playersData?.content?.forEach((p) => {
+      map[p.id] = toAbsolutePlayerPhotoUrl(p.photoUrl) || undefined;
+    });
+    return map;
+  }, [playersData]);
 
   const duePlayers = useMemo(
     () =>
@@ -48,9 +60,7 @@ const UpcomingDuesWidget: React.FC = () => {
               key={p.playerId}
               className="flex items-center gap-2.5 rounded-lg border border-gray-100 bg-gray-50 px-2 py-1.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]"
             >
-              <span className="flex h-6.5 w-6.5 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400 dark:bg-white/5 dark:text-gray-500">
-                <UserOutlined />
-              </span>
+              <Avatar src={photoById[p.playerId]} name={p.playerName} seed={p.playerId} size={26} />
               <span className="min-w-0 flex-1 truncate text-theme-xs text-gray-700 dark:text-gray-300">{p.playerName}</span>
               <WarningOutlined className="text-theme-xs text-error-500" />
             </div>

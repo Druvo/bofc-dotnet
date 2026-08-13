@@ -89,22 +89,28 @@ const MatchCalendarWidget: React.FC = () => {
           const hasMatch = !!matches?.length;
           const today = isToday(d);
           return (
-            <button
-              key={d}
-              type="button"
-              disabled={!hasMatch}
-              title={matches?.map((m) => m.name).join(", ")}
-              onClick={() => hasMatch && navigate(`/match-days/join-match-day/${matches[0].id}`)}
-              className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-theme-xs transition ${
-                today
-                  ? "bg-brand-500 text-white font-bold"
-                  : hasMatch
-                  ? "border-2 border-brand-500 bg-brand-50 font-bold text-brand-600 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400 dark:hover:bg-brand-500/25"
-                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"
-              } ${hasMatch ? "cursor-pointer" : "cursor-default"} ${today && hasMatch ? "ring-2 ring-warning-400 ring-offset-1 dark:ring-offset-[var(--color-paper-3)]" : ""}`}
-            >
-              {d}
-            </button>
+            <div key={d} className="relative mx-auto h-8 w-8">
+              <button
+                type="button"
+                disabled={!hasMatch}
+                title={matches?.map((m) => m.name).join(", ")}
+                onClick={() => hasMatch && navigate(`/match-days/join-match-day/${matches[0].id}`)}
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-theme-xs transition ${
+                  today
+                    ? "bg-brand-500 text-white font-bold"
+                    : hasMatch
+                    ? "border-2 border-brand-500 bg-brand-50 font-bold text-brand-600 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400 dark:hover:bg-brand-500/25"
+                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"
+                } ${hasMatch ? "cursor-pointer" : "cursor-default"} ${today && hasMatch ? "ring-2 ring-warning-400 ring-offset-1 dark:ring-offset-[var(--color-paper-3)]" : ""}`}
+              >
+                {d}
+              </button>
+              {hasMatch && (
+                <span className="pointer-events-none absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[10px] leading-none dark:bg-[var(--color-paper-3)]">
+                  ⚽
+                </span>
+              )}
+            </div>
           );
         })}
       </div>

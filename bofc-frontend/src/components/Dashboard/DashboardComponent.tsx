@@ -65,6 +65,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
         <LatestMatchDayCard />
       </div>
 
+      {/* Player leaderboard/spotlight - reuses the Player Statistics page's
+          Top-3/Spotlight/Quick-Insights block, links out to the full page. */}
+      <PlayerSpotlightWidget />
+
       {/* Your next match + goalkeeper history */}
       <div className="mb-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
@@ -72,10 +76,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           <GoalkeeperHistoryCard />
         </div>
       </div>
-
-      {/* Player leaderboard/spotlight - reuses the Player Statistics page's
-          Top-3/Spotlight/Quick-Insights block, links out to the full page. */}
-      <PlayerSpotlightWidget />
 
       {/* Payments due + your own contributions + Match calendar */}
       <div className="mb-10">

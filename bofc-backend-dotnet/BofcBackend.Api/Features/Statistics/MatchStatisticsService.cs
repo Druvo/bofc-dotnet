@@ -57,43 +57,39 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
 
     public async Task<List<PlayerMatchHistoryResponse>> GetPlayerMatchHistoryAsync(long playerId)
     {
-        // Scope to matches of teams the player actually belongs to (via TeamPlayer roster),
-        // falling back to all of his stat rows if he has no roster entries at all - matches
-        // Java's findPlayerMatchHistory query exactly.
-        var rows = await db.MatchStatistics
-            .Include(s => s.Match).ThenInclude(m => m.MatchDay)
-            .Include(s => s.Match).ThenInclude(m => m.HomeTeam)
-            .Include(s => s.Match).ThenInclude(m => m.AwayTeam)
-            .Include(s => s.Team)
-            .Where(s => s.PlayerId == playerId
-                && s.Match.MatchStatus == MatchStatus.COMPLETED
-                && (db.TeamPlayers.Any(tp => tp.PlayerId == playerId && tp.TeamId == s.TeamId)
-                    || !db.TeamPlayers.Any(tp => tp.PlayerId == playerId)))
-            .OrderByDescending(s => s.Match.MatchDate)
+        // Scoped to completed matches of teams the player is actually rostered on (TeamPlayer
+        // persists per-MatchDay, so this covers every MatchDay the player was ever assigned to,
+        // not just the current one) - a match with no synced MatchStatistics used to be silently
+        // hidden entirely, which was confusing (the player clearly played, roster + goalkeeper
+        // history already showed them). A missing stats row now just means zeroed contribution
+        // stats and a full-duration appearance, instead of the match not appearing at all. Also
+        // keeps any match with an existing stats row even if the roster entry is gone (e.g. team
+        // membership changed after the match), so nothing that showed before stops showing now.
+        var teamIds = await db.TeamPlayers.Where(tp => tp.PlayerId == playerId).Select(tp => tp.TeamId).ToListAsync();
+
+        var matches = await db.Matches
+            .Include(m => m.MatchDay)
+            .Include(m => m.HomeTeam)
+            .Include(m => m.AwayTeam)
+            .Where(m => m.MatchStatus == MatchStatus.COMPLETED
+                && (teamIds.Contains(m.HomeTeamId) || teamIds.Contains(m.AwayTeamId)
+                    || db.MatchStatistics.Any(s => s.PlayerId == playerId && s.MatchId == m.Id)))
+            .OrderByDescending(m => m.MatchDate)
             .ToListAsync();
 
-        if (rows.Count == 0)
+        if (matches.Count == 0)
         {
             return [];
         }
 
-        // Group the player's stat rows per match (data can carry more than one row per
-        // match); the first row supplies the match/team context.
-        var byMatch = new Dictionary<long, List<MatchStatistics>>();
-        var matchOrder = new List<long>();
-        foreach (var row in rows)
-        {
-            if (!byMatch.TryGetValue(row.MatchId, out var list))
-            {
-                list = [];
-                byMatch[row.MatchId] = list;
-                matchOrder.Add(row.MatchId);
-            }
-            list.Add(row);
-        }
+        var matchIds = matches.Select(m => m.Id).ToList();
+
+        var statsRows = await db.MatchStatistics
+            .Where(s => s.PlayerId == playerId && matchIds.Contains(s.MatchId))
+            .ToListAsync();
+        var statsByMatch = statsRows.GroupBy(s => s.MatchId).ToDictionary(g => g.Key, g => g.ToList());
 
         // Also count goals/assists/cards from the recorded match events.
-        var matchIds = byMatch.Keys.ToList();
         var events = await db.MatchEvents.Where(e => e.PlayerId == playerId && matchIds.Contains(e.MatchId)).ToListAsync();
         var eventCounts = new Dictionary<long, int[]>(); // [goals, assists, yellow, red]
         foreach (var ev in events)
@@ -115,17 +111,35 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         // Per match, take the greater of the aggregated stats and the recorded events for
         // each metric, so a contribution shows if either source has it.
         var history = new List<PlayerMatchHistoryResponse>();
-        foreach (var matchId in matchOrder)
+        foreach (var match in matches)
         {
-            var msList = byMatch[matchId];
-            var rep = msList[0];
-            var statGoals = msList.Sum(s => s.GoalsScored);
-            var statAssists = msList.Sum(s => s.Assists);
-            var statYellow = msList.Sum(s => s.YellowCards);
-            var statRed = msList.Sum(s => s.RedCards);
-            var ev = eventCounts.GetValueOrDefault(matchId, new int[4]);
+            var playerTeamId = teamIds.Contains(match.HomeTeamId) ? match.HomeTeamId
+                : teamIds.Contains(match.AwayTeamId) ? match.AwayTeamId
+                : statsByMatch.TryGetValue(match.Id, out var statTeamRows) && statTeamRows.Count > 0
+                    ? statTeamRows[0].TeamId
+                    : match.HomeTeamId;
+            var playerTeam = playerTeamId == match.HomeTeamId ? match.HomeTeam : match.AwayTeam;
 
-            history.Add(ToHistoryResponse(rep,
+            int statGoals = 0, statAssists = 0, statYellow = 0, statRed = 0, minutesPlayed;
+            if (statsByMatch.TryGetValue(match.Id, out var msList))
+            {
+                statGoals = msList.Sum(s => s.GoalsScored);
+                statAssists = msList.Sum(s => s.Assists);
+                statYellow = msList.Sum(s => s.YellowCards);
+                statRed = msList.Sum(s => s.RedCards);
+                minutesPlayed = msList.Sum(s => s.MinutesPlayed);
+            }
+            else
+            {
+                // No stats ever synced for this match - credit a full appearance from the match's
+                // own duration rather than showing 0 minutes for a match the player was rostered
+                // for.
+                minutesPlayed = match.MatchDurationMinutes ?? 0;
+            }
+
+            var ev = eventCounts.GetValueOrDefault(match.Id, new int[4]);
+
+            history.Add(ToHistoryResponse(match, playerTeam, minutesPlayed,
                 Math.Max(statGoals, ev[0]), Math.Max(statAssists, ev[1]),
                 Math.Max(statYellow, ev[2]), Math.Max(statRed, ev[3])));
         }
@@ -357,10 +371,8 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
         MinutesPlayed = stats.MinutesPlayed,
     };
 
-    private static PlayerMatchHistoryResponse ToHistoryResponse(MatchStatistics ms, int goals, int assists, int yellowCards, int redCards)
+    private static PlayerMatchHistoryResponse ToHistoryResponse(Match match, Team playerTeam, int minutesPlayed, int goals, int assists, int yellowCards, int redCards)
     {
-        var match = ms.Match;
-        var playerTeam = ms.Team;
         var home = match.HomeTeam;
         var away = match.AwayTeam;
 
@@ -385,7 +397,7 @@ public class MatchStatisticsService(BofcDbContext db) : IMatchStatisticsService
             Assists = assists,
             YellowCards = yellowCards,
             RedCards = redCards,
-            MinutesPlayed = ms.MinutesPlayed,
+            MinutesPlayed = minutesPlayed,
         };
     }
 }

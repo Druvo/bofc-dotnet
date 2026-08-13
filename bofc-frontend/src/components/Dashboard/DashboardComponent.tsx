@@ -13,6 +13,7 @@ import MatchCalendarWidget from "./widgets/MatchCalendarWidget";
 import MyContributionsCard from "./widgets/MyContributionsCard";
 import YourNextMatchCard from "./widgets/YourNextMatchCard";
 import GoalkeeperHistoryCard from "./widgets/GoalkeeperHistoryCard";
+import MatchDayHistoryCard from "./widgets/MatchDayHistoryCard";
 import PlayerSpotlightWidget from "./widgets/PlayerSpotlightWidget";
 import AccountBalanceCard from "./widgets/AccountBalanceCard";
 import FinanceStatTile from "./widgets/FinanceStatTile";
@@ -69,10 +70,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           Top-3/Spotlight/Quick-Insights block, links out to the full page. */}
       <PlayerSpotlightWidget />
 
-      {/* Your next match + goalkeeper history */}
+      {/* Your next match + match day history + goalkeeper history */}
       <div className="mb-6">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
           <YourNextMatchCard />
+          <MatchDayHistoryCard />
           <GoalkeeperHistoryCard />
         </div>
       </div>

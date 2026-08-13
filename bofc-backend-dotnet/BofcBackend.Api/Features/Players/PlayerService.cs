@@ -273,6 +273,7 @@ public class PlayerService(
     public async Task<List<GoalKeeperHistoryDto>> GetGoalKeeperHistoryByPlayerIdAsync(long playerId)
     {
         var histories = await db.PlayerGoalkeepingHistories.Include(h => h.Player)
+            .Include(h => h.MatchDay).ThenInclude(m => m.Venue)
             .Where(h => h.PlayerId == playerId)
             .OrderByDescending(h => h.RoundNumber)
             .ToListAsync();
@@ -283,6 +284,9 @@ public class PlayerService(
             PlayerName = h.Player.Name,
             RoundNumber = h.RoundNumber,
             PlayedDate = h.PlayedDate,
+            MatchDayId = h.MatchDayId,
+            MatchDayName = h.MatchDay?.Name,
+            VenueName = h.MatchDay?.Venue?.Name,
         }).ToList();
     }
 

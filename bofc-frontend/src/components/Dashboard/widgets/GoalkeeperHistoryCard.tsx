@@ -33,12 +33,17 @@ const GoalkeeperHistoryCard: React.FC = () => {
       ) : (
         <div className="flex flex-col gap-2.5">
           {history.slice(0, VISIBLE_COUNT).map((record, idx) => (
-            <div key={idx} className="flex items-center justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2 dark:border-[var(--color-rule)]">
-              <div className="flex items-center gap-2 text-theme-sm font-semibold text-gray-700 dark:text-gray-300">
-                <TrophyOutlined className="text-warning-500" />
-                Round {record.roundNumber}
+            <div key={idx} className="flex items-center gap-2.5 rounded-lg border border-gray-100 px-3 py-2 dark:border-[var(--color-rule)]">
+              <TrophyOutlined className="shrink-0 text-warning-500" />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-theme-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {record.matchDayName || `Round ${record.roundNumber}`}
+                </div>
+                <div className="truncate text-theme-xs text-gray-400 dark:text-gray-500">
+                  {record.venueName && `${record.venueName} · `}
+                  {showBdLocalTime(record.playedDate)}
+                </div>
               </div>
-              <span className="text-theme-xs text-gray-400 dark:text-gray-500">{showBdLocalTime(record.playedDate)}</span>
             </div>
           ))}
         </div>

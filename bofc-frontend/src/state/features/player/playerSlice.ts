@@ -20,6 +20,9 @@ export interface GoalkeepingHistoryRecord {
     playerName: string;
     roundNumber: number;
     playedDate: string;
+    matchDayId?: number;
+    matchDayName?: string;
+    venueName?: string;
 }
 
 export interface PlayerGoalkeepingHistoryResType extends BasicResType {

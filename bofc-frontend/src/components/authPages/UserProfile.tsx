@@ -349,10 +349,15 @@ export default function UserProfile() {
                         </span>
                         <div className="rounded-lg border border-gray-100 px-3.5 py-2.5 dark:border-[var(--color-rule)]">
                             <div className="flex items-center justify-between gap-2">
-                                <span className="font-semibold text-gray-800 dark:text-white/90">Round {record.roundNumber}</span>
+                                <span className="font-semibold text-gray-800 dark:text-white/90">
+                                    {record.matchDayName || `Round ${record.roundNumber}`}
+                                </span>
                                 <span className="text-theme-xs text-gray-400">#{goalkeepingHistoryData.content.length - index}</span>
                             </div>
-                            <span className="text-theme-sm text-gray-400">{showBdLocalTime(record.playedDate)}</span>
+                            <span className="text-theme-sm text-gray-400">
+                                {record.venueName && `${record.venueName} · `}
+                                {showBdLocalTime(record.playedDate)}
+                            </span>
                         </div>
                     </div>
                 ))}

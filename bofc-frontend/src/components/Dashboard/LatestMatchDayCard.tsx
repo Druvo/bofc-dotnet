@@ -306,7 +306,7 @@ const LatestMatchDayCard: React.FC = () => {
 
                     {myParticipation && (
                         <div className="rounded-xl border border-gray-100 bg-gray-50 p-3.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
-                            <div className="mb-2.5 text-theme-xs text-gray-500 dark:text-gray-400">Are you participating?</div>
+                            <div className="mb-2.5 text-theme-sm font-medium text-gray-600 dark:text-gray-300">Are you participating?</div>
                             <div className="flex gap-2">
                                 <button
                                     type="button"

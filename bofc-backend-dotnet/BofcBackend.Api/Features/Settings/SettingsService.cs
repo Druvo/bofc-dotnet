@@ -153,6 +153,9 @@ public class SettingsService(
     public async Task<bool> GetPushNotificationsEnabledAsync() =>
         (await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1))?.PushNotificationsEnabled ?? true;
 
+    public async Task<bool> GetAuctionEnabledAsync() =>
+        (await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1))?.AuctionEnabled ?? true;
+
     public async Task<GenerateWeeklyMatchesResponse> GenerateWeeklyMatchesNowAsync()
     {
         var settings = await LoadOrCreateAsync();

@@ -138,6 +138,11 @@ export const settingsApi = apiWithTags.injectEndpoints({
             providesTags: ["systemSettings"],
         }),
 
+        getAuctionEnabled: builder.query<BasicResType & { content: boolean }, void>({
+            query: () => "settings/auction-enabled",
+            providesTags: ["systemSettings"],
+        }),
+
         generateWeeklyMatchesNow: builder.mutation<
             BasicResType & { content: { matchDaysCreated: number; teamsGenerated: number } },
             void
@@ -167,6 +172,7 @@ export const {
     useUpdateSystemSettingsMutation,
     useSendTestEmailMutation,
     useGetPushNotificationsEnabledQuery,
+    useGetAuctionEnabledQuery,
     useGenerateWeeklyMatchesNowMutation,
     useGenerateTeamsNowMutation,
 } = settingsApi;

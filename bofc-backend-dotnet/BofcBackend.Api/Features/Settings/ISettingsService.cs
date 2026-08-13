@@ -14,6 +14,9 @@ public interface ISettingsService
     /// <summary>Just the one flag, readable by any authenticated user (not admin-gated like the rest of settings).</summary>
     Task<bool> GetPushNotificationsEnabledAsync();
 
+    /// <summary>Just the one flag, readable by any authenticated user (not admin-gated like the rest of settings).</summary>
+    Task<bool> GetAuctionEnabledAsync();
+
     /// <summary>Runs the same slot-generation + due-team-drafting logic as the hourly background
     /// scheduler, on demand - lets an admin verify the feature works without waiting an hour.</summary>
     Task<GenerateWeeklyMatchesResponse> GenerateWeeklyMatchesNowAsync();

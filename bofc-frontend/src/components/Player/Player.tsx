@@ -205,7 +205,9 @@ function Player() {
                             const rank = rankResponse.data.content;
                             setValues((prev) => ({ ...prev, rank: rank != null ? String(rank) : "" }));
                         })
-                        .catch(() => {});
+                        .catch((err: any) => {
+                            toast.error(normalizeErrorMessage(err?.response?.data || err, "Error loading player rank"));
+                        });
                 }
             })
             .catch((err: any) => {

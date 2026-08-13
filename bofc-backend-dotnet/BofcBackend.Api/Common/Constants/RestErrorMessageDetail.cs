@@ -88,6 +88,11 @@ public static class RestErrorMessageDetail
     public const string AcChartHasVoucher = "Cannot delete chart. There are vouchers associated with this chart.";
     public const string AcNatureNotFound = "AcNature not found for the given ID.";
 
+    public const string AcChartNameAlreadyExists = "A chart of account with this name already exists.";
+    public const string AcChartCodeAlreadyExists = "A chart of account with this code already exists.";
+    public const string AcChartDescriptionAlreadyExists = "A chart of account with this description already exists.";
+    public const string AcVoucherTypeNameAlreadyExists = "A voucher type with this name already exists.";
+
     public const string NotificationNotFound = "Notification is not found";
     public const string NotificationTargetUsersRequired = "Select at least one recipient for a targeted notification";
 }

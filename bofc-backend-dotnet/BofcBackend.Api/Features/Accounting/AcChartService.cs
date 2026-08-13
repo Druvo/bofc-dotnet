@@ -66,6 +66,7 @@ public class AcChartService(BofcDbContext db, AcNatureService acNatureService, I
 
     public async Task<long> SaveChartAsync(AcChartRequest request)
     {
+        await EnsureUniqueAsync(request, excludeId: null);
         var chart = new AcChart();
         await MapRequestToEntityAsync(request, chart);
         db.AcCharts.Add(chart);
@@ -75,10 +76,38 @@ public class AcChartService(BofcDbContext db, AcNatureService acNatureService, I
 
     public async Task<long> UpdateChartAsync(long id, AcChartRequest request)
     {
+        await EnsureUniqueAsync(request, excludeId: id);
         var chart = await GetAcChartByIdAsync(id);
         await MapRequestToEntityAsync(request, chart);
         await db.SaveChangesAsync();
         return chart.Id;
+    }
+
+    /// <summary>Name, Code, and Description all carry unique DB indexes (AcChartConfiguration.cs)
+    /// but nothing pre-checked them before SaveChangesAsync - a duplicate hit the raw SQL
+    /// constraint uncaught, surfacing as a generic 500 instead of a real error message. Fetches
+    /// the conflicting row (if any) first and compares Id in memory, same as
+    /// PlayerService.UpdatePlayerAsync - excludeId is null on create, so embedding it directly
+    /// into the SQL predicate would hit SQL's three-valued NULL logic and silently match nothing.</summary>
+    private async Task EnsureUniqueAsync(AcChartRequest request, long? excludeId)
+    {
+        var byName = await db.AcCharts.FirstOrDefaultAsync(c => c.Name == request.Name);
+        if (byName != null && byName.Id != excludeId)
+        {
+            throw new BadRequestException(RestErrorMessageDetail.AcChartNameAlreadyExists, HttpStatusCode.Conflict);
+        }
+
+        var byCode = await db.AcCharts.FirstOrDefaultAsync(c => c.Code == request.Code);
+        if (byCode != null && byCode.Id != excludeId)
+        {
+            throw new BadRequestException(RestErrorMessageDetail.AcChartCodeAlreadyExists, HttpStatusCode.Conflict);
+        }
+
+        var byDescription = await db.AcCharts.FirstOrDefaultAsync(c => c.Description == request.Description);
+        if (byDescription != null && byDescription.Id != excludeId)
+        {
+            throw new BadRequestException(RestErrorMessageDetail.AcChartDescriptionAlreadyExists, HttpStatusCode.Conflict);
+        }
     }
 
     public async Task DeleteChartAsync(long id)

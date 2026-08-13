@@ -33,6 +33,7 @@ function Venue() {
     const [address, setAddress] = useState("");
     const [mapLink, setMapLink] = useState("");
     const [nameError, setNameError] = useState<string | undefined>();
+    const [addressError, setAddressError] = useState<string | undefined>();
 
     useEffect(() => {
         if (modalState === "CREATE") {
@@ -45,6 +46,7 @@ function Venue() {
         setAddress("");
         setMapLink("");
         setNameError(undefined);
+        setAddressError(undefined);
     };
 
     const showModal = () => {
@@ -59,10 +61,23 @@ function Venue() {
     };
 
     const modalFormSubmit = async () => {
+        // Address is required backend-side (VenueRegistrationRequest.cs) - validate it here too
+        // so the error has somewhere to anchor instead of only showing as a toast after a
+        // round-trip.
+        let hasError = false;
         if (!name.trim()) {
             setNameError("Venue Name can not be null!");
-            return;
+            hasError = true;
+        } else {
+            setNameError(undefined);
         }
+        if (!address.trim()) {
+            setAddressError("Venue Address can not be null!");
+            hasError = true;
+        } else {
+            setAddressError(undefined);
+        }
+        if (hasError) return;
         setModalConfirmLoading(true);
 
         if (modalState === "CREATE") {
@@ -212,8 +227,13 @@ function Venue() {
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
                             rows={3}
-                            className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
+                            className={`w-full rounded-lg border bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3 dark:text-white/90 ${
+                                addressError
+                                    ? "border-error-500 focus:border-error-300 focus:ring-error-500/10 dark:border-error-500 dark:focus:border-error-800"
+                                    : "border-gray-300 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:focus:border-brand-800"
+                            }`}
                         />
+                        {addressError && <p className="mt-1.5 text-theme-xs text-error-500">{addressError}</p>}
                     </div>
                     <FormInput
                         label="Google Maps Link (optional)"

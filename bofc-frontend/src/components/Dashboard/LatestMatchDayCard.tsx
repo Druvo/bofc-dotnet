@@ -6,9 +6,10 @@ import {
     TeamOutlined,
     UserOutlined,
     CheckCircleOutlined,
-    CloseOutlined,
+    CloseCircleOutlined,
     ClockCircleOutlined,
     RightOutlined,
+    StarFilled,
 } from '@ant-design/icons';
 import {
     useGetLatestMatchDayWithUserStatusQuery,
@@ -21,9 +22,13 @@ import { selectLoginInfo } from '../../state/slices/loginInfoSlice';
 import { Link } from 'react-router-dom';
 import { MatchDayPlayerInfoType } from '../../state/features/matchDays/matchDayTypes';
 import { normalizeErrorMessage } from '../../utils/normalizeErrorMessage';
+import { toAbsolutePlayerPhotoUrl } from '../../utils/playerPhotoUtils';
 import AddToCalendarButton from '../CommonAtoms/AddToCalendarButton';
 import VenueLink from '../CommonAtoms/VenueLink';
+import Avatar from '../CommonAtoms/Avatar';
+import DebouncedInput from '../MatchDays/Atoms/DebouncedInput';
 import Button from '../ui/button';
+import Badge from '../ui/badge';
 import Modal from '../ui/modal';
 import Loader from '../ui/loader';
 
@@ -36,6 +41,7 @@ const LatestMatchDayCard: React.FC = () => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<'confirmed' | 'pending' | 'not-joining' | null>(null);
+    const [editedComment, setEditedComment] = useState<string | null>(null);
 
     const {
         data: latestMatchDayData,
@@ -55,10 +61,8 @@ const LatestMatchDayCard: React.FC = () => {
 
     const [addParticipationToMatchDay] = useAddParticipationToMatchDayMutation();
 
-    const handleParticipationChange = async (value: string) => {
+    const handleParticipationChange = async (participationStatus: boolean, comments?: string) => {
         if (!latestMatchDayData?.content || !loginInfo.userId) return;
-
-        const participationStatus = value === 'true';
 
         setIsUpdating(true);
 
@@ -73,7 +77,7 @@ const LatestMatchDayCard: React.FC = () => {
                 matchDayId: latestMatchDayData.content.matchDay.id,
                 playerId: Number(loginInfo.userId),
                 participationStatus,
-                comments: "",
+                comments: comments ?? "",
             };
 
             if (latestMatchDayData.content.matchDayParticipantId) {
@@ -116,6 +120,23 @@ const LatestMatchDayCard: React.FC = () => {
 
     const matchDayPlayers = matchDayParticipantsData?.content?.players || [];
     const hasPlayerStatusData = matchDayPlayers.length > 0;
+
+    // Same "Your Response" card as JoinMatchDay.tsx - my own participant row
+    // if one exists yet, falling back to a pending stand-in (fresh MatchDay =
+    // zero participant rows) so the card still renders and the player can
+    // submit their first response instead of it just not appearing.
+    const myParticipation: MatchDayPlayerInfoType | undefined =
+        matchDayPlayers.find((p) => p.playerId === Number(loginInfo.userId)) ??
+        (loginInfo.userId
+            ? {
+                  playerId: Number(loginInfo.userId),
+                  playerName: loginInfo.username || 'You',
+                  employeeId: '',
+                  participationStatus: isUserParticipated as unknown as boolean,
+                  comments: '',
+                  matchDayParticipantId: undefined as unknown as number,
+              }
+            : undefined);
 
     const confirmedCount = hasPlayerStatusData
         ? matchDayPlayers.filter((p) => p.participationStatus === true).length
@@ -174,12 +195,6 @@ const LatestMatchDayCard: React.FC = () => {
 
     const selectedPlayers = getPlayersBySelectedStatus();
 
-    const getParticipationValue = () => {
-        if (isUserParticipated === true) return 'true';
-        if (isUserParticipated === false) return 'false';
-        return 'null';
-    };
-    const participationValue = getParticipationValue();
     const countdown = getCountdown();
 
     const statCells = [
@@ -295,35 +310,76 @@ const LatestMatchDayCard: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-gray-100 bg-gray-50 p-3.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
-                        <div className="mb-2.5 text-theme-xs text-gray-500 dark:text-gray-400">Your call for this Match Day</div>
-                        <div className="flex gap-2">
-                            <button
-                                type="button"
-                                disabled={isUpdating}
-                                onClick={() => handleParticipationChange('true')}
-                                className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                                    participationValue === 'true'
-                                        ? 'border-success-500 bg-success-500 text-white'
-                                        : 'border-success-500/40 bg-success-50 text-success-600 dark:bg-success-500/10 dark:text-success-500'
-                                }`}
-                            >
-                                <CheckCircleOutlined /> Yes
-                            </button>
-                            <button
-                                type="button"
-                                disabled={isUpdating}
-                                onClick={() => handleParticipationChange('false')}
-                                className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                                    participationValue === 'false'
-                                        ? 'border-error-500 bg-error-500 text-white'
-                                        : 'border-error-500/40 bg-error-50 text-error-600 dark:bg-error-500/10 dark:text-error-500'
-                                }`}
-                            >
-                                <CloseOutlined /> No
-                            </button>
+                    {myParticipation && (
+                        <div className="rounded-xl border border-brand-500/30 bg-gray-50 p-3.5 dark:border-brand-500/30 dark:bg-[var(--color-paper-2)]">
+                            <div className="mb-2 flex items-center gap-2.5">
+                                <Avatar
+                                    src={toAbsolutePlayerPhotoUrl(myParticipation.photoUrl)}
+                                    name={myParticipation.playerName}
+                                    seed={myParticipation.playerId}
+                                    size={38}
+                                    className="border-2 border-brand-500"
+                                />
+                                <div className="min-w-0 flex-1">
+                                    <span className="flex items-center gap-1.5 truncate text-theme-sm font-semibold text-gray-800 dark:text-white/90">
+                                        {myParticipation.playerName} <StarFilled className="shrink-0 text-theme-xs text-brand-500 dark:text-brand-400" />
+                                    </span>
+                                    <div className="mt-0.5 flex items-center gap-2">
+                                        {myParticipation.employeeId && (
+                                            <span className="text-theme-xs text-gray-400 dark:text-gray-500">ID: {myParticipation.employeeId}</span>
+                                        )}
+                                        {myParticipation.participationStatus === true && <Badge variant="success">Confirmed</Badge>}
+                                        {myParticipation.participationStatus === false && <Badge variant="error">Declined</Badge>}
+                                        {myParticipation.participationStatus == null && <Badge variant="warning">Pending</Badge>}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="my-2.5 h-px bg-gray-100 dark:bg-[var(--color-rule)]" />
+
+                            <div className="mb-2 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">
+                                Are you participating?
+                            </div>
+
+                            <div className="mb-2.5 grid grid-cols-2 gap-2">
+                                <button
+                                    type="button"
+                                    disabled={isUpdating}
+                                    onClick={() => handleParticipationChange(true, editedComment ?? myParticipation.comments ?? '')}
+                                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                                        myParticipation.participationStatus === true
+                                            ? 'border-success-500 bg-success-500 text-white'
+                                            : 'border-success-500/40 bg-transparent text-success-600 dark:text-success-500'
+                                    }`}
+                                >
+                                    <CheckCircleOutlined /> Yes, I'm in
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={isUpdating}
+                                    onClick={() => handleParticipationChange(false, editedComment ?? myParticipation.comments ?? '')}
+                                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                                        myParticipation.participationStatus === false
+                                            ? 'border-error-500 bg-error-500 text-white'
+                                            : 'border-gray-300 bg-transparent text-gray-500 dark:border-[var(--color-rule)] dark:text-gray-400'
+                                    }`}
+                                >
+                                    <CloseCircleOutlined /> Can't make it
+                                </button>
+                            </div>
+
+                            <DebouncedInput
+                                isDisabled={false}
+                                placeholder="Leave a comment (optional)..."
+                                debounceDuration={1000}
+                                onChange={(value) => {
+                                    setEditedComment(value);
+                                    handleParticipationChange(myParticipation.participationStatus, value);
+                                }}
+                                value={editedComment ?? myParticipation.comments ?? ''}
+                            />
                         </div>
-                    </div>
+                    )}
 
                     <AddToCalendarButton
                         size="sm"

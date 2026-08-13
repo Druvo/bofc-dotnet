@@ -86,21 +86,24 @@ const MatchCalendarWidget: React.FC = () => {
         {cells.map((d, i) => {
           if (d === null) return <div key={`empty-${i}`} />;
           const matches = byDate.get(dateKey(d));
+          const hasMatch = !!matches?.length;
+          const today = isToday(d);
           return (
             <button
               key={d}
               type="button"
-              disabled={!matches?.length}
+              disabled={!hasMatch}
               title={matches?.map((m) => m.name).join(", ")}
-              onClick={() => matches?.length && navigate(`/match-days/join-match-day/${matches[0].id}`)}
-              className={`mx-auto flex h-7 w-7 flex-col items-center justify-center rounded-full text-theme-xs ${
-                isToday(d) ? "bg-brand-500 text-white" : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"
-              } ${matches?.length ? "cursor-pointer font-semibold" : "cursor-default"}`}
+              onClick={() => hasMatch && navigate(`/match-days/join-match-day/${matches[0].id}`)}
+              className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-theme-xs transition ${
+                today
+                  ? "bg-brand-500 text-white font-bold"
+                  : hasMatch
+                  ? "border-2 border-brand-500 bg-brand-50 font-bold text-brand-600 hover:bg-brand-100 dark:bg-brand-500/15 dark:text-brand-400 dark:hover:bg-brand-500/25"
+                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"
+              } ${hasMatch ? "cursor-pointer" : "cursor-default"} ${today && hasMatch ? "ring-2 ring-warning-400 ring-offset-1 dark:ring-offset-[var(--color-paper-3)]" : ""}`}
             >
               {d}
-              {matches?.length ? (
-                <span className={`-mt-0.5 h-1 w-1 rounded-full ${isToday(d) ? "bg-white" : "bg-brand-500"}`} />
-              ) : null}
             </button>
           );
         })}

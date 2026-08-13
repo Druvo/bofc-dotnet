@@ -22,9 +22,11 @@ interface FinanceStatTileProps {
   /** Metric implies the user needs to act (e.g. unpaid dues) - amber left-border
    * accent + tinted value, distinct from purely informational metrics. */
   actionable?: boolean;
+  /** Extra content below the subtitle - e.g. an avatar row of the specific players behind the number. */
+  footer?: React.ReactNode;
 }
 
-const FinanceStatTile: React.FC<FinanceStatTileProps> = ({ title, icon, variant, value, display, subtitle, actionable }) => {
+const FinanceStatTile: React.FC<FinanceStatTileProps> = ({ title, icon, variant, value, display, subtitle, actionable, footer }) => {
   return (
     <div
       className={`overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] ${
@@ -52,6 +54,7 @@ const FinanceStatTile: React.FC<FinanceStatTileProps> = ({ title, icon, variant,
         )}
       </div>
       {subtitle && <div className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">{subtitle}</div>}
+      {footer && <div className="mt-2.5">{footer}</div>}
     </div>
   );
 };

@@ -73,6 +73,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
         </div>
       </div>
 
+      {/* Player leaderboard/spotlight - reuses the Player Statistics page's
+          Top-3/Spotlight/Quick-Insights block, links out to the full page. */}
+      <PlayerSpotlightWidget />
+
       {/* Payments due + your own contributions + Match calendar */}
       <div className="mb-10">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
@@ -81,10 +85,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           <MatchCalendarWidget />
         </div>
       </div>
-
-      {/* Player leaderboard/spotlight - reuses the Player Statistics page's
-          Top-3/Spotlight/Quick-Insights block, links out to the full page. */}
-      <PlayerSpotlightWidget />
 
       {/* Every player's collection status, side by side - admin/finance view
           only. Regular players already get their own status via

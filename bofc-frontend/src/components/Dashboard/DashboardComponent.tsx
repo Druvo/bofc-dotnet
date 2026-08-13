@@ -12,6 +12,7 @@ import UpcomingDuesWidget from "./widgets/UpcomingDuesWidget";
 import MatchCalendarWidget from "./widgets/MatchCalendarWidget";
 import MyContributionsCard from "./widgets/MyContributionsCard";
 import YourNextMatchCard from "./widgets/YourNextMatchCard";
+import PlayerSpotlightWidget from "./widgets/PlayerSpotlightWidget";
 import AccountBalanceCard from "./widgets/AccountBalanceCard";
 import FinanceStatTile from "./widgets/FinanceStatTile";
 import TotalCollectionsTile from "./widgets/TotalCollectionsTile";
@@ -72,6 +73,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           <MatchCalendarWidget />
         </div>
       </div>
+
+      {/* Player leaderboard/spotlight - reuses the Player Statistics page's
+          Top-3/Spotlight/Quick-Insights block, links out to the full page. */}
+      <PlayerSpotlightWidget />
 
       {/* Every player's collection status, side by side - admin/finance view
           only. Regular players already get their own status via

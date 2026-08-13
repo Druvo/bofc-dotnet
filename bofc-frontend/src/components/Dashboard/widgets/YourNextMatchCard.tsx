@@ -31,13 +31,16 @@ const YourNextMatchCard: React.FC = () => {
     { skip: !matchDayId }
   );
 
+  const teams = summaryData?.content?.[0]?.teams || [];
+  const teamsDrafted = teams.length > 0;
+
   const myAssignment = useMemo(() => {
-    const teams = summaryData?.content?.[0]?.teams || [];
     for (const team of teams) {
       const me = team.players.find((p) => String(p.playerId) === String(loginInfo.userId));
       if (me) return { team, player: me };
     }
     return null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [summaryData, loginInfo.userId]);
 
   // No upcoming MatchDay at all - LatestMatchDayCard already shows that
@@ -56,9 +59,13 @@ const YourNextMatchCard: React.FC = () => {
 
       {isLoadingMatchDay || isLoadingSummary ? (
         <Loader className="py-4" />
-      ) : !myAssignment ? (
+      ) : !teamsDrafted ? (
         <p className="my-3 text-theme-xs text-gray-400 dark:text-gray-500">
           Teams haven&apos;t been drafted for this Match Day yet.
+        </p>
+      ) : !myAssignment ? (
+        <p className="my-3 text-theme-xs text-gray-400 dark:text-gray-500">
+          Teams are set for this Match Day, but you&apos;re not on one - check your RSVP.
         </p>
       ) : (
         <div className="flex flex-col gap-3">

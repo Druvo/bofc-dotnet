@@ -12,6 +12,7 @@ import UpcomingDuesWidget from "./widgets/UpcomingDuesWidget";
 import MatchCalendarWidget from "./widgets/MatchCalendarWidget";
 import MyContributionsCard from "./widgets/MyContributionsCard";
 import YourNextMatchCard from "./widgets/YourNextMatchCard";
+import GoalkeeperHistoryCard from "./widgets/GoalkeeperHistoryCard";
 import PlayerSpotlightWidget from "./widgets/PlayerSpotlightWidget";
 import AccountBalanceCard from "./widgets/AccountBalanceCard";
 import FinanceStatTile from "./widgets/FinanceStatTile";
@@ -64,10 +65,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
         <LatestMatchDayCard />
       </div>
 
-      {/* Payments due + your next match + your own contributions + Match calendar */}
+      {/* Payments due + your next match + goalkeeper history + your own contributions + Match calendar */}
       <div className="mb-10">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:gap-6">
           <YourNextMatchCard />
+          <GoalkeeperHistoryCard />
           <UpcomingDuesWidget />
           <MyContributionsCard />
           <MatchCalendarWidget />

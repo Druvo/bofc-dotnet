@@ -28,6 +28,20 @@ public class PlayerService(
             throw new PlayerServiceException(RestErrorMessageDetail.PlayerAlreadyExists, HttpStatusCode.Conflict);
         }
 
+        // employee_id and teams_id both carry unique DB indexes (PlayerConfiguration.cs), but
+        // registration only ever pre-checked email - a duplicate EmployeeId/TeamsId hit the raw
+        // SQL constraint on SaveChangesAsync instead, surfacing as a generic 500 rather than a
+        // real error message. UpdatePlayerAsync already does this same pre-check pattern below.
+        if (await db.Players.AnyAsync(p => p.EmployeeId == request.EmployeeId))
+        {
+            throw new BofcSecurityException(RestErrorMessageDetail.EmployeeIdAlreadyInUse, HttpStatusCode.ExpectationFailed);
+        }
+
+        if (await db.Players.AnyAsync(p => p.TeamsId == request.TeamsId))
+        {
+            throw new BofcSecurityException(RestErrorMessageDetail.TeamsIdAlreadyInUse, HttpStatusCode.ExpectationFailed);
+        }
+
         var playerRole = await db.Roles.FirstOrDefaultAsync(r => r.Name == PlayerRoleNames.Player)
             ?? throw new PlayerServiceException("Role PLAYER not found", HttpStatusCode.NotFound);
 

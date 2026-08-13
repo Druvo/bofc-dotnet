@@ -285,7 +285,7 @@ const LatestMatchDayCard: React.FC = () => {
                 </div>
 
                 {/* Right sidebar: Kick-off + your call + actions, spans the card's full height */}
-                <div className="flex shrink-0 flex-col gap-3 border-gray-100 dark:border-[var(--color-rule)] lg:w-72 lg:border-l lg:pl-5">
+                <div className="flex shrink-0 flex-col gap-3 border-gray-100 dark:border-[var(--color-rule)] lg:w-96 lg:border-l lg:pl-5">
                     <div>
                         <div className="text-theme-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">Kick-Off</div>
                         <div className="mt-0.5 flex items-center gap-1.5 text-theme-sm text-gray-700 dark:text-gray-300">

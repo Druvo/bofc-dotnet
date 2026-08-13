@@ -227,6 +227,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
       label: "Settings",
       icon: SettingsIcon,
       matchPrefixes: ["/settings"],
+      adminOnly: true,
       children: [{ label: "Settings", path: "/settings" }],
     },
   ];

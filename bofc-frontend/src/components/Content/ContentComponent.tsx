@@ -222,7 +222,9 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
 
                             <Route path="club-rules" element={<ClubRules />} />
 
-                            <Route path="settings" element={<GlobalSettingsPage />} />
+                            {(loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN")) && (
+                                <Route path="settings" element={<GlobalSettingsPage />} />
+                            )}
 
                             <Route path="match-day" element={<MatchDayPage />} />
 

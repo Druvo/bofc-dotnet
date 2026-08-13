@@ -36,7 +36,7 @@ pipeline {
             steps {
                 sshagent(['vps-ssh']) {
                     bat """
-                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "mkdir -p %DEPLOY_DIR%/snapshots && SNAPSHOT=%DEPLOY_DIR%/snapshots/%BUILD_ID% && mkdir -p \\$SNAPSHOT && cp -r %DEPLOY_DIR%/publish \\$SNAPSHOT/ 2>/dev/null; cp -r %DEPLOY_DIR%/frontend \\$SNAPSHOT/ 2>/dev/null; echo Snapshot saved to \\$SNAPSHOT || echo No previous deploy to snapshot"
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "mkdir -p /opt/bofc-dotnet/snapshots/%BUILD_ID%/publish /opt/bofc-dotnet/snapshots/%BUILD_ID%/frontend && cp -r /opt/bofc-dotnet/publish/* /opt/bofc-dotnet/snapshots/%BUILD_ID%/publish/ 2>/dev/null; cp -r /opt/bofc-dotnet/frontend/* /opt/bofc-dotnet/snapshots/%BUILD_ID%/frontend/ 2>/dev/null; echo Snapshot saved"
                     """
                 }
             }
@@ -70,7 +70,7 @@ pipeline {
                 sshagent(['vps-ssh']) {
                     bat """
                         ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "sudo systemctl start bofc-dotnet"
-                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do curl -sf -o /dev/null http://127.0.0.1:9292/swagger/index.html && echo Backend is UP && break; echo Waiting... $i/15; sleep 2; done"
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do curl -sf -o /dev/null http://127.0.0.1:9292/swagger/index.html && echo Backend is UP && break; echo Waiting...; sleep 2; done"
                         ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "sudo systemctl is-active bofc-dotnet"
                         ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "curl -s -o /dev/null -w '%%{http_code}' http://127.0.0.1:80/ || echo 'Frontend check'"
                     """

@@ -173,20 +173,38 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                                 element={<MatchDetailsPage />}
                             />
                             <Route path="venues" element={<Venue />} />
-                            <Route
-                                path="ac/voucher-types"
-                                element={<AcVoucherType />}
-                            />
-                            <Route path="/ac/natures" element={<AcNature />} />
-                            <Route
-                                path="ac/collections"
-                                element={<AcCollection />}
-                            />
-                            <Route
-                                path="ac/bill-payments"
-                                element={<AcBillPayment />}
-                            />
-                            <Route path="ac/charts" element={<AcChart />} />
+                            {/* AcVoucherType/AcNature/AcChart/AcVouchers all fetch on mount from
+                                controllers restricted to Admin/SuperAdmin only - gating the route
+                                (not just hiding the Sidebar link) keeps a direct URL nav from
+                                403-ing for every other role, same fix as useAuctionEnabled. */}
+                            {(loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN")) && (
+                                <>
+                                    <Route
+                                        path="ac/voucher-types"
+                                        element={<AcVoucherType />}
+                                    />
+                                    <Route path="/ac/natures" element={<AcNature />} />
+                                    <Route path="ac/charts" element={<AcChart />} />
+                                    <Route
+                                        path="ac/vouchers"
+                                        element={<AcVouchers />}
+                                    />
+                                </>
+                            )}
+                            {/* AcCollection/AcBillPayment read endpoints allow Admin/SuperAdmin/Player
+                                (financial transparency for players), unlike the config pages above. */}
+                            {(loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN") || loginInfo.roles.includes("PLAYER")) && (
+                                <>
+                                    <Route
+                                        path="ac/collections"
+                                        element={<AcCollection />}
+                                    />
+                                    <Route
+                                        path="ac/bill-payments"
+                                        element={<AcBillPayment />}
+                                    />
+                                </>
+                            )}
                             <Route
                                 path="ac/reports/accounts-summary"
                                 element={<AccountsReport />}
@@ -200,10 +218,6 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                                 element={<AccountBalanceSheet />}
                             />
                             {/* <Route path="ac/voucher" element={<AcVoucher />} /> */}
-                            <Route
-                                path="ac/vouchers"
-                                element={<AcVouchers />}
-                            />
                             {/* <Route path="ac/vouchers/:id" element={<AcVoucher />} /> */}
 
                             <Route path="club-rules" element={<ClubRules />} />

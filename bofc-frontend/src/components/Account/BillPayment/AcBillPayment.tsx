@@ -60,7 +60,11 @@ function AcBillPayment() {
 
     useEffect(() => {
         getAcBillPaymentList();
-        getCostTypes();
+        // CostTypeController's GET is Admin/SuperAdmin only (narrower than this page's own
+        // AdminSuperAdminPlayer read access) - only fetch it for admins, who are the only ones
+        // who can open the create/edit form that actually uses costTypes (the table itself
+        // reads each record's own embedded costType.name, not this list).
+        if (canManage) getCostTypes();
         getPaymentAccounts();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

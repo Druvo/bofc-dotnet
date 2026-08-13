@@ -26,7 +26,6 @@ import { toAbsolutePlayerPhotoUrl } from '../../utils/playerPhotoUtils';
 import AddToCalendarButton from '../CommonAtoms/AddToCalendarButton';
 import VenueLink from '../CommonAtoms/VenueLink';
 import Avatar from '../CommonAtoms/Avatar';
-import DebouncedInput from '../MatchDays/Atoms/DebouncedInput';
 import Button from '../ui/button';
 import Badge from '../ui/badge';
 import Modal from '../ui/modal';
@@ -41,7 +40,6 @@ const LatestMatchDayCard: React.FC = () => {
     const [isUpdating, setIsUpdating] = useState(false);
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<'confirmed' | 'pending' | 'not-joining' | null>(null);
-    const [editedComment, setEditedComment] = useState<string | null>(null);
 
     const {
         data: latestMatchDayData,
@@ -311,7 +309,7 @@ const LatestMatchDayCard: React.FC = () => {
                     </div>
 
                     {myParticipation && (
-                        <div className="rounded-xl border border-brand-500/30 bg-gray-50 p-3.5 dark:border-brand-500/30 dark:bg-[var(--color-paper-2)]">
+                        <div>
                             <div className="mb-2 flex items-center gap-2.5">
                                 <Avatar
                                     src={toAbsolutePlayerPhotoUrl(myParticipation.photoUrl)}
@@ -345,7 +343,7 @@ const LatestMatchDayCard: React.FC = () => {
                                 <button
                                     type="button"
                                     disabled={isUpdating}
-                                    onClick={() => handleParticipationChange(true, editedComment ?? myParticipation.comments ?? '')}
+                                    onClick={() => handleParticipationChange(true, myParticipation.comments ?? '')}
                                     className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                                         myParticipation.participationStatus === true
                                             ? 'border-success-500 bg-success-500 text-white'
@@ -357,7 +355,7 @@ const LatestMatchDayCard: React.FC = () => {
                                 <button
                                     type="button"
                                     disabled={isUpdating}
-                                    onClick={() => handleParticipationChange(false, editedComment ?? myParticipation.comments ?? '')}
+                                    onClick={() => handleParticipationChange(false, myParticipation.comments ?? '')}
                                     className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                                         myParticipation.participationStatus === false
                                             ? 'border-error-500 bg-error-500 text-white'
@@ -367,17 +365,6 @@ const LatestMatchDayCard: React.FC = () => {
                                     <CloseCircleOutlined /> Can't make it
                                 </button>
                             </div>
-
-                            <DebouncedInput
-                                isDisabled={false}
-                                placeholder="Leave a comment (optional)..."
-                                debounceDuration={1000}
-                                onChange={(value) => {
-                                    setEditedComment(value);
-                                    handleParticipationChange(myParticipation.participationStatus, value);
-                                }}
-                                value={editedComment ?? myParticipation.comments ?? ''}
-                            />
                         </div>
                     )}
 

@@ -65,11 +65,17 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
         <LatestMatchDayCard />
       </div>
 
-      {/* Payments due + your next match + goalkeeper history + your own contributions + Match calendar */}
-      <div className="mb-10">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 md:gap-6">
+      {/* Your next match + goalkeeper history */}
+      <div className="mb-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
           <YourNextMatchCard />
           <GoalkeeperHistoryCard />
+        </div>
+      </div>
+
+      {/* Payments due + your own contributions + Match calendar */}
+      <div className="mb-10">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
           <UpcomingDuesWidget />
           <MyContributionsCard />
           <MatchCalendarWidget />

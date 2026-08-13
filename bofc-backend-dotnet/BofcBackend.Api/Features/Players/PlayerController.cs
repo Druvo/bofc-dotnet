@@ -118,6 +118,16 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, history);
     }
 
+    // Mirrors GetGoalKeeperHistoryForPlayer - same [AllowAnonymous] openness, captaincy history
+    // is non-sensitive roster info like match/goalkeeping history.
+    [AllowAnonymous]
+    [HttpGet("{playerId}/captain-history")]
+    public async Task<IActionResult> GetCaptainHistoryForPlayer(long playerId)
+    {
+        var history = await playerService.GetCaptainHistoryByPlayerIdAsync(playerId);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, history);
+    }
+
     [AllowAnonymous]
     [HttpGet("goalkeeper-queue")]
     public async Task<IActionResult> GetGoalKeeperPriorityQueue([FromQuery] long matchDayId)

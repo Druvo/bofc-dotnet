@@ -286,6 +286,26 @@ public class PlayerService(
         }).ToList();
     }
 
+    public async Task<List<CaptainHistoryDto>> GetCaptainHistoryByPlayerIdAsync(long playerId)
+    {
+        var captaincies = await db.TeamPlayers
+            .Include(tp => tp.Player)
+            .Include(tp => tp.Team).ThenInclude(t => t.MatchDay)
+            .Where(tp => tp.PlayerId == playerId && tp.IsCaptain)
+            .OrderByDescending(tp => tp.Team.MatchDay.MatchDayDate)
+            .ToListAsync();
+
+        return captaincies.Select(tp => new CaptainHistoryDto
+        {
+            PlayerId = tp.Player.Id,
+            PlayerName = tp.Player.Name,
+            MatchDayId = tp.Team.MatchDayId,
+            MatchDayName = tp.Team.MatchDay.Name,
+            MatchDayDate = tp.Team.MatchDay.MatchDayDate,
+            TeamName = tp.Team.TeamName,
+        }).ToList();
+    }
+
     public async Task<GoalKeeperQueueResponseDto> GetGoalKeeperPriorityQueueAsync(long matchDayId)
     {
         var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)

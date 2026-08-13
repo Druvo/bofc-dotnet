@@ -31,6 +31,10 @@ public interface IPlayerService
     Task<List<GoalKeeperHistoryDto>> GetGoalKeeperHistoryByPlayerIdAsync(long playerId);
     Task<GoalKeeperQueueResponseDto> GetGoalKeeperPriorityQueueAsync(long matchDayId);
 
+    /// <summary>Every MatchDay this player captained their Team for - derived from TeamPlayer.IsCaptain,
+    /// no separate history table needed since each MatchDay's Team/TeamPlayer rows already persist.</summary>
+    Task<List<CaptainHistoryDto>> GetCaptainHistoryByPlayerIdAsync(long playerId);
+
     /// <summary>Port of PlayerService.getPlayerEntity(Long) - used by other domains (e.g. accounting) that need the raw entity.</summary>
     Task<Player> GetPlayerEntityAsync(long id);
 

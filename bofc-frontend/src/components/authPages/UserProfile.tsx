@@ -16,6 +16,7 @@ import {
     CheckCircleOutlined,
     SafetyCertificateOutlined,
     StarFilled,
+    CrownOutlined,
 } from "@ant-design/icons";
 import companyLogo from "../../assets/logo.png";
 import {
@@ -26,6 +27,7 @@ import {
 import {
     useGetPlayerPositionsQuery,
     useGetPlayerGoalkeepingHistoryQuery,
+    useGetPlayerCaptainHistoryQuery,
 } from "../../state/features/player/playerSlice";
 import { useGetPlayerStatisticsQuery, useGetPlayerMatchHistoryQuery } from "../../state/features/statistics/statisticsSlice";
 import { computeRating } from "../../utils/playerRating";
@@ -62,6 +64,11 @@ export default function UserProfile() {
     const [updatePlayerData, { isLoading: isUpdating }] = useUpdatePlayerDataMutation();
 
     const { data: goalkeepingHistoryData, isLoading: isLoadingGoalkeeping } = useGetPlayerGoalkeepingHistoryQuery(
+        { playerId: viewingId },
+        { skip: !viewingId }
+    );
+
+    const { data: captainHistoryData, isLoading: isLoadingCaptain } = useGetPlayerCaptainHistoryQuery(
         { playerId: viewingId },
         { skip: !viewingId }
     );
@@ -355,13 +362,42 @@ export default function UserProfile() {
         <p className="py-10 text-center text-theme-sm text-gray-400 dark:text-gray-500">No goalkeeping history yet</p>
     );
 
+    const captainTab = isLoadingCaptain ? (
+        <Loader className="py-10" />
+    ) : captainHistoryData?.content && captainHistoryData.content.length > 0 ? (
+        <div>
+            <span className="text-theme-sm text-gray-500 dark:text-gray-400">
+                You have captained <strong className="text-gray-800 dark:text-white/90">{captainHistoryData.content.length}</strong> {captainHistoryData.content.length === 1 ? "time" : "times"}.
+            </span>
+            <div className="relative mt-5 flex flex-col gap-4 border-l-2 border-gray-100 pl-5 dark:border-[var(--color-rule)]">
+                {captainHistoryData.content.map((record, index) => (
+                    <div key={index} className="relative">
+                        <span className="absolute -left-[27px] top-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-warning-500 dark:bg-[var(--color-paper-3)]">
+                            <CrownOutlined className="text-xs" />
+                        </span>
+                        <div className="rounded-lg border border-gray-100 px-3.5 py-2.5 dark:border-[var(--color-rule)]">
+                            <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold text-gray-800 dark:text-white/90">{record.matchDayName}</span>
+                                <span className="text-theme-xs text-gray-400">#{captainHistoryData.content.length - index}</span>
+                            </div>
+                            <span className="text-theme-sm text-gray-400">{record.teamName} - {showBdLocalTime(record.matchDayDate)}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    ) : (
+        <p className="py-10 text-center text-theme-sm text-gray-400 dark:text-gray-500">No captain history yet</p>
+    );
+
     const allTabs = [
         { key: "edit", label: <span className="flex items-center gap-1.5"><EditOutlined /> Edit Profile</span>, content: editTab },
         { key: "password", label: <span className="flex items-center gap-1.5"><LockOutlined /> Change Password</span>, content: passwordTab },
         { key: "history", label: <span className="flex items-center gap-1.5"><HistoryOutlined /> Match History</span>, content: historyTab },
         { key: "goalkeeping", label: <span className="flex items-center gap-1.5"><TrophyOutlined /> Goalkeeping History</span>, content: goalkeepingTab },
+        { key: "captain", label: <span className="flex items-center gap-1.5"><CrownOutlined /> Captain History</span>, content: captainTab },
     ];
-    const visibleTabs = allTabs.filter((t) => isOwn || t.key === "history" || t.key === "goalkeeping");
+    const visibleTabs = allTabs.filter((t) => isOwn || t.key === "history" || t.key === "goalkeeping" || t.key === "captain");
     const currentTab = visibleTabs.find((t) => t.key === activeTab) || visibleTabs[0];
 
     return (

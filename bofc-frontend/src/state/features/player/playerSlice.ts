@@ -26,6 +26,19 @@ export interface PlayerGoalkeepingHistoryResType extends BasicResType {
     content: GoalkeepingHistoryRecord[];
 }
 
+export interface CaptainHistoryRecord {
+    playerId: number;
+    playerName: string;
+    matchDayId: number;
+    matchDayName: string;
+    matchDayDate: string;
+    teamName: string;
+}
+
+export interface CaptainHistoryResType extends BasicResType {
+    content: CaptainHistoryRecord[];
+}
+
 export interface PlayerPhotoPresignResponse extends BasicResType {
     content: {
         key: string;
@@ -70,6 +83,11 @@ export const playerApi = apiWithTags.injectEndpoints({
             providesTags: ["player"],
         }),
 
+        getPlayerCaptainHistory: builder.query<CaptainHistoryResType, { playerId: number }>({
+            query: ({ playerId }) => `players/${playerId}/captain-history`,
+            providesTags: ["player"],
+        }),
+
         presignPlayerPhotoUpload: builder.mutation<PlayerPhotoPresignResponse, { fileName: string; contentType: string }>({
             query: ({ fileName, contentType }) => ({
                 url: `files/player-photos/presign?fileName=${encodeURIComponent(fileName)}&contentType=${encodeURIComponent(contentType)}`,
@@ -99,6 +117,7 @@ export const {
     useGetPlayerPositionsQuery,
     useGetPlayerGoalkeepingHistoryQuery,
     useGetMyGoalkeepingHistoryQuery,
+    useGetPlayerCaptainHistoryQuery,
     usePresignPlayerPhotoUploadMutation,
     useGetPlayerRanksQuery,
     useSetPlayerRankMutation,

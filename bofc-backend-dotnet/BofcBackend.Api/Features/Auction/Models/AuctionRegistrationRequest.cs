@@ -18,6 +18,8 @@ public class AuctionRegistrationRequest
     public string? EmployeeId { get; set; }
 
     public string? TeamsId { get; set; }
+
+    [RegularExpression(@"^(?:\+?880|0)1[3-9]\d{8}$", ErrorMessage = "Mobile number must be a valid Bangladesh number (e.g. 01XXXXXXXXX)")]
     public string? MobileNo { get; set; }
 
     [Required]
@@ -28,6 +30,8 @@ public class AuctionRegistrationRequest
     public string? PreviousExperience { get; set; }
     public AvailabilityStatus? AvailabilityStatus { get; set; }
     public string? ProfilePhoto { get; set; }
+
+    [RegularExpression(@"^(?:\+?880|0)1[3-9]\d{8}$", ErrorMessage = "Emergency contact must be a valid Bangladesh number (e.g. 01XXXXXXXXX)")]
     public string? EmergencyContact { get; set; }
     public int? PreferredBasePrice { get; set; }
 }

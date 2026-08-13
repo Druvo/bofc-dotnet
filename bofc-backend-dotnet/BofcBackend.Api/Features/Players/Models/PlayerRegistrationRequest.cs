@@ -23,6 +23,7 @@ public class PlayerRegistrationRequest
     public string TeamsId { get; set; } = string.Empty;
 
     [MaxLength(255, ErrorMessage = "mobile No must be less than 255 characters")]
+    [RegularExpression(@"^(?:\+?880|0)1[3-9]\d{8}$", ErrorMessage = "Mobile number must be a valid Bangladesh number (e.g. 01XXXXXXXXX)")]
     public string? MobileNo { get; set; }
 
     [MaxLength(500, ErrorMessage = "Profile photo key must be less than 500 characters")]

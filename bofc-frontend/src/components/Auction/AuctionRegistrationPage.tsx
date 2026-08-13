@@ -77,6 +77,9 @@ const AuctionRegistrationPage: React.FC = () => {
     if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = "Please enter a valid email";
     if (!form.employeeId.trim()) next.employeeId = "Please enter your employee ID";
     if (!form.teamsId.trim()) next.teamsId = "Please enter your Teams ID";
+    if (form.mobileNo.trim() && !/^(?:\+?880|0)1[3-9]\d{8}$/.test(form.mobileNo.trim())) {
+      next.mobileNo = "Enter a valid Bangladesh mobile number (e.g. 01XXXXXXXXX)";
+    }
     if (!form.playingPosition) next.playingPosition = "Please select your position";
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -237,7 +240,7 @@ const AuctionRegistrationPage: React.FC = () => {
             onChange={(e) => setField("employeeId", e.target.value)} />
           <FormInput label="Teams ID" placeholder="e.g. zahid.hasan" value={form.teamsId} error={errors.teamsId}
             onChange={(e) => setField("teamsId", e.target.value)} />
-          <FormInput label="Phone (Optional)" placeholder="e.g. +880 1XXXXXXXXX" value={form.mobileNo}
+          <FormInput label="Phone (Optional)" placeholder="e.g. +880 1XXXXXXXXX" value={form.mobileNo} error={errors.mobileNo}
             onChange={(e) => setField("mobileNo", e.target.value)} />
           <FormSelect
             label="Preferred Playing Position"

@@ -38,6 +38,7 @@ interface PlayerFormValues {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MOBILE_RE = /^(?:\+?880|0)1[3-9]\d{8}$/;
 
 const emptyValues: PlayerFormValues = {
     name: "",
@@ -101,6 +102,9 @@ function Player() {
         else if (!EMAIL_RE.test(values.email)) next.email = "The input is not a valid email!";
         if (!values.employeeId.toString().trim()) next.employeeId = "Please input your Employee Id!";
         if (!values.teamsId.trim()) next.teamsId = "Please input your Teams Id!";
+        if (values.mobileNo.trim() && !MOBILE_RE.test(values.mobileNo.trim())) {
+            next.mobileNo = "Enter a valid Bangladesh mobile number (e.g. 01XXXXXXXXX)";
+        }
         if (!values.playingPosition) next.playingPosition = "Please input your Playing Position!";
         if (values.jerseyNumber) {
             const num = Number(values.jerseyNumber);
@@ -376,9 +380,10 @@ function Player() {
                                 />
                                 <FormInput
                                     label="Mobile Number"
-                                    placeholder="Contact phone number"
+                                    placeholder="e.g. 01XXXXXXXXX"
                                     value={values.mobileNo}
                                     onChange={(e) => setField("mobileNo", e.target.value)}
+                                    error={errors.mobileNo}
                                 />
                                 <FormSelect
                                     label="Playing Position"

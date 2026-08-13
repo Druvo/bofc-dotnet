@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_HOST = '192.168.0.50'
-        REMOTE_USER = 'druvo'
+        REMOTE_HOST = '168.107.78.111'
+        REMOTE_USER = 'ubuntu'
         DEPLOY_DIR  = '/opt/bofc-dotnet'
         REPO_URL    = 'https://github.com/Druvo/bofc-dotnet.git'
     }
@@ -18,7 +18,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('bofc-backend-dotnet') {
-                    bat 'dotnet publish BofcBackend.Api/BofcBackend.Api.csproj -c Release -o publish'
+                    bat 'dotnet publish BofcBackend.Api/BofcBackend.Api.csproj -c Release -r linux-arm64 --self-contained true -p:PublishSingleFile=true -o publish'
                 }
             }
         }
@@ -32,12 +32,23 @@ pipeline {
             }
         }
 
+        stage('Snapshot (pre-deploy)') {
+            steps {
+                sshagent(['vps-ssh']) {
+                    bat """
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "mkdir -p %DEPLOY_DIR%/snapshots && SNAPSHOT=%DEPLOY_DIR%/snapshots/%BUILD_ID% && mkdir -p \\$SNAPSHOT && cp -r %DEPLOY_DIR%/publish \\$SNAPSHOT/ 2>/dev/null; cp -r %DEPLOY_DIR%/frontend \\$SNAPSHOT/ 2>/dev/null; echo Snapshot saved to \\$SNAPSHOT || echo No previous deploy to snapshot"
+                    """
+                }
+            }
+        }
+
         stage('Deploy Backend') {
             steps {
-                sshagent(['corex-ssh']) {
+                sshagent(['vps-ssh']) {
                     bat """
                         ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "sudo systemctl stop bofc-dotnet" || echo "Service not running yet"
-                        scp -o StrictHostKeyChecking=no -r bofc-backend-dotnet/publish/* %REMOTE_USER%@%REMOTE_HOST%:%DEPLOY_DIR%/publish/
+                        scp -o StrictHostKeyChecking=no -r bofc-backend-dotnet/publish/. %REMOTE_USER%@%REMOTE_HOST%:%DEPLOY_DIR%/publish/
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "chmod +x %DEPLOY_DIR%/publish/BofcBackend.Api"
                     """
                 }
             }
@@ -45,7 +56,7 @@ pipeline {
 
         stage('Deploy Frontend') {
             steps {
-                sshagent(['corex-ssh']) {
+                sshagent(['vps-ssh']) {
                     bat """
                         ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "rm -rf %DEPLOY_DIR%/frontend/*"
                         scp -o StrictHostKeyChecking=no -r bofc-frontend/build/. %REMOTE_USER%@%REMOTE_HOST%:%DEPLOY_DIR%/frontend/
@@ -56,10 +67,12 @@ pipeline {
 
         stage('Start & Verify') {
             steps {
-                sshagent(['corex-ssh']) {
+                sshagent(['vps-ssh']) {
                     bat """
-                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "sudo systemctl start bofc-dotnet && sleep 5 && sudo systemctl is-active bofc-dotnet"
-                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "curl -s -o /dev/null -w '%%{http_code}' http://127.0.0.1:9292/auth/login -X POST -H 'Content-Type: application/json' || echo 'Backend check'"
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "sudo systemctl start bofc-dotnet"
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do curl -sf -o /dev/null http://127.0.0.1:9292/swagger/index.html && echo Backend is UP && break; echo Waiting... $i/15; sleep 2; done"
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "sudo systemctl is-active bofc-dotnet"
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "curl -s -o /dev/null -w '%%{http_code}' http://127.0.0.1:80/ || echo 'Frontend check'"
                     """
                 }
             }
@@ -68,7 +81,7 @@ pipeline {
 
     post {
         failure {
-            echo 'BOFC .NET deployment FAILED! Rollback: restore snapshot from /opt/bofc-dotnet/snapshots/'
+            echo 'BOFC VPS deployment FAILED! Rollback: restore snapshot from /opt/bofc-dotnet/snapshots/'
         }
         success {
             echo 'BOFC .NET deployed successfully to https://originalsfootball.club'

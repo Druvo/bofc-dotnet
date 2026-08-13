@@ -184,7 +184,7 @@ export default function FixtureGenerationModal({
     }
 
     if (!combinedStart) {
-      message.error("This MatchDay has no date set - set one before generating fixtures");
+      message.error("This Match Day has no date set - set one before generating fixtures");
       return;
     }
 
@@ -278,7 +278,7 @@ export default function FixtureGenerationModal({
           }
           style={{ borderRadius: 8 }}
         >
-          <Form.Item label="MatchDay Type" style={{ marginBottom: 0 }}>
+          <Form.Item label="Match Day Type" style={{ marginBottom: 0 }}>
             <Select
               value={matchDayType}
               onChange={setMatchDayType}
@@ -405,7 +405,7 @@ export default function FixtureGenerationModal({
           {combinedStart && (
             <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 12 }}>
               Kicks off {combinedStart.format("DD MMM YYYY, hh:mm A")}
-              {matchDayDurationMinutes ? ` - MatchDay runs for ${matchDayDurationMinutes} min` : ""}, from the MatchDay's own schedule.
+              {matchDayDurationMinutes ? ` - Match Day runs for ${matchDayDurationMinutes} min` : ""}, from the Match Day's own schedule.
             </Text>
           )}
 
@@ -463,7 +463,7 @@ export default function FixtureGenerationModal({
             >
               <Text style={{ fontSize: 13 }}>
                 At {matchDurationMinutes} min/match + {timeGapMinutes} min gap, up to{" "}
-                <Text strong>{maxMatchesThatFit}</Text> match{maxMatchesThatFit === 1 ? "" : "es"} fit in this MatchDay's {matchDayDurationMinutes}-minute window.
+                <Text strong>{maxMatchesThatFit}</Text> match{maxMatchesThatFit === 1 ? "" : "es"} fit in this Match Day's {matchDayDurationMinutes}-minute window.
               </Text>
             </div>
           )}
@@ -472,7 +472,7 @@ export default function FixtureGenerationModal({
         {/* Warnings */}
         {exceedsMatchDayDuration && (
           <Alert
-            message="Won't fit in the MatchDay's duration"
+            message="Won't fit in the Match Day's duration"
             description={`${estimatedMatchCount} matches selected, but only ${maxMatchesThatFit} fit within ${matchDayDurationMinutes} minutes at this duration/gap - shorten matches, reduce the gap, or select fewer teams.`}
             type="warning"
             showIcon

@@ -192,7 +192,7 @@ const AuctionHubPage: React.FC = () => {
     matchDaysData?.content?.matchDays?.filter((t: IoMatchDaySingleSummaryType) => t.auctionMode) || [];
 
   const guideSteps = [
-    { title: "Create MatchDay", description: "Toggle 'Auction Mode' ON when creating" },
+    { title: "Create Match Day", description: "Toggle 'Auction Mode' ON when creating" },
     { title: "Configure Settings", description: "Set team budget, timer, bid increment, squad size" },
     { title: "Open Registrations", description: "Share the registration link with players" },
     { title: "Approve & Build Pool", description: "Approve registrations → Add to player pool" },
@@ -207,7 +207,7 @@ const AuctionHubPage: React.FC = () => {
       <AuctionHeader
         icon={<FireOutlined />}
         title="Auction Hub"
-        subtitle="Select a MatchDay to manage or participate in its player auction."
+        subtitle="Select a Match Day to manage or participate in its player auction."
       />
 
       {/* MatchDays first - the primary content */}
@@ -215,7 +215,7 @@ const AuctionHubPage: React.FC = () => {
         <PanelCard>
           <div className="py-10 text-center text-theme-sm" style={{ color: ac.textMuted }}>
             <FireOutlined className="mb-2 block text-3xl" style={{ opacity: 0.4 }} />
-            No auction-mode MatchDays found. Create one from the MatchDays page with 'Auction Mode' enabled.
+            No auction-mode Match Days found. Create one from the Match Days page with 'Auction Mode' enabled.
           </div>
         </PanelCard>
       ) : (

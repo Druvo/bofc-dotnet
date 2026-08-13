@@ -93,7 +93,7 @@ export default function CanvasBuilder({
   const handleSave = () => {
     // Convert canvas items to matchDay structure
     onSave(canvasItems);
-    message.success("MatchDay structure saved");
+    message.success("Match Day structure saved");
   };
 
   return (

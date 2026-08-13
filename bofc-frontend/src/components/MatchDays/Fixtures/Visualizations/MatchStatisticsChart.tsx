@@ -144,7 +144,7 @@ export default function MatchStatisticsChart({ fixtures }: MatchStatisticsChartP
         </Col>
 
         <Col xs={24} md={12}>
-          <Card title="MatchDay Progress Over Time" bordered={false}>
+          <Card title="Match Day Progress Over Time" bordered={false}>
             <div style={{ height: '300px' }}>
               <Line data={progressData} options={chartOptions} />
             </div>

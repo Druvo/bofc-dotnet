@@ -312,7 +312,7 @@ const PlayerStatistics: React.FC = () => {
                         <BarChartOutlined className="text-brand-500 dark:text-brand-400" />
                         Player Statistics
                     </h3>
-                    <p className="text-theme-sm text-gray-500 dark:text-gray-400">Goals, assists and disciplinary records across MatchDays</p>
+                    <p className="text-theme-sm text-gray-500 dark:text-gray-400">Goals, assists and disciplinary records across Match Days</p>
                 </div>
                 <div className="flex overflow-hidden rounded-lg border border-gray-300 dark:border-[var(--color-rule)]">
                     <button
@@ -373,7 +373,7 @@ const PlayerStatistics: React.FC = () => {
 
                     <FormSelect
                         className={`!h-10 ${isMobile ? "w-full" : "w-[200px]"}`}
-                        placeholder="Select MatchDay"
+                        placeholder="Select Match Day"
                         value={selectedMatchDay ?? ""}
                         disabled={!selectedSeason || matchDaysLoading}
                         onChange={(e) => setSelectedMatchDay(e.target.value ? Number(e.target.value) : undefined)}

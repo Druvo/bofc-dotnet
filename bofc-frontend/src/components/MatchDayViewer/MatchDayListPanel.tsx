@@ -73,7 +73,7 @@ export default function MatchDayListPanel({
         <div className="relative">
           <SearchOutlined className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
-            placeholder="Search MatchDays..."
+            placeholder="Search Match Days..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-8 w-full rounded-md border border-gray-300 bg-transparent pl-8 pr-3 text-theme-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-[var(--color-rule)] dark:text-white/90"
@@ -90,7 +90,7 @@ export default function MatchDayListPanel({
           {matchDays.length === 0 ? (
             <div className="p-6 text-center text-theme-xs text-gray-400 dark:text-gray-500">
               <TrophyOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
-              No MatchDays found
+              No Match Days found
             </div>
           ) : (
             matchDays.map((matchDay) => {

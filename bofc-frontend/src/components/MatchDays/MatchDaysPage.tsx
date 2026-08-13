@@ -135,7 +135,7 @@ const MatchDaysPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h2 className="flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
           <TrophyOutlined className="text-brand-500 dark:text-brand-400" />
-          MatchDays
+          Match Days
         </h2>
         {canManage && <CreateMatchDay />}
       </div>
@@ -159,7 +159,7 @@ const MatchDaysPage: React.FC = () => {
         <div className="relative ml-auto w-full sm:w-64">
           <SearchOutlined className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
-            placeholder="Search matchDays..."
+            placeholder="Search Match Days..."
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
@@ -173,8 +173,8 @@ const MatchDaysPage: React.FC = () => {
           <div className="rounded-2xl border border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
             <EmptyState
               icon={<TrophyOutlined />}
-              title="No MatchDays yet"
-              description="Create a MatchDay to start scheduling fixtures."
+              title="No Match Days yet"
+              description="Create a Match Day to start scheduling fixtures."
             />
             {canManage && (
               <div className="flex justify-center pb-8">

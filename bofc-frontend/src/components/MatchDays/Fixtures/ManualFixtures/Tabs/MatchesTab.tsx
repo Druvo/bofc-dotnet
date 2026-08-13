@@ -188,7 +188,7 @@ export default function MatchesTab({
     return (
       <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
         <p className="text-theme-sm text-gray-500 dark:text-gray-400">No matches available yet.</p>
-        <p className="text-theme-sm text-gray-500 dark:text-gray-400">Create rounds and generate matches in the MatchDay tab.</p>
+        <p className="text-theme-sm text-gray-500 dark:text-gray-400">Create rounds and generate matches in the Match Day tab.</p>
       </div>
     );
   }
@@ -198,7 +198,7 @@ export default function MatchesTab({
       <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
         <CalendarOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
         <p className="text-theme-sm text-gray-500 dark:text-gray-400">No matches found.</p>
-        <p className="text-theme-sm text-gray-500 dark:text-gray-400">Generate matches in the MatchDay tab.</p>
+        <p className="text-theme-sm text-gray-500 dark:text-gray-400">Generate matches in the Match Day tab.</p>
       </div>
     );
   }

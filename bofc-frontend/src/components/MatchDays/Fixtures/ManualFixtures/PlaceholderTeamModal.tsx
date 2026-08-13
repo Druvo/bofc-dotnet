@@ -156,7 +156,7 @@ export default function PlaceholderTeamModal({
           label="Placeholder Name"
           name="placeholderName"
           rules={[{ required: true, message: "Please enter a placeholder name" }]}
-          extra="This will be displayed in the MatchDay bracket until the actual team is determined"
+          extra="This will be displayed in the Match Day bracket until the actual team is determined"
         >
           <Input placeholder='e.g., "Winner of Match 5" or "2nd Place Group A"' />
         </Form.Item>

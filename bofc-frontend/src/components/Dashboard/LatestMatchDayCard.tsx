@@ -81,7 +81,7 @@ const LatestMatchDayCard: React.FC = () => {
             await addParticipationToMatchDay(payload).unwrap();
 
             const statusMessage = participationStatus
-                ? 'Successfully joined the MatchDay!'
+                ? 'Successfully joined the Match Day!'
                 : 'Updated to not participating';
 
             toast.success(statusMessage);
@@ -105,7 +105,7 @@ const LatestMatchDayCard: React.FC = () => {
         return (
             <div className="rounded-2xl border border-gray-200 bg-white py-8 text-center shadow-theme-xs dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
                 <TrophyOutlined className="mb-2 text-3xl text-gray-300 dark:text-gray-600" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming MatchDays</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming Match Days</p>
             </div>
         );
     }

@@ -261,7 +261,7 @@ export default function JoinMatchDay() {
               {myParticipation?.participationStatus === true
                 ? "You're confirmed - check back here for your team assignment."
                 : myParticipation?.participationStatus === false
-                ? "You are currently marked as unavailable for this MatchDay."
+                ? "You are currently marked as unavailable for this Match Day."
                 : "Awaiting your response - let us know if you're in."}
             </p>
           </div>
@@ -277,7 +277,7 @@ export default function JoinMatchDay() {
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <span className="flex items-center gap-2">
             <TeamOutlined className="text-brand-500 dark:text-brand-400" />
-            <h4 className="text-lg font-bold text-gray-800 dark:text-white/90">MatchDay Participants</h4>
+            <h4 className="text-lg font-bold text-gray-800 dark:text-white/90">Match Day Participants</h4>
             <Badge variant="light">{players.length}</Badge>
           </span>
           <div className="flex flex-wrap items-center gap-2">

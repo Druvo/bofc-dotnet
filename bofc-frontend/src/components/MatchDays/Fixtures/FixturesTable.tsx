@@ -89,7 +89,7 @@ export default function FixturesTable({
 
   const handleAddMatch = () => {
     if (!matchDayId || teams.length === 0) {
-      toast.warning("MatchDay ID and teams are required to add matches");
+      toast.warning("Match Day ID and teams are required to add matches");
       return;
     }
     setIsAddModalVisible(true);

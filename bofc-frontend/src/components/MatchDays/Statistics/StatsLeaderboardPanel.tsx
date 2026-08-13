@@ -374,7 +374,7 @@ export default function StatsLeaderboardPanel({
         rows={topScorers}
         loading={loading}
         error={playerStatisticsQuery.error}
-        emptyMessage="No goal scorers found for this MatchDay."
+        emptyMessage="No goal scorers found for this Match Day."
         valueTitle="Goals"
         accentColor="#ff4d4f"
         completedMatches={completedMatches}
@@ -386,7 +386,7 @@ export default function StatsLeaderboardPanel({
         rows={topAssists}
         loading={loading}
         error={playerStatisticsQuery.error}
-        emptyMessage="No assists found for this MatchDay."
+        emptyMessage="No assists found for this Match Day."
         valueTitle="Assists"
         accentColor="#52c41a"
         completedMatches={completedMatches}
@@ -399,7 +399,7 @@ export default function StatsLeaderboardPanel({
         rows={yellowCardLeaders}
         loading={loading}
         error={playerStatisticsQuery.error}
-        emptyMessage="No yellow cards found for this MatchDay."
+        emptyMessage="No yellow cards found for this Match Day."
         valueTitle="Cards"
         accentColor="#faad14"
         completedMatches={completedMatches}
@@ -412,7 +412,7 @@ export default function StatsLeaderboardPanel({
         rows={redCardLeaders}
         loading={loading}
         error={playerStatisticsQuery.error}
-        emptyMessage="No red cards found for this MatchDay"
+        emptyMessage="No red cards found for this Match Day"
         valueTitle="Cards"
         accentColor="#cf1322"
         completedMatches={completedMatches}

@@ -198,7 +198,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
               <input
                 type="text"
                 autoComplete="off"
-                placeholder="Search players, MatchDays, venues..."
+                placeholder="Search players, Match Days, venues..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -237,7 +237,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
                       )}
                       {matchedMatchDays.length > 0 && (
                         <div className="mb-1">
-                          <span className="block px-3 py-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">MatchDays</span>
+                          <span className="block px-3 py-1.5 text-theme-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">Match Days</span>
                           {matchedMatchDays.map((t) => (
                             <button
                               key={t.id}

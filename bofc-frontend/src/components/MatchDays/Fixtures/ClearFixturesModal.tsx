@@ -49,7 +49,7 @@ export default function ClearFixturesModal({
             <strong>Warning: This action cannot be undone</strong>
           </div>
           <p>
-            You are about to delete <strong>{fixtureCount} fixtures</strong> for this MatchDay.
+            You are about to delete <strong>{fixtureCount} fixtures</strong> for this Match Day.
           </p>
           <p>All match schedules and records will be permanently removed.</p>
 

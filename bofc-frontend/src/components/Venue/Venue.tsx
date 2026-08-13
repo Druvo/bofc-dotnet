@@ -143,7 +143,7 @@ function Venue() {
                 <EmptyState
                     icon={<EnvironmentOutlined />}
                     title="No venues yet"
-                    description="Add a venue so MatchDays can be scheduled there."
+                    description="Add a venue so Match Days can be scheduled there."
                     action={isAdmin ? { label: "Add Venue", icon: <PlusOutlined />, onClick: showModal } : undefined}
                 />
             ) : (

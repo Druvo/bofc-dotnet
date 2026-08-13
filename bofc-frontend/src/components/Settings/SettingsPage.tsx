@@ -401,8 +401,8 @@ function SettingsPage() {
                 <div className="flex flex-col gap-5">
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 p-4 dark:border-[var(--color-rule)]">
                         <div>
-                            <FormSwitch label="Upcoming MatchDay reminder" checked={notifyMatchDayReminderEnabled} onChange={setNotifyMatchDayReminderEnabled} />
-                            <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">Notifies every player before a MatchDay starts.</p>
+                            <FormSwitch label="Upcoming Match Day reminder" checked={notifyMatchDayReminderEnabled} onChange={setNotifyMatchDayReminderEnabled} />
+                            <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">Notifies every player before a Match Day starts.</p>
                         </div>
                         <div className="w-40">
                             <FormInput
@@ -462,7 +462,7 @@ function SettingsPage() {
                     Auction
                 </h2>
                 <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    Master switch for the player-auction feature. When off, the Auction nav entry and the "Auction Mode" toggle on MatchDay creation are hidden club-wide.
+                    Master switch for the player-auction feature. When off, the Auction nav entry and the "Auction Mode" toggle on Match Day creation are hidden club-wide.
                 </p>
 
                 <FormSwitch label="Enable auction" checked={auctionEnabled} onChange={setAuctionEnabled} />
@@ -474,7 +474,7 @@ function SettingsPage() {
                     Scheduler
                 </h2>
                 <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    How often the background job re-checks MatchDays and concludes any that are overdue. Takes effect after the current wait finishes - no restart needed.
+                    How often the background job re-checks Match Days and concludes any that are overdue. Takes effect after the current wait finishes - no restart needed.
                 </p>
 
                 <div className="w-48">

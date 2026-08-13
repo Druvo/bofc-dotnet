@@ -237,7 +237,7 @@ export default function RoundManagement({
       >
         <div className="flex flex-col gap-4">
           <Alert variant="info" title="Round Configuration">
-            Rounds organize your MatchDay into stages. Each round can contain groups (Group Stage) or teams directly (Knockout rounds).
+            Rounds organize your Match Day into stages. Each round can contain groups (Group Stage) or teams directly (Knockout rounds).
           </Alert>
 
           {!isEditing && createContext?.sourceRoundName && (

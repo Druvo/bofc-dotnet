@@ -287,7 +287,7 @@ export default function MatchDayViewerPage({
                       <div className={styles.identityText}>
                         <div className={styles.titleLine}>
                           <span className={styles.matchDayName}>
-                            {selectedMatchDay?.name || "Select MatchDay"}
+                            {selectedMatchDay?.name || "Select Match Day"}
                           </span>
                           {selectedStatus && (
                             <span
@@ -356,7 +356,7 @@ export default function MatchDayViewerPage({
           <div className={styles.emptyStateWrap}>
             <TrophyOutlined className={styles.emptyIcon} />
             <span className={styles.emptyDescription}>
-              Select a MatchDay from the dropdown to view fixtures,
+              Select a Match Day from the dropdown to view fixtures,
               results, standings and stats
             </span>
           </div>

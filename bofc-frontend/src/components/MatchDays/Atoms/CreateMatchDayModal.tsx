@@ -83,9 +83,9 @@ export default function CreateMatchDay({
 
     const validate = () => {
         const next: Partial<Record<keyof FormValues, string>> = {};
-        if (!values.matchDayName.trim()) next.matchDayName = "Please input the MatchDay name!";
-        if (!values.matchDayDate) next.matchDayDate = "Please select the MatchDay date!";
-        if (!values.matchDayTime) next.matchDayTime = "Please select the MatchDay time!";
+        if (!values.matchDayName.trim()) next.matchDayName = "Please input the Match Day name!";
+        if (!values.matchDayDate) next.matchDayDate = "Please select the Match Day date!";
+        if (!values.matchDayTime) next.matchDayTime = "Please select the Match Day time!";
         if (!values.venueId) next.venueId = "Please select a venue!";
         setErrors(next);
         return Object.keys(next).length === 0;
@@ -118,7 +118,7 @@ export default function CreateMatchDay({
             updateMatchDay({ id: matchDayId, ...payload })
                 .unwrap()
                 .then(() => {
-                    toast.success("MatchDay updated successfully");
+                    toast.success("Match Day updated successfully");
                     setOpen(false);
                     resetForm();
                     setRoadmapImageUrl(undefined);
@@ -129,7 +129,7 @@ export default function CreateMatchDay({
             createMatchDay(payload)
                 .unwrap()
                 .then(() => {
-                    toast.success("MatchDay created successfully");
+                    toast.success("Match Day created successfully");
                     setOpen(false);
                     resetForm();
                     setRoadmapImageUrl(undefined);
@@ -212,11 +212,11 @@ export default function CreateMatchDay({
 
     return (
         <div>
-            {!matchDayId && <Button onClick={() => setOpen(true)}>+ New MatchDay</Button>}
+            {!matchDayId && <Button onClick={() => setOpen(true)}>+ New Match Day</Button>}
             <Modal
                 isOpen={open}
                 onClose={closeModal}
-                title={matchDayId ? "Update MatchDay" : "Create MatchDay"}
+                title={matchDayId ? "Update Match Day" : "Create Match Day"}
                 className="max-w-[600px]"
             >
                 {isVenuesLoading ? (
@@ -230,8 +230,8 @@ export default function CreateMatchDay({
                         className="flex flex-col gap-4"
                     >
                         <FormInput
-                            label="MatchDay Name"
-                            placeholder="Enter MatchDay name"
+                            label="Match Day Name"
+                            placeholder="Enter Match Day name"
                             value={values.matchDayName}
                             onChange={(e) => setField("matchDayName", e.target.value)}
                             error={errors.matchDayName}
@@ -240,14 +240,14 @@ export default function CreateMatchDay({
                         <div className="grid grid-cols-2 gap-3">
                             <FormInput
                                 type="date"
-                                label={<span className="flex items-center gap-1.5"><CalendarOutlined /> MatchDay Date</span>}
+                                label={<span className="flex items-center gap-1.5"><CalendarOutlined /> Match Day Date</span>}
                                 value={values.matchDayDate}
                                 onChange={(e) => setField("matchDayDate", e.target.value)}
                                 error={errors.matchDayDate}
                             />
                             <FormInput
                                 type="time"
-                                label={<span className="flex items-center gap-1.5"><ClockCircleOutlined /> MatchDay Time</span>}
+                                label={<span className="flex items-center gap-1.5"><ClockCircleOutlined /> Match Day Time</span>}
                                 value={values.matchDayTime}
                                 onChange={(e) => setField("matchDayTime", e.target.value)}
                                 error={errors.matchDayTime}
@@ -264,7 +264,7 @@ export default function CreateMatchDay({
                                     ? `Ends at ${dayjs(`${values.matchDayDate}T${values.matchDayTime}:00`)
                                           .add(Number(values.durationMinutes) || 0, "minute")
                                           .format("MMM D, YYYY h:mm A")} - drives whether it shows as Upcoming, Ongoing, or Concluded.`
-                                    : "How long the MatchDay runs from its start time - drives whether it shows as Upcoming, Ongoing, or Concluded."
+                                    : "How long the Match Day runs from its start time - drives whether it shows as Upcoming, Ongoing, or Concluded."
                             }
                             value={values.durationMinutes}
                             onChange={(e) => setField("durationMinutes", e.target.value)}
@@ -290,7 +290,7 @@ export default function CreateMatchDay({
                                 />
                                 <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">
                                     {isAutoMatchDay
-                                        ? "Auto-created MatchDays never use auction mode."
+                                        ? "Auto-created Match Days never use auction mode."
                                         : "Enable if teams will be formed by bidding auction instead of manual selection"}
                                 </p>
                             </div>
@@ -298,13 +298,13 @@ export default function CreateMatchDay({
 
                         <div>
                             <FormSwitch
-                                label="Default MatchDay"
+                                label="Default Match Day"
                                 checked={isAutoMatchDay ? true : values.defaultMatchDay}
                                 disabled={isAutoMatchDay}
                                 onChange={(checked) => setField("defaultMatchDay", checked)}
                             />
                             {isAutoMatchDay && (
-                                <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Auto-created MatchDays are always the default.</p>
+                                <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">Auto-created Match Days are always the default.</p>
                             )}
                         </div>
 
@@ -331,10 +331,10 @@ export default function CreateMatchDay({
                                 </div>
 
                                 <div>
-                                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">MatchDay Rules</label>
+                                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Match Day Rules</label>
                                     <textarea
                                         rows={8}
-                                        placeholder="Enter MatchDay rules in Markdown format"
+                                        placeholder="Enter Match Day rules in Markdown format"
                                         value={values.rules}
                                         onChange={(e) => setField("rules", e.target.value)}
                                         className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
@@ -382,7 +382,7 @@ export default function CreateMatchDay({
                         )}
 
                         <Button type="submit" className="w-full" disabled={isCreating || isUpdating}>
-                            {isCreating || isUpdating ? <LoadingOutlined /> : null} {matchDayId ? "Update MatchDay" : "Create MatchDay"}
+                            {isCreating || isUpdating ? <LoadingOutlined /> : null} {matchDayId ? "Update Match Day" : "Create Match Day"}
                         </Button>
                     </form>
                 )}

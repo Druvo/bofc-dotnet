@@ -21,7 +21,7 @@ export default function ViewerHomeTab({ matchDayId }: ViewerHomeTabProps) {
   if (!matchDay) {
     return (
       <div className="p-12 text-center text-theme-sm text-gray-400 dark:text-gray-500">
-        MatchDay details not found
+        Match Day details not found
       </div>
     );
   }

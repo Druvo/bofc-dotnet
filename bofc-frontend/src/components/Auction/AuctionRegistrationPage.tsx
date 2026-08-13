@@ -176,7 +176,7 @@ const AuctionRegistrationPage: React.FC = () => {
               )}
             </div>
             <p className="m-0 text-theme-sm text-gray-600 dark:text-gray-300">
-              Hi <span className="font-semibold">{loginInfo.username || loginInfo.email}</span>! Ready to be part of the player auction for this MatchDay?
+              Hi <span className="font-semibold">{loginInfo.username || loginInfo.email}</span>! Ready to be part of the player auction for this Match Day?
             </p>
             <Alert
               variant="success"
@@ -187,7 +187,7 @@ const AuctionRegistrationPage: React.FC = () => {
             </Alert>
             {isRegistrationClosed && (
               <Alert variant="warning" title="Auction registration is closed" className="w-full text-left">
-                This MatchDay auction is already completed, so new registrations are not accepted.
+                This Match Day auction is already completed, so new registrations are not accepted.
               </Alert>
             )}
             <Button
@@ -214,7 +214,7 @@ const AuctionRegistrationPage: React.FC = () => {
           Player Auction Registration
         </h3>
         <p className="mt-1.5 text-theme-sm text-gray-500 dark:text-gray-400">
-          Register yourself to be part of the player auction for MatchDay #{matchDayId}.
+          Register yourself to be part of the player auction for Match Day #{matchDayId}.
           After admin approval, teams will bid for you during the live auction.
         </p>
         <GoldDivider style={{ margin: "12px 0 16px" }} />

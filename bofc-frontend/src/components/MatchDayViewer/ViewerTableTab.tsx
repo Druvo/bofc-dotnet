@@ -153,7 +153,7 @@ export default function ViewerTableTab({ matchDayId }: ViewerTableTabProps) {
       return [
         {
           key: "all",
-          title: "MatchDay Standings",
+          title: "Match Day Standings",
           meta: "Overall Table",
           rows,
         },
@@ -165,7 +165,7 @@ export default function ViewerTableTab({ matchDayId }: ViewerTableTabProps) {
       if (fixture.round != null) {
         return roundNameMap.get(fixture.round) ?? `Round ${fixture.round}`;
       }
-      return "MatchDay Stage";
+      return "Match Day Stage";
     };
 
     const displayMeta = (fixture: IFixture) => {
@@ -388,7 +388,7 @@ export default function ViewerTableTab({ matchDayId }: ViewerTableTabProps) {
       : [
           {
             key: "all",
-            title: "MatchDay Standings",
+            title: "Match Day Standings",
             meta: "Overall Table",
             rows,
           },

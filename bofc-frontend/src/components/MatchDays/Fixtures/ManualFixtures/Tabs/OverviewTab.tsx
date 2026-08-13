@@ -529,7 +529,7 @@ export default function OverviewTab({
     if (!matchDayStructure || matchDayStructure.rounds.length === 0) {
         return (
             <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
-                <p className="text-theme-sm text-gray-500 dark:text-gray-400">No MatchDay structure yet.</p>
+                <p className="text-theme-sm text-gray-500 dark:text-gray-400">No Match Day structure yet.</p>
                 <p className="text-theme-sm text-gray-500 dark:text-gray-400">Create rounds and groups to see standings.</p>
             </div>
         );

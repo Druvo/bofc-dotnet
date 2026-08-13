@@ -29,11 +29,11 @@ export default function PreviewTab({
           description={
             <div>
               <Text type="secondary">
-                No MatchDay structure to visualize yet.
+                No Match Day structure to visualize yet.
               </Text>
               <br />
               <Text type="secondary">
-                Create rounds in the MatchDay tab to see the flow visualization.
+                Create rounds in the Match Day tab to see the flow visualization.
               </Text>
             </div>
           }
@@ -114,7 +114,7 @@ export default function PreviewTab({
           <Empty
             description={
               <Text type="secondary">
-                No rounds created yet. Create rounds in the MatchDay tab.
+                No rounds created yet. Create rounds in the Match Day tab.
               </Text>
             }
           />

@@ -24,7 +24,7 @@ interface Action {
 
 const ACTIONS: Action[] = [
   { key: "pay", label: "Make a Payment", icon: <DollarOutlined />, to: "/ac/collections" },
-  { key: "join", label: "My MatchDays", icon: <TeamOutlined />, to: "/match-days" },
+  { key: "join", label: "My Match Days", icon: <TeamOutlined />, to: "/match-days" },
   { key: "auction", label: "Auction Hub", icon: <FireOutlined />, to: "/auction", auctionOnly: true },
   { key: "stats", label: "Player Statistics", icon: <BarChartOutlined />, to: "/player-statistics" },
   { key: "approve", label: "Approve Registrations", icon: <UserAddOutlined />, to: "/auction", adminOnly: true, auctionOnly: true },

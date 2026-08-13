@@ -167,7 +167,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
       icon: FieldIcon,
       matchPrefixes: ["/match-days", "/venues", "/auction"],
       children: [
-        { label: "MatchDays", path: "/match-days" },
+        { label: "Match Days", path: "/match-days" },
         { label: "Venues", path: "/venues" },
         ...(auctionEnabled ? [{ label: "Auction", path: "/auction", adminOnly: true }] : []),
       ],

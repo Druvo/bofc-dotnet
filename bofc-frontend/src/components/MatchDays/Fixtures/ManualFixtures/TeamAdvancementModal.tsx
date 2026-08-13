@@ -386,7 +386,7 @@ export default function TeamAdvancementModal({
         {!hasNextRound && (
           <Alert
             message="Final Round"
-            description="This is the last round. Completing it will finish the MatchDay."
+            description="This is the last round. Completing it will finish the Match Day."
             type="warning"
             showIcon
           />

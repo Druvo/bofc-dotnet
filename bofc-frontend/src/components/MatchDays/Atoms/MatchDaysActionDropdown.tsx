@@ -63,11 +63,11 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
     concludeMatchDay({ id: record.id })
       .unwrap()
       .then(() => {
-        toast.success("MatchDay concluded successfully");
+        toast.success("Match Day concluded successfully");
         setIsConcludeModalVisible(false);
       })
       .catch(() => {
-        toast.error("Failed to conclude MatchDay");
+        toast.error("Failed to conclude Match Day");
       });
   };
 
@@ -75,11 +75,11 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
     hardDeleteMatchDay({ id: record.id })
       .unwrap()
       .then(() => {
-        toast.success("MatchDay permanently deleted");
+        toast.success("Match Day permanently deleted");
         setIsDeleteModalVisible(false);
       })
       .catch(() => {
-        toast.error("Failed to delete MatchDay");
+        toast.error("Failed to delete Match Day");
       });
   };
 
@@ -95,21 +95,21 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
       >
         {(close) => (
           <>
-            {record.activeStatus && <DropdownItem onClick={() => fireMenuClick("join", close)}>Join MatchDay</DropdownItem>}
+            {record.activeStatus && <DropdownItem onClick={() => fireMenuClick("join", close)}>Join Match Day</DropdownItem>}
             {auctionEnabled && record.auctionMode && <DropdownItem onClick={() => fireMenuClick("auction-register", close)}>Register for Auction</DropdownItem>}
             {auctionEnabled && record.auctionMode && <DropdownItem onClick={() => fireMenuClick("auction-live", close)}>Live Auction</DropdownItem>}
             <DropdownItem onClick={() => fireMenuClick("team-building", close)}>Team Building</DropdownItem>
             <DropdownItem onClick={() => fireMenuClick("fixtures", close)}>Teams and Fixtures</DropdownItem>
-            {canManage && <DropdownItem onClick={() => fireMenuClick("update", close)}>Update MatchDay</DropdownItem>}
+            {canManage && <DropdownItem onClick={() => fireMenuClick("update", close)}>Update Match Day</DropdownItem>}
             {canManage && <DropdownItem onClick={() => fireMenuClick("active-status", close)}>Update Active Status</DropdownItem>}
             {loginInfo.roles.includes("SUPERADMIN") && (
               <DropdownItem className="text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10" onClick={() => fireMenuClick("conclude", close)}>
-                Conclude MatchDay
+                Conclude Match Day
               </DropdownItem>
             )}
             {loginInfo.roles.includes("SUPERADMIN") && (
               <DropdownItem className="text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10" onClick={() => fireMenuClick("delete", close)}>
-                Delete MatchDay Permanently
+                Delete Match Day Permanently
               </DropdownItem>
             )}
           </>
@@ -149,7 +149,7 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
       <Modal
         isOpen={isConcludeModalVisible}
         onClose={() => setIsConcludeModalVisible(false)}
-        title="Conclude MatchDay"
+        title="Conclude Match Day"
         className="max-w-[420px]"
         footer={
           <>
@@ -166,7 +166,7 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
       <Modal
         isOpen={isDeleteModalVisible}
         onClose={() => setIsDeleteModalVisible(false)}
-        title="Delete MatchDay Permanently"
+        title="Delete Match Day Permanently"
         className="max-w-[420px]"
         footer={
           <>

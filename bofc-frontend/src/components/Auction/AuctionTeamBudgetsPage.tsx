@@ -304,7 +304,7 @@ const AuctionTeamBudgetsPage: React.FC = () => {
         className="max-w-[400px]"
       >
         <div className="flex flex-col gap-4">
-          <span className="text-theme-sm text-gray-600 dark:text-gray-300">Enter a name for the new team in this MatchDay:</span>
+          <span className="text-theme-sm text-gray-600 dark:text-gray-300">Enter a name for the new team in this Match Day:</span>
           <FormInput
             placeholder="e.g. Thunder Titans, Thunder FC..."
             value={newTeamName}

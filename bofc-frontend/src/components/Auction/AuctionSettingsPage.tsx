@@ -95,7 +95,7 @@ const AuctionSettingsPage: React.FC = () => {
       <AuctionHeader
         icon={<SettingOutlined />}
         title="Auction Settings"
-        subtitle="Budget, timer, bid increment and squad rules for this MatchDay."
+        subtitle="Budget, timer, bid increment and squad rules for this Match Day."
         backTo="/auction"
         actions={session?.status ? <StatusPill status={session.status} /> : undefined}
       />

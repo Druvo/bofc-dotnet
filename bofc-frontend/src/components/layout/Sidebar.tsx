@@ -51,7 +51,7 @@ interface NavGroup {
 
 const iconSvgProps = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "currentColor" as const, xmlns: "http://www.w3.org/2000/svg" };
 
-const DashboardIcon = (
+export const DashboardIcon = (
   <svg {...iconSvgProps}>
     <path
       fillRule="evenodd"
@@ -60,7 +60,7 @@ const DashboardIcon = (
     />
   </svg>
 );
-const ProfileIcon = (
+export const ProfileIcon = (
   <svg {...iconSvgProps}>
     <path
       fillRule="evenodd"
@@ -90,11 +90,11 @@ const TablesIcon = (
 /** Sourced straight from the icon pack (@ant-design/icons) instead of a hand-drawn
  * glyph - matches the AntD icons used everywhere else in the app (page headers,
  * content pages). Was previously a hand-built calendar shape. */
-const NextMatchIcon = <CalendarOutlined style={{ fontSize: 20 }} />;
+export const NextMatchIcon = <CalendarOutlined style={{ fontSize: 20 }} />;
 /** The icon pack has no literal "football pitch" glyph, so this stays hand-built
  * (rounded pitch boundary + halfway line + center circle) - every other sidebar
  * icon now comes straight from @ant-design/icons. Was previously a whistle. */
-const FieldIcon = (
+export const FieldIcon = (
   <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
     <rect x="4" y="3" width="16" height="18" rx="2" />
     <line x1="4" y1="12" x2="20" y2="12" />
@@ -297,8 +297,10 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
       } ${collapsed ? "lg:!w-[90px]" : "lg:!w-[290px]"}`}
       style={{ transition: "width 0.2s ease-in-out" }}
     >
-      <div className={`flex items-center gap-2 pb-4 pt-5 ${collapsed ? "lg:justify-center" : "justify-between"}`}>
-        <button onClick={() => go("/")} className="flex items-center">
+      <div className={`flex items-center gap-2 pb-4 pt-5 justify-end md:justify-between ${collapsed ? "lg:justify-center" : ""}`}>
+        {/* Hidden below md - MobileTopBar (DefaultLayout.tsx) already shows the logo
+            there, so this drawer doesn't need to repeat it. */}
+        <button onClick={() => go("/")} className="hidden items-center md:flex">
           <img src={companyLogo} alt="BOFC" className="h-12 w-12 shrink-0" />
           <span className={`ml-2 text-3xl font-semibold text-gray-800 dark:text-white ${collapsed ? "lg:hidden" : ""}`}>BOFC</span>
         </button>
@@ -307,7 +309,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
             besides tapping the scrim outside. */}
         <button
           onClick={() => setSidebarToggle(false)}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 lg:hidden dark:text-gray-400 dark:hover:bg-white/5"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-100 lg:hidden dark:border-[var(--color-rule)] dark:text-gray-400 dark:hover:bg-white/5"
           aria-label="Close menu"
         >
           <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -316,10 +318,13 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
         </button>
       </div>
 
-      {/* Mobile/tablet-only (<lg) account strip - Header (the usual home for dark
-          mode/notifications/sign out) is hidden below md, and even between md-lg where
-          Header still shows, having this here too is harmless since it's lg:hidden. */}
-      <div className="mb-4 flex items-center justify-between border-b border-[var(--color-rule)] pb-4 lg:hidden">
+      {/* Tablet-only (md-lg) account strip - Header (the usual home for dark
+          mode/notifications/sign out) is hidden below md and shows again from md up,
+          so this only fills the md-lg gap. Hidden below md since MobileTopBar
+          (DefaultLayout.tsx) now shows these same avatar/bell/theme/logout controls
+          there - without the "hidden" this duplicated them every time the drawer
+          opened on mobile. */}
+      <div className="mb-4 hidden items-center justify-between border-b border-[var(--color-rule)] pb-4 md:flex lg:hidden">
         <button onClick={() => go("/profile")} className="flex min-w-0 items-center gap-2">
           <Avatar src={userImage || undefined} name={loginInfo?.username} seed={loginInfo?.userId} size={36} />
           <span className="truncate text-sm font-medium text-gray-800 dark:text-white/90">{loginInfo?.username || "User"}</span>

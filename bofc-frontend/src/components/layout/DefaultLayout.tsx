@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import MobileTopBar from "./MobileTopBar";
+import OfflineBanner from "./OfflineBanner";
 import { AppShellProvider } from "./AppShellContext";
 
 /**
@@ -56,6 +58,9 @@ export default function DefaultLayout({ children, isDarkMode, setIsDarkMode }: D
         />
 
         <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+          <MobileTopBar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
+          <OfflineBanner />
+
           {/* Small-device overlay/scrim - closes the sidebar on outside tap */}
           <div
             onClick={() => setSidebarToggle(false)}

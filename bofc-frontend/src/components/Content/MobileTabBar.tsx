@@ -1,11 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  DashboardOutlined,
-  EyeOutlined,
-  TeamOutlined,
-  MenuOutlined,
-} from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
+import { DashboardIcon, NextMatchIcon, FieldIcon, ProfileIcon } from "../layout/Sidebar";
 
 interface MobileTabBarProps {
   onOpenMore: () => void;
@@ -18,20 +14,24 @@ interface TabItem {
   path?: string;
 }
 
+// Icons reused straight from layout/Sidebar.tsx (not redrawn) so the bottom
+// nav and the sidebar/drawer always show the exact same glyph per section.
 const TABS: TabItem[] = [
-  { key: "dashboard", label: "Dashboard", icon: <DashboardOutlined />, path: "/dashboard" },
-  { key: "match-center", label: "Match Center", icon: <EyeOutlined />, path: "/match-day-viewer" },
-  { key: "players", label: "Players", icon: <TeamOutlined />, path: "/players" },
+  { key: "dashboard", label: "Dashboard", icon: DashboardIcon, path: "/dashboard" },
+  { key: "match-day", label: "Next Match", icon: NextMatchIcon, path: "/match-day" },
+  { key: "match-center", label: "Match Center", icon: FieldIcon, path: "/match-day-viewer" },
+  { key: "players", label: "Players", icon: ProfileIcon, path: "/players" },
   { key: "more", label: "More", icon: <MenuOutlined /> },
 ];
 
 /**
  * Mobile-only (<768px) persistent bottom nav so the highest-frequency
- * destinations - dashboard, live score/fixtures, roster - are one tap away
- * instead of hamburger -> drawer -> menu item. "More" opens the exact same
- * sidebar drawer the header hamburger already does (onOpenMore), so Finance/
- * Venue/Club Rules/Auction/Profile stay reachable without duplicating nav.
- * Desktop (>=768px) renders nothing - layout/Sidebar.tsx is the nav there.
+ * destinations - dashboard, next match day, live score/fixtures, roster - are
+ * one tap away instead of hamburger -> drawer -> menu item. "More" opens the
+ * exact same sidebar drawer the header hamburger already does (onOpenMore),
+ * so Finance/Venue/Club Rules/Auction/Profile stay reachable without
+ * duplicating nav. Desktop (>=768px) renders nothing - layout/Sidebar.tsx is
+ * the nav there.
  */
 export default function MobileTabBar({ onOpenMore }: MobileTabBarProps) {
   const navigate = useNavigate();
@@ -41,6 +41,11 @@ export default function MobileTabBar({ onOpenMore }: MobileTabBarProps) {
     if (!tab.path) return false;
     if (tab.path === "/dashboard") {
       return location.pathname === "/" || location.pathname === "/dashboard";
+    }
+    // Exact-match "/match-day" first - startsWith alone would also match
+    // "/match-day-viewer" (Match Center's own path) and light up both tabs.
+    if (tab.path === "/match-day") {
+      return location.pathname === "/match-day";
     }
     return location.pathname.startsWith(tab.path);
   };

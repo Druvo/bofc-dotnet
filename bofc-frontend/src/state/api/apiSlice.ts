@@ -53,6 +53,15 @@ const customBaseQuery: typeof baseQuery = async (args, api, extraOptions) => {
 
   // Check if result.error exists
   if (result?.error) {
+    // Network-level failure (offline, DNS, backend unreachable) - every widget's
+    // query fails independently and would otherwise stack a "Failed to fetch"
+    // toast per widget. Skip the toast and let the app-wide OfflineBanner
+    // (DefaultLayout.tsx) show one persistent "you're offline" message instead.
+    if ((result.error as any)?.status === "FETCH_ERROR") {
+      window.dispatchEvent(new Event("bofc:network-error"));
+      return result;
+    }
+
     try {
       const errorData = result?.error?.data as ApiErrorResponse; // Cast to ApiErrorResponse
       const statusCode = (result?.error as any)?.status || errorData?.statusCode;

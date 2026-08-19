@@ -4,6 +4,7 @@ import { IoMatchDaySingleSummaryType } from "../../state/features/matchDays/matc
 import MatchDaysActionDropdown from "./Atoms/MatchDaysActionDropdown";
 import { useNavigate } from "react-router-dom";
 import CreateMatchDay from "./Atoms/CreateMatchDayModal";
+import GenerateMatchDaysModal from "./Atoms/GenerateMatchDaysModal";
 import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import { showBdLocalTimeRange, getEffectiveMatchDayStatus } from "../../utils/utils";
@@ -137,7 +138,12 @@ const MatchDaysPage: React.FC = () => {
           <TrophyOutlined className="text-brand-500 dark:text-brand-400" />
           Match Days
         </h2>
-        {canManage && <CreateMatchDay />}
+        {canManage && (
+          <div className="flex items-center gap-2">
+            <GenerateMatchDaysModal />
+            <CreateMatchDay />
+          </div>
+        )}
       </div>
 
       <div className="h-0.5 w-full rounded bg-gradient-to-r from-brand-500 to-transparent" />

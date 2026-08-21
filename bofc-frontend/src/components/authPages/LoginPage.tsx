@@ -17,6 +17,7 @@ import {
 } from "../../utils/utils";
 import Button from "../ui/button";
 import FormCheckbox from "../ui/form-checkbox";
+import companyLogo from "../../assets/logo.png";
 import "./authStyles.css";
 
 const LoginPage: React.FC = () => {
@@ -26,7 +27,6 @@ const LoginPage: React.FC = () => {
     const [errors, setErrors] = useState({ email: "", password: "" });
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [rememberPassword, setRememberPassword] = useState(false);
-    const [backgroundLoaded, setBackgroundLoaded] = useState(false);
     const [login] = useLoginMutation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -48,17 +48,6 @@ const LoginPage: React.FC = () => {
                 handleAutoLogin(storedCredentials.email, storedCredentials.password);
             }
         }
-    }, []);
-
-    // Lazy load background image
-    useEffect(() => {
-        const img = new Image();
-        img.onload = () => {
-            // Set CSS custom property for background image
-            document.documentElement.style.setProperty('--login-bg-image', `url(${process.env.PUBLIC_URL}/loginBackground.png)`);
-            setBackgroundLoaded(true);
-        };
-        img.src = `${process.env.PUBLIC_URL}/loginBackground.png`;
     }, []);
 
     const handleAutoLogin = async (email: string, password: string) => {
@@ -181,7 +170,17 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className={`login-page-wrapper dark ${backgroundLoaded ? 'bg-loaded' : ''}`}>
+        <div className="login-page-wrapper dark">
+            <div className="login-brand">
+                <img src={companyLogo} alt="BOFC" className="login-brand-logo" />
+                <div className="login-brand-divider" />
+                <div className="login-brand-text">
+                    <span>Pride.</span>
+                    <span>Passion.</span>
+                    <span>Football.</span>
+                </div>
+            </div>
+
             <div className="login-form-container">
                 {/* Login Form */}
                 <div className="login-right-section">
@@ -271,6 +270,11 @@ const LoginPage: React.FC = () => {
                         </Button>
                     </form>
                 </div>
+            </div>
+
+            <div className="login-footer-bar" aria-hidden="true">
+                <div className="login-footer-rule" />
+                <span>BJIT-2.0 Originals Football Club</span>
             </div>
         </div>
     );

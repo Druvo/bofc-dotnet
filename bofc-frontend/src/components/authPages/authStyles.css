@@ -63,25 +63,120 @@
     --color-accent: oklch(68.47% 0.1027 86.0);
     --color-accent-hover: oklch(76% 0.085 86.0);
     --color-accent-ink: oklch(14% 0.030 145.2);
-    background: linear-gradient(135deg, var(--color-paper-3) 0%, var(--color-paper-2) 50%, var(--color-paper) 100%);
+    /* Ported straight from bofc-banner.html's :root tokens. */
+    --pitch-bg-mid: #0c2016;
+    --pitch-bg-stripe: #0a1c12;
+    --gold: #c9a34a;
+    --gold-bright: #e0bd63;
+    --sage: #7a9a82;
+    --sage-bright: #a9c7ae;
+    background: repeating-linear-gradient(90deg, var(--pitch-bg-mid) 0px, var(--pitch-bg-mid) 62px, var(--pitch-bg-stripe) 62px, var(--pitch-bg-stripe) 124px);
     min-height: 100vh;
+    /* Brand/card/footer are normal flex children stacked in one column now -
+       previously brand and footer were position:absolute at fixed
+       percentages while the card was independently vertically centered, and
+       no combination of reserved padding/clamp() sizing survived every real
+       viewport (it came down to 1px of clearance at 1366x650 before finally
+       overlapping there). A column stack can't overlap by construction:
+       each item's height pushes the next one down, at any viewport size. */
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    gap: clamp(12px, 2.5vh, 28px);
+    padding: clamp(12px, 3vh, 28px) 20px;
     position: relative;
-    background-size: cover;
-    background-position: center top;
-    background-repeat: no-repeat;
-    transition: background-image 0.5s ease-in-out;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
-.login-page-wrapper.bg-loaded {
-    /* A light vignette (alpha-composited, not blended) so the brand
-       background shows through clearly instead of being crushed dark
-       by a heavy blend-mode overlay. */
-    background-image: radial-gradient(circle at 50% 45%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.3) 100%), var(--login-bg-image);
-    background-blend-mode: normal;
+/* Vignette overlay - ported from .banner::before. */
+.login-page-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+        radial-gradient(ellipse at 20% 15%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.35) 75%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0) 12%, rgba(0, 0, 0, 0) 82%, rgba(0, 0, 0, 0.45) 100%);
+    pointer-events: none;
+}
+
+/* Club lockup - ported from .lockup/.crest/.divider/.tagline, but a normal
+   flex child (centered above the card, left-aligned on wide screens below)
+   rather than absolute top-left - see .login-page-wrapper's comment for why. */
+.login-brand {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.login-brand-logo {
+    height: auto;
+    /* min() against vh too, not just vw - a wide-but-short viewport still
+       needs the logo to shrink, or the login page needs to scroll to fit
+       brand+card+footer, which login pages specifically shouldn't need. */
+    width: min(16vw, 13vh, 140px);
+    max-width: 220px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
+}
+
+.login-brand-divider {
+    width: 2px;
+    align-self: stretch;
+    background: linear-gradient(180deg, rgba(201, 163, 74, 0) 0%, var(--gold) 20%, var(--gold) 80%, rgba(201, 163, 74, 0) 100%);
+    opacity: 0.85;
+}
+
+.login-brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+}
+
+.login-brand-text span {
+    font-weight: 700;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: clamp(15px, min(2vw, 2.2vh), 26px);
+    line-height: 1.05;
+    color: var(--sage-bright);
+    background: linear-gradient(180deg, var(--sage-bright) 0%, var(--sage) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Bottom club name bar - ported from .bottom-bar/.rule/.club-name, but a
+   normal flex child (below the card) rather than absolute bottom - see
+   .login-page-wrapper's comment for why. */
+.login-footer-bar {
+    position: relative;
+    z-index: 10;
+    width: min(600px, 90vw);
+}
+
+.login-footer-rule {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(201, 163, 74, 0) 0%, var(--gold) 12%, var(--gold) 88%, rgba(201, 163, 74, 0) 100%);
+    margin-bottom: 1.1em;
+}
+
+.login-footer-bar span {
+    display: block;
+    text-align: center;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.42em;
+    font-size: clamp(13px, 1.15vw, 19px);
+    color: var(--gold-bright);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .login-form-container {
@@ -317,11 +412,49 @@
     }
 }
 
+/* Trims the card's internal spacing on short viewports (common laptop heights
+   like 1366x768 - real usable height is even less once browser chrome is
+   subtracted) so brand+card+footer fit without scrolling, which a login page
+   specifically shouldn't need. Keyed on height, not width, since this is
+   about vertical room, not a phone/desktop split. */
+@media (max-height: 850px) {
+    .login-right-section {
+        padding: 32px 40px;
+    }
+
+    .welcome-section {
+        margin-bottom: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+    }
+
+    .checkbox-container {
+        margin-bottom: 14px;
+    }
+
+    .login-btn {
+        height: 46px;
+        margin-bottom: 8px;
+    }
+}
+
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
     .login-page-wrapper {
         padding: 10px;
-        background-image: linear-gradient(135deg, var(--color-paper-3) 0%, var(--color-paper) 100%);
+        gap: 14px;
+    }
+
+    .login-brand-text span {
+        font-size: 22px;
+        letter-spacing: 0;
+    }
+
+    .login-footer-bar span {
+        letter-spacing: 0.18em;
+        font-size: 10px;
     }
 
     .login-form-container {
@@ -333,7 +466,13 @@
 
     .login-right-section {
         padding: 20px 20px 25px;
-        flex: none;
+        /* Was "flex: none" (flex-basis:auto, no shrink) - with no sibling
+           left-image section left in the JSX, that made this size itself off
+           its own content's preferred width instead of filling the card,
+           forcing every input ~56px wider than the card and clipping them
+           on the right. flex:1 (matching the desktop rule) fills the card's
+           actual width instead. */
+        flex: 1;
     }
 
     .welcome-text {

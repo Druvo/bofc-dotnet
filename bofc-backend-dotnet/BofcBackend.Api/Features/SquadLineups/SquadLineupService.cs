@@ -89,6 +89,9 @@ public class SquadLineupService(BofcDbContext db) : ISquadLineupService
         }
     }
 
+    private static string? BuildPlayerPhotoUrl(string? photoKey) =>
+        string.IsNullOrWhiteSpace(photoKey) ? null : $"/files/player-photos/{photoKey}";
+
     private async Task<Team> GetTeamWithRosterAsync(long teamId) =>
         await db.Teams.Include(t => t.TeamPlayers).ThenInclude(tp => tp.Player)
             .FirstOrDefaultAsync(t => t.Id == teamId)
@@ -107,6 +110,9 @@ public class SquadLineupService(BofcDbContext db) : ISquadLineupService
                 PlayerName = teamPlayer?.Player.Name ?? string.Empty,
                 PlayingPosition = teamPlayer?.PlayingPosition.ToString() ?? FootballPosition.UNASSIGNED.ToString(),
                 Availability = lp.Availability.ToString(),
+                IsCaptain = teamPlayer?.IsCaptain ?? false,
+                PhotoKey = teamPlayer?.Player.PhotoKey,
+                PhotoUrl = BuildPlayerPhotoUrl(teamPlayer?.Player.PhotoKey),
             };
         }
 

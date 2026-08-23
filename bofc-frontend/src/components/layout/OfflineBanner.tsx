@@ -28,7 +28,7 @@ export default function OfflineBanner() {
   if (!isOffline) return null;
 
   return (
-    <div className="flex items-center justify-center gap-3 bg-warning-500 px-4 py-2 text-center text-theme-sm font-medium text-white">
+    <div className="flex shrink-0 items-center justify-center gap-3 bg-warning-500 px-4 py-2 text-center text-theme-sm font-medium text-white">
       <WifiOutlined />
       <span>You're offline - showing the last loaded data, some info may be out of date.</span>
       <button

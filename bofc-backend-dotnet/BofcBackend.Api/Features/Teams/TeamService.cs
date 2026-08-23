@@ -186,6 +186,265 @@ public class TeamService(
         await db.SaveChangesAsync();
     }
 
+    /// <summary>Bulk-undo for AutoAssignGoalkeepersAsync: every team on this MatchDay with a
+    /// goalkeeper set goes back to UNASSIGNED, and the matching PlayerGoalkeepingHistory rows for
+    /// today are removed (same bookkeeping as the manual "Remove from Goalkeeper" action, just
+    /// looped across every team). Teams with no goalkeeper set are left alone. Lets the organiser
+    /// re-run the auto-assign ranking from a clean slate instead of clearing each team by hand.</summary>
+    public async Task<ClearGoalkeepersResponse> ClearGoalkeepersAsync(long matchDayId)
+    {
+        var teams = await db.Teams.Include(t => t.TeamPlayers).ThenInclude(tp => tp.Player)
+            .Where(t => t.MatchDayId == matchDayId)
+            .ToListAsync();
+
+        var cleared = new List<ClearedGoalkeeper>();
+        foreach (var team in teams)
+        {
+            var currentGoalkeeper = team.TeamPlayers.FirstOrDefault(tp => tp.PlayingPosition == FootballPosition.GOALKEEPER);
+            if (currentGoalkeeper == null) continue;
+
+            currentGoalkeeper.PlayingPosition = FootballPosition.UNASSIGNED;
+            await RemoveGoalKeeperRoundAsync(currentGoalkeeper.PlayerId, matchDayId);
+
+            cleared.Add(new ClearedGoalkeeper
+            {
+                TeamId = team.Id,
+                TeamName = team.TeamName,
+                PlayerId = currentGoalkeeper.PlayerId,
+                PlayerName = currentGoalkeeper.Player.Name,
+            });
+        }
+
+        await db.SaveChangesAsync();
+
+        return new ClearGoalkeepersResponse { Cleared = cleared };
+    }
+
+    /// <summary>One click, one goalkeeper per team: for every team on this MatchDay that doesn't
+    /// already have one, ranks that team's own roster by the club's fairness formula (see
+    /// ComputeGoalkeeperBalancesAsync) and assigns the top eligible player. Teams that already
+    /// have a goalkeeper are left untouched - this fills gaps, it never overrides a manual pick.
+    /// The organiser can still undo any single pick afterward via the normal "Remove from
+    /// Goalkeeper" action.</summary>
+    public async Task<GoalkeeperAutoAssignResponse> AutoAssignGoalkeepersAsync(long matchDayId)
+    {
+        var teams = await db.Teams.Include(t => t.TeamPlayers).ThenInclude(tp => tp.Player)
+            .Where(t => t.MatchDayId == matchDayId)
+            .ToListAsync();
+
+        var candidatePlayerIds = teams.SelectMany(t => t.TeamPlayers).Select(tp => tp.PlayerId).Distinct().ToList();
+        var (balances, pastMatchDaysConsidered, pastMatchDaysMissingGkData) =
+            await ComputeGoalkeeperBalancesAsync(matchDayId, candidatePlayerIds);
+
+        var results = new List<TeamGoalkeeperAssignmentResult>();
+
+        foreach (var team in teams)
+        {
+            var existingGoalkeeper = team.TeamPlayers.FirstOrDefault(tp => tp.PlayingPosition == FootballPosition.GOALKEEPER);
+            if (existingGoalkeeper != null)
+            {
+                results.Add(new TeamGoalkeeperAssignmentResult
+                {
+                    TeamId = team.Id,
+                    TeamName = team.TeamName,
+                    Assigned = false,
+                    PlayerId = existingGoalkeeper.PlayerId,
+                    PlayerName = existingGoalkeeper.Player.Name,
+                    SkippedReason = "Already has a goalkeeper",
+                });
+                continue;
+            }
+
+            // Highest balance (most owed) first among this team's own eligible members; playerId
+            // is just a stable tiebreaker, not a meaningful ranking signal.
+            var pick = team.TeamPlayers
+                .Where(tp => balances.TryGetValue(tp.PlayerId, out var b) && b.IsEligible)
+                .OrderByDescending(tp => balances[tp.PlayerId].Balance)
+                .ThenBy(tp => tp.PlayerId)
+                .FirstOrDefault();
+
+            if (pick == null)
+            {
+                results.Add(new TeamGoalkeeperAssignmentResult
+                {
+                    TeamId = team.Id,
+                    TeamName = team.TeamName,
+                    Assigned = false,
+                    SkippedReason = team.TeamPlayers.Count == 0
+                        ? "No players on this team"
+                        : "No eligible players (all resting or excluded)",
+                });
+                continue;
+            }
+
+            pick.PlayingPosition = FootballPosition.GOALKEEPER;
+            await TrackGoalKeeperRoundAsync(pick.PlayerId, matchDayId);
+
+            results.Add(new TeamGoalkeeperAssignmentResult
+            {
+                TeamId = team.Id,
+                TeamName = team.TeamName,
+                Assigned = true,
+                PlayerId = pick.PlayerId,
+                PlayerName = pick.Player.Name,
+            });
+        }
+
+        await db.SaveChangesAsync();
+
+        return new GoalkeeperAutoAssignResponse
+        {
+            Teams = results,
+            PastMatchDaysConsidered = pastMatchDaysConsidered,
+            PastMatchDaysMissingGoalkeeperData = pastMatchDaysMissingGkData,
+        };
+    }
+
+    private sealed record PlayerGoalkeeperBalance(int Played, int InGoal, double Balance, bool IsResting, bool IsExcluded)
+    {
+        public bool IsEligible => !IsResting && !IsExcluded;
+    }
+
+    /// <summary>Read-only view of the same ranking AutoAssignGoalkeepersAsync acts on - lets the
+    /// UI show the club's "Whose turn in goal" table (played/in goal/balance/status per player,
+    /// ranked, NEXT UP marked) before or instead of actually assigning anyone.</summary>
+    public async Task<GoalkeeperRankingResponse> GetGoalkeeperRankingAsync(long matchDayId)
+    {
+        var teams = await db.Teams.Include(t => t.TeamPlayers).ThenInclude(tp => tp.Player)
+            .Where(t => t.MatchDayId == matchDayId)
+            .ToListAsync();
+
+        var candidatePlayerIds = teams.SelectMany(t => t.TeamPlayers).Select(tp => tp.PlayerId).Distinct().ToList();
+        var (balances, pastMatchDaysConsidered, pastMatchDaysMissingGkData) =
+            await ComputeGoalkeeperBalancesAsync(matchDayId, candidatePlayerIds);
+
+        var teamRankings = new List<TeamGoalkeeperRanking>();
+        foreach (var team in teams)
+        {
+            var hasExistingGoalkeeper = team.TeamPlayers.Any(tp => tp.PlayingPosition == FootballPosition.GOALKEEPER);
+
+            var ranked = team.TeamPlayers
+                .Select(tp => (TeamPlayer: tp, Balance: balances.GetValueOrDefault(tp.PlayerId)))
+                .Where(x => x.Balance != null)
+                .OrderByDescending(x => x.Balance!.Balance)
+                .ThenBy(x => x.TeamPlayer.PlayerId)
+                .ToList();
+
+            // Only the single top-ranked eligible player is "next up" to actually be picked (and
+            // only when nobody's wearing the gloves for this team yet) - everyone else eligible is
+            // still just "eligible", same as the reference table's Rakib/Sunipoon/Nahid/Badrul rows.
+            var nextUpPlayerId = !hasExistingGoalkeeper
+                ? ranked.FirstOrDefault(x => x.Balance!.IsEligible).TeamPlayer?.PlayerId
+                : null;
+
+            var rows = ranked.Select((x, i) => new GoalkeeperRankingPlayer
+            {
+                Rank = i + 1,
+                PlayerId = x.TeamPlayer.PlayerId,
+                PlayerName = x.TeamPlayer.Player.Name,
+                Played = x.Balance!.Played,
+                InGoal = x.Balance.InGoal,
+                Balance = Math.Round(x.Balance.Balance, 2),
+                Status = x.TeamPlayer.PlayingPosition == FootballPosition.GOALKEEPER ? "CURRENT_GOALKEEPER"
+                    : x.Balance.IsExcluded ? "NOT_IN_ROTATION"
+                    : x.Balance.IsResting ? "RESTING"
+                    : x.TeamPlayer.PlayerId == nextUpPlayerId ? "NEXT_UP"
+                    : "ELIGIBLE",
+            }).ToList();
+
+            teamRankings.Add(new TeamGoalkeeperRanking
+            {
+                TeamId = team.Id,
+                TeamName = team.TeamName,
+                Players = rows,
+            });
+        }
+
+        return new GoalkeeperRankingResponse
+        {
+            Teams = teamRankings,
+            PastMatchDaysConsidered = pastMatchDaysConsidered,
+            PastMatchDaysMissingGoalkeeperData = pastMatchDaysMissingGkData,
+        };
+    }
+
+    /// <summary>Implements the club's "Whose turn in goal" fairness formula: every past MatchDay a
+    /// player attended hands them a slice of that day's actual keeper count divided by that day's
+    /// attendance (a thin turnout owes more per player than a big one - see the reference doc's
+    /// "big turnouts ask less" guardrail), summed across every MatchDay they played in. Actually
+    /// keeping goal pays a whole turn off. Balance = slices owed - turns served; the player owed
+    /// the most should go in goal next. A player who kept goal in either of the two most recent
+    /// past MatchDays is resting regardless of balance (nobody plays two weeks running); an
+    /// admin-excluded player is never eligible regardless of balance either - both are reported as
+    /// ineligible rather than silently dropped, so callers can show why someone was skipped.</summary>
+    private async Task<(Dictionary<long, PlayerGoalkeeperBalance> Balances, int PastMatchDaysConsidered, int PastMatchDaysMissingGkData)>
+        ComputeGoalkeeperBalancesAsync(long matchDayId, IReadOnlyCollection<long> candidatePlayerIds)
+    {
+        var matchDay = await GetMatchDayOrThrowAsync(matchDayId);
+
+        var pastMatchDays = await db.MatchDays
+            .Where(t => t.MatchDayDate < matchDay.MatchDayDate)
+            .OrderByDescending(t => t.MatchDayDate)
+            .Select(t => new { t.Id, t.MatchDayDate })
+            .ToListAsync();
+        var pastMatchDayIds = pastMatchDays.Select(t => t.Id).ToHashSet();
+
+        // "Held back automatically" - kept goal in either of the two most recent past MatchDays.
+        var lastTwoMatchDayIds = pastMatchDays.Take(2).Select(t => t.Id).ToHashSet();
+
+        var attendance = await db.MatchDayParticipants
+            .Where(p => p.ParticipationStatus && pastMatchDayIds.Contains(p.MatchDayId))
+            .Select(p => new { p.MatchDayId, p.PlayerId })
+            .ToListAsync();
+
+        var goalkeeperRows = await db.PlayerGoalkeepingHistories
+            .Where(h => pastMatchDayIds.Contains(h.MatchDayId))
+            .Select(h => new { h.MatchDayId, h.PlayerId })
+            .Distinct()
+            .ToListAsync();
+
+        var attendanceCountByMatchDay = attendance.GroupBy(a => a.MatchDayId).ToDictionary(g => g.Key, g => g.Count());
+        var goalkeeperCountByMatchDay = goalkeeperRows.GroupBy(g => g.MatchDayId).ToDictionary(g => g.Key, g => g.Count());
+        var attendanceByPlayer = attendance.GroupBy(a => a.PlayerId).ToDictionary(g => g.Key, g => g.Select(a => a.MatchDayId).ToList());
+        var goalkeeperMatchDaysByPlayer = goalkeeperRows.GroupBy(g => g.PlayerId).ToDictionary(g => g.Key, g => g.Select(x => x.MatchDayId).ToHashSet());
+
+        var excludedPlayerIds = await db.Players
+            .Where(p => candidatePlayerIds.Contains(p.Id) && p.ExcludeFromGoalkeeperRotation)
+            .Select(p => p.Id)
+            .ToListAsync();
+        var excludedSet = excludedPlayerIds.ToHashSet();
+
+        var balances = new Dictionary<long, PlayerGoalkeeperBalance>();
+        foreach (var playerId in candidatePlayerIds)
+        {
+            var owed = 0.0;
+            var played = 0;
+            if (attendanceByPlayer.TryGetValue(playerId, out var attendedMatchDayIds))
+            {
+                played = attendedMatchDayIds.Count;
+                foreach (var attendedId in attendedMatchDayIds)
+                {
+                    var denom = attendanceCountByMatchDay.GetValueOrDefault(attendedId, 0);
+                    if (denom <= 0) continue;
+                    var numer = goalkeeperCountByMatchDay.GetValueOrDefault(attendedId, 0);
+                    owed += (double)numer / denom;
+                }
+            }
+
+            var served = goalkeeperMatchDaysByPlayer.TryGetValue(playerId, out var gkDays) ? gkDays.Count : 0;
+            var isResting = gkDays != null && lastTwoMatchDayIds.Overlaps(gkDays);
+            var isExcluded = excludedSet.Contains(playerId);
+
+            balances[playerId] = new PlayerGoalkeeperBalance(played, served, owed - served, isResting, isExcluded);
+        }
+
+        var pastMatchDaysMissingGkData = pastMatchDays.Count(t =>
+            attendanceCountByMatchDay.GetValueOrDefault(t.Id, 0) > 0
+            && goalkeeperCountByMatchDay.GetValueOrDefault(t.Id, 0) == 0);
+
+        return (balances, pastMatchDays.Count, pastMatchDaysMissingGkData);
+    }
+
     public async Task<List<MatchDayWithTeamsResponse>> GetMatchDaysSummaryAsync(long? matchDayId)
     {
         if (matchDayId != null)

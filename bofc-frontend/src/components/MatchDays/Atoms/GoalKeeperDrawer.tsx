@@ -9,14 +9,25 @@ export default function GoalKeeperDrawer({
   triggerClassName,
   triggerStyle,
   triggerIcon,
+  isOpen,
+  onOpenChange,
+  onOpenAssignGoalkeepers,
 }: {
   matchDayId: number;
   triggerClassName?: string;
   triggerStyle?: React.CSSProperties;
   triggerIcon?: React.ReactNode;
+  /** Controlled open state - lets a parent cross-link this with another panel (e.g. Assign
+   * Goalkeepers). Falls back to its own internal state when omitted. */
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Renders a button in the modal that switches to the Assign Goalkeepers panel instead. */
+  onOpenAssignGoalkeepers?: () => void;
 }) {
   const { data: matchDayGoalKeeperList, refetch: refetchMatchDayGoalKeeperList } = useGetMatchDayGoalkeeperHistoryListQuery();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [searchText, setSearchText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +67,13 @@ export default function GoalKeeperDrawer({
       </Button>
 
       <Modal isOpen={open} onClose={() => setOpen(false)} title="Goalkeeper Records" className="max-w-[95vw]">
+        {onOpenAssignGoalkeepers && (
+          <div className="mb-4 flex justify-end">
+            <Button type="button" variant="outline" size="sm" onClick={onOpenAssignGoalkeepers}>
+              Assign Goalkeepers
+            </Button>
+          </div>
+        )}
         <input
           placeholder="Search Player"
           value={searchText}

@@ -17,4 +17,7 @@ public class LineupPlayerResponse
     public string PlayerName { get; set; } = string.Empty;
     public string PlayingPosition { get; set; } = string.Empty;
     public string Availability { get; set; } = string.Empty;
+    public bool IsCaptain { get; set; }
+    public string? PhotoKey { get; set; }
+    public string? PhotoUrl { get; set; }
 }

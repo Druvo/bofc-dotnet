@@ -27,5 +27,12 @@ public class Player : AuditableEntity
     /// player-facing responses. Null = treated as the lowest tier for drafting purposes.</summary>
     public int? Rank { get; set; }
 
+    /// <summary>Admin-set opt-out from goalkeeper auto-assignment (e.g. a player who physically
+    /// cannot keep goal). They still count toward fairness history/attendance - this only keeps
+    /// them off the auto-pick, never overruled by the balance math (see TeamService's goalkeeper
+    /// fairness calculation). Never surfaced to non-admin player-facing responses, same
+    /// convention as Rank.</summary>
+    public bool ExcludeFromGoalkeeperRotation { get; set; }
+
     public ICollection<Role> Roles { get; set; } = new List<Role>();
 }

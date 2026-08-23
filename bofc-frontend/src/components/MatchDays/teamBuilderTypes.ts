@@ -10,6 +10,8 @@ export interface Player {
     isCaptain?: boolean;
     teamPlayerRole?: string;
     jerseyNumber?: number;
+    photoUrl?: string;
+    photoKey?: string;
 }
 
 // Team Type

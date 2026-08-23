@@ -11,4 +11,7 @@ public interface ITeamService
     Task<TeamPlayerResponse> UpdateTeamPlayerDetailsAsync(TeamPlayerRequest request);
     Task RemovePlayerFromTeamAsync(TeamPlayerRemoveRequest request);
     Task<List<MatchDayWithTeamsResponse>> GetMatchDaysSummaryAsync(long? matchDayId);
+    Task<GoalkeeperAutoAssignResponse> AutoAssignGoalkeepersAsync(long matchDayId);
+    Task<GoalkeeperRankingResponse> GetGoalkeeperRankingAsync(long matchDayId);
+    Task<ClearGoalkeepersResponse> ClearGoalkeepersAsync(long matchDayId);
 }

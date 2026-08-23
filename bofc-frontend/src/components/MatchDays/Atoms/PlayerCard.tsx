@@ -21,7 +21,14 @@ const PlayerIdentity = ({ player }: { player: Player }) => (
         <Avatar name={player.playerName} seed={player.playerId} size={28} />
         <span className="truncate font-medium">{player?.playerName ? player.playerName : "processing..."}</span>
         {player.jerseyNumber != null && <Badge variant="light">#{player.jerseyNumber}</Badge>}
-        {player.isCaptain && <CrownOutlined className="shrink-0 text-warning-500" title="Captain" />}
+        {player.isCaptain && (
+            <span
+                className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-warning-500 text-[10px] font-bold leading-none text-white"
+                title="Captain"
+            >
+                C
+            </span>
+        )}
     </span>
 );
 

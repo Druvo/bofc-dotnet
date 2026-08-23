@@ -11,11 +11,12 @@ import { IFixture, MatchStatus } from "../../../state/features/fixtures/fixtureT
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import { getStatusText } from "../../../utils/matchStatusUtils";
 import { formatMatchTimeRange } from "../../../utils/matchTimeUtils";
-import { getJerseySwatch } from "../../../utils/jerseyColors";
+import { getJerseySwatch, getJerseyLabel } from "../../../utils/jerseyColors";
 import Button from "../../ui/button";
 import Badge from "../../ui/badge";
 import Loader from "../../ui/loader";
 import TabsNav from "../../ui/tabs";
+import JerseyIcon from "../../CommonAtoms/JerseyIcon";
 import FixtureGenerationModal from "./FixtureGenerationModal";
 import AddMatchModal from "./AddMatchModal";
 import EditFixtureModal from "./EditFixtureModal";
@@ -34,14 +35,15 @@ const STATUS_BADGE_VARIANT: Record<string, "success" | "warning" | "info" | "lig
   [MatchStatus.COMPLETED]: "success",
 };
 
-function JerseyDot({ color }: { color?: string | null }) {
+function JerseyBadge({ color }: { color?: string | null }) {
   const swatch = getJerseySwatch(color);
+  const label = getJerseyLabel(color);
   if (!swatch) return null;
   return (
-    <span
-      className="h-2.5 w-2.5 shrink-0 rounded-full border border-gray-300 dark:border-gray-600"
-      style={{ backgroundColor: swatch }}
-    />
+    <span className="flex shrink-0 items-center gap-1">
+      <JerseyIcon color={swatch} size={16} />
+      <span className="hidden text-theme-xs text-gray-400 sm:inline">({label})</span>
+    </span>
   );
 }
 
@@ -149,7 +151,7 @@ export default function SimpleMatchesPanel({ matchDayId, teams, matchDayStartDat
 
               <div className="flex items-center justify-center gap-3 pt-1 text-theme-sm">
                 <span className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white/90">
-                  <JerseyDot color={fixture.homeJerseyColor} /> {fixture.homeTeamName}
+                  <JerseyBadge color={fixture.homeJerseyColor} /> {fixture.homeTeamName}
                   <TeamAvatar name={fixture.homeTeamName} />
                 </span>
 
@@ -165,7 +167,7 @@ export default function SimpleMatchesPanel({ matchDayId, teams, matchDayStartDat
 
                 <span className="flex items-center gap-2 font-semibold text-gray-800 dark:text-white/90">
                   <TeamAvatar name={fixture.awayTeamName} />
-                  {fixture.awayTeamName} <JerseyDot color={fixture.awayJerseyColor} />
+                  {fixture.awayTeamName} <JerseyBadge color={fixture.awayJerseyColor} />
                 </span>
               </div>
 

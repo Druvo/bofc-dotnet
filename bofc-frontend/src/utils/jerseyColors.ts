@@ -19,3 +19,8 @@ export function getJerseySwatch(color?: string | null): string | undefined {
   if (!color) return undefined;
   return JERSEY_COLOR_PALETTE.find((c) => c.value === color)?.swatch || color;
 }
+
+export function getJerseyLabel(color?: string | null): string | undefined {
+  if (!color) return undefined;
+  return JERSEY_COLOR_PALETTE.find((c) => c.value === color)?.label || color;
+}

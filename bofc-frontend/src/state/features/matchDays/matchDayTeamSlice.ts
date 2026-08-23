@@ -180,6 +180,80 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
             }),
             invalidatesTags: ["matchDayTeam", "matchDays", "fixtures"],
         }),
+
+        /** Fills in a goalkeeper for every team on this MatchDay that doesn't already have one,
+         * ranked by the club's fairness formula (owed slices from attendance minus turns served -
+         * see TeamService.ComputeGoalkeeperBalancesAsync). Never overrides a team that already has
+         * a goalkeeper assigned - it only fills gaps. */
+        autoAssignGoalkeepers: builder.mutation<
+            BasicResType & {
+                content: {
+                    teams: {
+                        teamId: number;
+                        teamName: string;
+                        assigned: boolean;
+                        playerId?: number | null;
+                        playerName?: string | null;
+                        skippedReason?: string | null;
+                    }[];
+                    pastMatchDaysMissingGoalkeeperData: number;
+                    pastMatchDaysConsidered: number;
+                };
+            },
+            { matchDayId: number }
+        >({
+            query: ({ matchDayId }) => ({
+                url: `teams/matchday/${matchDayId}/auto-assign-goalkeepers`,
+                method: "POST",
+            }),
+            invalidatesTags: ["matchDayTeam", "matchDays"],
+        }),
+
+        /** Read-only: the same per-team ranking auto-assign acts on (played/in goal/balance/status,
+         * ranked, NEXT UP marked) - the club's "Whose turn in goal" table, shown before committing
+         * to an assignment. */
+        getGoalkeeperRanking: builder.query<
+            BasicResType & {
+                content: {
+                    teams: {
+                        teamId: number;
+                        teamName: string;
+                        players: {
+                            rank: number;
+                            playerId: number;
+                            playerName: string;
+                            played: number;
+                            inGoal: number;
+                            balance: number;
+                            status: "NEXT_UP" | "ELIGIBLE" | "RESTING" | "NOT_IN_ROTATION" | "CURRENT_GOALKEEPER";
+                        }[];
+                    }[];
+                    pastMatchDaysConsidered: number;
+                    pastMatchDaysMissingGoalkeeperData: number;
+                };
+            },
+            { matchDayId: number }
+        >({
+            query: ({ matchDayId }) => `teams/matchday/${matchDayId}/goalkeeper-ranking`,
+            providesTags: ["matchDayTeam"],
+        }),
+
+        /** Bulk-undo for autoAssignGoalkeepers - every team's current goalkeeper (if any) goes back
+         * to UNASSIGNED, so the ranking can be re-run from a clean slate. */
+        clearGoalkeepers: builder.mutation<
+            BasicResType & {
+                content: {
+                    cleared: { teamId: number; teamName: string; playerId: number; playerName: string }[];
+                };
+            },
+            { matchDayId: number }
+        >({
+            query: ({ matchDayId }) => ({
+                url: `teams/matchday/${matchDayId}/clear-goalkeepers`,
+                method: "POST",
+            }),
+            invalidatesTags: ["matchDayTeam", "matchDays"],
+        }),
     }),
 });
 
@@ -193,4 +267,7 @@ export const {
     useUpdatePlayerInTeamMutation,
     useRemovePlayerFromTeamMutation,
     useGenerateTeamsByRankMutation,
+    useAutoAssignGoalkeepersMutation,
+    useLazyGetGoalkeeperRankingQuery,
+    useClearGoalkeepersMutation,
 } = matchDayTeamApi;

@@ -18,6 +18,12 @@ public interface IPlayerService
     /// <summary>Admin-only - see Player.Rank for what this drives.</summary>
     Task SetPlayerRankAsync(long id, int? rank);
 
+    /// <summary>Admin-only opt-out from goalkeeper auto-assignment - see Player.ExcludeFromGoalkeeperRotation.</summary>
+    Task<bool> GetGoalkeeperRotationExclusionAsync(long id);
+
+    /// <summary>Admin-only - see Player.ExcludeFromGoalkeeperRotation for what this drives.</summary>
+    Task SetGoalkeeperRotationExclusionAsync(long id, bool excluded);
+
     /// <summary>Every player plus its current Rank, ordered by rank (unranked last) - feeds the
     /// admin drag-and-drop rank board. Multiple players can share the same Rank (it's a tier,
     /// e.g. 1-10, not a unique position), so this is a plain list, not a ranking.</summary>

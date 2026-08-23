@@ -120,7 +120,7 @@ const TeamCard: React.FC<TeamCardProps> = ({
                     <div
                         ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`custom-scrollbar flex max-h-[300px] flex-col gap-1.5 overflow-y-auto rounded-xl border-2 border-dashed p-2 ${
+                        className={`custom-scrollbar flex max-h-[420px] flex-col gap-1.5 overflow-y-auto rounded-xl border-2 border-dashed p-2 ${
                             snapshot.isDraggingOver
                                 ? "border-brand-300 bg-brand-50/50 dark:border-brand-500/40 dark:bg-brand-500/5"
                                 : "border-gray-200 dark:border-[var(--color-rule)]"

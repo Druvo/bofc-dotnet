@@ -62,7 +62,7 @@ export default function MobileTopBar({ isDarkMode, setIsDarkMode }: MobileTopBar
     "relative flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5";
 
   return (
-    <header className="sticky top-0 z-sticky flex h-14 items-center justify-between gap-2 border-b border-[var(--color-rule-2)] bg-[var(--color-paper-3)] px-3 md:hidden">
+    <header className="sticky top-0 z-sticky flex h-14 shrink-0 items-center justify-between gap-2 border-b border-[var(--color-rule-2)] bg-[var(--color-paper-3)] px-3 md:hidden">
       <div className="flex min-w-0 items-center gap-1.5">
         <button onClick={() => navigate("/")} className="flex shrink-0 items-center gap-1.5 pr-1">
           <img src={companyLogo} alt="BOFC" className="h-8 w-8 shrink-0" />

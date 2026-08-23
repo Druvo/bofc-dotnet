@@ -62,4 +62,33 @@ public class TeamController(ITeamService teamService, WeeklyMatchDayTeamGenerato
         var result = await weeklyMatchDayTeamGenerator.GenerateAsync(matchDayId, maxPlayersPerTeam);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.CreateOk, result);
     }
+
+    /// <summary>Fills in a goalkeeper for every team on this MatchDay that doesn't already have
+    /// one, ranked by the club's fairness formula (see TeamService.ComputeGoalkeeperBalancesAsync).
+    /// Never overrides a team that already has a goalkeeper assigned.</summary>
+    [HttpPost("matchday/{matchDayId}/auto-assign-goalkeepers")]
+    public async Task<IActionResult> AutoAssignGoalkeepers(long matchDayId)
+    {
+        var result = await teamService.AutoAssignGoalkeepersAsync(matchDayId);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, result);
+    }
+
+    /// <summary>Bulk-undo for AutoAssignGoalkeepers - every team's current goalkeeper (if any) goes
+    /// back to UNASSIGNED, so the ranking can be re-run from a clean slate.</summary>
+    [HttpPost("matchday/{matchDayId}/clear-goalkeepers")]
+    public async Task<IActionResult> ClearGoalkeepers(long matchDayId)
+    {
+        var result = await teamService.ClearGoalkeepersAsync(matchDayId);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, result);
+    }
+
+    /// <summary>Read-only: the same per-team ranking auto-assign acts on (played/in goal/balance/
+    /// status, ranked, NEXT UP marked) - lets the UI show the club's "Whose turn in goal" table
+    /// before committing to an assignment.</summary>
+    [HttpGet("matchday/{matchDayId}/goalkeeper-ranking")]
+    public async Task<IActionResult> GetGoalkeeperRanking(long matchDayId)
+    {
+        var result = await teamService.GetGoalkeeperRankingAsync(matchDayId);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, result);
+    }
 }

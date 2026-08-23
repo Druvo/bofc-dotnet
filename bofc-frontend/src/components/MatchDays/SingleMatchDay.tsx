@@ -19,6 +19,7 @@ import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import { RootState } from "../../state/store";
 import { setActiveMainTab } from "../../state/features/matchDays/matchDayUISlice";
 import PickerWheelModal from "./Atoms/pickerWheel/PickerWheelModal";
+import AutoAssignGoalkeeperButton from "./Atoms/AutoAssignGoalkeeperButton";
 import { BarChartOutlined, FileExcelOutlined, RightSquareOutlined, TrophyOutlined, SearchOutlined } from "@ant-design/icons";
 import { exportToExcel, showBdLocalTimeRange } from "../../utils/utils";
 import FixturesPanel from "./Fixtures/FixturesPanel";
@@ -26,6 +27,7 @@ import SimpleMatchesPanel from "./Fixtures/SimpleMatchesPanel";
 import PrizesPanel from "./Prizes/PrizesPanel";
 import StatsLeaderboardPanel from "./Statistics/StatsLeaderboardPanel";
 import SquadLineupTab from "./SquadLineup/SquadLineupTab";
+import TeamsScreenshotButton from "./Atoms/TeamsScreenshotButton";
 import Button from "../ui/button";
 import Tabs from "../ui/tabs";
 
@@ -67,6 +69,9 @@ function SingleMatchDay() {
   } = useMatchDayTeams(matchDayId);
 
   const [playerSearch, setPlayerSearch] = useState("");
+  // Cross-links Goalkeeper Records <-> Assign Goalkeepers - each panel can hand off to the other
+  // without both being open at once.
+  const [goalkeeperPanel, setGoalkeeperPanel] = useState<"records" | "assign" | null>(null);
 
   const isWeeklyMatchDay = Boolean(matchDaySummary?.content[0]?.isWeeklyMatchDay);
   const hasTeams = Array.isArray(teams) && teams.length > 0;
@@ -187,10 +192,33 @@ function SingleMatchDay() {
             />
           )}
           {isAdmin && <PickerWheelModal teams={teams} />}
-          <GoalKeeperDrawer matchDayId={matchDayId} />
+          {isAdmin && hasTeams && (
+            <AutoAssignGoalkeeperButton
+              matchDayId={matchDayId}
+              isOpen={goalkeeperPanel === "assign"}
+              onOpenChange={(o) => setGoalkeeperPanel(o ? "assign" : null)}
+              onOpenRecords={() => setGoalkeeperPanel("records")}
+            />
+          )}
+          <GoalKeeperDrawer
+            matchDayId={matchDayId}
+            isOpen={goalkeeperPanel === "records"}
+            onOpenChange={(o) => setGoalkeeperPanel(o ? "records" : null)}
+            onOpenAssignGoalkeepers={isAdmin && hasTeams ? () => setGoalkeeperPanel("assign") : undefined}
+          />
           <Button type="button" variant="outline" size="sm" startIcon={<FileExcelOutlined />} onClick={handleExportTeams}>
             Export
           </Button>
+          {hasTeams && (
+            <TeamsScreenshotButton
+              matchDayId={matchDayId}
+              matchDayName={matchDaySummary?.content[0]?.name}
+              matchDayDate={matchDaySummary?.content[0]?.matchDayDate}
+              durationMinutes={matchDaySummary?.content[0]?.durationMinutes}
+              venueName={matchDaySummary?.content[0]?.venueName}
+              teams={teams}
+            />
+          )}
         </div>
       </div>
 

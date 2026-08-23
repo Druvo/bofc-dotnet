@@ -35,6 +35,8 @@ interface TeamPlayer {
     isCaptain?: boolean;
     teamPlayerRole?: string;
     jerseyNumber?: number;
+    photoUrl?: string;
+    photoKey?: string;
 }
 
 interface Teams {
@@ -84,6 +86,8 @@ const useMatchDayTeams = (matchDayId: number) => {
                     isCaptain: player.isCaptain,
                     teamPlayerRole: player.teamPlayerRole,
                     jerseyNumber: player.jerseyNumber,
+                    photoUrl: player.photoUrl,
+                    photoKey: player.photoKey,
                 })),
             }));
             setTeams(teams);

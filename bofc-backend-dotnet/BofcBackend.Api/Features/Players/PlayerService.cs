@@ -171,6 +171,16 @@ public class PlayerService(
         await db.SaveChangesAsync();
     }
 
+    public async Task<bool> GetGoalkeeperRotationExclusionAsync(long id) =>
+        (await GetPlayerEntityAsync(id)).ExcludeFromGoalkeeperRotation;
+
+    public async Task SetGoalkeeperRotationExclusionAsync(long id, bool excluded)
+    {
+        var player = await GetPlayerEntityAsync(id);
+        player.ExcludeFromGoalkeeperRotation = excluded;
+        await db.SaveChangesAsync();
+    }
+
     public async Task<List<PlayerRankListItemResponse>> GetPlayerRanksAsync()
     {
         var players = await db.Players

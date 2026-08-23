@@ -6,6 +6,9 @@ export interface ILineupPlayer {
   playerName: string;
   playingPosition: string;
   availability: "FIT" | "DOUBTFUL" | "INJURED";
+  isCaptain?: boolean;
+  photoKey?: string;
+  photoUrl?: string;
 }
 
 export interface ITeamLineup {

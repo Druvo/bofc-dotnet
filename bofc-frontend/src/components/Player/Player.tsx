@@ -22,6 +22,7 @@ import { normalizeErrorMessage } from "../../utils/normalizeErrorMessage";
 import Button from "../ui/button";
 import FormInput from "../ui/form-input";
 import FormSelect from "../ui/form-select";
+import FormCheckbox from "../ui/form-checkbox";
 import Loader from "../ui/loader";
 
 interface PlayerFormValues {
@@ -35,6 +36,9 @@ interface PlayerFormValues {
     active: boolean;
     /** Admin-only - never returned by the public player endpoints, fetched/saved separately. */
     rank: string;
+    /** Admin-only - same fetch/save pattern as rank. Opts this player out of the goalkeeper
+     * auto-assign button's picks; they still count toward attendance/fairness history. */
+    excludeFromGoalkeeperRotation: boolean;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -50,6 +54,7 @@ const emptyValues: PlayerFormValues = {
     jerseyNumber: "",
     active: false,
     rank: "",
+    excludeFromGoalkeeperRotation: false,
 };
 
 function Player() {
@@ -153,6 +158,9 @@ function Player() {
                         followUps.push(axiosApi.put(`players/${id}/rank`, {
                             rank: values.rank ? Number(values.rank) : null,
                         }));
+                        followUps.push(axiosApi.put(`players/${id}/goalkeeper-rotation-exclusion`, {
+                            excluded: values.excludeFromGoalkeeperRotation,
+                        }));
                     }
                     Promise.all(followUps)
                         .then(() => {
@@ -188,6 +196,7 @@ function Player() {
                     playingPosition: c.playingPosition || "UNASSIGNED",
                     jerseyNumber: c.jerseyNumber != null ? String(c.jerseyNumber) : "",
                     rank: "",
+                    excludeFromGoalkeeperRotation: false,
                 });
                 if (c.photoKey) {
                     setPhotoKey(c.photoKey);
@@ -207,6 +216,17 @@ function Player() {
                         })
                         .catch((err: any) => {
                             toast.error(normalizeErrorMessage(err?.response?.data || err, "Error loading player rank"));
+                        });
+
+                    axiosApi
+                        .get(`players/${id}/goalkeeper-rotation-exclusion`, {
+                            headers: { Authorization: `Bearer ${getTokenFromLocalStorage(tokenContent)}` },
+                        })
+                        .then((exclusionResponse) => {
+                            setValues((prev) => ({ ...prev, excludeFromGoalkeeperRotation: !!exclusionResponse.data.content }));
+                        })
+                        .catch((err: any) => {
+                            toast.error(normalizeErrorMessage(err?.response?.data || err, "Error loading goalkeeper rotation setting"));
                         });
                 }
             })
@@ -430,6 +450,20 @@ function Player() {
                                 <p className="mt-2 text-theme-xs text-gray-500 dark:text-gray-400">
                                     Used only to balance auto-generated Match Day teams - never shown to players.
                                 </p>
+                            )}
+
+                            {isAdmin && formState === "UPDATE" && (
+                                <div className="mt-4">
+                                    <FormCheckbox
+                                        id="excludeFromGoalkeeperRotation"
+                                        label="Exclude from goalkeeper rotation (admin only)"
+                                        checked={values.excludeFromGoalkeeperRotation}
+                                        onChange={(checked) => setField("excludeFromGoalkeeperRotation", checked)}
+                                    />
+                                    <p className="mt-1 ml-8 text-theme-xs text-gray-500 dark:text-gray-400">
+                                        Keeps this player off the goalkeeper auto-assign button's picks. They still count toward attendance/fairness history.
+                                    </p>
+                                </div>
                             )}
 
                             {isAdmin && (

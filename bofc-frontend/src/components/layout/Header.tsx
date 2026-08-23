@@ -150,7 +150,7 @@ export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, se
   };
 
   return (
-    <header className="sticky top-0 z-sticky hidden w-full border-[var(--color-rule-2)] bg-[var(--color-paper-3)] md:flex lg:border-b">
+    <header className="sticky top-0 z-sticky hidden w-full shrink-0 border-[var(--color-rule-2)] bg-[var(--color-paper-3)] md:flex lg:border-b">
       <div className="flex grow flex-col items-center justify-between lg:flex-row lg:px-6">
         <div className="flex w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4 dark:border-[var(--color-rule)]">
           <button

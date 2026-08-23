@@ -29,6 +29,10 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.Property(p => p.ThemePreference).HasColumnName("theme_preference").HasMaxLength(10);
         // "rank" is a reserved word in SQL Server - use a non-reserved column name to be safe.
         builder.Property(p => p.Rank).HasColumnName("player_rank");
+        builder.Property(p => p.ExcludeFromGoalkeeperRotation)
+            .HasColumnName("exclude_from_goalkeeper_rotation")
+            .IsRequired()
+            .HasDefaultValue(false);
 
         builder.Property(p => p.CreatedBy).HasColumnName("created_by").IsRequired();
         builder.Property(p => p.CreatedDate).HasColumnName("created_date").IsRequired();

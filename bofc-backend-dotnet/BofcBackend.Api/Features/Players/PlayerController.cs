@@ -62,6 +62,23 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
     }
 
+    /// <summary>Admin-only opt-out from goalkeeper auto-assignment - never exposed via the anonymous-readable PlayerResponse endpoints above.</summary>
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpGet("{id}/goalkeeper-rotation-exclusion")]
+    public async Task<IActionResult> GetGoalkeeperRotationExclusion(long id)
+    {
+        var excluded = await playerService.GetGoalkeeperRotationExclusionAsync(id);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, excluded);
+    }
+
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpPut("{id}/goalkeeper-rotation-exclusion")]
+    public async Task<IActionResult> SetGoalkeeperRotationExclusion(long id, [FromBody] GoalkeeperRotationExclusionRequest request)
+    {
+        await playerService.SetGoalkeeperRotationExclusionAsync(id, request.Excluded);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
+    }
+
     /// <summary>Feeds the admin drag-and-drop rank board - separate from the plain player list/edit page.</summary>
     [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
     [HttpGet("ranks")]

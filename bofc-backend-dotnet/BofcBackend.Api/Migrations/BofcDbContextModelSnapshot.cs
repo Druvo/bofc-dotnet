@@ -2212,6 +2212,12 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("employee_id");
 
+                    b.Property<bool>("ExcludeFromGoalkeeperRotation")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("exclude_from_goalkeeper_rotation");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")
                         .HasColumnName("is_active");

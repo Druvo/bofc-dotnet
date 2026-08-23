@@ -9,10 +9,18 @@ import {
   useUpdateTeamLineupMutation,
   ILineupPlayer,
 } from "../../../state/features/matchDays/squadLineupSlice";
+import { useUpdatePlayerInTeamMutation } from "../../../state/features/matchDays/matchDayTeamSlice";
+import { normalizeErrorMessage } from "../../../utils/normalizeErrorMessage";
 import { FORMATION_PRESETS, validateFormation } from "./pitchLayout";
 import PitchCard from "./PitchCard";
-import BenchCard from "./BenchCard";
 import Loader from "../../ui/loader";
+
+/** Which player is currently "armed" for a swap, and which list they came from - tapping any
+ * other player (starter or bench) while one is armed completes the swap. Symmetric in both
+ * directions (start from a starter or from a bench player, same result) - matches the standard
+ * tap-to-select-then-target pattern most mobile squad builders (e.g. Fantasy Premier League) use
+ * instead of drag-and-drop. */
+type SelectedPlayer = { playerId: number; from: "starter" | "bench" } | null;
 
 const DEFAULT_SQUAD_SIZE = 5;
 
@@ -22,6 +30,9 @@ function buildDefaultLineup(team: Team): { starters: ILineupPlayer[]; bench: ILi
     playerName: p.playerName,
     playingPosition: p.playingPosition || "UNASSIGNED",
     availability: "FIT",
+    isCaptain: p.isCaptain,
+    photoKey: p.photoKey,
+    photoUrl: p.photoUrl,
   }));
 
   const gkIndex = pool.findIndex((p) => p.playingPosition === "GOALKEEPER");
@@ -59,12 +70,13 @@ export default function SquadLineupTab({ teams }: SquadLineupTabProps) {
 
   const { data, isLoading } = useGetTeamLineupQuery({ teamId: selectedTeamId ?? 0 }, { skip: !selectedTeamId });
   const [updateTeamLineup] = useUpdateTeamLineupMutation();
+  const [updatePlayerInTeam] = useUpdatePlayerInTeamMutation();
 
   const [squadSize, setSquadSize] = useState(DEFAULT_SQUAD_SIZE);
   const [formation, setFormation] = useState(FORMATION_PRESETS[DEFAULT_SQUAD_SIZE][0]);
   const [starters, setStarters] = useState<ILineupPlayer[]>([]);
   const [bench, setBench] = useState<ILineupPlayer[]>([]);
-  const [selectedBenchPlayerId, setSelectedBenchPlayerId] = useState<number | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<SelectedPlayer>(null);
   const [formationError, setFormationError] = useState<string | null>(null);
 
   // Every interaction here auto-saves (no Save button) by firing updateTeamLineup immediately,
@@ -78,7 +90,7 @@ export default function SquadLineupTab({ teams }: SquadLineupTabProps) {
   useEffect(() => {
     if (!selectedTeam) return;
     if (pendingSaveCount.current > 0) return;
-    setSelectedBenchPlayerId(null);
+    setSelectedPlayer(null);
 
     if (data?.content?.squadSize) {
       setSquadSize(data.content.squadSize);
@@ -137,27 +149,81 @@ export default function SquadLineupTab({ teams }: SquadLineupTabProps) {
     persist({ squadSize, formation: nextFormation, starters, bench });
   };
 
-  const handleSelectBenchPlayer = (playerId: number) => {
-    setSelectedBenchPlayerId((prev) => (prev === playerId ? null : playerId));
-  };
+  // Tap-to-select-then-target, symmetric regardless of which list either player came from:
+  // starter+starter swaps their pitch slots, starter+bench subs one in for the other,
+  // bench+bench reorders bench order. Tapping the same player again (or tapping empty space
+  // via a fresh selection of the same id) just deselects.
+  const handleTapPlayer = (playerId: number, from: "starter" | "bench") => {
+    if (!selectedPlayer) {
+      setSelectedPlayer({ playerId, from });
+      return;
+    }
+    if (selectedPlayer.playerId === playerId) {
+      setSelectedPlayer(null);
+      return;
+    }
 
-  const handleSlotTap = (starterPlayerId: number) => {
-    if (!selectedBenchPlayerId) return;
-    const starterIndex = starters.findIndex((p) => p.playerId === starterPlayerId);
-    const benchIndex = bench.findIndex((p) => p.playerId === selectedBenchPlayerId);
-    if (starterIndex === -1 || benchIndex === -1) return;
+    const aIndex = (selectedPlayer.from === "starter" ? starters : bench).findIndex((p) => p.playerId === selectedPlayer.playerId);
+    const bIndex = (from === "starter" ? starters : bench).findIndex((p) => p.playerId === playerId);
+    if (aIndex === -1 || bIndex === -1) {
+      setSelectedPlayer({ playerId, from });
+      return;
+    }
 
-    const nextStarters = [...starters];
-    const nextBench = [...bench];
-    const outgoing = nextStarters[starterIndex];
-    const incoming = nextBench[benchIndex];
-    nextStarters[starterIndex] = incoming;
-    nextBench[benchIndex] = outgoing;
+    let nextStarters = starters;
+    let nextBench = bench;
+
+    if (selectedPlayer.from === "starter" && from === "starter") {
+      nextStarters = [...starters];
+      [nextStarters[aIndex], nextStarters[bIndex]] = [nextStarters[bIndex], nextStarters[aIndex]];
+    } else if (selectedPlayer.from === "bench" && from === "bench") {
+      nextBench = [...bench];
+      [nextBench[aIndex], nextBench[bIndex]] = [nextBench[bIndex], nextBench[aIndex]];
+    } else {
+      // One starter, one bench player - the actual substitution, regardless of tap order.
+      const starterIndex = selectedPlayer.from === "starter" ? aIndex : bIndex;
+      const benchIndex = selectedPlayer.from === "bench" ? aIndex : bIndex;
+      nextStarters = [...starters];
+      nextBench = [...bench];
+      const outgoing = nextStarters[starterIndex];
+      const incoming = nextBench[benchIndex];
+      nextStarters[starterIndex] = incoming;
+      nextBench[benchIndex] = outgoing;
+    }
 
     setStarters(nextStarters);
     setBench(nextBench);
-    setSelectedBenchPlayerId(null);
+    setSelectedPlayer(null);
     persist({ squadSize, formation, starters: nextStarters, bench: nextBench });
+  };
+
+  const handleChangePosition = async (playerId: number, playingPosition: string) => {
+    if (!selectedTeamId || !selectedTeam) return;
+    const rosterPlayer = selectedTeam.players.find((p) => p.playerId === playerId);
+    if (!rosterPlayer) return;
+
+    const nextStarters = starters.map((p) => (p.playerId === playerId ? { ...p, playingPosition } : p));
+    const nextBench = bench.map((p) => (p.playerId === playerId ? { ...p, playingPosition } : p));
+    setStarters(nextStarters);
+    setBench(nextBench);
+
+    try {
+      // Position lives on the roster (TeamPlayer), not the lineup - reuses the same Team Building
+      // update call, so isCaptain/jerseyNumber/role must be carried over explicitly or they'd
+      // silently reset to their defaults (isCaptain:false, role:"PLAYER").
+      await updatePlayerInTeam({
+        teamId: selectedTeamId,
+        playerId,
+        playingPosition,
+        isCaptain: rosterPlayer.isCaptain,
+        teamPlayerRole: rosterPlayer.teamPlayerRole,
+        jerseyNumber: rosterPlayer.jerseyNumber,
+      }).unwrap();
+    } catch (error: any) {
+      setStarters(starters);
+      setBench(bench);
+      toast.error(normalizeErrorMessage(error?.data || error, "Failed to change position"));
+    }
   };
 
   const cycleAvailability = (current: ILineupPlayer["availability"]): ILineupPlayer["availability"] => {
@@ -204,27 +270,22 @@ export default function SquadLineupTab({ teams }: SquadLineupTabProps) {
       {isLoading ? (
         <Loader className="py-10" />
       ) : selectedTeam ? (
-        <div className="grid grid-cols-1 gap-4 min-[900px]:grid-cols-[1.3fr_1fr]">
-          <PitchCard
-            squadSize={squadSize}
-            formation={formation}
-            starters={starters}
-            selectedBenchPlayerId={selectedBenchPlayerId}
-            formationError={formationError}
-            canManage={canManage}
-            onSquadSizeChange={handleSquadSizeChange}
-            onFormationChange={handleFormationChange}
-            onSlotTap={handleSlotTap}
-          />
-          <BenchCard
-            teamName={selectedTeam.teamName}
-            bench={bench}
-            selectedBenchPlayerId={selectedBenchPlayerId}
-            canManage={canManage}
-            onSelectBenchPlayer={handleSelectBenchPlayer}
-            onCycleAvailability={handleCycleAvailability}
-          />
-        </div>
+        <PitchCard
+          squadSize={squadSize}
+          formation={formation}
+          starters={starters}
+          selectedPlayerId={selectedPlayer?.playerId ?? null}
+          formationError={formationError}
+          canManage={canManage}
+          onSquadSizeChange={handleSquadSizeChange}
+          onFormationChange={handleFormationChange}
+          onTapPlayer={(playerId) => handleTapPlayer(playerId, "starter")}
+          onChangePosition={handleChangePosition}
+          teamName={selectedTeam.teamName}
+          bench={bench}
+          onTapBenchPlayer={(playerId) => handleTapPlayer(playerId, "bench")}
+          onCycleAvailability={handleCycleAvailability}
+        />
       ) : null}
     </div>
   );

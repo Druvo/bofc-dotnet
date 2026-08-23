@@ -30,6 +30,9 @@ pipeline {
                     bat 'set REACT_APP_API_URL=/api&& set CI=false&& npm run build'
                 }
             }
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
         }
 
         stage('Snapshot (pre-deploy)') {
@@ -70,9 +73,9 @@ pipeline {
                 sshagent(['vps-ssh']) {
                     bat """
                         ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "sudo systemctl start bofc-dotnet"
-                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do curl -sf -o /dev/null http://127.0.0.1:9292/swagger/index.html && echo Backend is UP && break; echo Waiting...; sleep 2; done"
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do curl -sf -o /dev/null -w '%%{http_code}' http://127.0.0.1:8080/auth/login | grep -q '405' && echo Backend is UP && break; echo Waiting...; sleep 2; done"
                         ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "sudo systemctl is-active bofc-dotnet"
-                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "curl -s -o /dev/null -w '%%{http_code}' http://127.0.0.1:80/ || echo 'Frontend check'"
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "curl -sk -o /dev/null -w '%%{http_code}' https://127.0.0.1/ || echo 'Frontend check'"
                     """
                 }
             }

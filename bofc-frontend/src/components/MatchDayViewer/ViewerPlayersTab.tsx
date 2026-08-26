@@ -62,28 +62,38 @@ export default function ViewerPlayersTab({
 
   const teams = useMemo(() => data?.content?.[0]?.teams || [], [data]);
 
-  // No teams drafted yet - show who's actually confirmed (voted Yes) instead of an empty state.
-  // "to-be-selected" is exactly the confirmed-but-unassigned list, which with zero teams is
-  // everyone who RSVP'd yes.
-  const { data: confirmedData, isLoading: isLoadingConfirmed } = usePlayerListToAddToTeamQuery(
-    { matchDayId },
-    { skip: teams.length > 0 }
-  );
-  const confirmedPlayers = confirmedData?.content || [];
+  // Confirmed (voted Yes) players not yet drafted onto a team - shown as an "Unassigned"
+  // pseudo-team ahead of the real teams so every "Yes" RSVP stays visible here, not just
+  // the ones already picked. "to-be-selected" is exactly this confirmed-but-unassigned list.
+  const { data: confirmedData, isLoading: isLoadingConfirmed } = usePlayerListToAddToTeamQuery({ matchDayId });
+  const confirmedPlayers = useMemo(() => confirmedData?.content || [], [confirmedData]);
+
+  const allTeams = useMemo(() => {
+    if (confirmedPlayers.length === 0) return teams;
+    const unassignedTeam: Team = {
+      teamId: -1,
+      teamName: "Unassigned",
+      players: confirmedPlayers.map((p) => ({
+        playerId: p.playerId,
+        playerName: p.playerName,
+        photoUrl: p.photoUrl,
+      })),
+    };
+    return [unassignedTeam, ...teams];
+  }, [teams, confirmedPlayers]);
 
   const filters = useMemo(() => {
-    const labels = Array.from(
-      new Set(teams.map((team: Team) => team.teamName)),
-    ).sort();
+    const teamLabels = Array.from(new Set(teams.map((team: Team) => team.teamName))).sort();
+    const labels = confirmedPlayers.length > 0 ? ["Unassigned", ...teamLabels] : teamLabels;
     return ["ALL", ...labels];
-  }, [teams]);
+  }, [teams, confirmedPlayers]);
 
   const visibleTeams = useMemo(() => {
-    if (activeFilter === "ALL") return teams;
-    return teams.filter((team: Team) => team.teamName === activeFilter);
-  }, [activeFilter, teams]);
+    if (activeFilter === "ALL") return allTeams;
+    return allTeams.filter((team: Team) => team.teamName === activeFilter);
+  }, [activeFilter, allTeams]);
 
-  if (isLoading || isFetching) {
+  if (isLoading || isFetching || isLoadingConfirmed) {
     return (
       <div className={styles.loadingWrap}>
         <Loader />
@@ -91,49 +101,12 @@ export default function ViewerPlayersTab({
     );
   }
 
-  if (teams.length === 0) {
-    if (isLoadingConfirmed) {
-      return (
-        <div className={styles.loadingWrap}>
-          <Loader />
-        </div>
-      );
-    }
-
-    if (confirmedPlayers.length === 0) {
-      return (
-        <div className={styles.emptyWrap}>
-          <div className="text-center text-theme-sm text-gray-400 dark:text-gray-500">
-            <TeamOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
-            No teams or players found
-          </div>
-        </div>
-      );
-    }
-
+  if (allTeams.length === 0) {
     return (
-      <div className={styles.pageWrap}>
-        <div className={styles.contentWrap}>
-          <div className="mb-3 text-center text-theme-sm text-gray-400 dark:text-gray-500">
-            Teams haven&apos;t been drafted yet - {confirmedPlayers.length} player{confirmedPlayers.length === 1 ? "" : "s"} confirmed so far
-          </div>
-          <div className={styles.playersGrid}>
-            {confirmedPlayers.map((player) => (
-              <PlayerCardV2
-                key={player.playerId}
-                size="compact"
-                player={{
-                  playerId: player.playerId,
-                  playerName: player.playerName.toUpperCase(),
-                  photoUrl: player.photoUrl ? toAbsolutePlayerPhotoUrl(player.photoUrl) : undefined,
-                  position: null,
-                  isCaptain: false,
-                  isViceCaptain: false,
-                  isGoalkeeper: false,
-                }}
-              />
-            ))}
-          </div>
+      <div className={styles.emptyWrap}>
+        <div className="text-center text-theme-sm text-gray-400 dark:text-gray-500">
+          <TeamOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
+          No teams or players found
         </div>
       </div>
     );

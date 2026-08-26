@@ -3,9 +3,11 @@ import { WifiOutlined, ReloadOutlined } from "@ant-design/icons";
 
 /**
  * Single persistent banner for network failures, replacing the per-widget
- * "Failed to fetch" toast stack that used to fire once per failed query
- * (see apiSlice.ts's FETCH_ERROR branch, which dispatches "bofc:network-error"
- * instead of toasting).
+ * "Failed to fetch" toast stack that used to fire once per failed query (see
+ * apiSlice.ts's FETCH_ERROR/502/503/504 branch, which dispatches
+ * "bofc:network-error" instead of toasting). Covers both a dead internet
+ * connection and a reachable-but-down backend (proxy answers with a 502/503/504) -
+ * from the user's side both look the same: "the app stopped working."
  */
 export default function OfflineBanner() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -30,7 +32,7 @@ export default function OfflineBanner() {
   return (
     <div className="flex shrink-0 items-center justify-center gap-3 bg-warning-500 px-4 py-2 text-center text-theme-sm font-medium text-white">
       <WifiOutlined />
-      <span>You're offline - showing the last loaded data, some info may be out of date.</span>
+      <span>Having trouble connecting - showing the last loaded data, some info may be out of date.</span>
       <button
         type="button"
         onClick={() => window.location.reload()}

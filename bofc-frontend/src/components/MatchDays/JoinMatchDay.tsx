@@ -2,12 +2,13 @@ import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useJoinMatchDay from "../../hooks/useJoinMatchDay";
 import { MatchDayPlayerInfoType } from "../../state/features/matchDays/matchDayTypes";
+import { useGetMatchDaySummaryQuery } from "../../state/features/matchDays/matchDaysSlice";
 import DebouncedInput from "./Atoms/DebouncedInput";
 import "./matchDay.css";
 import {
   CheckCircleOutlined, CloseCircleOutlined, SearchOutlined,
   ClockCircleOutlined, TeamOutlined, StarFilled, CalendarOutlined,
-  CheckCircleFilled, TrophyOutlined,
+  CheckCircleFilled, TrophyOutlined, UnorderedListOutlined, BarChartOutlined,
 } from "@ant-design/icons";
 import { showBdLocalTimeRange } from "./../../utils/utils";
 import { canManageTeams } from "../../utils/roleUtils";
@@ -22,6 +23,21 @@ import Modal from "../ui/modal";
 import FormSelect from "../ui/form-select";
 import Loader from "../ui/loader";
 import Avatar from "../CommonAtoms/Avatar";
+import ViewerHomeTab from "../MatchDayViewer/ViewerHomeTab";
+import ViewerFixturesResultsTab from "../MatchDayViewer/ViewerFixturesResultsTab";
+import ViewerTableTab from "../MatchDayViewer/ViewerTableTab";
+import StatsLeaderboardPanel from "./Statistics/StatsLeaderboardPanel";
+import SquadLineupTab from "./SquadLineup/SquadLineupTab";
+import { HomeOutlined } from "@ant-design/icons";
+
+type ViewerTabKey = "home" | "results" | "table" | "stats" | "squad-lineup";
+const VIEWER_TABS: { key: ViewerTabKey; label: string; icon: React.ReactNode }[] = [
+  { key: "home", label: "Home", icon: <HomeOutlined /> },
+  { key: "squad-lineup", label: "Squad & Lineup", icon: <TeamOutlined /> },
+  { key: "results", label: "Results", icon: <CheckCircleOutlined /> },
+  { key: "table", label: "Table", icon: <UnorderedListOutlined /> },
+  { key: "stats", label: "Stats", icon: <BarChartOutlined /> },
+];
 
 type ParticipationFilter = "all" | "participating" | "not-participating" | "pending";
 type SortOption = "name" | "status" | "employeeId";
@@ -53,6 +69,14 @@ export default function JoinMatchDay() {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<"in" | "out" | "pending" | null>(null);
   const isMobileTable = useIsMobile(768);
+
+  // Regular players don't need the raw editable participants grid (that's a
+  // roster-management tool for admins/coordinators) - they get the same
+  // Results/Table/Stats/Squad & Lineup view the public Match Day Viewer shows instead.
+  const canSeeParticipantsGrid = canManageTeams(loginInfo.roles);
+  const [viewerTab, setViewerTab] = useState<ViewerTabKey>("home");
+  const { data: summaryData } = useGetMatchDaySummaryQuery({ matchDayId }, { skip: !matchDayId || canSeeParticipantsGrid });
+  const teams = summaryData?.content?.[0]?.teams || [];
 
   const loggedInPlayer = players.find((p) => p.playerId === Number(loginInfo.userId));
 
@@ -266,13 +290,18 @@ export default function JoinMatchDay() {
             </p>
           </div>
 
-          <Button startIcon={<TeamOutlined />} className="mt-2.5 w-full" onClick={() => navigate(`/match-days/team-building/${matchDayId}`)}>
-            View Team
-          </Button>
+          {canSeeParticipantsGrid && (
+            <Button startIcon={<TeamOutlined />} className="mt-2.5 w-full" onClick={() => navigate(`/match-days/team-building/${matchDayId}`)}>
+              Manage Match Day
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* Participants panel */}
+      {/* Participants panel - admins/coordinators only; regular players get the
+          Results/Table/Stats/Squad & Lineup view below instead (same as the public
+          Match Day Viewer), not a roster-management grid they can't act on anyway. */}
+      {canSeeParticipantsGrid ? (
       <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <span className="flex items-center gap-2">
@@ -411,6 +440,33 @@ export default function JoinMatchDay() {
           </div>
         )}
       </div>
+      ) : (
+      <div className="rounded-2xl p-4 md:p-5">
+        <div className="mb-4 flex justify-center overflow-x-auto border-b border-gray-200 dark:border-[var(--color-rule)]">
+          <nav className="flex gap-4">
+            {VIEWER_TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setViewerTab(t.key)}
+                className={`shrink-0 whitespace-nowrap border-b-2 px-1 py-2.5 text-sm font-medium ${
+                  viewerTab === t.key
+                    ? "border-brand-500 text-brand-500"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                }`}
+              >
+                {t.icon} {t.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+        {viewerTab === "home" && <ViewerHomeTab matchDayId={matchDayId} />}
+        {viewerTab === "results" && <ViewerFixturesResultsTab matchDayId={matchDayId} />}
+        {viewerTab === "table" && <ViewerTableTab matchDayId={matchDayId} />}
+        {viewerTab === "stats" && <StatsLeaderboardPanel matchDayId={matchDayId} isActive={viewerTab === "stats"} />}
+        {viewerTab === "squad-lineup" && <SquadLineupTab teams={teams} />}
+      </div>
+      )}
 
       {/* Stat-box player list modal */}
       <Modal isOpen={isStatusModalOpen} onClose={() => setIsStatusModalOpen(false)} title={getModalTitle()} className="max-w-[900px]">

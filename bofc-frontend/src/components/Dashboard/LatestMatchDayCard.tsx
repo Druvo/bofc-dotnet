@@ -44,13 +44,13 @@ const LatestMatchDayCard: React.FC = () => {
     } = useGetLatestMatchDayWithUserStatusQuery();
 
     const latestMatchDayId = latestMatchDayData?.content?.matchDay?.id;
-    const latestMatchDay = latestMatchDayData?.content?.matchDay;
-    const matchDayEffectiveStatus = latestMatchDay
-        ? getEffectiveMatchDayStatus(latestMatchDay.matchDayStatus, latestMatchDay.matchDayDate, latestMatchDay.durationMinutes)
-        : undefined;
+    // Fetched regardless of effective status - "latest" can be a just-concluded MatchDay
+    // (no upcoming one yet), and the stat cells' click-through modal needs the real
+    // per-player list either way. Skipping it here left the stat cells showing correct
+    // aggregate counts (from the other query) while the modal behind them stayed empty.
     const { data: matchDayParticipantsData } = useGetMatchDayParticipantsListQuery(
         { matchDayId: latestMatchDayId ?? 0 },
-        { skip: !latestMatchDayId || matchDayEffectiveStatus === 'CONCLUDED' }
+        { skip: !latestMatchDayId }
     );
 
     const [addParticipationToMatchDay] = useAddParticipationToMatchDayMutation();

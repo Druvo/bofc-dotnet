@@ -280,10 +280,10 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
   };
 
   // Sub-groups (e.g. Finance's "Configuration"/"Voucher"/"Accounts Reports") default
-  // open and toggle independently of each other and of the top-level group state.
-  const [collapsedSubGroups, setCollapsedSubGroups] = useState<Record<string, boolean>>({});
+  // collapsed and toggle independently of each other and of the top-level group state.
+  const [expandedSubGroups, setExpandedSubGroups] = useState<Record<string, boolean>>({});
   const toggleSubGroup = (subGroupKey: string) => {
-    setCollapsedSubGroups((prev) => ({ ...prev, [subGroupKey]: !prev[subGroupKey] }));
+    setExpandedSubGroups((prev) => ({ ...prev, [subGroupKey]: !prev[subGroupKey] }));
   };
 
   // On desktop, collapsing shrinks the rail to icons-only and hides dropdown
@@ -453,7 +453,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
                             }
 
                             const subGroupKey = `${group.key}:${child.label}`;
-                            const subGroupOpen = !collapsedSubGroups[subGroupKey];
+                            const subGroupOpen = !!expandedSubGroups[subGroupKey];
 
                             return (
                               <li key={subGroupKey}>

@@ -57,7 +57,14 @@ const customBaseQuery: typeof baseQuery = async (args, api, extraOptions) => {
     // query fails independently and would otherwise stack a "Failed to fetch"
     // toast per widget. Skip the toast and let the app-wide OfflineBanner
     // (DefaultLayout.tsx) show one persistent "you're offline" message instead.
-    if ((result.error as any)?.status === "FETCH_ERROR") {
+    //
+    // A dead backend process (server down, still starting up) doesn't fail at the
+    // fetch level though - the dev proxy / reverse proxy is still up and answers with
+    // a real HTTP response, just a 502/503/504 one. Treat those the same way, or every
+    // widget on the page fires its own error toast in a loop for as long as the
+    // backend stays down.
+    const errorStatus = (result.error as any)?.status;
+    if (errorStatus === "FETCH_ERROR" || errorStatus === 502 || errorStatus === 503 || errorStatus === 504) {
       window.dispatchEvent(new Event("bofc:network-error"));
       return result;
     }

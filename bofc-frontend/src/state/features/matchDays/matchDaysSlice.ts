@@ -15,7 +15,7 @@ import {
 } from "./matchDayTypes";
 
 const apiWithTags = apiSlice.enhanceEndpoints({
-  addTagTypes: ["matchDays"],
+  addTagTypes: ["matchDays", "matchDayTeam"],
 });
 
 export const matchDaysApi = apiWithTags.injectEndpoints({
@@ -161,7 +161,11 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
           matchDayParticipantId,
         },
       }),
-      invalidatesTags: ["matchDays"],
+      // "matchDayTeam" too - playerListToAddToTeam (matchDayTeamSlice) is how the
+      // Participants view's "Unassigned" bucket and the team-builder picker know who's
+      // confirmed-but-unassigned; without it, a Yes/No vote here left both showing stale
+      // data until a hard refresh blew away the whole RTK Query cache.
+      invalidatesTags: ["matchDays", "matchDayTeam"],
     }),
     getMatchDaySummary: builder.query<
       MatchDaySummeryResType,

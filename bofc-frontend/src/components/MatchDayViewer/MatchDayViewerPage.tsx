@@ -9,6 +9,7 @@ import {
   FireOutlined,
   HomeOutlined,
   LoginOutlined,
+  TeamOutlined,
   TrophyOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
@@ -19,6 +20,7 @@ import ViewerTableTab from "./ViewerTableTab";
 import ViewerRulesTab from "./ViewerRulesTab";
 import ViewerLoginTab from "./ViewerLoginTab";
 import StatsLeaderboardPanel from "../MatchDays/Statistics/StatsLeaderboardPanel";
+import SquadLineupTab from "../MatchDays/SquadLineup/SquadLineupTab";
 import {
   useGetMatchDaysQuery,
   useGetMatchDaySummaryQuery,
@@ -57,7 +59,7 @@ const isValidViewerTab = (
   if (!tabKey) return false;
 
   return (
-    ["home", "results", "table", "stats"].includes(tabKey) ||
+    ["home", "results", "table", "stats", "squad-lineup"].includes(tabKey) ||
     (tabKey === "rules" && hasRules) ||
     (tabKey === "auction" && hasAuction) ||
     (tabKey === "login" && !isLoggedIn)
@@ -169,6 +171,18 @@ export default function MatchDayViewerPage({
       ),
       children: selectedId ? (
         <ViewerHomeTab matchDayId={selectedId} />
+      ) : null,
+    },
+    {
+      key: "squad-lineup",
+      label: (
+        <span>
+          <TeamOutlined style={{ marginRight: 6 }} />
+          Squad &amp; Lineup
+        </span>
+      ),
+      children: selectedId ? (
+        <SquadLineupTab teams={summaryData?.content?.[0]?.teams || []} />
       ) : null,
     },
     ...(hasRules
@@ -327,8 +341,11 @@ export default function MatchDayViewerPage({
                   </div>
                 </div>
               )}
-              <div className="match-day-viewer-tabs" style={{ marginTop: 6 }}>
-                <div className="flex justify-center overflow-x-auto border-b border-gray-200 dark:border-[var(--color-rule)]">
+              <div
+                className="match-day-viewer-tabs rounded-2xl p-4 md:p-5"
+                style={{ marginTop: 6 }}
+              >
+                <div className="mb-4 flex justify-center overflow-x-auto border-b border-gray-200 dark:border-[var(--color-rule)]">
                   <nav className="flex gap-4">
                     {tabItems.map((item) => (
                       <button
@@ -346,9 +363,7 @@ export default function MatchDayViewerPage({
                     ))}
                   </nav>
                 </div>
-                <div style={{ marginTop: 16 }}>
-                  {activeTabItem.children}
-                </div>
+                {activeTabItem.children}
               </div>
             </div>
           </div>

@@ -35,6 +35,25 @@ pipeline {
             }
         }
 
+        stage('Generate Migration Script') {
+            steps {
+                dir('bofc-backend-dotnet') {
+                    bat 'dotnet ef migrations script --idempotent --project BofcBackend.Api/BofcBackend.Api.csproj --startup-project BofcBackend.Api/BofcBackend.Api.csproj -o migrations.sql'
+                }
+            }
+        }
+
+        stage('Apply Migrations') {
+            steps {
+                sshagent(['vps-ssh']) {
+                    bat """
+                        scp -o StrictHostKeyChecking=no bofc-backend-dotnet/migrations.sql %REMOTE_USER%@%REMOTE_HOST%:/tmp/migrations.sql
+                        ssh -o StrictHostKeyChecking=no %REMOTE_USER%@%REMOTE_HOST% "python3 /opt/bofc-dotnet/apply_migrations.py /tmp/migrations.sql"
+                    """
+                }
+            }
+        }
+
         stage('Snapshot (pre-deploy)') {
             steps {
                 sshagent(['vps-ssh']) {

@@ -73,4 +73,15 @@ public class SettingsController(ISettingsService settingsService) : ControllerBa
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.CreateOk, result);
     }
 
+    /// <summary>Emails+notifies every active player still unpaid for the given month (both
+    /// optional, default to the current month) right now, bypassing the day-of-month/repeat-interval
+    /// gates - the "Send Payment Due Email" button (with its month picker) on the Player Monthly
+    /// Payments page.</summary>
+    [HttpPost("payment-due-reminder/send-now")]
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    public async Task<IActionResult> SendPaymentDueReminderNow([FromQuery] int? year, [FromQuery] int? month)
+    {
+        var (due, sent) = await settingsService.SendPaymentDueReminderNowAsync(year, month);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.CreateOk, new { due, sent });
+    }
 }

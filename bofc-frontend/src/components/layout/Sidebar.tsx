@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { CalendarOutlined, SettingOutlined, BellOutlined, BulbOutlined, BulbFilled, LogoutOutlined } from "@ant-design/icons";
 import { selectLoginInfo, selectUserImage, selectUserRoles } from "../../state/slices/loginInfoSlice";
@@ -118,16 +118,17 @@ interface SidebarProps {
 
 export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpanded, isDarkMode, setIsDarkMode }: SidebarProps) {
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Closing after every nav pick is a no-op on desktop (lg:translate-x-0 keeps the rail
   // visible regardless of sidebarToggle there) but is the only way the mobile/tablet
   // drawer ever dismisses itself after picking a destination - without it, tapping a
   // link just navigates behind the still-open drawer.
-  const go = (path: string) => {
-    navigate(path);
-    setSidebarToggle(false);
-  };
+  //
+  // Used on every real navigable item (rendered as <Link>, not <button onClick>) so
+  // ctrl/cmd/middle-click "open in new tab" works like a normal anchor tag - a plain
+  // onClick+navigate() button can never do that, only a real <a href> can. Link already
+  // navigates on its own; this only handles the side effect of closing the mobile drawer.
+  const closeDrawer = () => setSidebarToggle(false);
 
   const roles = useSelector(selectUserRoles);
   const isUserAdmin = roles.includes("ADMIN") || roles.includes("SUPERADMIN");
@@ -182,6 +183,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
         { label: "Rank Players", path: "/players/ranks", adminOnly: true },
         { label: "My Player Profile", path: "/profile" },
         { label: "Player Statistics", path: "/player-statistics" },
+        { label: "Player Monthly Payments", path: "/players/monthly-payments", adminOnly: true },
       ],
     },
     {
@@ -300,10 +302,10 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
       <div className={`flex items-center gap-2 pb-4 pt-5 justify-end md:justify-between ${collapsed ? "lg:justify-center" : ""}`}>
         {/* Hidden below md - MobileTopBar (DefaultLayout.tsx) already shows the logo
             there, so this drawer doesn't need to repeat it. */}
-        <button onClick={() => go("/")} className="hidden items-center md:flex">
+        <Link to="/" onClick={closeDrawer} className="hidden items-center md:flex">
           <img src={companyLogo} alt="BOFC" className="h-12 w-12 shrink-0" />
           <span className={`ml-2 text-3xl font-semibold text-gray-800 dark:text-white ${collapsed ? "lg:hidden" : ""}`}>BOFC</span>
-        </button>
+        </Link>
         {/* Closes the drawer on mobile/tablet (<lg) - Header (the desktop-only home for
             this) is hidden below md, so this is the only in-drawer way to dismiss it
             besides tapping the scrim outside. */}
@@ -325,13 +327,14 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
           there - without the "hidden" this duplicated them every time the drawer
           opened on mobile. */}
       <div className="mb-4 hidden items-center justify-between border-b border-[var(--color-rule)] pb-4 md:flex lg:hidden">
-        <button onClick={() => go("/profile")} className="flex min-w-0 items-center gap-2">
+        <Link to="/profile" onClick={closeDrawer} className="flex min-w-0 items-center gap-2">
           <Avatar src={userImage || undefined} name={loginInfo?.username} seed={loginInfo?.userId} size={36} />
           <span className="truncate text-sm font-medium text-gray-800 dark:text-white/90">{loginInfo?.username || "User"}</span>
-        </button>
+        </Link>
         <div className="flex shrink-0 items-center gap-1.5">
-          <button
-            onClick={() => go("/notifications")}
+          <Link
+            to="/notifications"
+            onClick={closeDrawer}
             className="relative flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-500 dark:border-[var(--color-rule)] dark:text-gray-400"
             aria-label="Notifications"
           >
@@ -341,7 +344,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
                 {unreadNotifCount}
               </span>
             )}
-          </button>
+          </Link>
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
             className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-500 dark:border-[var(--color-rule)] dark:text-gray-400"
@@ -372,41 +375,56 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
                 const open = selectedGroup === group.key && !collapsed;
                 const onlyChild = group.children.length === 1 ? group.children[0] : null;
                 const hasSingleChild = onlyChild !== null && !isSubGroup(onlyChild);
+                // Same target resolution go() used to do inline - now precomputed so the
+                // control can render as a real <Link> (ctrl/cmd/middle-click "open in new
+                // tab" only works on a real <a href>, never on a button+onClick handler)
+                // whenever this click would navigate rather than just toggle the dropdown.
+                const collapsedFirstLeaf = collapsed && !hasSingleChild
+                  ? group.children.find((c): c is NavLeaf => !isSubGroup(c)) ?? (isSubGroup(group.children[0]) ? group.children[0].children[0] : undefined)
+                  : undefined;
+                const directPath = hasSingleChild ? (onlyChild as NavLeaf).path : collapsedFirstLeaf?.path;
+
+                const groupIconAndLabel = (
+                  <>
+                    <span
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center ${active ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}
+                    >
+                      {group.icon}
+                    </span>
+                    <span className={`menu-item-text ${collapsed ? "lg:hidden" : ""}`}>{group.label}</span>
+                    {!hasSingleChild && (
+                      <svg
+                        className={`menu-item-arrow ${collapsed ? "lg:hidden" : ""} ${open ? "menu-item-arrow-active" : "menu-item-arrow-inactive"}`}
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        stroke="currentColor"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        {ArrowDownIcon}
+                      </svg>
+                    )}
+                  </>
+                );
+                const groupControlClassName = `menu-item group w-full ${collapsed ? "lg:justify-center" : ""} ${active ? "menu-item-active" : "menu-item-inactive"}`;
 
                 return (
                   <li key={group.key}>
-                    <button
-                      type="button"
-                      title={collapsed ? group.label : undefined}
-                      onClick={() => {
-                        if (hasSingleChild && onlyChild) go((onlyChild as NavLeaf).path);
-                        else if (collapsed) {
-                          const firstLeaf = group.children.find((c): c is NavLeaf => !isSubGroup(c)) ?? (isSubGroup(group.children[0]) ? group.children[0].children[0] : undefined);
-                          if (firstLeaf) go(firstLeaf.path);
-                        } else toggleGroup(group.key);
-                      }}
-                      className={`menu-item group w-full ${collapsed ? "lg:justify-center" : ""} ${active ? "menu-item-active" : "menu-item-inactive"}`}
-                    >
-                      <span
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center ${active ? "menu-item-icon-active" : "menu-item-icon-inactive"}`}
+                    {directPath ? (
+                      <Link to={directPath} onClick={closeDrawer} title={collapsed ? group.label : undefined} className={groupControlClassName}>
+                        {groupIconAndLabel}
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        title={collapsed ? group.label : undefined}
+                        onClick={() => toggleGroup(group.key)}
+                        className={groupControlClassName}
                       >
-                        {group.icon}
-                      </span>
-                      <span className={`menu-item-text ${collapsed ? "lg:hidden" : ""}`}>{group.label}</span>
-                      {!hasSingleChild && (
-                        <svg
-                          className={`menu-item-arrow ${collapsed ? "lg:hidden" : ""} ${open ? "menu-item-arrow-active" : "menu-item-arrow-inactive"}`}
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          stroke="currentColor"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          {ArrowDownIcon}
-                        </svg>
-                      )}
-                    </button>
+                        {groupIconAndLabel}
+                      </button>
+                    )}
 
                     {!hasSingleChild && (
                       <div className={`overflow-hidden ${collapsed ? "lg:hidden" : ""} ${open ? "block" : "hidden"}`}>
@@ -415,9 +433,9 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
                             if (!isSubGroup(child)) {
                               return (
                                 <li key={child.path}>
-                                  <button
-                                    type="button"
-                                    onClick={() => go(child.path)}
+                                  <Link
+                                    to={child.path}
+                                    onClick={closeDrawer}
                                     className={`menu-dropdown-item group w-full text-left ${
                                       // Exact match, not pathMatchesPrefix's "starts with" - these are
                                       // sibling leaf pages (e.g. "/players" vs "/players/ranks"), not
@@ -429,7 +447,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
                                     }`}
                                   >
                                     {child.label}
-                                  </button>
+                                  </Link>
                                 </li>
                               );
                             }
@@ -461,9 +479,9 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
                                   <ul className="mt-1 flex flex-col gap-1 pl-4">
                                     {child.children.map((leaf) => (
                                       <li key={leaf.path}>
-                                        <button
-                                          type="button"
-                                          onClick={() => go(leaf.path)}
+                                        <Link
+                                          to={leaf.path}
+                                          onClick={closeDrawer}
                                           className={`menu-dropdown-item group w-full text-left ${
                                             // Exact match - see the sibling-leaf note above.
                                             location.pathname === leaf.path
@@ -472,7 +490,7 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
                                           }`}
                                         >
                                           {leaf.label}
-                                        </button>
+                                        </Link>
                                       </li>
                                     ))}
                                   </ul>

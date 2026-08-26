@@ -91,4 +91,13 @@ public class TeamController(ITeamService teamService, WeeklyMatchDayTeamGenerato
         var result = await teamService.GetGoalkeeperRankingAsync(matchDayId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, result);
     }
+
+    /// <summary>"Send Teams Email" button on Team Building - emails every confirmed participant a
+    /// link to this page. Manual only, never fired automatically off generation.</summary>
+    [HttpPost("matchday/{matchDayId}/send-teams-email")]
+    public async Task<IActionResult> SendTeamsGeneratedEmail(long matchDayId)
+    {
+        var sent = await teamService.SendTeamsGeneratedEmailAsync(matchDayId);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.CreateOk, new { sent });
+    }
 }

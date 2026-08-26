@@ -4,6 +4,7 @@ using BofcBackend.Api.Common.Scheduling;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
+using BofcBackend.Api.Features.EmailTemplates;
 using BofcBackend.Api.Features.Settings.Models;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -16,8 +17,10 @@ public class SettingsService(
     BofcDbContext db,
     IDataProtectionProvider dataProtectionProvider,
     IEmailSender emailSender,
+    IEmailTemplateService emailTemplateService,
     IOptions<AccountingOptions> accountingOptions,
-    WeeklyMatchDayTeamGenerator weeklyMatchDayTeamGenerator) : ISettingsService
+    WeeklyMatchDayTeamGenerator weeklyMatchDayTeamGenerator,
+    ILogger<SettingsService> logger) : ISettingsService
 {
     private readonly IDataProtector protector = dataProtectionProvider.CreateProtector(SettingsEncryption.Purpose);
 
@@ -37,8 +40,10 @@ public class SettingsService(
 
         settings.NotifyMatchDayReminderEnabled = request.NotifyMatchDayReminderEnabled;
         settings.MatchDayReminderDaysBefore = request.MatchDayReminderDaysBefore;
+        settings.MatchDayReminderRepeatHours = request.MatchDayReminderRepeatHours;
         settings.NotifyPaymentDueEnabled = request.NotifyPaymentDueEnabled;
         settings.PaymentDueReminderDayOfMonth = request.PaymentDueReminderDayOfMonth;
+        settings.PaymentDueReminderRepeatDays = request.PaymentDueReminderRepeatDays;
         settings.NotifyCustomEmailEnabled = request.NotifyCustomEmailEnabled;
         settings.PushNotificationsEnabled = request.PushNotificationsEnabled;
         settings.AuctionEnabled = request.AuctionEnabled;
@@ -184,6 +189,27 @@ public class SettingsService(
         return await weeklyMatchDayTeamGenerator.GenerateAsync(matchDayId, settings.WeeklyMatchDayMaxPlayersPerTeam);
     }
 
+    public async Task<(int Due, int Sent)> SendPaymentDueReminderNowAsync(int? year, int? month)
+    {
+        var now = DateTime.Now;
+        var targetYear = year ?? now.Year;
+        var targetMonth = month ?? now.Month;
+        if (targetMonth is < 1 or > 12) throw new BadRequestException("month must be between 1 and 12.");
+
+        var settings = await LoadOrCreateAsync();
+        var result = await PaymentDueReminderBackgroundService.SendRemindersAsync(db, emailSender, emailTemplateService, logger, targetYear, targetMonth);
+
+        // Only advances the scheduled reminder's own cadence when sending for the CURRENT month -
+        // a manual send for a past/future month is a separate, one-off action that shouldn't
+        // suppress the automatic current-month reminder for the next PaymentDueReminderRepeatDays.
+        if (targetYear == now.Year && targetMonth == now.Month)
+        {
+            settings.LastPaymentReminderSentAt = now;
+        }
+        await db.SaveChangesAsync();
+        return result;
+    }
+
     private async Task<SystemSettings> LoadOrCreateAsync()
     {
         var settings = await db.SystemSettings
@@ -228,8 +254,10 @@ public class SettingsService(
             SmtpUseSsl = s.SmtpUseSsl,
             NotifyMatchDayReminderEnabled = s.NotifyMatchDayReminderEnabled,
             MatchDayReminderDaysBefore = s.MatchDayReminderDaysBefore,
+            MatchDayReminderRepeatHours = s.MatchDayReminderRepeatHours,
             NotifyPaymentDueEnabled = s.NotifyPaymentDueEnabled,
             PaymentDueReminderDayOfMonth = s.PaymentDueReminderDayOfMonth,
+            PaymentDueReminderRepeatDays = s.PaymentDueReminderRepeatDays,
             NotifyCustomEmailEnabled = s.NotifyCustomEmailEnabled,
             PushNotificationsEnabled = s.PushNotificationsEnabled,
             AuctionEnabled = s.AuctionEnabled,

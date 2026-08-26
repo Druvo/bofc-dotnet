@@ -4,10 +4,15 @@ using System.Security.Cryptography;
 using BofcBackend.Api.Data;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace BofcBackend.Api.Common.Email;
 
-public class EmailSender(BofcDbContext db, IDataProtectionProvider dataProtectionProvider, ILogger<EmailSender> logger)
+public class EmailSender(
+    BofcDbContext db,
+    IDataProtectionProvider dataProtectionProvider,
+    IOptions<AppUrlOptions> appUrlOptions,
+    ILogger<EmailSender> logger)
     : IEmailSender
 {
     private readonly IDataProtector protector = dataProtectionProvider.CreateProtector(SettingsEncryption.Purpose);
@@ -43,6 +48,8 @@ public class EmailSender(BofcDbContext db, IDataProtectionProvider dataProtectio
             client.Credentials = new NetworkCredential(settings.SmtpUsername, password);
         }
 
+        var brandedBody = RenderBranded(subject, htmlBody);
+
         var sent = 0;
         var failed = 0;
         foreach (var recipient in recipients)
@@ -53,7 +60,7 @@ public class EmailSender(BofcDbContext db, IDataProtectionProvider dataProtectio
                 {
                     From = new MailAddress(settings.SmtpFromEmail, settings.SmtpFromName),
                     Subject = subject,
-                    Body = htmlBody,
+                    Body = brandedBody,
                     IsBodyHtml = true,
                 };
                 message.To.Add(recipient);
@@ -68,5 +75,29 @@ public class EmailSender(BofcDbContext db, IDataProtectionProvider dataProtectio
         }
 
         return new EmailSendResult(sent, failed, true);
+    }
+
+    public Task<string> RenderPreviewAsync(string subject, string htmlBody) => Task.FromResult(RenderBranded(subject, htmlBody));
+
+    private string RenderBranded(string subject, string htmlBody)
+    {
+        // Some templates (the current Payment/MatchDay reminders) are already complete,
+        // self-branded HTML documents with their own header/footer baked in - wrapping those in
+        // ANOTHER full <html> shell would nest two documents inside one email. Only wrap a body
+        // that's a plain fragment (no <html> of its own), e.g. the Settings page's plain-text test email.
+        if (IsFullHtmlDocument(htmlBody)) return htmlBody;
+
+        var logoUrl = $"{appUrlOptions.Value.BaseUrl.TrimEnd('/')}/email/bofc-logo.png";
+        return BrandedEmailRenderer.Render(subject, htmlBody, DefaultAccentColor, DefaultFooterTagline, logoUrl);
+    }
+
+    private const string DefaultAccentColor = "#1d4ed8";
+    private const string DefaultFooterTagline = "Originals Football Club";
+
+    private static bool IsFullHtmlDocument(string htmlBody)
+    {
+        var trimmed = htmlBody.TrimStart();
+        return trimmed.StartsWith("<!doctype", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("<html", StringComparison.OrdinalIgnoreCase);
     }
 }

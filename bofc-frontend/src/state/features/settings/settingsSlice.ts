@@ -35,8 +35,12 @@ export interface SystemSettings {
     smtpUseSsl: boolean;
     notifyMatchDayReminderEnabled: boolean;
     matchDayReminderDaysBefore: number;
+    /** Hours between re-sends during the reminder window - only to players who still haven't voted. */
+    matchDayReminderRepeatHours: number;
     notifyPaymentDueEnabled: boolean;
     paymentDueReminderDayOfMonth: number;
+    /** Days between re-sends after the trigger day - only to players still unpaid for the month. */
+    paymentDueReminderRepeatDays: number;
     notifyCustomEmailEnabled: boolean;
     pushNotificationsEnabled: boolean;
     auctionEnabled: boolean;
@@ -81,8 +85,12 @@ export interface UpdateSystemSettingsRequest {
     smtpUseSsl: boolean;
     notifyMatchDayReminderEnabled: boolean;
     matchDayReminderDaysBefore: number;
+    /** Hours between re-sends during the reminder window - only to players who still haven't voted. */
+    matchDayReminderRepeatHours: number;
     notifyPaymentDueEnabled: boolean;
     paymentDueReminderDayOfMonth: number;
+    /** Days between re-sends after the trigger day - only to players still unpaid for the month. */
+    paymentDueReminderRepeatDays: number;
     notifyCustomEmailEnabled: boolean;
     pushNotificationsEnabled: boolean;
     auctionEnabled: boolean;
@@ -107,6 +115,46 @@ export interface UpdateSystemSettingsRequest {
     collectionIncomeChartCode?: string | null;
     /** At least 2 required (server-validated) - need 2 distinct colors to tell the teams in a match apart. */
     jerseyColors: string[];
+}
+
+/** Maps a fetched SystemSettings 1:1 into a full save payload - used whenever a page needs to
+ * change just ONE field (e.g. the email branding color) without wiping out every other setting,
+ * since PUT /settings replaces the whole row rather than patching individual fields. */
+export function toUpdateSystemSettingsRequest(s: SystemSettings): UpdateSystemSettingsRequest {
+    return {
+        smtpEnabled: s.smtpEnabled,
+        smtpHost: s.smtpHost || undefined,
+        smtpPort: s.smtpPort,
+        smtpUsername: s.smtpUsername || undefined,
+        // Omitted - keeps whatever password is currently stored untouched.
+        smtpFromEmail: s.smtpFromEmail || undefined,
+        smtpFromName: s.smtpFromName || undefined,
+        smtpUseSsl: s.smtpUseSsl,
+        notifyMatchDayReminderEnabled: s.notifyMatchDayReminderEnabled,
+        matchDayReminderDaysBefore: s.matchDayReminderDaysBefore,
+        matchDayReminderRepeatHours: s.matchDayReminderRepeatHours,
+        notifyPaymentDueEnabled: s.notifyPaymentDueEnabled,
+        paymentDueReminderDayOfMonth: s.paymentDueReminderDayOfMonth,
+        paymentDueReminderRepeatDays: s.paymentDueReminderRepeatDays,
+        notifyCustomEmailEnabled: s.notifyCustomEmailEnabled,
+        pushNotificationsEnabled: s.pushNotificationsEnabled,
+        auctionEnabled: s.auctionEnabled,
+        matchDayStatusCheckIntervalHours: s.matchDayStatusCheckIntervalHours,
+        weeklyMatchDayEnabled: s.weeklyMatchDayEnabled,
+        weeklyMatchDayNamePrefix: s.weeklyMatchDayNamePrefix,
+        weeklyMatchDayOfWeek: s.weeklyMatchDaySlots[0]?.dayOfWeek || s.weeklyMatchDayOfWeek,
+        weeklyMatchTime: s.weeklyMatchDaySlots[0]?.time || s.weeklyMatchTime,
+        weeklyMatchDayVenueId: s.weeklyMatchDayVenueId ?? undefined,
+        weeklyMatchDaySportType: s.weeklyMatchDaySportType,
+        matchDaysPerWeek: s.matchDaysPerWeek,
+        weeklyMatchDaySlots: s.weeklyMatchDaySlots,
+        weeklyMatchDayMaxPlayersPerTeam: s.weeklyMatchDayMaxPlayersPerTeam,
+        weeklyMatchDayAutoTeamsEnabled: s.weeklyMatchDayAutoTeamsEnabled,
+        weeklyMatchDayAutoTeamsLeadHours: s.weeklyMatchDayAutoTeamsLeadHours,
+        cashChartCode: s.cashChartCodeIsOverridden ? s.cashChartCode : null,
+        collectionIncomeChartCode: s.collectionIncomeChartCodeIsOverridden ? s.collectionIncomeChartCode : null,
+        jerseyColors: s.jerseyColors,
+    };
 }
 
 export const settingsApi = apiWithTags.injectEndpoints({
@@ -164,6 +212,14 @@ export const settingsApi = apiWithTags.injectEndpoints({
             }),
             invalidatesTags: ["matchDayTeam", "matchDays", "fixtures"],
         }),
+
+        sendPaymentDueReminderNow: builder.mutation<BasicResType & { content: { due: number; sent: number } }, { year: number; month: number }>({
+            query: ({ year, month }) => ({
+                url: `settings/payment-due-reminder/send-now?year=${year}&month=${month}`,
+                method: "POST",
+            }),
+            invalidatesTags: ["systemSettings"],
+        }),
     }),
 });
 
@@ -175,4 +231,5 @@ export const {
     useGetAuctionEnabledQuery,
     useGenerateWeeklyMatchesNowMutation,
     useGenerateTeamsNowMutation,
+    useSendPaymentDueReminderNowMutation,
 } = settingsApi;

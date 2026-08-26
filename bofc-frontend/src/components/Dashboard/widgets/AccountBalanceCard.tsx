@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   ArrowUpOutlined,
@@ -37,6 +37,19 @@ const AccountBalanceCard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const roles = useSelector(selectUserRoles);
   const isAdmin = roles.includes("ADMIN") || roles.includes("SUPERADMIN");
+
+  // Deep-link target for the "PAY YOUR CLUB DUES" button in the payment-due-reminder email
+  // (?openPayments=1) - opens this modal straight from a cold page load, then strips the param
+  // so a refresh/back-nav doesn't keep re-opening it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("openPayments") !== "1") return;
+    setIsModalOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete("openPayments");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { data: summary, isLoading: isSummaryLoading } = useGetAccountSummaryQuery();
   const { data: accountsData } = useGetActivePaymentAccountsQuery();

@@ -1,6 +1,9 @@
 import React from 'react';
 import { CalendarOutlined } from '@ant-design/icons';
 import { PlayerMetric } from '../../interfaces/IPlayerCollectionMetrics';
+import IPlayer from '../../interfaces/IPlayer';
+import Avatar from '../CommonAtoms/Avatar';
+import { toAbsolutePlayerPhotoUrl } from '../../utils/playerPhotoUtils';
 import FormSelect from '../ui/form-select';
 
 const monthNames = [
@@ -18,6 +21,8 @@ interface PlayerCollectionMobileViewProps {
   years?: number[];
   onYearChange?: (year: number) => void;
   isLoading?: boolean;
+  playersById?: Record<number, IPlayer>;
+  onCellClick?: (playerId: number, playerName: string, month: number) => void;
 }
 
 const monthCellClasses = {
@@ -35,7 +40,9 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
   currentMonth,
   years = [],
   onYearChange,
-  isLoading = false
+  isLoading = false,
+  playersById = {},
+  onCellClick,
 }) => {
   return (
     <div className="grid grid-cols-1 gap-3 p-4 lg:grid-cols-3">
@@ -61,12 +68,17 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
         const playerData = metrics.find((p: PlayerMetric) => p.playerId === player.key);
         const isActive = playerData?.active ?? false;
 
+        const photoUrl = playersById[player.key]?.photoUrl;
+
         return (
           <div key={player.key} className="rounded-xl border border-gray-200 bg-white p-3 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
             <div className="mb-2.5 flex items-center justify-between">
-              <div>
-                <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{player.playerName}</span>
-                <span className="ml-2 text-theme-xs text-gray-400 dark:text-gray-500">{selectedYear}</span>
+              <div className="flex items-center gap-2">
+                <Avatar src={toAbsolutePlayerPhotoUrl(photoUrl)} name={player.playerName} seed={player.key} size={28} />
+                <div>
+                  <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{player.playerName}</span>
+                  <span className="ml-2 text-theme-xs text-gray-400 dark:text-gray-500">{selectedYear}</span>
+                </div>
               </div>
               <span className="text-theme-xs text-gray-400 dark:text-gray-500">#{index + 1}</span>
             </div>
@@ -84,12 +96,17 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
                 else if (amount > 0) variant = 'paid';
 
                 return (
-                  <div key={monthNumber} className={`rounded-lg border px-1.5 py-1.5 text-center ${monthCellClasses[variant]}`}>
+                  <button
+                    type="button"
+                    key={monthNumber}
+                    onClick={() => onCellClick?.(player.key, player.playerName, monthNumber)}
+                    className={`rounded-lg border px-1.5 py-1.5 text-center ${monthCellClasses[variant]}`}
+                  >
                     <div className="text-[10px] font-medium uppercase">{month}</div>
                     <div className="text-theme-xs font-semibold">
                       {showDue ? 'Due' : (amount > 0 ? amount.toFixed(0) : '-')}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>

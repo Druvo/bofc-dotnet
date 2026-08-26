@@ -25,4 +25,12 @@ public interface ISettingsService
     /// MatchDay right now, bypassing the configured lead-time wait - lets an admin test the full
     /// auto-generation flow without waiting until kickoff.</summary>
     Task<BofcBackend.Api.Common.Scheduling.TeamGenerationResult> GenerateTeamsNowAsync(long matchDayId);
+
+    /// <summary>Emails+notifies every active player still unpaid for <paramref name="year"/>/<paramref name="month"/>
+    /// (both default to the current month if omitted) right now, bypassing the day-of-month/
+    /// repeat-interval gates the scheduled reminder is normally subject to - the "Send Payment Due
+    /// Email" button (with its month picker, defaulting to the current month) on the Player
+    /// Monthly Payments page. Due/Sent are returned separately so a caller can tell "nobody owed
+    /// anything" apart from "owed but SMTP isn't configured" - both look like Sent=0 otherwise.</summary>
+    Task<(int Due, int Sent)> SendPaymentDueReminderNowAsync(int? year, int? month);
 }

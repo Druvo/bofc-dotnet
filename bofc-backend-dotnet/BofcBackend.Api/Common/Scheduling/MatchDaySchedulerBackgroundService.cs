@@ -1,5 +1,5 @@
-using BofcBackend.Api.Common.Email;
 using BofcBackend.Api.Data;
+using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -47,13 +47,7 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
         if (settings is not { WeeklyMatchDayEnabled: true } || settings.WeeklyMatchDayVenueId == null) return;
         if (settings.WeeklyMatchDaySlots.Count == 0) return;
 
-        var emailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
-        var created = await GenerateForCurrentMonthAsync(db, settings, DateTime.Now);
-
-        foreach (var matchDay in created)
-        {
-            await NotifyPlayersAsync(db, emailSender, settings, matchDay);
-        }
+        await GenerateForCurrentMonthAsync(db, settings, DateTime.Now);
 
         if (settings.WeeklyMatchDayAutoTeamsEnabled)
         {
@@ -157,36 +151,6 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
         }
 
         return created;
-    }
-
-    private async Task NotifyPlayersAsync(BofcDbContext db, IEmailSender emailSender, SystemSettings settings, MatchDay matchDay)
-    {
-        var activePlayers = await db.Players.Where(p => p.IsActive).Select(p => new { p.Id, p.Email }).ToListAsync();
-        if (activePlayers.Count == 0) return;
-
-        var venueName = await db.Venues.Where(v => v.Id == matchDay.VenueId).Select(v => v.Name).FirstOrDefaultAsync() ?? "TBD";
-        var title = $"{settings.WeeklyMatchDayNamePrefix} - {matchDay.MatchDayDate:dddd, MMM d}";
-        var body = $"{matchDay.MatchDayDate:dddd, MMM d} at {matchDay.MatchDayDate:h:mm tt}, {venueName}. Are you in?";
-
-        var notification = new Notification { Title = title, Body = body, TargetType = NotificationTargetType.ALL };
-        db.Notifications.Add(notification);
-        db.NotificationRecipients.AddRange(activePlayers.Select(p => new NotificationRecipient
-        {
-            Notification = notification,
-            RecipientId = p.Id,
-            IsRead = false,
-        }));
-        await db.SaveChangesAsync();
-
-        try
-        {
-            var emails = activePlayers.Where(p => p.Email != "").Select(p => p.Email);
-            await emailSender.SendAsync(emails, title, $"<p>{System.Net.WebUtility.HtmlEncode(body)}</p>");
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Failed emailing Match Day invite for MatchDay {MatchDayId}", matchDay.Id);
-        }
     }
 
     private static DateTime MondayOf(DateTime date)

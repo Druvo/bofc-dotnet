@@ -1,11 +1,8 @@
 import { MinusCircleOutlined } from "@ant-design/icons";
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
+import React from "react";
 import { useGetAccountSummaryQuery } from "../../state/features/account/accountSummarySlice";
 
 // Import components
-import PlayerCollectionMetrics from "./PlayerCollectionMetricsTable";
 import LatestMatchDayCard from "./LatestMatchDayCard";
 import LiveAuctionStatusCard from "./widgets/LiveAuctionStatusCard";
 import UpcomingDuesWidget from "./widgets/UpcomingDuesWidget";
@@ -21,15 +18,7 @@ import TotalCollectionsTile from "./widgets/TotalCollectionsTile";
 import ThisMonthCollectionsTile from "./widgets/ThisMonthCollectionsTile";
 import PendingDuesCountTile from "./widgets/PendingDuesCountTile";
 
-interface DashboardProps {
-  isDarkMode?: boolean;
-}
-
-const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
-  const [selectedYear, setSelectedYear] = useState<number>();
-  const loginInfo = useSelector(selectLoginInfo);
-  const isAdmin = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN");
-
+const Dashboard: React.FC = () => {
   const { data: accountSummaryData } = useGetAccountSummaryQuery();
 
   return (
@@ -87,20 +76,6 @@ const Dashboard: React.FC<DashboardProps> = ({ isDarkMode = false }) => {
           <MatchCalendarWidget />
         </div>
       </div>
-
-      {/* Every player's collection status, side by side - admin/finance view
-          only. Regular players already get their own status via
-          MyContributionsCard above; the full roster table is noise for them
-          and exposes every other player's payment standing. */}
-      {isAdmin && (
-        <div className="mb-3">
-          <PlayerCollectionMetrics
-            selectedYear={selectedYear}
-            onYearChange={setSelectedYear}
-            isDarkMode={isDarkMode}
-          />
-        </div>
-      )}
     </div>
   );
 };

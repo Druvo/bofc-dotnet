@@ -43,7 +43,9 @@ public class MatchDay : AuditableEntity
     public int? GroupCount { get; set; }
     public bool AuctionMode { get; set; }
 
-    /// <summary>Set once the "MatchDay starting soon" reminder email/notification has gone out - prevents re-sending on every scheduler tick.</summary>
+    /// <summary>When the "MatchDay starting soon" reminder last actually went out (to whoever
+    /// hadn't voted yet at the time) - paired with SystemSettings.MatchDayReminderRepeatHours to
+    /// decide when the next re-send is due. Null before the first send ever.</summary>
     public DateTime? ReminderSentAt { get; set; }
 
     /// <summary>True for MatchDays auto-created weekly by MatchDaySchedulerBackgroundService ("Match Day") rather than manually created by an admin - drives simplified nav/tabs and scopes the season-cumulative stats leaderboard.</summary>

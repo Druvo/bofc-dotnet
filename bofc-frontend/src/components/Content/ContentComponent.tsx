@@ -29,6 +29,8 @@ import ContentOutlet from "./ContentOutlet";
 import { useAppShell } from "../layout/AppShellContext";
 import ClubRules from "../ClubRules/ClubRules";
 import GlobalSettingsPage from "../Settings/SettingsPage";
+import EmailTemplatesPage from "../Settings/EmailTemplatesPage";
+import MonthlyPaymentsPage from "../Dashboard/MonthlyPaymentsPage";
 import MatchDayPage from "../MatchDay/MatchDayPage";
 import MatchDetailsPage from "../MatchDays/Fixtures/MatchDetailsPage";
 import {
@@ -123,7 +125,7 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                         <div style={{ flex: 1 }}>
                     <Routes>
                         <Route path="/" element={<ContentOutlet />}>
-                            <Route index element={<Dashboard isDarkMode={isDarkMode} />} />
+                            <Route index element={<Dashboard />} />
                             <Route
                                 path="/match-day-viewer"
                                 element={<MatchDayViewerPage />}
@@ -138,7 +140,7 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                             />
                             <Route
                                 path="/dashboard"
-                                element={<Dashboard isDarkMode={isDarkMode} />}
+                                element={<Dashboard />}
                             />
                             <Route path="/profile" element={<UserProfile />} />
                             <Route path="/notifications" element={<NotificationsPage />} />
@@ -153,6 +155,9 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                             )}
                             {(loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN")) && (
                                 <Route path="/players/ranks" element={<PlayerRankBoard />} />
+                            )}
+                            {(loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN")) && (
+                                <Route path="/players/monthly-payments" element={<MonthlyPaymentsPage />} />
                             )}
                             <Route path="/players" element={<Players />} />
                             <Route path="/player-statistics" element={<PlayerStatistics />} />
@@ -223,7 +228,10 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                             <Route path="club-rules" element={<ClubRules />} />
 
                             {(loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN")) && (
-                                <Route path="settings" element={<GlobalSettingsPage />} />
+                                <>
+                                    <Route path="settings" element={<GlobalSettingsPage />} />
+                                    <Route path="settings/email-templates" element={<EmailTemplatesPage />} />
+                                </>
                             )}
 
                             <Route path="match-day" element={<MatchDayPage />} />

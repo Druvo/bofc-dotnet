@@ -71,6 +71,7 @@ public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUser
     public DbSet<WeeklyMatchDaySlot> WeeklyMatchDaySlots => Set<WeeklyMatchDaySlot>();
     public DbSet<JerseyColor> JerseyColors => Set<JerseyColor>();
     public DbSet<PlayerStatAdjustment> PlayerStatAdjustments => Set<PlayerStatAdjustment>();
+    public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

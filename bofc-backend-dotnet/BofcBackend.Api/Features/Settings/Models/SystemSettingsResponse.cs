@@ -16,9 +16,13 @@ public class SystemSettingsResponse
 
     public bool NotifyMatchDayReminderEnabled { get; set; }
     public int MatchDayReminderDaysBefore { get; set; }
+    /// <summary>Hours between re-sends during the reminder window - only to players who still haven't voted.</summary>
+    public int MatchDayReminderRepeatHours { get; set; } = 48;
 
     public bool NotifyPaymentDueEnabled { get; set; }
     public int PaymentDueReminderDayOfMonth { get; set; }
+    /// <summary>Days between re-sends after the trigger day - only to players still unpaid for the month.</summary>
+    public int PaymentDueReminderRepeatDays { get; set; } = 10;
 
     public bool NotifyCustomEmailEnabled { get; set; }
 

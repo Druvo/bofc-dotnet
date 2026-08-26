@@ -24,10 +24,20 @@ public class SystemSettings : AuditableEntity
     public bool SmtpUseSsl { get; set; } = true;
 
     public bool NotifyMatchDayReminderEnabled { get; set; }
-    public int MatchDayReminderDaysBefore { get; set; } = 3;
+    public int MatchDayReminderDaysBefore { get; set; } = 4;
+
+    /// <summary>Hours between re-sends during the reminder window (MatchDayReminderDaysBefore
+    /// through kickoff) - each re-send only goes to players who still haven't voted, so it
+    /// naturally tapers off as RSVPs come in and stops entirely once the MatchDay starts.</summary>
+    public int MatchDayReminderRepeatHours { get; set; } = 48;
 
     public bool NotifyPaymentDueEnabled { get; set; }
-    public int PaymentDueReminderDayOfMonth { get; set; } = 25;
+    public int PaymentDueReminderDayOfMonth { get; set; } = 5;
+
+    /// <summary>Days between re-sends after PaymentDueReminderDayOfMonth - each re-send only
+    /// goes to players still showing no payment for the current month, so it naturally stops
+    /// nagging a player once they pay.</summary>
+    public int PaymentDueReminderRepeatDays { get; set; } = 10;
 
     /// <summary>Master switch for the "also send email" option on custom/manual notifications.</summary>
     public bool NotifyCustomEmailEnabled { get; set; }
@@ -38,8 +48,10 @@ public class SystemSettings : AuditableEntity
     /// <summary>Master switch for the player-auction feature - when off, the Auction nav entry and "Auction Mode" toggle are hidden.</summary>
     public bool AuctionEnabled { get; set; } = true;
 
-    /// <summary>"yyyy-MM" of the last month the payment-due reminder actually ran - guards against re-sending twice in one month.</summary>
-    public string? LastPaymentReminderSentMonth { get; set; }
+    /// <summary>When the payment-due reminder last actually sent (to whoever was still unpaid at
+    /// the time) - paired with PaymentDueReminderDayOfMonth/PaymentDueReminderRepeatDays to decide
+    /// when the next re-send is due. Null before the first send ever.</summary>
+    public DateTime? LastPaymentReminderSentAt { get; set; }
 
     /// <summary>How often MatchDayStatusSchedulerBackgroundService re-checks and concludes overdue MatchDays. Re-read fresh on every cycle, so a change here takes effect after the current cycle finishes - no restart needed.</summary>
     public int MatchDayStatusCheckIntervalHours { get; set; } = 1;

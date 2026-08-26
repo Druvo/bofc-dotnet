@@ -1,12 +1,17 @@
 using System.Net;
+using BofcBackend.Api.Common;
 using BofcBackend.Api.Common.Constants;
+using BofcBackend.Api.Common.Email;
 using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Common.Storage;
 using BofcBackend.Api.Data;
+using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Domain.Enums;
+using BofcBackend.Api.Features.EmailTemplates;
 using BofcBackend.Api.Features.Teams.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace BofcBackend.Api.Features.Teams;
 
@@ -14,6 +19,9 @@ namespace BofcBackend.Api.Features.Teams;
 public class TeamService(
     BofcDbContext db,
     [FromKeyedServices("team-logo")] IMediaStorageProvider teamLogoStorageProvider,
+    IEmailSender emailSender,
+    IEmailTemplateService emailTemplateService,
+    IOptions<AppUrlOptions> appUrlOptions,
     ILogger<TeamService> logger)
     : ITeamService
 {
@@ -218,6 +226,74 @@ public class TeamService(
         await db.SaveChangesAsync();
 
         return new ClearGoalkeepersResponse { Cleared = cleared };
+    }
+
+    /// <summary>The "Send Teams Email" button on Team Building - manually triggered only, never
+    /// fired automatically off team/fixture generation. Emails every confirmed participant (not
+    /// just players who ended up on a team) with a link to the live Team Building page.</summary>
+    public async Task<int> SendTeamsGeneratedEmailAsync(long matchDayId)
+    {
+        var matchDay = await GetMatchDayOrThrowAsync(matchDayId);
+        if (!await db.Teams.AnyAsync(t => t.MatchDayId == matchDayId))
+        {
+            throw new BadRequestException("Generate teams for this MatchDay before sending the teams email.");
+        }
+
+        var participants = await db.MatchDayParticipants
+            .Include(p => p.Player)
+            .Where(p => p.MatchDayId == matchDayId && p.ParticipationStatus)
+            .Select(p => p.Player)
+            .ToListAsync();
+        if (participants.Count == 0) return 0;
+
+        var venueName = await db.Venues.Where(v => v.Id == matchDay.VenueId).Select(v => v.Name).FirstOrDefaultAsync() ?? "TBD";
+        var teamBuildingUrl = $"{appUrlOptions.Value.WebsiteUrl.TrimEnd('/')}/match-days/team-building/{matchDay.Id}";
+
+        var notification = new Notification
+        {
+            Title = matchDay.Name,
+            Body = "Teams and fixtures are ready - check Team Building to see who you're playing with.",
+            TargetType = NotificationTargetType.ALL,
+        };
+        db.Notifications.Add(notification);
+        db.NotificationRecipients.AddRange(participants.Select(p => new NotificationRecipient
+        {
+            Notification = notification,
+            RecipientId = p.Id,
+            IsRead = false,
+        }));
+        await db.SaveChangesAsync();
+
+        var sent = 0;
+
+        // Personalized per player (not a single batch send), matching the other reminder emails.
+        foreach (var player in participants)
+        {
+            if (string.IsNullOrWhiteSpace(player.Email)) continue;
+
+            var (title, body) = await emailTemplateService.RenderAsync(
+                EmailTemplateKeys.TeamsGenerated,
+                new Dictionary<string, string>
+                {
+                    ["PlayerName"] = player.Name,
+                    ["MatchDayName"] = matchDay.Name,
+                    ["MatchDayDateTime"] = matchDay.MatchDayDate.ToString("MMMM d, yyyy 'at' h:mm tt"),
+                    ["VenueName"] = venueName,
+                    ["TeamBuildingUrl"] = teamBuildingUrl,
+                });
+
+            try
+            {
+                var result = await emailSender.SendAsync([player.Email], title, body);
+                sent += result.Sent;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed emailing teams-generated notice to player {PlayerId} for MatchDay {MatchDayId}", player.Id, matchDay.Id);
+            }
+        }
+
+        return sent;
     }
 
     /// <summary>One click, one goalkeeper per team: for every team on this MatchDay that doesn't

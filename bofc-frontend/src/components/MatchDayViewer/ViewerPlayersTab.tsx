@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { TeamOutlined } from "@ant-design/icons";
 import { useGetMatchDaySummaryQuery } from "../../state/features/matchDays/matchDaysSlice";
+import { usePlayerListToAddToTeamQuery } from "../../state/features/matchDays/matchDayTeamSlice";
 import { getTeamInitials, toAbsoluteLogoUrl } from "./teamLogoUtils";
 import { toAbsolutePlayerPhotoUrl } from "../../utils/playerPhotoUtils";
 import PlayerCardV2 from "../CommonAtoms/PlayerCardV2";
@@ -61,6 +62,15 @@ export default function ViewerPlayersTab({
 
   const teams = useMemo(() => data?.content?.[0]?.teams || [], [data]);
 
+  // No teams drafted yet - show who's actually confirmed (voted Yes) instead of an empty state.
+  // "to-be-selected" is exactly the confirmed-but-unassigned list, which with zero teams is
+  // everyone who RSVP'd yes.
+  const { data: confirmedData, isLoading: isLoadingConfirmed } = usePlayerListToAddToTeamQuery(
+    { matchDayId },
+    { skip: teams.length > 0 }
+  );
+  const confirmedPlayers = confirmedData?.content || [];
+
   const filters = useMemo(() => {
     const labels = Array.from(
       new Set(teams.map((team: Team) => team.teamName)),
@@ -82,11 +92,48 @@ export default function ViewerPlayersTab({
   }
 
   if (teams.length === 0) {
+    if (isLoadingConfirmed) {
+      return (
+        <div className={styles.loadingWrap}>
+          <Loader />
+        </div>
+      );
+    }
+
+    if (confirmedPlayers.length === 0) {
+      return (
+        <div className={styles.emptyWrap}>
+          <div className="text-center text-theme-sm text-gray-400 dark:text-gray-500">
+            <TeamOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
+            No teams or players found
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className={styles.emptyWrap}>
-        <div className="text-center text-theme-sm text-gray-400 dark:text-gray-500">
-          <TeamOutlined className="mb-2 block text-3xl text-gray-300 dark:text-gray-600" />
-          No teams or players found
+      <div className={styles.pageWrap}>
+        <div className={styles.contentWrap}>
+          <div className="mb-3 text-center text-theme-sm text-gray-400 dark:text-gray-500">
+            Teams haven&apos;t been drafted yet - {confirmedPlayers.length} player{confirmedPlayers.length === 1 ? "" : "s"} confirmed so far
+          </div>
+          <div className={styles.playersGrid}>
+            {confirmedPlayers.map((player) => (
+              <PlayerCardV2
+                key={player.playerId}
+                size="compact"
+                player={{
+                  playerId: player.playerId,
+                  playerName: player.playerName.toUpperCase(),
+                  photoUrl: player.photoUrl ? toAbsolutePlayerPhotoUrl(player.photoUrl) : undefined,
+                  position: null,
+                  isCaptain: false,
+                  isViceCaptain: false,
+                  isGoalkeeper: false,
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     );

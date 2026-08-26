@@ -25,7 +25,11 @@ export interface BasicResType<T> {
 // components for the dispatch(acCollectionApi.util.invalidateTags(...)) calls
 // that close the loop.
 const apiWithTags = apiSlice.enhanceEndpoints({
-  addTagTypes: ["acCollection", "acBillPayment"],
+  // "playerCollectionMetrics" belongs to playerCollectionMetricsSlice.ts, but RTK Query's tag
+  // registry is shared across the whole apiSlice - declaring it here too just lets
+  // createAcCollection's invalidatesTags reference it, so logging a payment refreshes the
+  // Monthly Payments table without a manual refetch call.
+  addTagTypes: ["acCollection", "acBillPayment", "playerCollectionMetrics"],
 });
 
 export const acCollectionApi = apiWithTags.injectEndpoints({
@@ -49,7 +53,7 @@ export const acCollectionApi = apiWithTags.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["acCollection"],
+      invalidatesTags: ["acCollection", "playerCollectionMetrics"],
     }),
 
     // Update existing AC Collection

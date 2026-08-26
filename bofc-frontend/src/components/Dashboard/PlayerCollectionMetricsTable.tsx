@@ -3,7 +3,6 @@ import {
   TableOutlined,
   AppstoreOutlined,
   BarChartOutlined,
-  CalendarOutlined,
   TeamOutlined,
   UserAddOutlined,
   UserDeleteOutlined,
@@ -11,8 +10,13 @@ import {
   CaretDownOutlined,
 } from "@ant-design/icons";
 import { useGetPlayerCollectionMetricsQuery } from "../../state/features/account/playerCollectionMetricsSlice";
+import { useGetPlayersQuery } from "../../state/features/player/playerSlice";
 import { PlayerMetric } from "../../interfaces/IPlayerCollectionMetrics";
+import IPlayer from "../../interfaces/IPlayer";
 import PlayerCollectionMobileView from "./PlayerCollectionMobileView";
+import LogPaymentModal from "./LogPaymentModal";
+import Avatar from "../CommonAtoms/Avatar";
+import { toAbsolutePlayerPhotoUrl } from "../../utils/playerPhotoUtils";
 import FormSelect from "../ui/form-select";
 import Loader from "../ui/loader";
 import useIsMobile from "../../hooks/useIsMobile";
@@ -73,6 +77,20 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
 
   const metrics = data?.content?.metrics || [];
   const years = data?.content?.years || [];
+
+  // The metrics endpoint returns amounts only, no photo - join against the player list
+  // (already cached app-wide) client-side for the avatar column instead of a backend change.
+  const { data: playersData } = useGetPlayersQuery();
+  const playersById = useMemo(() => {
+    const map: Record<number, IPlayer> = {};
+    (playersData?.content || []).forEach((p) => { map[p.id] = p; });
+    return map;
+  }, [playersData]);
+
+  const [logPaymentFor, setLogPaymentFor] = useState<{ playerId: number; playerName: string; photoUrl?: string; month: number } | null>(null);
+  const openLogPayment = (playerId: number, playerName: string, month: number) => {
+    setLogPaymentFor({ playerId, playerName, photoUrl: playersById[playerId]?.photoUrl, month });
+  };
 
   React.useEffect(() => {
     if (!selectedYear && years.length > 0) {
@@ -162,9 +180,9 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
           <tr className="border-b border-gray-100 dark:border-[var(--color-rule)]">
             <th
               onClick={() => toggleSort("playerName")}
-              className="sticky left-0 z-10 min-w-[150px] cursor-pointer whitespace-nowrap bg-white px-3 py-2.5 text-left font-semibold text-gray-500 dark:bg-[var(--color-paper-3)] dark:text-gray-400"
+              className="sticky left-0 z-10 min-w-[190px] cursor-pointer whitespace-nowrap bg-white px-3 py-2.5 text-left font-semibold text-gray-500 dark:bg-[var(--color-paper-3)] dark:text-gray-400"
             >
-              Name <SortIcon field="playerName" />
+              Player <SortIcon field="playerName" />
             </th>
             {monthNames.map((month, idx) => (
               <th
@@ -178,29 +196,37 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-          {dataSource.map((record) => (
-            <tr key={record.key} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
-              <td className="sticky left-0 z-10 whitespace-nowrap bg-white px-3 py-2 font-semibold text-gray-800 dark:bg-[var(--color-paper-3)] dark:text-white/90">
-                {record.playerName}
-              </td>
-              {monthNames.map((_, idx) => {
-                const monthNumber = idx + 1;
-                const amount = record[`month_${monthNumber}`] || 0;
-                const isCurrentCell = selectedYear === currentYear && monthNumber === currentMonth;
-                const playerData = metrics.find((p: PlayerMetric) => p.playerId === record.key);
-                const isActive = playerData?.active ?? false;
-                const showDue = isCurrentCell && amount <= 0 && isActive;
-                return (
-                  <td
-                    key={monthNumber}
-                    className={`px-2 py-2 text-center tabular-nums text-gray-600 dark:text-gray-300 ${showDue ? "bg-warning-50 dark:bg-warning-500/10" : ""}`}
-                  >
-                    {showDue ? <span className="font-bold text-warning-600 dark:text-orange-400">Due</span> : amount > 0 ? amount.toFixed(0) : ""}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+          {dataSource.map((record) => {
+            const player = playersById[record.key];
+            return (
+              <tr key={record.key} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                <td className="sticky left-0 z-10 whitespace-nowrap bg-white px-3 py-2 dark:bg-[var(--color-paper-3)]">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar src={toAbsolutePlayerPhotoUrl(player?.photoUrl)} name={record.playerName} seed={record.key} size={30} />
+                    <span className="font-semibold text-gray-800 dark:text-white/90">{record.playerName}</span>
+                  </div>
+                </td>
+                {monthNames.map((_, idx) => {
+                  const monthNumber = idx + 1;
+                  const amount = record[`month_${monthNumber}`] || 0;
+                  const isCurrentCell = selectedYear === currentYear && monthNumber === currentMonth;
+                  const playerData = metrics.find((p: PlayerMetric) => p.playerId === record.key);
+                  const isActive = playerData?.active ?? false;
+                  const showDue = isCurrentCell && amount <= 0 && isActive;
+                  return (
+                    <td
+                      key={monthNumber}
+                      onClick={() => selectedYear && openLogPayment(record.key, record.playerName, monthNumber)}
+                      title="Click to view/log payments for this month"
+                      className={`cursor-pointer px-2 py-2 text-center tabular-nums text-gray-600 hover:ring-1 hover:ring-inset hover:ring-brand-300 dark:text-gray-300 ${showDue ? "bg-warning-50 dark:bg-warning-500/10" : ""}`}
+                    >
+                      {showDue ? <span className="font-bold text-warning-600 dark:text-orange-400">Due</span> : amount > 0 ? amount.toFixed(0) : <span className="text-gray-300 dark:text-gray-700">-</span>}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
         <tfoot>
           <tr className="border-t border-gray-200 font-bold dark:border-[var(--color-rule)]">
@@ -276,9 +302,22 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
           years={years}
           onYearChange={handleYearChange}
           isLoading={isLoading}
+          playersById={playersById}
+          onCellClick={(playerId, playerName, month) => selectedYear && openLogPayment(playerId, playerName, month)}
         />
       ) : (
         <div className="p-4">{renderTable()}</div>
+      )}
+
+      {logPaymentFor && selectedYear && (
+        <LogPaymentModal
+          playerId={logPaymentFor.playerId}
+          playerName={logPaymentFor.playerName}
+          photoUrl={logPaymentFor.photoUrl}
+          month={logPaymentFor.month}
+          year={selectedYear}
+          onClose={() => setLogPaymentFor(null)}
+        />
       )}
     </div>
   );

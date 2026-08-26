@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { SettingOutlined, MailOutlined, CalendarOutlined, BankOutlined, BellOutlined, FireOutlined, SkinOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { SettingOutlined, MailOutlined, CalendarOutlined, BankOutlined, BellOutlined, FireOutlined, SkinOutlined, ClockCircleOutlined, FileTextOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import FormInput from "../ui/form-input";
 import FormSelect from "../ui/form-select";
@@ -77,6 +78,7 @@ const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "F
  * SettingsController is already role-gated on every action, so `skip` below just
  * avoids firing a request every non-admin would get a 403 back from. */
 function SettingsPage() {
+    const navigate = useNavigate();
     const loginInfo = useSelector(selectLoginInfo);
     const admin = isAdmin(loginInfo.roles);
 
@@ -98,9 +100,11 @@ function SettingsPage() {
     const [smtpUseSsl, setSmtpUseSsl] = useState(true);
 
     const [notifyMatchDayReminderEnabled, setNotifyMatchDayReminderEnabled] = useState(false);
-    const [matchDayReminderDaysBefore, setMatchDayReminderDaysBefore] = useState(3);
+    const [matchDayReminderDaysBefore, setMatchDayReminderDaysBefore] = useState(4);
+    const [matchDayReminderRepeatHours, setMatchDayReminderRepeatHours] = useState(48);
     const [notifyPaymentDueEnabled, setNotifyPaymentDueEnabled] = useState(false);
-    const [paymentDueReminderDayOfMonth, setPaymentDueReminderDayOfMonth] = useState(25);
+    const [paymentDueReminderDayOfMonth, setPaymentDueReminderDayOfMonth] = useState(5);
+    const [paymentDueReminderRepeatDays, setPaymentDueReminderRepeatDays] = useState(10);
     const [notifyCustomEmailEnabled, setNotifyCustomEmailEnabled] = useState(false);
     const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
     const [auctionEnabled, setAuctionEnabled] = useState(true);
@@ -217,8 +221,10 @@ function SettingsPage() {
         setSmtpUseSsl(s.smtpUseSsl);
         setNotifyMatchDayReminderEnabled(s.notifyMatchDayReminderEnabled);
         setMatchDayReminderDaysBefore(s.matchDayReminderDaysBefore);
+        setMatchDayReminderRepeatHours(s.matchDayReminderRepeatHours || 48);
         setNotifyPaymentDueEnabled(s.notifyPaymentDueEnabled);
         setPaymentDueReminderDayOfMonth(s.paymentDueReminderDayOfMonth);
+        setPaymentDueReminderRepeatDays(s.paymentDueReminderRepeatDays || 10);
         setNotifyCustomEmailEnabled(s.notifyCustomEmailEnabled);
         setPushNotificationsEnabled(s.pushNotificationsEnabled);
         setAuctionEnabled(s.auctionEnabled);
@@ -271,8 +277,10 @@ function SettingsPage() {
                 smtpUseSsl,
                 notifyMatchDayReminderEnabled,
                 matchDayReminderDaysBefore,
+                matchDayReminderRepeatHours,
                 notifyPaymentDueEnabled,
                 paymentDueReminderDayOfMonth,
+                paymentDueReminderRepeatDays,
                 notifyCustomEmailEnabled,
                 pushNotificationsEnabled,
                 auctionEnabled,
@@ -391,6 +399,19 @@ function SettingsPage() {
 
             <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
+                    <FileTextOutlined className="text-brand-500 dark:text-brand-400" />
+                    Email Templates
+                </h2>
+                <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
+                    Edit the subject and body of the payment-due reminder and upcoming Match Day reminder emails - each supports a few placeholders that get filled in automatically when it's sent.
+                </p>
+                <Button variant="outline" onClick={() => navigate("/settings/email-templates")}>
+                    Manage Templates
+                </Button>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
+                <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <SettingOutlined className="text-brand-500 dark:text-brand-400" />
                     Automated Email Notifications
                 </h2>
@@ -402,36 +423,66 @@ function SettingsPage() {
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 p-4 dark:border-[var(--color-rule)]">
                         <div>
                             <FormSwitch label="Upcoming Match Day reminder" checked={notifyMatchDayReminderEnabled} onChange={setNotifyMatchDayReminderEnabled} />
-                            <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">Notifies every player before a Match Day starts.</p>
+                            <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
+                                Reminds every player who hasn't voted Yes/No yet, starting this many days before kickoff - repeats until they vote or the Match Day starts.
+                            </p>
                         </div>
-                        <div className="w-40">
-                            <FormInput
-                                label="Days before"
-                                type="number"
-                                min={1}
-                                max={30}
-                                value={matchDayReminderDaysBefore}
-                                onChange={(e) => setMatchDayReminderDaysBefore(Number(e.target.value) || 1)}
-                                disabled={!notifyMatchDayReminderEnabled}
-                            />
+                        <div className="flex gap-3">
+                            <div className="w-36">
+                                <FormInput
+                                    label="Days before"
+                                    type="number"
+                                    min={1}
+                                    max={30}
+                                    value={matchDayReminderDaysBefore}
+                                    onChange={(e) => setMatchDayReminderDaysBefore(Number(e.target.value) || 1)}
+                                    disabled={!notifyMatchDayReminderEnabled}
+                                />
+                            </div>
+                            <div className="w-36">
+                                <FormInput
+                                    label="Repeat every (hrs)"
+                                    type="number"
+                                    min={1}
+                                    max={168}
+                                    value={matchDayReminderRepeatHours}
+                                    onChange={(e) => setMatchDayReminderRepeatHours(Number(e.target.value) || 1)}
+                                    disabled={!notifyMatchDayReminderEnabled}
+                                />
+                            </div>
                         </div>
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 p-4 dark:border-[var(--color-rule)]">
                         <div>
                             <FormSwitch label="Monthly payment due reminder" checked={notifyPaymentDueEnabled} onChange={setNotifyPaymentDueEnabled} />
-                            <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">Notifies players who haven't paid dues for the current month.</p>
+                            <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
+                                Reminds players who haven't paid dues for the current month, starting on this day - repeats until they pay or the month rolls over.
+                            </p>
                         </div>
-                        <div className="w-40">
-                            <FormInput
-                                label="Day of month"
-                                type="number"
-                                min={1}
-                                max={28}
-                                value={paymentDueReminderDayOfMonth}
-                                onChange={(e) => setPaymentDueReminderDayOfMonth(Number(e.target.value) || 1)}
-                                disabled={!notifyPaymentDueEnabled}
-                            />
+                        <div className="flex gap-3">
+                            <div className="w-36">
+                                <FormInput
+                                    label="Day of month"
+                                    type="number"
+                                    min={1}
+                                    max={28}
+                                    value={paymentDueReminderDayOfMonth}
+                                    onChange={(e) => setPaymentDueReminderDayOfMonth(Number(e.target.value) || 1)}
+                                    disabled={!notifyPaymentDueEnabled}
+                                />
+                            </div>
+                            <div className="w-36">
+                                <FormInput
+                                    label="Repeat every (days)"
+                                    type="number"
+                                    min={1}
+                                    max={30}
+                                    value={paymentDueReminderRepeatDays}
+                                    onChange={(e) => setPaymentDueReminderRepeatDays(Number(e.target.value) || 1)}
+                                    disabled={!notifyPaymentDueEnabled}
+                                />
+                            </div>
                         </div>
                     </div>
 

@@ -30,12 +30,18 @@ public class UpdateSystemSettingsRequest
     public bool NotifyMatchDayReminderEnabled { get; set; }
 
     [Range(1, 30)]
-    public int MatchDayReminderDaysBefore { get; set; } = 3;
+    public int MatchDayReminderDaysBefore { get; set; } = 4;
+
+    [Range(1, 168)]
+    public int MatchDayReminderRepeatHours { get; set; } = 48;
 
     public bool NotifyPaymentDueEnabled { get; set; }
 
     [Range(1, 28)]
-    public int PaymentDueReminderDayOfMonth { get; set; } = 25;
+    public int PaymentDueReminderDayOfMonth { get; set; } = 5;
+
+    [Range(1, 30)]
+    public int PaymentDueReminderRepeatDays { get; set; } = 10;
 
     public bool NotifyCustomEmailEnabled { get; set; }
 

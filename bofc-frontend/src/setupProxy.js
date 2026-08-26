@@ -28,7 +28,7 @@ module.exports = function (app) {
   app.use(
     "/api",
     createProxyMiddleware({
-      target: "http://localhost:9500",
+      target: "http://localhost:9700",
       changeOrigin: true,
       pathRewrite: { "^/api": "" },
     })
@@ -37,7 +37,7 @@ module.exports = function (app) {
   app.use(
     "/ws/auction",
     createProxyMiddleware({
-      target: "http://localhost:9500",
+      target: "http://localhost:9700",
       changeOrigin: true,
     })
   );

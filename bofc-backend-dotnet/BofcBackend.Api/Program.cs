@@ -18,6 +18,7 @@ using BofcBackend.Api.Features.Accounting;
 using BofcBackend.Api.Features.Auction;
 using BofcBackend.Api.Features.Auth;
 using BofcBackend.Api.Features.ClubRules;
+using BofcBackend.Api.Features.EmailTemplates;
 using BofcBackend.Api.Features.Fixtures;
 using BofcBackend.Api.Features.LogicNodes;
 using BofcBackend.Api.Features.Matches;
@@ -81,6 +82,8 @@ builder.Services.Configure<VapidOptions>(builder.Configuration.GetSection("Vapid
 builder.Services.AddDataProtection();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<IMatchDayVoteTokenService, MatchDayVoteTokenService>();
 builder.Services.AddHostedService<MatchDayReminderBackgroundService>();
 builder.Services.AddHostedService<PaymentDueReminderBackgroundService>();
 builder.Services.AddHostedService<MatchDaySchedulerBackgroundService>();
@@ -97,6 +100,7 @@ builder.Services.AddScoped<IMatchDayPrizeService, MatchDayPrizeService>();
 builder.Services.AddScoped<IPlayerStatisticsService, PlayerStatisticsService>();
 builder.Services.Configure<PlayerOptions>(builder.Configuration.GetSection("Player"));
 builder.Services.Configure<AccountingOptions>(builder.Configuration.GetSection("Accounting"));
+builder.Services.Configure<AppUrlOptions>(builder.Configuration.GetSection("Public"));
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IMatchDayParticipantService, MatchDayParticipantService>();
 builder.Services.AddScoped<IMatchDayParticipantPlayerService, MatchDayParticipantPlayerService>();
@@ -283,6 +287,11 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseCors(corsPolicyName);
+
+// wwwroot/email/* - stable, publicly-reachable image URLs for HTML emails (the club logo
+// embedded in every email's branded header/footer). Email clients load images from an
+// absolute URL outside the app entirely, so this can't be a webpack-hashed frontend asset.
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

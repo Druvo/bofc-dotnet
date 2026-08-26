@@ -254,6 +254,15 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
             }),
             invalidatesTags: ["matchDayTeam", "matchDays"],
         }),
+
+        /** "Send Teams Email" button - manual only, emails every confirmed participant a link to
+         * this Team Building page. Never fired automatically off generation. */
+        sendTeamsGeneratedEmail: builder.mutation<BasicResType & { content: { sent: number } }, { matchDayId: number }>({
+            query: ({ matchDayId }) => ({
+                url: `teams/matchday/${matchDayId}/send-teams-email`,
+                method: "POST",
+            }),
+        }),
     }),
 });
 
@@ -270,4 +279,5 @@ export const {
     useAutoAssignGoalkeepersMutation,
     useLazyGetGoalkeeperRankingQuery,
     useClearGoalkeepersMutation,
+    useSendTeamsGeneratedEmailMutation,
 } = matchDayTeamApi;

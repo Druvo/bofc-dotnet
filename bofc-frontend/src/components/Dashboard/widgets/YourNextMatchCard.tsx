@@ -7,6 +7,7 @@ import {
   useGetLatestMatchDayWithUserStatusQuery,
   useGetMatchDaySummaryQuery,
 } from "../../../state/features/matchDays/matchDaysSlice";
+import { usePlayerListToAddToTeamQuery } from "../../../state/features/matchDays/matchDayTeamSlice";
 import { useGetFixturesQuery } from "../../../state/features/fixtures/fixturesSlice";
 import { MatchStatus } from "../../../state/features/fixtures/fixtureTypes";
 import { showBdLocalTime } from "../../../utils/utils";
@@ -40,6 +41,16 @@ const YourNextMatchCard: React.FC = () => {
 
   const teams = summaryData?.content?.[0]?.teams || [];
   const teamsDrafted = teams.length > 0;
+
+  // Teams not drafted yet - the card would otherwise just show an empty "not drafted" message.
+  // Show who's actually confirmed (voted Yes) so far instead, so there's still something useful
+  // here before teams exist. "to-be-selected" is exactly the confirmed-but-unassigned list -
+  // with zero teams, that's everyone who RSVP'd yes.
+  const { data: confirmedPlayersData, isLoading: isLoadingConfirmed } = usePlayerListToAddToTeamQuery(
+    { matchDayId: matchDayId ?? 0 },
+    { skip: !matchDayId || teamsDrafted }
+  );
+  const confirmedPlayers = confirmedPlayersData?.content || [];
 
   const myAssignment = useMemo(() => {
     for (const team of teams) {
@@ -90,9 +101,40 @@ const YourNextMatchCard: React.FC = () => {
       {isLoadingMatchDay || isLoadingSummary ? (
         <Loader className="py-4" />
       ) : !teamsDrafted ? (
-        <p className="my-3 text-theme-xs text-gray-400 dark:text-gray-500">
-          Teams haven&apos;t been drafted for this Match Day yet.
-        </p>
+        <div className="flex flex-col gap-2">
+          <p className="my-1 text-theme-xs text-gray-400 dark:text-gray-500">
+            Teams haven&apos;t been drafted for this Match Day yet.
+          </p>
+          {isLoadingConfirmed ? (
+            <Loader className="py-2" />
+          ) : confirmedPlayers.length === 0 ? (
+            <p className="text-theme-xs text-gray-400 dark:text-gray-500">Nobody's confirmed yet.</p>
+          ) : (
+            <div>
+              <div className="mb-1.5 text-theme-xs text-gray-400 dark:text-gray-500">
+                {confirmedPlayers.length} confirmed so far
+              </div>
+              <div className="flex flex-wrap items-center">
+                {confirmedPlayers.slice(0, MAX_TEAMMATE_AVATARS).map((p, idx) => (
+                  <div key={p.playerId} className={idx > 0 ? "-ml-2" : ""} title={p.playerName}>
+                    <Avatar
+                      src={toAbsolutePlayerPhotoUrl(p.photoUrl)}
+                      name={p.playerName}
+                      seed={p.playerId}
+                      size={28}
+                      className="border-2 border-white dark:border-[var(--color-paper-3)]"
+                    />
+                  </div>
+                ))}
+                {confirmedPlayers.length > MAX_TEAMMATE_AVATARS && (
+                  <div className="-ml-2 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-[10px] font-semibold text-gray-500 dark:border-[var(--color-paper-3)] dark:bg-white/10 dark:text-gray-400">
+                    +{confirmedPlayers.length - MAX_TEAMMATE_AVATARS}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       ) : !myAssignment ? (
         <p className="my-3 text-theme-xs text-gray-400 dark:text-gray-500">
           Teams are set for this Match Day, but you&apos;re not on one - check your RSVP.

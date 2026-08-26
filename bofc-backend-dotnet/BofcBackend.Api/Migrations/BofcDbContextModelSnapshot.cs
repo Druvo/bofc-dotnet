@@ -1079,6 +1079,68 @@ namespace BofcBackend.Api.Migrations
                     b.ToTable("cost_types", (string)null);
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.EmailTemplate", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("body");
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("key_name");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)")
+                        .HasColumnName("subject");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("email_templates", (string)null);
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.GroupStanding", b =>
                 {
                     b.Property<long>("Id")
@@ -2736,14 +2798,19 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("last_modified_by");
 
-                    b.Property<string>("LastPaymentReminderSentMonth")
-                        .HasMaxLength(7)
-                        .HasColumnType("nvarchar(7)")
-                        .HasColumnName("last_payment_reminder_sent_month");
+                    b.Property<DateTime?>("LastPaymentReminderSentAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("last_payment_reminder_sent_at");
 
                     b.Property<int>("MatchDayReminderDaysBefore")
                         .HasColumnType("int")
                         .HasColumnName("match_day_reminder_days_before");
+
+                    b.Property<int>("MatchDayReminderRepeatHours")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(48)
+                        .HasColumnName("match_day_reminder_repeat_hours");
 
                     b.Property<int>("MatchDayStatusCheckIntervalHours")
                         .ValueGeneratedOnAdd()
@@ -2772,6 +2839,12 @@ namespace BofcBackend.Api.Migrations
                     b.Property<int>("PaymentDueReminderDayOfMonth")
                         .HasColumnType("int")
                         .HasColumnName("payment_due_reminder_day_of_month");
+
+                    b.Property<int>("PaymentDueReminderRepeatDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(7)
+                        .HasColumnName("payment_due_reminder_repeat_days");
 
                     b.Property<bool>("PushNotificationsEnabled")
                         .HasColumnType("bit")

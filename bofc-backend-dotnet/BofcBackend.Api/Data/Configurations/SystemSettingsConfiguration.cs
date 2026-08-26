@@ -30,7 +30,9 @@ public class SystemSettingsConfiguration : IEntityTypeConfiguration<SystemSettin
         builder.Property(s => s.NotifyCustomEmailEnabled).HasColumnName("notify_custom_email_enabled").IsRequired();
         builder.Property(s => s.PushNotificationsEnabled).HasColumnName("push_notifications_enabled").IsRequired();
         builder.Property(s => s.AuctionEnabled).HasColumnName("auction_enabled").IsRequired();
-        builder.Property(s => s.LastPaymentReminderSentMonth).HasColumnName("last_payment_reminder_sent_month").HasMaxLength(7);
+        builder.Property(s => s.LastPaymentReminderSentAt).HasColumnName("last_payment_reminder_sent_at");
+        builder.Property(s => s.MatchDayReminderRepeatHours).HasColumnName("match_day_reminder_repeat_hours").HasDefaultValue(48).IsRequired();
+        builder.Property(s => s.PaymentDueReminderRepeatDays).HasColumnName("payment_due_reminder_repeat_days").HasDefaultValue(7).IsRequired();
         builder.Property(s => s.MatchDayStatusCheckIntervalHours).HasColumnName("match_day_status_check_interval_hours").HasDefaultValue(1).IsRequired();
 
         builder.Property(s => s.WeeklyMatchDayEnabled).HasColumnName("weekly_match_day_enabled").IsRequired();

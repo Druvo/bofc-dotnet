@@ -33,6 +33,10 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
             .HasColumnName("exclude_from_goalkeeper_rotation")
             .IsRequired()
             .HasDefaultValue(false);
+        builder.Property(p => p.EmailNotificationsEnabled)
+            .HasColumnName("email_notifications_enabled")
+            .IsRequired()
+            .HasDefaultValue(true);
 
         builder.Property(p => p.CreatedBy).HasColumnName("created_by").IsRequired();
         builder.Property(p => p.CreatedDate).HasColumnName("created_date").IsRequired();

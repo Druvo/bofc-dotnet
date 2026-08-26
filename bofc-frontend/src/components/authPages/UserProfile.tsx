@@ -9,6 +9,7 @@ import {
     MailOutlined,
     MessageOutlined,
     LockOutlined,
+    BellOutlined,
     EditOutlined,
     TrophyOutlined,
     HistoryOutlined,
@@ -23,6 +24,7 @@ import {
     useGetUserProfileQuery,
     useChangePasswordMutation,
     useUpdatePlayerDataMutation,
+    useUpdateEmailNotificationsEnabledMutation,
 } from "../../state/features/auth/authSlice";
 import {
     useGetPlayerPositionsQuery,
@@ -62,6 +64,7 @@ export default function UserProfile() {
     const { data: playerPositions } = useGetPlayerPositionsQuery();
     const [changePassword, { isLoading: isChangingPassword }] = useChangePasswordMutation();
     const [updatePlayerData, { isLoading: isUpdating }] = useUpdatePlayerDataMutation();
+    const [updateEmailNotificationsEnabled, { isLoading: isUpdatingEmailNotifications }] = useUpdateEmailNotificationsEnabledMutation();
 
     const { data: goalkeepingHistoryData, isLoading: isLoadingGoalkeeping } = useGetPlayerGoalkeepingHistoryQuery(
         { playerId: viewingId },
@@ -134,6 +137,18 @@ export default function UserProfile() {
             })
             .catch((err: any) => {
                 toast.error(err?.data?.message || "Failed to update profile");
+            });
+    };
+
+    const handleToggleEmailNotifications = (enabled: boolean) => {
+        updateEmailNotificationsEnabled({ emailNotificationsEnabled: enabled })
+            .unwrap()
+            .then(() => {
+                toast.success(enabled ? "Email notifications turned on" : "Email notifications turned off");
+                refetch();
+            })
+            .catch((err: any) => {
+                toast.error(err?.data?.message || "Failed to update email notification preference");
             });
     };
 
@@ -229,6 +244,36 @@ export default function UserProfile() {
                 />
             </div>
             <Button type="button" className="mt-4" disabled={isUpdating} onClick={handleUpdateProfile}>Save Changes</Button>
+
+            <div className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
+                <div className="flex items-start gap-3">
+                    <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-base text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
+                        <BellOutlined />
+                    </div>
+                    <div>
+                        <div className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">Email Notifications</div>
+                        <div className="text-theme-xs text-gray-500 dark:text-gray-400">
+                            Match day reminders, payment reminders and teams-announced emails. Turn off to stop receiving these.
+                        </div>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    role="switch"
+                    aria-checked={profile?.emailNotificationsEnabled ?? true}
+                    disabled={isUpdatingEmailNotifications || !profile}
+                    onClick={() => handleToggleEmailNotifications(!(profile?.emailNotificationsEnabled ?? true))}
+                    className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-60 ${
+                        (profile?.emailNotificationsEnabled ?? true) ? "bg-brand-500" : "bg-gray-300 dark:bg-white/15"
+                    }`}
+                >
+                    <span
+                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                            (profile?.emailNotificationsEnabled ?? true) ? "translate-x-[22px]" : "translate-x-0.5"
+                        }`}
+                    />
+                </button>
+            </div>
         </div>
     );
 

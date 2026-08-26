@@ -77,7 +77,7 @@ public class PaymentDueReminderBackgroundService(IServiceScopeFactory scopeFacto
             .ToListAsync();
 
         var duePlayers = await db.Players
-            .Where(p => p.IsActive && !paidPlayerIds.Contains(p.Id))
+            .Where(p => p.IsActive && p.EmailNotificationsEnabled && !paidPlayerIds.Contains(p.Id))
             .Select(p => new { p.Id, p.Name, p.Email })
             .ToListAsync();
 

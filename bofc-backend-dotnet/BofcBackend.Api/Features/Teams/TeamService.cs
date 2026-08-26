@@ -3,6 +3,8 @@ using BofcBackend.Api.Common;
 using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Common.Email;
 using BofcBackend.Api.Common.Exceptions;
+using BofcBackend.Api.Common.Scheduling;
+using BofcBackend.Api.Common.Security;
 using BofcBackend.Api.Common.Storage;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
@@ -21,6 +23,7 @@ public class TeamService(
     [FromKeyedServices("team-logo")] IMediaStorageProvider teamLogoStorageProvider,
     IEmailSender emailSender,
     IEmailTemplateService emailTemplateService,
+    IMatchDayVoteTokenService voteTokenService,
     IOptions<AppUrlOptions> appUrlOptions,
     ILogger<TeamService> logger)
     : ITeamService
@@ -247,7 +250,7 @@ public class TeamService(
         if (participants.Count == 0) return 0;
 
         var venueName = await db.Venues.Where(v => v.Id == matchDay.VenueId).Select(v => v.Name).FirstOrDefaultAsync() ?? "TBD";
-        var teamBuildingUrl = $"{appUrlOptions.Value.WebsiteUrl.TrimEnd('/')}/match-days/team-building/{matchDay.Id}";
+        var teamBuildingUrl = $"{appUrlOptions.Value.WebsiteUrl.TrimEnd('/')}/match-days/join-match-day/{matchDay.Id}";
 
         var notification = new Notification
         {
@@ -267,9 +270,12 @@ public class TeamService(
         var sent = 0;
 
         // Personalized per player (not a single batch send), matching the other reminder emails.
+        // In-app notifications above go to every participant regardless - only the email itself
+        // respects IsActive/EmailNotificationsEnabled, same gate as the other reminder emails.
         foreach (var player in participants)
         {
             if (string.IsNullOrWhiteSpace(player.Email)) continue;
+            if (!player.IsActive || !player.EmailNotificationsEnabled) continue;
 
             var (title, body) = await emailTemplateService.RenderAsync(
                 EmailTemplateKeys.TeamsGenerated,
@@ -293,6 +299,28 @@ public class TeamService(
             }
         }
 
+        return sent;
+    }
+
+    /// <summary>The "Send Match Day Reminder" button on Team Building - manually triggered, reuses
+    /// the exact same per-MatchDay send the hourly MatchDayReminderBackgroundService runs
+    /// automatically (see its SendForMatchDayAsync), so a manual nudge behaves identically to a
+    /// scheduled one: only players who haven't voted yet, active + email-notifications-on only.
+    /// Also resets the MatchDay's ReminderSentAt, so the automatic scheduler won't immediately
+    /// re-send on its next hourly tick.</summary>
+    public async Task<int> SendMatchDayReminderNowAsync(long matchDayId)
+    {
+        var matchDay = await db.MatchDays.Include(m => m.Venue).FirstOrDefaultAsync(m => m.Id == matchDayId)
+            ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
+
+        var activePlayers = await db.Players.Where(p => p.IsActive && p.EmailNotificationsEnabled)
+            .Select(p => new MatchDayReminderBackgroundService.ReminderPlayer(p.Id, p.Name, p.Email))
+            .ToListAsync();
+
+        var sent = await MatchDayReminderBackgroundService.SendForMatchDayAsync(
+            db, emailSender, emailTemplateService, voteTokenService, appUrlOptions, logger, matchDay, activePlayers, DateTime.Now);
+
+        await db.SaveChangesAsync();
         return sent;
     }
 

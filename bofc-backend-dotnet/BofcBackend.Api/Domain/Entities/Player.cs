@@ -34,5 +34,11 @@ public class Player : AuditableEntity
     /// convention as Rank.</summary>
     public bool ExcludeFromGoalkeeperRotation { get; set; }
 
+    /// <summary>Player's own opt-in/out of system-generated emails (payment/matchday reminders,
+    /// teams-announced). Defaults to true - only an explicit opt-out stops delivery. Checked
+    /// alongside IsActive everywhere reminder emails go out (see PlayerService's active-player
+    /// queries used by the reminder background services).</summary>
+    public bool EmailNotificationsEnabled { get; set; } = true;
+
     public ICollection<Role> Roles { get; set; } = new List<Role>();
 }

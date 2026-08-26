@@ -64,80 +64,103 @@ public class MatchDayReminderBackgroundService(IServiceScopeFactory scopeFactory
 
         if (dueMatchDays.Count == 0) return;
 
-        var activePlayers = await db.Players.Where(p => p.IsActive).Select(p => new { p.Id, p.Name, p.Email }).ToListAsync();
+        var activePlayers = await db.Players.Where(p => p.IsActive && p.EmailNotificationsEnabled)
+            .Select(p => new ReminderPlayer(p.Id, p.Name, p.Email)).ToListAsync();
         if (activePlayers.Count == 0) return;
-
-        var baseUrl = appUrlOptions.Value.BaseUrl.TrimEnd('/');
 
         foreach (var matchDay in dueMatchDays)
         {
-            // Only players who haven't voted yet - a "yes" or a "no" both count as having
-            // answered, so neither gets nagged again; only the still-silent get re-reminded.
-            var votedPlayerIds = (await db.MatchDayParticipants
-                .Where(p => p.MatchDayId == matchDay.Id)
-                .Select(p => p.PlayerId)
-                .ToListAsync())
-                .ToHashSet();
-            var targetPlayers = activePlayers.Where(p => !votedPlayerIds.Contains(p.Id)).ToList();
-
-            // Advance the "last sent" marker even with zero targets this round (everyone's
-            // already voted) so the interval check above doesn't re-query every single tick.
-            matchDay.ReminderSentAt = now;
-            if (targetPlayers.Count == 0) continue;
-
-            // The vote link must keep working right up to kickoff (the vote endpoint itself
-            // rejects a past MatchDayDate) plus a little slack for clock drift/mail delay.
-            var tokenLifetime = (matchDay.MatchDayDate - now).Add(TimeSpan.FromHours(6));
-            if (tokenLifetime < TimeSpan.FromHours(1)) tokenLifetime = TimeSpan.FromHours(1);
-
-            // In-app notification text is short/plain, independent of the templated email body
-            // (which is now a full standalone HTML document, not something to dump into a
-            // notification card).
-            var notification = new Notification
-            {
-                Title = matchDay.Name,
-                Body = $"Starts {matchDay.MatchDayDate:MMMM d, yyyy 'at' h:mm tt} at {matchDay.Venue.Name}. RSVP now.",
-                TargetType = NotificationTargetType.ALL,
-            };
-            db.Notifications.Add(notification);
-            db.NotificationRecipients.AddRange(targetPlayers.Select(p => new NotificationRecipient
-            {
-                Notification = notification,
-                RecipientId = p.Id,
-                IsRead = false,
-            }));
-
-            // Personalized per player (not a single batch send) - each player's vote links must
-            // be minted only for that player, so they can't be swapped to vote as someone else.
-            foreach (var player in targetPlayers)
-            {
-                if (string.IsNullOrWhiteSpace(player.Email)) continue;
-
-                var voteButtons = BuildVoteButtonsHtml(player.Id, matchDay.Id, tokenLifetime, baseUrl, voteTokenService);
-
-                var (title, body) = await emailTemplateService.RenderAsync(
-                    EmailTemplateKeys.MatchDayReminder,
-                    new Dictionary<string, string>
-                    {
-                        ["PlayerName"] = player.Name,
-                        ["MatchDayName"] = matchDay.Name,
-                        ["MatchDayDateTime"] = matchDay.MatchDayDate.ToString("MMMM d, yyyy 'at' h:mm tt"),
-                        ["VenueName"] = matchDay.Venue.Name,
-                        ["VoteButtons"] = voteButtons,
-                    });
-
-                try
-                {
-                    await emailSender.SendAsync([player.Email], title, body);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogWarning(ex, "Failed emailing MatchDay reminder to player {PlayerId} for MatchDay {MatchDayId}", player.Id, matchDay.Id);
-                }
-            }
+            await SendForMatchDayAsync(db, emailSender, emailTemplateService, voteTokenService, appUrlOptions, logger, matchDay, activePlayers, now);
         }
 
         await db.SaveChangesAsync();
+    }
+
+    /// <summary>Core per-MatchDay send, shared by the hourly scheduler above and the manual
+    /// "Send Reminder" button on Team Building (see TeamService.SendMatchDayReminderNowAsync).
+    /// Caller owns the SaveChangesAsync - this only stages entity changes.</summary>
+    public static async Task<int> SendForMatchDayAsync(
+        BofcDbContext db,
+        IEmailSender emailSender,
+        IEmailTemplateService emailTemplateService,
+        IMatchDayVoteTokenService voteTokenService,
+        IOptions<AppUrlOptions> appUrlOptions,
+        ILogger logger,
+        MatchDay matchDay,
+        List<ReminderPlayer> activePlayers,
+        DateTime now)
+    {
+        var baseUrl = appUrlOptions.Value.BaseUrl.TrimEnd('/');
+
+        // Only players who haven't voted yet - a "yes" or a "no" both count as having
+        // answered, so neither gets nagged again; only the still-silent get re-reminded.
+        var votedPlayerIds = (await db.MatchDayParticipants
+            .Where(p => p.MatchDayId == matchDay.Id)
+            .Select(p => p.PlayerId)
+            .ToListAsync())
+            .ToHashSet();
+        var targetPlayers = activePlayers.Where(p => !votedPlayerIds.Contains(p.Id)).ToList();
+
+        // Advance the "last sent" marker even with zero targets this round (everyone's
+        // already voted) so the interval check above doesn't re-query every single tick.
+        matchDay.ReminderSentAt = now;
+        if (targetPlayers.Count == 0) return 0;
+
+        // The vote link must keep working right up to kickoff (the vote endpoint itself
+        // rejects a past MatchDayDate) plus a little slack for clock drift/mail delay.
+        var tokenLifetime = (matchDay.MatchDayDate - now).Add(TimeSpan.FromHours(6));
+        if (tokenLifetime < TimeSpan.FromHours(1)) tokenLifetime = TimeSpan.FromHours(1);
+
+        // In-app notification text is short/plain, independent of the templated email body
+        // (which is now a full standalone HTML document, not something to dump into a
+        // notification card).
+        var notification = new Notification
+        {
+            Title = matchDay.Name,
+            Body = $"Starts {matchDay.MatchDayDate:MMMM d, yyyy 'at' h:mm tt} at {matchDay.Venue.Name}. RSVP now.",
+            TargetType = NotificationTargetType.ALL,
+        };
+        db.Notifications.Add(notification);
+        db.NotificationRecipients.AddRange(targetPlayers.Select(p => new NotificationRecipient
+        {
+            Notification = notification,
+            RecipientId = p.Id,
+            IsRead = false,
+        }));
+
+        var sent = 0;
+
+        // Personalized per player (not a single batch send) - each player's vote links must
+        // be minted only for that player, so they can't be swapped to vote as someone else.
+        foreach (var player in targetPlayers)
+        {
+            if (string.IsNullOrWhiteSpace(player.Email)) continue;
+
+            var voteButtons = BuildVoteButtonsHtml(player.Id, matchDay.Id, tokenLifetime, baseUrl, voteTokenService);
+
+            var (title, body) = await emailTemplateService.RenderAsync(
+                EmailTemplateKeys.MatchDayReminder,
+                new Dictionary<string, string>
+                {
+                    ["PlayerName"] = player.Name,
+                    ["MatchDayName"] = matchDay.Name,
+                    ["MatchDayDateTime"] = matchDay.MatchDayDate.ToString("MMMM d, yyyy 'at' h:mm tt"),
+                    ["VenueName"] = matchDay.Venue.Name,
+                    ["VoteButtons"] = voteButtons,
+                });
+
+            try
+            {
+                await emailSender.SendAsync([player.Email], title, body);
+                sent++;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed emailing MatchDay reminder to player {PlayerId} for MatchDay {MatchDayId}", player.Id, matchDay.Id);
+            }
+        }
+
+        return sent;
     }
 
     /// <summary>Two side-by-side buttons that stack full-width on mobile - reuses the ".stack"
@@ -163,4 +186,9 @@ public class MatchDayReminderBackgroundService(IServiceScopeFactory scopeFactory
             </table>
             """;
     }
+
+    /// <summary>Minimal projection of an eligible (active, email-notifications-on) player - shared
+    /// between the scheduler's own query and TeamService.SendMatchDayReminderNowAsync's manual
+    /// trigger, so neither has to pull the full Player entity just to email/notify.</summary>
+    public sealed record ReminderPlayer(long Id, string Name, string Email);
 }

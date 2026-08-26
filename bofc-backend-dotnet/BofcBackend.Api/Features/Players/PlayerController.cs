@@ -109,6 +109,15 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
     }
 
+    /// <summary>Self-service only - always the caller's own row (no id param), so any authenticated player can opt in/out of system emails without needing admin access.</summary>
+    [Authorize]
+    [HttpPut("me/email-notifications-enabled")]
+    public async Task<IActionResult> UpdateOwnEmailNotificationsEnabled([FromBody] EmailNotificationsEnabledRequest request)
+    {
+        await playerService.UpdateOwnEmailNotificationsEnabledAsync(request.EmailNotificationsEnabled);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
+    }
+
     [AllowAnonymous]
     [HttpGet("goal-keeper-history")]
     public async Task<IActionResult> GoalKeepingHistory()

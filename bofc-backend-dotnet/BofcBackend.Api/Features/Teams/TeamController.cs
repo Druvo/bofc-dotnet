@@ -100,4 +100,13 @@ public class TeamController(ITeamService teamService, WeeklyMatchDayTeamGenerato
         var sent = await teamService.SendTeamsGeneratedEmailAsync(matchDayId);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.CreateOk, new { sent });
     }
+
+    /// <summary>"Send Match Day Reminder" button on Team Building - manually triggers the same
+    /// reminder email the hourly scheduler sends automatically, right now, for this one MatchDay.</summary>
+    [HttpPost("matchday/{matchDayId}/send-reminder-email")]
+    public async Task<IActionResult> SendMatchDayReminder(long matchDayId)
+    {
+        var sent = await teamService.SendMatchDayReminderNowAsync(matchDayId);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.CreateOk, new { sent });
+    }
 }

@@ -205,6 +205,13 @@ public class PlayerService(
         await db.SaveChangesAsync();
     }
 
+    public async Task UpdateOwnEmailNotificationsEnabledAsync(bool enabled)
+    {
+        var player = await GetPlayerEntityAsync(currentUser.GetPlayerId());
+        player.EmailNotificationsEnabled = enabled;
+        await db.SaveChangesAsync();
+    }
+
     public async Task<int> CountActivePlayersAsync() => await db.Players.CountAsync(p => p.IsActive);
 
     public async Task<Dictionary<int, List<GoalKeeperHistoryDto>>> GoalKeepingHistoryAsync()
@@ -542,5 +549,6 @@ public class PlayerService(
         PhotoKey = player.PhotoKey,
         PhotoUrl = player.PhotoKey != null ? $"/files/player-photos/{player.PhotoKey}" : null,
         ThemePreference = player.ThemePreference,
+        EmailNotificationsEnabled = player.EmailNotificationsEnabled,
     };
 }

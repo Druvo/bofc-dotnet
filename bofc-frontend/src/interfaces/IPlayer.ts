@@ -19,6 +19,7 @@ interface IPlayer {
     photoKey?: string;
     photoUrl?: string;
     themePreference?: "light" | "dark" | null;
+    emailNotificationsEnabled: boolean;
 }
 
 export default IPlayer;

@@ -2269,6 +2269,12 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("email");
 
+                    b.Property<bool>("EmailNotificationsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasColumnName("email_notifications_enabled");
+
                     b.Property<string>("EmployeeId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")

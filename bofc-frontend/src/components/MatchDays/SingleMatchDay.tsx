@@ -29,6 +29,7 @@ import StatsLeaderboardPanel from "./Statistics/StatsLeaderboardPanel";
 import SquadLineupTab from "./SquadLineup/SquadLineupTab";
 import TeamsScreenshotButton from "./Atoms/TeamsScreenshotButton";
 import SendTeamsEmailButton from "./Atoms/SendTeamsEmailButton";
+import SendMatchDayReminderButton from "./Atoms/SendMatchDayReminderButton";
 import Button from "../ui/button";
 import Tabs from "../ui/tabs";
 
@@ -221,6 +222,7 @@ function SingleMatchDay() {
             />
           )}
           {isAdmin && hasTeams && <SendTeamsEmailButton matchDayId={matchDayId} />}
+          {isAdmin && <SendMatchDayReminderButton matchDayId={matchDayId} />}
         </div>
       </div>
 

@@ -263,6 +263,15 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                 method: "POST",
             }),
         }),
+
+        /** "Send Match Day Reminder" button - manual only, triggers the exact same reminder email
+         * the hourly scheduler sends automatically, right now, for just this MatchDay. */
+        sendMatchDayReminderEmail: builder.mutation<BasicResType & { content: { sent: number } }, { matchDayId: number }>({
+            query: ({ matchDayId }) => ({
+                url: `teams/matchday/${matchDayId}/send-reminder-email`,
+                method: "POST",
+            }),
+        }),
     }),
 });
 
@@ -280,4 +289,5 @@ export const {
     useLazyGetGoalkeeperRankingQuery,
     useClearGoalkeepersMutation,
     useSendTeamsGeneratedEmailMutation,
+    useSendMatchDayReminderEmailMutation,
 } = matchDayTeamApi;

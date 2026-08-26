@@ -28,4 +28,5 @@ public class PlayerResponse
     public string? PhotoKey { get; set; }
     public string? PhotoUrl { get; set; }
     public string? ThemePreference { get; set; }
+    public bool EmailNotificationsEnabled { get; set; }
 }

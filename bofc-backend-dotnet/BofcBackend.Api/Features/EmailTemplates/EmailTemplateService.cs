@@ -64,7 +64,7 @@ public class EmailTemplateService(
             </head>
             <body>
             <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">Friendly reminder: {{MonthYear}} club dues are still pending, {{PlayerName}}.</div>
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eef1f0">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eef1f0" style="font-family:Arial,Helvetica,sans-serif;">
             <tr><td align="center" class="outer" style="padding:28px 14px;">
             <table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0">
 
@@ -73,7 +73,7 @@ public class EmailTemplateService(
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
             <td align="left" valign="middle">
-            <img class="logo" src="{{BofcLogoUrl}}" width="125" alt="BOFC - Originals Football Club">
+            <img class="logo" src="{{BofcLogoUrl}}" width="125" height="125" alt="BOFC - Originals Football Club" style="display:block;border:0;outline:none;width:125px;height:125px;">
             </td>
             <td align="right" valign="middle" style="font-size:12px;line-height:18px;font-weight:bold;letter-spacing:1.4px;color:#7bd43d;text-transform:uppercase;">
             PAYMENT REMINDER
@@ -125,7 +125,7 @@ public class EmailTemplateService(
             <td class="stack" width="25%" valign="top" style="padding:7px;">
             <table role="presentation" width="100%" bgcolor="#f5f8f3" style="background:#f5f8f3;border-radius:12px;">
             <tr><td align="center" style="padding:20px 8px;">
-            <div style="font-size:27px;">🏟️</div>
+            <div style="font-size:27px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">🏟️</div>
             <div style="font-size:12px;line-height:18px;font-weight:900;color:#2f7d22;margin-top:8px;">FIELD FEES</div>
             <div style="font-size:12px;line-height:18px;color:#4f5d50;margin-top:5px;">Keeping the pitch booked and ready.</div>
             </td></tr>
@@ -134,7 +134,7 @@ public class EmailTemplateService(
             <td class="stack" width="25%" valign="top" style="padding:7px;">
             <table role="presentation" width="100%" bgcolor="#f5f8f3" style="background:#f5f8f3;border-radius:12px;">
             <tr><td align="center" style="padding:20px 8px;">
-            <div style="font-size:27px;">💧</div>
+            <div style="font-size:27px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">💧</div>
             <div style="font-size:12px;line-height:18px;font-weight:900;color:#2f7d22;margin-top:8px;">WATER</div>
             <div style="font-size:12px;line-height:18px;color:#4f5d50;margin-top:5px;">Because 90 minutes without water is a bad plan.</div>
             </td></tr>
@@ -143,7 +143,7 @@ public class EmailTemplateService(
             <td class="stack" width="25%" valign="top" style="padding:7px;">
             <table role="presentation" width="100%" bgcolor="#f5f8f3" style="background:#f5f8f3;border-radius:12px;">
             <tr><td align="center" style="padding:20px 8px;">
-            <div style="font-size:27px;">🥤</div>
+            <div style="font-size:27px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">🥤</div>
             <div style="font-size:12px;line-height:18px;font-weight:900;color:#2f7d22;margin-top:8px;">SNACKS</div>
             <div style="font-size:12px;line-height:18px;color:#4f5d50;margin-top:5px;">Because goals don't keep us alive. 😅</div>
             </td></tr>
@@ -152,7 +152,7 @@ public class EmailTemplateService(
             <td class="stack" width="25%" valign="top" style="padding:7px;">
             <table role="presentation" width="100%" bgcolor="#f5f8f3" style="background:#f5f8f3;border-radius:12px;">
             <tr><td align="center" style="padding:20px 8px;">
-            <div style="font-size:27px;">⚽</div>
+            <div style="font-size:27px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">⚽</div>
             <div style="font-size:12px;line-height:18px;font-weight:900;color:#2f7d22;margin-top:8px;">EQUIPMENT</div>
             <div style="font-size:12px;line-height:18px;color:#4f5d50;margin-top:5px;">Balls, gloves and gear when needed.</div>
             </td></tr>
@@ -244,7 +244,7 @@ public class EmailTemplateService(
             </head>
             <body>
             <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">{{MatchDayName}} is coming up! Let us know if you're in, {{PlayerName}}.</div>
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eef1f0">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eef1f0" style="font-family:Arial,Helvetica,sans-serif;">
             <tr><td align="center" class="outer" style="padding:28px 14px;">
             <table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0">
 
@@ -253,7 +253,7 @@ public class EmailTemplateService(
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
             <td align="left" valign="middle">
-            <img class="logo" src="{{BofcLogoUrl}}" width="125" alt="BOFC - Originals Football Club">
+            <img class="logo" src="{{BofcLogoUrl}}" width="125" height="125" alt="BOFC - Originals Football Club" style="display:block;border:0;outline:none;width:125px;height:125px;">
             </td>
             <td align="right" valign="middle" style="font-size:12px;line-height:18px;font-weight:bold;letter-spacing:1.4px;color:#7bd43d;text-transform:uppercase;">
             MATCHDAY REMINDER
@@ -298,7 +298,7 @@ public class EmailTemplateService(
             <td class="stack" width="50%" valign="top" style="padding:7px;">
             <table role="presentation" width="100%" bgcolor="#f5f8f3" style="background:#f5f8f3;border-radius:12px;">
             <tr><td align="center" style="padding:22px 10px;">
-            <div style="font-size:28px;">📅</div>
+            <div style="font-size:28px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">📅</div>
             <div style="font-size:12px;line-height:18px;font-weight:900;color:#2f7d22;letter-spacing:.8px;margin-top:8px;">DATE &amp; TIME</div>
             <div style="font-size:14px;line-height:21px;font-weight:bold;color:#17263a;margin-top:6px;">{{MatchDayDateTime}}</div>
             </td></tr>
@@ -307,7 +307,7 @@ public class EmailTemplateService(
             <td class="stack" width="50%" valign="top" style="padding:7px;">
             <table role="presentation" width="100%" bgcolor="#f5f8f3" style="background:#f5f8f3;border-radius:12px;">
             <tr><td align="center" style="padding:22px 10px;">
-            <div style="font-size:28px;">📍</div>
+            <div style="font-size:28px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">📍</div>
             <div style="font-size:12px;line-height:18px;font-weight:900;color:#2f7d22;letter-spacing:.8px;margin-top:8px;">VENUE</div>
             <div style="font-size:14px;line-height:21px;font-weight:bold;color:#17263a;margin-top:6px;">{{VenueName}}</div>
             </td></tr>
@@ -319,7 +319,7 @@ public class EmailTemplateService(
 
             <tr><td class="mobile-pad" style="padding:20px 42px 8px;">
             <div style="border-top:1px dashed #c8d0c8;text-align:center;height:1px;">
-            <span style="position:relative;top:-14px;background:#fff;padding:0 12px;font-size:22px;">⚽</span>
+            <span style="position:relative;top:-14px;background:#fff;padding:0 12px;font-size:22px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">⚽</span>
             </div>
             </td></tr>
 
@@ -395,7 +395,7 @@ public class EmailTemplateService(
             </head>
             <body>
             <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">Teams are set for {{MatchDayName}} - see who you're playing with, {{PlayerName}}.</div>
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eef1f0">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eef1f0" style="font-family:Arial,Helvetica,sans-serif;">
             <tr><td align="center" class="outer" style="padding:28px 14px;">
             <table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0">
 
@@ -404,7 +404,7 @@ public class EmailTemplateService(
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
             <td align="left" valign="middle">
-            <img class="logo" src="{{BofcLogoUrl}}" width="125" alt="BOFC - Originals Football Club">
+            <img class="logo" src="{{BofcLogoUrl}}" width="125" height="125" alt="BOFC - Originals Football Club" style="display:block;border:0;outline:none;width:125px;height:125px;">
             </td>
             <td align="right" valign="middle" style="font-size:12px;line-height:18px;font-weight:bold;letter-spacing:1.4px;color:#7bd43d;text-transform:uppercase;">
             TEAMS ANNOUNCED
@@ -441,7 +441,7 @@ public class EmailTemplateService(
             <div style="font-size:16px;line-height:25px;color:#17263a;margin-top:14px;">
             Teams and fixtures for <strong>{{MatchDayName}}</strong> are ready.
             </div>
-            <div style="font-size:14px;line-height:22px;color:#667085;margin-top:5px;">
+            <div style="font-size:14px;line-height:22px;color:#667085;margin-top:5px;font-family:Arial,Helvetica,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">
             📅 {{MatchDayDateTime}}<br>
             📍 {{VenueName}}
             </div>
@@ -449,7 +449,7 @@ public class EmailTemplateService(
 
             <tr><td align="center" style="padding:20px 42px 34px;">
             <a href="{{TeamBuildingUrl}}" target="_blank" class="cta" style="display:inline-block;background:#2f9e1f;color:#ffffff;font-size:16px;line-height:21px;font-weight:900;border-radius:9px;padding:15px 28px;">
-            VIEW TEAM BUILDING →
+            VIEW TEAM →
             </a>
             <div style="font-size:14px;line-height:22px;color:#667085;margin-top:15px;">
             See your team, your teammates, and who you're up against.
@@ -578,10 +578,10 @@ public class EmailTemplateService(
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                     <td class="stack" width="50%" style="padding:6px;">
-                    <a href="{baseUrl}/vote?token={encodedToken}&choice=yes" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;">✅ YES, I'M IN</a>
+                    <a href="{baseUrl}/vote?token={encodedToken}&choice=yes" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">✅ YES, I'M IN</a>
                     </td>
                     <td class="stack" width="50%" style="padding:6px;">
-                    <a href="{baseUrl}/vote?token={encodedToken}&choice=no" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;">❌ CAN'T MAKE IT</a>
+                    <a href="{baseUrl}/vote?token={encodedToken}&choice=no" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">❌ CAN'T MAKE IT</a>
                     </td>
                     </tr>
                     </table>
@@ -601,10 +601,10 @@ public class EmailTemplateService(
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                 <td class="stack" width="50%" style="padding:6px;">
-                <a href="#" onclick="return false;" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;opacity:0.6;">✅ YES, I'M IN</a>
+                <a href="#" onclick="return false;" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;opacity:0.6;">✅ YES, I'M IN</a>
                 </td>
                 <td class="stack" width="50%" style="padding:6px;">
-                <a href="#" onclick="return false;" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;opacity:0.6;">❌ CAN'T MAKE IT</a>
+                <a href="#" onclick="return false;" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;opacity:0.6;">❌ CAN'T MAKE IT</a>
                 </td>
                 </tr>
                 </table>
@@ -644,7 +644,7 @@ public class EmailTemplateService(
                     ["MatchDayName"] = matchDay.Name,
                     ["MatchDayDateTime"] = matchDay.MatchDayDate.ToString("MMMM d, yyyy 'at' h:mm tt"),
                     ["VenueName"] = matchDay.Venue.Name,
-                    ["TeamBuildingUrl"] = $"{websiteBaseUrl}/match-days/team-building/{matchDay.Id}",
+                    ["TeamBuildingUrl"] = $"{websiteBaseUrl}/match-days/join-match-day/{matchDay.Id}",
                 };
             }
 

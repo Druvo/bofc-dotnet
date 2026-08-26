@@ -107,6 +107,14 @@ export const authApi = apiWithTags.injectEndpoints({
             }),
             invalidatesTags: ["auth"],
         }),
+        updateEmailNotificationsEnabled: build.mutation<BasicResType, { emailNotificationsEnabled: boolean }>({
+            query: (data) => ({
+                url: "players/me/email-notifications-enabled",
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: ["auth"],
+        }),
     }),
 });
 
@@ -118,4 +126,5 @@ export const {
     useUpdatePlayerDataMutation,
     useResetPlayerPasswordMutation,
     useUpdateThemePreferenceMutation,
+    useUpdateEmailNotificationsEnabledMutation,
 } = authApi;

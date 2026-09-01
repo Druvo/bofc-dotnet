@@ -5,7 +5,7 @@ import {
     UserOutlined,
     LockOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setAllData } from "../../state/slices/loginInfoSlice";
 import { useLoginMutation } from "../../state/features/auth/authSlice";
@@ -253,12 +253,15 @@ const LoginPage: React.FC = () => {
                             )}
                         </div>
 
-                        <div className="checkbox-container">
+                        <div className="checkbox-container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
                             <FormCheckbox
                                 checked={rememberPassword}
                                 onChange={handleRememberPasswordChange}
                                 label="Enable Auto Login"
                             />
+                            <Link to="/forgot-password" style={{ color: "var(--color-accent)", fontWeight: 600, textDecoration: "none", fontSize: 14 }}>
+                                Forgot password?
+                            </Link>
                         </div>
 
                         <Button

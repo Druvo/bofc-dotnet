@@ -115,6 +115,24 @@ export const authApi = apiWithTags.injectEndpoints({
             }),
             invalidatesTags: ["auth"],
         }),
+        // "Forgot password?" on the login page - anonymous, no session. Always resolves
+        // successfully regardless of whether the email matches a player (see the backend's
+        // matching doc comment) - the UI shows the same "check your email" message either way.
+        requestPasswordReset: build.mutation<BasicResType, { email: string }>({
+            query: (data) => ({
+                url: "auth/forgot-password",
+                method: "POST",
+                body: data,
+            }),
+        }),
+        // Redeems the link from the "forgot password" email.
+        resetPasswordWithToken: build.mutation<BasicResType, { token: string; newPassword: string }>({
+            query: (data) => ({
+                url: "auth/reset-password-with-token",
+                method: "POST",
+                body: data,
+            }),
+        }),
     }),
 });
 
@@ -127,4 +145,6 @@ export const {
     useResetPlayerPasswordMutation,
     useUpdateThemePreferenceMutation,
     useUpdateEmailNotificationsEnabledMutation,
+    useRequestPasswordResetMutation,
+    useResetPasswordWithTokenMutation,
 } = authApi;

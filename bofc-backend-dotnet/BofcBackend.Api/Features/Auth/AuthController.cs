@@ -45,4 +45,23 @@ public class AuthController(IAuthService authService) : ControllerBase
         await authService.ResetPasswordAsync(request);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
     }
+
+    /// <summary>"Forgot password?" on the login page. Always returns success - see
+    /// AuthService.RequestPasswordResetAsync's doc comment on why.</summary>
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        await authService.RequestPasswordResetAsync(request.Email);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
+    }
+
+    /// <summary>Redeems the link from the "forgot password" email.</summary>
+    [AllowAnonymous]
+    [HttpPost("reset-password-with-token")]
+    public async Task<IActionResult> ResetPasswordWithToken([FromBody] ResetPasswordWithTokenRequest request)
+    {
+        await authService.ResetPasswordWithTokenAsync(request.Token, request.NewPassword);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
+    }
 }

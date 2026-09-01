@@ -12,6 +12,8 @@ import { useAuthHook } from "./hooks/useAuthHook";
 import { checkTockenValidity } from "./utils/utils";
 import LoginPage from "./components/authPages/LoginPage";
 import PasswordResetPage from "./components/authPages/PasswordResetPage";
+import ForgotPasswordPage from "./components/authPages/ForgotPasswordPage";
+import ResetPasswordConfirmPage from "./components/authPages/ResetPasswordConfirmPage";
 import { useDispatch, useSelector } from "react-redux";
 import { selectResetPassword } from "./state/slices/loginInfoSlice";
 import { AuctionRegistrationPage } from "./components/Auction";
@@ -167,6 +169,8 @@ function App() {
                     <div style={{ flex: 1 }}>
                         <Routes>
                             <Route path="/login" element={<LoginPage />} />
+                            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                            <Route path="/reset-password-confirm" element={<ResetPasswordConfirmPage />} />
                             <Route path="/match-day-viewer" element={<MatchDayViewerPage hasHeader={false} />} />
                             <Route path="/match-day-viewer/:matchDayId" element={<MatchDayViewerPage hasHeader={false} />} />
                             <Route path="/match-day-viewer/:matchDayId/:tab" element={<MatchDayViewerPage hasHeader={false} />} />

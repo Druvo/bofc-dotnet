@@ -28,6 +28,7 @@ public static class RestErrorMessageDetail
     public const string NewPasswordSameAsOld = "New password cannot be the same as old password";
     public const string PasswordResetNotRequired = "A password reset is not currently required for this account";
     public const string InvalidToken = "Invalid token";
+    public const string PasswordResetTokenInvalid = "This password reset link is invalid or has expired. Request a new one from the login page.";
     public const string EmailAlreadyInUse = "Email address is already in use by another player.";
     public const string EmployeeIdAlreadyInUse = "Employee ID is already in use by another player.";
     public const string TeamsIdAlreadyInUse = "Teams ID is already in use by another player.";

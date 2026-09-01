@@ -84,6 +84,7 @@ builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IMatchDayVoteTokenService, MatchDayVoteTokenService>();
+builder.Services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
 builder.Services.AddHostedService<MatchDayReminderBackgroundService>();
 builder.Services.AddHostedService<PaymentDueReminderBackgroundService>();
 builder.Services.AddHostedService<MatchDaySchedulerBackgroundService>();

@@ -177,10 +177,10 @@ public class MatchDayReminderBackgroundService(IServiceScopeFactory scopeFactory
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
             <td class="stack" width="50%" style="padding:6px;">
-            <a href="{yesUrl}" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;">✅ YES, I'M IN</a>
+            <a href="{yesUrl}" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,sans-serif;"><img src="{baseUrl}/email/icons/check.png" width="16" height="16" alt="" style="display:inline-block;vertical-align:middle;margin-right:6px;border:0;outline:none;width:16px;height:16px;">YES, I'M IN</a>
             </td>
             <td class="stack" width="50%" style="padding:6px;">
-            <a href="{noUrl}" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;">❌ CAN'T MAKE IT</a>
+            <a href="{noUrl}" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,sans-serif;"><img src="{baseUrl}/email/icons/cross.png" width="16" height="16" alt="" style="display:inline-block;vertical-align:middle;margin-right:6px;border:0;outline:none;width:16px;height:16px;">CAN'T MAKE IT</a>
             </td>
             </tr>
             </table>

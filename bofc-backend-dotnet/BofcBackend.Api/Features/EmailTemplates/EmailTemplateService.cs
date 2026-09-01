@@ -298,7 +298,7 @@ public class EmailTemplateService(
             <td class="stack" width="50%" valign="top" style="padding:7px;">
             <table role="presentation" width="100%" bgcolor="#f5f8f3" style="background:#f5f8f3;border-radius:12px;">
             <tr><td align="center" style="padding:22px 10px;">
-            <div style="font-size:28px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">📅</div>
+            <img src="{{IconBaseUrl}}/calendar.png" width="28" height="28" alt="" style="display:block;margin:0 auto;border:0;outline:none;width:28px;height:28px;">
             <div style="font-size:12px;line-height:18px;font-weight:900;color:#2f7d22;letter-spacing:.8px;margin-top:8px;">DATE &amp; TIME</div>
             <div style="font-size:14px;line-height:21px;font-weight:bold;color:#17263a;margin-top:6px;">{{MatchDayDateTime}}</div>
             </td></tr>
@@ -307,7 +307,7 @@ public class EmailTemplateService(
             <td class="stack" width="50%" valign="top" style="padding:7px;">
             <table role="presentation" width="100%" bgcolor="#f5f8f3" style="background:#f5f8f3;border-radius:12px;">
             <tr><td align="center" style="padding:22px 10px;">
-            <div style="font-size:28px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">📍</div>
+            <img src="{{IconBaseUrl}}/pin.png" width="28" height="28" alt="" style="display:block;margin:0 auto;border:0;outline:none;width:28px;height:28px;">
             <div style="font-size:12px;line-height:18px;font-weight:900;color:#2f7d22;letter-spacing:.8px;margin-top:8px;">VENUE</div>
             <div style="font-size:14px;line-height:21px;font-weight:bold;color:#17263a;margin-top:6px;">{{VenueName}}</div>
             </td></tr>
@@ -319,7 +319,7 @@ public class EmailTemplateService(
 
             <tr><td class="mobile-pad" style="padding:20px 42px 8px;">
             <div style="border-top:1px dashed #c8d0c8;text-align:center;height:1px;">
-            <span style="position:relative;top:-14px;background:#fff;padding:0 12px;font-size:22px;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">⚽</span>
+            <img src="{{IconBaseUrl}}/football.png" width="22" height="22" alt="" style="display:inline-block;position:relative;top:-11px;background:#fff;padding:0 12px;border:0;outline:none;width:22px;height:22px;">
             </div>
             </td></tr>
 
@@ -479,6 +479,123 @@ public class EmailTemplateService(
             </html>
             """,
             ["PlayerName", "MatchDayName", "MatchDayDateTime", "VenueName", "TeamBuildingUrl"]),
+
+        [EmailTemplateKeys.PasswordReset] = new TemplateDefault(
+            "Password Reset",
+            "Sent when a player uses \"Forgot password?\" on the login page - the link is single-use and expires after 1 hour.",
+            "BOFC Password Reset Request",
+            """
+            <!doctype html>
+            <html lang="en">
+            <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <title>BOFC — Password Reset</title>
+            <style>
+              html, body { margin:0!important; padding:0!important; width:100%!important; background:#eef1f0; }
+              body { font-family:Arial,Helvetica,sans-serif; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+              table { border-collapse:collapse; border-spacing:0; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+              td { padding:0; }
+              img { border:0; display:block; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; }
+              a { text-decoration:none; }
+              .wrap { width:100%; max-width:640px; margin:0 auto; }
+              .mobile-pad { padding-left:42px!important; padding-right:42px!important; }
+              @media screen and (max-width:600px) {
+                .outer { padding:12px!important; }
+                .wrap { width:100%!important; }
+                .mobile-pad { padding-left:22px!important; padding-right:22px!important; }
+                .hero-title { font-size:32px!important; line-height:36px!important; }
+                .cta { display:block!important; width:auto!important; }
+                .logo { width:118px!important; }
+              }
+            </style>
+            </head>
+            <body>
+            <div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">Reset your BOFC password, {{PlayerName}} - this link expires in 1 hour.</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#eef1f0" style="font-family:Arial,Helvetica,sans-serif;">
+            <tr><td align="center" class="outer" style="padding:28px 14px;">
+            <table role="presentation" class="wrap" width="640" cellpadding="0" cellspacing="0" border="0">
+
+            <!-- BOFC HEADER -->
+            <tr><td bgcolor="#071a2d" style="background:#071a2d;border-radius:18px 18px 0 0;padding:24px 28px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+            <td align="left" valign="middle">
+            <img class="logo" src="{{BofcLogoUrl}}" width="125" height="125" alt="BOFC - Originals Football Club" style="display:block;border:0;outline:none;width:125px;height:125px;">
+            </td>
+            <td align="right" valign="middle" style="font-size:12px;line-height:18px;font-weight:bold;letter-spacing:1.4px;color:#7bd43d;text-transform:uppercase;">
+            PASSWORD RESET
+            </td>
+            </tr>
+            </table>
+            </td></tr>
+
+            <!-- HERO -->
+            <tr><td bgcolor="#071a2d" style="background:#071a2d;padding:20px 30px 42px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td align="center">
+            <div style="font-size:13px;line-height:20px;font-weight:bold;letter-spacing:2px;color:#7bd43d;text-transform:uppercase;">
+            ★ BOFC ACCOUNT SECURITY ★
+            </div>
+            <div class="hero-title" style="font-size:40px;line-height:44px;font-weight:900;letter-spacing:-1px;color:#ffffff;margin-top:10px;">
+            RESET YOUR
+            <span style="color:#7bd43d;"> PASSWORD</span>
+            </div>
+            <div style="font-size:16px;line-height:25px;color:#ffffff;margin-top:10px;">
+            We got a request to reset your password.
+            </div>
+            </td></tr>
+            </table>
+            </td></tr>
+
+            <!-- CONTENT CARD -->
+            <tr><td bgcolor="#ffffff" style="background:#ffffff;border-radius:18px;padding:0;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td class="mobile-pad" style="padding:38px 42px 12px;">
+            <div style="font-size:18px;line-height:27px;font-weight:700;color:#17263a;">
+            Hey {{PlayerName}},
+            </div>
+            <div style="font-size:16px;line-height:25px;color:#17263a;margin-top:14px;">
+            Click the button below to choose a new password. This link expires in <strong>1 hour</strong> and can only be used once.
+            </div>
+            </td></tr>
+
+            <tr><td align="center" style="padding:20px 42px 12px;">
+            <a href="{{ResetUrl}}" target="_blank" class="cta" style="display:inline-block;background:#2f9e1f;color:#ffffff;font-size:16px;line-height:21px;font-weight:900;border-radius:9px;padding:15px 28px;">
+            RESET PASSWORD →
+            </a>
+            </td></tr>
+
+            <tr><td class="mobile-pad" style="padding:10px 42px 34px;">
+            <div style="font-size:13px;line-height:20px;color:#8792A8;">
+            If you didn't request this, you can safely ignore this email - your password won't change unless you click the button above.
+            </div>
+            </td></tr>
+            </table>
+            </td></tr>
+
+            <!-- FOOTER -->
+            <tr><td bgcolor="#071a2d" style="background:#071a2d;border-radius:0 0 18px 18px;padding:30px 24px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td align="center">
+            <div style="font-size:14px;line-height:20px;color:#7bd43d;font-weight:bold;">
+            Pride. Passion. Football.
+            </div>
+            <div style="font-size:11px;line-height:17px;color:#8795a4;margin-top:10px;">
+            © 2026 BOFC. All rights reserved.
+            </div>
+            </td></tr>
+            </table>
+            </td></tr>
+
+            </table>
+            </td></tr>
+            </table>
+            </body>
+            </html>
+            """,
+            ["PlayerName", "ResetUrl"]),
     };
 
     public async Task<List<EmailTemplateResponse>> GetAllAsync()
@@ -578,10 +695,10 @@ public class EmailTemplateService(
                     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                     <td class="stack" width="50%" style="padding:6px;">
-                    <a href="{baseUrl}/vote?token={encodedToken}&choice=yes" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">✅ YES, I'M IN</a>
+                    <a href="{baseUrl}/vote?token={encodedToken}&choice=yes" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,sans-serif;"><img src="{baseUrl}/email/icons/check.png" width="16" height="16" alt="" style="display:inline-block;vertical-align:middle;margin-right:6px;border:0;outline:none;width:16px;height:16px;">YES, I'M IN</a>
                     </td>
                     <td class="stack" width="50%" style="padding:6px;">
-                    <a href="{baseUrl}/vote?token={encodedToken}&choice=no" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;">❌ CAN'T MAKE IT</a>
+                    <a href="{baseUrl}/vote?token={encodedToken}&choice=no" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,sans-serif;"><img src="{baseUrl}/email/icons/cross.png" width="16" height="16" alt="" style="display:inline-block;vertical-align:middle;margin-right:6px;border:0;outline:none;width:16px;height:16px;">CAN'T MAKE IT</a>
                     </td>
                     </tr>
                     </table>
@@ -597,14 +714,15 @@ public class EmailTemplateService(
                 };
             }
 
+            var sampleBaseUrl = appUrlOptions.Value.BaseUrl.TrimEnd('/');
             var sampleVoteButtons = $"""
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                 <td class="stack" width="50%" style="padding:6px;">
-                <a href="#" onclick="return false;" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;opacity:0.6;">✅ YES, I'M IN</a>
+                <a href="#" onclick="return false;" style="display:block;text-align:center;background:#2f9e1f;color:#ffffff;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,sans-serif;opacity:0.6;"><img src="{sampleBaseUrl}/email/icons/check.png" width="16" height="16" alt="" style="display:inline-block;vertical-align:middle;margin-right:6px;border:0;outline:none;width:16px;height:16px;">YES, I'M IN</a>
                 </td>
                 <td class="stack" width="50%" style="padding:6px;">
-                <a href="#" onclick="return false;" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;opacity:0.6;">❌ CAN'T MAKE IT</a>
+                <a href="#" onclick="return false;" style="display:block;text-align:center;background:#e6e9ea;color:#17263a;font-size:15px;line-height:20px;font-weight:900;border-radius:9px;padding:14px 10px;font-family:Arial,Helvetica,sans-serif;opacity:0.6;"><img src="{sampleBaseUrl}/email/icons/cross.png" width="16" height="16" alt="" style="display:inline-block;vertical-align:middle;margin-right:6px;border:0;outline:none;width:16px;height:16px;">CAN'T MAKE IT</a>
                 </td>
                 </tr>
                 </table>
@@ -654,7 +772,17 @@ public class EmailTemplateService(
                 ["MatchDayName"] = "Saturday Football",
                 ["MatchDayDateTime"] = DateTime.Now.AddDays(3).ToString("MMMM d, yyyy 'at' h:mm tt"),
                 ["VenueName"] = "Sample Venue",
-                ["TeamBuildingUrl"] = $"{websiteBaseUrl}/match-days/team-building/0",
+                ["TeamBuildingUrl"] = $"{websiteBaseUrl}/match-days/join-match-day/0",
+            };
+        }
+
+        if (key == EmailTemplateKeys.PasswordReset)
+        {
+            var websiteBaseUrl = appUrlOptions.Value.WebsiteUrl.TrimEnd('/');
+            return new Dictionary<string, string>
+            {
+                ["PlayerName"] = sampleName,
+                ["ResetUrl"] = $"{websiteBaseUrl}/reset-password-confirm?token=sample-token",
             };
         }
 
@@ -669,6 +797,12 @@ public class EmailTemplateService(
         var merged = new Dictionary<string, string>
         {
             ["BofcLogoUrl"] = $"{appUrlOptions.Value.BaseUrl.TrimEnd('/')}/email/bofc-logo.png",
+            // Baked-PNG icon set (see wwwroot/email/icons) - used instead of raw unicode emoji
+            // for anything structural (date/venue cards, the vote buttons, the football divider).
+            // Emoji glyphs render wildly inconsistently across mail clients (Outlook/Windows Mail
+            // in particular render a different size/style than a browser preview does, breaking
+            // the pixel-tuned layout around them) - a real image renders identically everywhere.
+            ["IconBaseUrl"] = $"{appUrlOptions.Value.BaseUrl.TrimEnd('/')}/email/icons",
             // Deep-links straight into the dashboard's Payment Accounts modal (see
             // AccountBalanceCard.tsx's ?openPayments=1 handling) - only meaningful on the
             // PaymentDueReminder template, harmless as an unused token on any other.

@@ -56,8 +56,11 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
 }) => {
   const [internalSelectedYear, setInternalSelectedYear] = useState<number | null>(null);
   const [filter, setFilter] = useState<FilterType>("active");
-  const [sortField, setSortField] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<SortOrder>(null);
+  // Default to sorted by player name ascending rather than the raw API order - same
+  // reasoning as dropping the old 3rd "unsorted" click state, an arbitrary starting
+  // order reads as broken, not deliberate.
+  const [sortField, setSortField] = useState<string | null>("playerName");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("ascend");
   const isMobile = useIsMobile();
   const [mobileView, setMobileView] = useState<'cards' | 'table'>('table');
 
@@ -112,17 +115,16 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
     }
   };
 
+  // Two states only - ascend/descend, toggling back and forth. A 3rd "unsorted" state
+  // used to be in this cycle, but it just showed the raw API order (not alphabetical, not
+  // meaningful to a viewer) - it read as broken/inconsistent sorting rather than a
+  // deliberate "no sort" option, so it's gone.
   const toggleSort = (field: string) => {
     if (sortField !== field) {
       setSortField(field);
       setSortOrder("ascend");
-    } else if (sortOrder === "ascend") {
-      setSortOrder("descend");
-    } else if (sortOrder === "descend") {
-      setSortField(null);
-      setSortOrder(null);
     } else {
-      setSortOrder("ascend");
+      setSortOrder(sortOrder === "ascend" ? "descend" : "ascend");
     }
   };
 
@@ -152,7 +154,11 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
     if (!sortField || !sortOrder) return rows;
 
     const sorted = [...rows].sort((a, b) => {
-      if (sortField === "playerName") return a.playerName.localeCompare(b.playerName);
+      // .trim() - a few player names have stray leading/trailing whitespace in the DB
+      // (data issue, not a sort bug per se), and a leading space sorts before every
+      // letter in standard collation - left untrimmed, those names always jumped to
+      // the top regardless of the rest of the name.
+      if (sortField === "playerName") return a.playerName.trim().localeCompare(b.playerName.trim());
       return (a[sortField] || 0) - (b[sortField] || 0);
     });
     return sortOrder === "descend" ? sorted.reverse() : sorted;

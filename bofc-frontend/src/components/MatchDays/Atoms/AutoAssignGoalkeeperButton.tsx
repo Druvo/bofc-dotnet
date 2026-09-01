@@ -103,18 +103,19 @@ export default function AutoAssignGoalkeeperButton({
         try {
             const result = await autoAssign({ matchDayId }).unwrap();
             const { teams, pastMatchDaysMissingGoalkeeperData } = result.content;
-            const assignedCount = teams.filter((t) => t.assigned).length;
+            const teamsWithAssignments = teams.filter((t) => t.assigned.length > 0);
+            const totalAssigned = teams.reduce((sum, t) => sum + t.assigned.length, 0);
 
-            if (assignedCount > 0) {
+            if (totalAssigned > 0) {
                 toast.success(
-                    `Assigned goalkeeper${assignedCount > 1 ? "s" : ""} for ${assignedCount} of ${teams.length} team${teams.length > 1 ? "s" : ""}`
+                    `Assigned ${totalAssigned} goalkeeper${totalAssigned > 1 ? "s" : ""} across ${teamsWithAssignments.length} of ${teams.length} team${teams.length > 1 ? "s" : ""}`
                 );
             } else {
                 toast.info("No teams needed a goalkeeper assigned");
             }
 
             teams
-                .filter((t) => !t.assigned && t.skippedReason && t.skippedReason !== "Already has a goalkeeper")
+                .filter((t) => t.assigned.length === 0 && t.skippedReason && t.skippedReason !== "Already has enough goalkeepers")
                 .forEach((t) => toast.warning(`${t.teamName}: ${t.skippedReason}`));
 
             if (pastMatchDaysMissingGoalkeeperData > 0) {
@@ -177,8 +178,9 @@ export default function AutoAssignGoalkeeperButton({
                 <p className="mb-4 text-theme-sm text-gray-600 dark:text-gray-400">
                     Ranked by turns owed (attendance-weighted) minus turns served. Resting (kept goal in
                     either of the last two match days) and excluded players are never picked, however
-                    much they're owed. Only the highlighted <span className="font-semibold">Next Up</span> player
-                    per team gets assigned - teams that already have a goalkeeper are left untouched.
+                    much they're owed. Only the highlighted <span className="font-semibold">Next Up</span> players
+                    per team get assigned (up to the configured minimum goalkeepers per team, see Settings) -
+                    teams already at that count are left untouched.
                 </p>
 
                 {!isLoadingRanking && !anyAssignable && teams.length > 0 && (

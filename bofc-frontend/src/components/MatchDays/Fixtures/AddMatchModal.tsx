@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import moment from "moment";
-import { useCreateMatchMutation } from "../../../state/features/fixtures/fixturesSlice";
+import { useCreateMatchMutation, useGetFixturesQuery } from "../../../state/features/fixtures/fixturesSlice";
 import { useGetVanuesQuery } from "../../../state/features/vanues/vanuesSlice";
 import { useGetSystemSettingsQuery } from "../../../state/features/settings/settingsSlice";
 import { ICreateMatchRequest } from "../../../state/features/fixtures/fixtureTypes";
@@ -65,6 +65,25 @@ export default function AddMatchModal({
       .map((c) => ({ value: c, label: JERSEY_COLOR_PALETTE.find((p) => p.value === c)?.label || c })),
   ];
 
+  // A round-robin match day creates many fixtures per team - re-picking jersey colors
+  // from scratch on every single one is exactly the friction the auto-default below
+  // avoids. Only look within this match day, not the team's whole history, since a
+  // team's jersey can legitimately change between match days (kit switches season to
+  // season) - this match day's own fixtures are what actually needs to stay consistent.
+  const { data: fixturesData } = useGetFixturesQuery({ matchDayId });
+  const fixtures = fixturesData?.content || [];
+
+  const getTeamUsualColor = (teamId: number): string | undefined => {
+    const teamFixtures = [...fixtures]
+      .filter((f) => f.homeTeamId === teamId || f.awayTeamId === teamId)
+      .sort((a, b) => new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime());
+    for (const f of teamFixtures) {
+      const color = f.homeTeamId === teamId ? f.homeJerseyColor : f.awayJerseyColor;
+      if (color) return color;
+    }
+    return undefined;
+  };
+
   const [values, setValues] = useState<FormValues>(emptyValues);
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
   const setField = <K extends keyof FormValues>(key: K, val: FormValues[K]) => setValues((prev) => ({ ...prev, [key]: val }));
@@ -75,6 +94,38 @@ export default function AddMatchModal({
       setErrors({});
     }
   }, [isModalVisible, roundId, groupId]);
+
+  // Auto-fill each team's usual jersey color once both teams are picked - minimizes how
+  // often an admin has to touch these fields at all. Only overwrites a field the admin
+  // hasn't already set by hand, and only auto-assigns a color that doesn't clash with the
+  // other team's - a genuine clash is left for the admin to resolve manually (the "if
+  // needed then they will switch" case), never silently forced onto the same color.
+  useEffect(() => {
+    if (!values.homeTeamId || !values.awayTeamId || values.homeTeamId === values.awayTeamId) return;
+
+    const homeUsual = getTeamUsualColor(Number(values.homeTeamId));
+    const awayUsual = getTeamUsualColor(Number(values.awayTeamId));
+
+    setValues((prev) => {
+      const next = { ...prev };
+      if (!prev.homeJerseyColor && homeUsual) next.homeJerseyColor = homeUsual;
+
+      if (!prev.awayJerseyColor) {
+        const homeColor = next.homeJerseyColor;
+        if (awayUsual && awayUsual !== homeColor) {
+          next.awayJerseyColor = awayUsual;
+        } else if (!awayUsual) {
+          // No history for the away team this match day - pick any palette color that
+          // doesn't clash with home's, rather than leaving it on "Not set" by default.
+          const available = (settingsData?.content.jerseyColors || []).find((c) => c !== homeColor);
+          if (available) next.awayJerseyColor = available;
+        }
+        // else: awayUsual clashes with homeColor - leave blank, admin picks by hand.
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.homeTeamId, values.awayTeamId, fixtures.length]);
 
   const validate = () => {
     const next: Partial<Record<keyof FormValues, string>> = {};

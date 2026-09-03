@@ -4,7 +4,6 @@ import { useGetAccountSummaryQuery } from "../../state/features/account/accountS
 
 // Import components
 import LatestMatchDayCard from "./LatestMatchDayCard";
-import LiveAuctionStatusCard from "./widgets/LiveAuctionStatusCard";
 import UpcomingDuesWidget from "./widgets/UpcomingDuesWidget";
 import MatchCalendarWidget from "./widgets/MatchCalendarWidget";
 import MyContributionsCard from "./widgets/MyContributionsCard";
@@ -44,11 +43,6 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Live Auction (only shows when an auction is running) - the widget
-          owns its own bottom margin so no empty gap is reserved when it
-          renders null. */}
-      <LiveAuctionStatusCard />
 
       {/* Latest MatchDay Section */}
       <div className="mb-10">

@@ -29,7 +29,6 @@ public class SystemSettingsConfiguration : IEntityTypeConfiguration<SystemSettin
 
         builder.Property(s => s.NotifyCustomEmailEnabled).HasColumnName("notify_custom_email_enabled").IsRequired();
         builder.Property(s => s.PushNotificationsEnabled).HasColumnName("push_notifications_enabled").IsRequired();
-        builder.Property(s => s.AuctionEnabled).HasColumnName("auction_enabled").IsRequired();
         builder.Property(s => s.LastPaymentReminderSentAt).HasColumnName("last_payment_reminder_sent_at");
         builder.Property(s => s.MatchDayReminderRepeatHours).HasColumnName("match_day_reminder_repeat_hours").HasDefaultValue(48).IsRequired();
         builder.Property(s => s.PaymentDueReminderRepeatDays).HasColumnName("payment_due_reminder_repeat_days").HasDefaultValue(7).IsRequired();
@@ -52,6 +51,7 @@ public class SystemSettingsConfiguration : IEntityTypeConfiguration<SystemSettin
         builder.Property(s => s.WeeklyMatchDayMaxPlayersPerTeam).HasColumnName("weekly_match_day_max_players_per_team").HasDefaultValue(6).ValueGeneratedNever().IsRequired();
         builder.Property(s => s.WeeklyMatchDayAutoTeamsEnabled).HasColumnName("weekly_match_day_auto_teams_enabled").IsRequired();
         builder.Property(s => s.WeeklyMatchDayAutoTeamsLeadHours).HasColumnName("weekly_match_day_auto_teams_lead_hours").HasDefaultValue(24).IsRequired();
+        builder.Property(s => s.MinGoalkeepersPerTeam).HasColumnName("min_goalkeepers_per_team").HasDefaultValue(2).ValueGeneratedNever().IsRequired();
         builder.HasMany(s => s.WeeklyMatchDaySlots).WithOne(sl => sl.SystemSettings).HasForeignKey(sl => sl.SystemSettingsId).OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(s => s.CashChartCode).HasColumnName("cash_chart_code").HasMaxLength(50);

@@ -6,7 +6,6 @@ import {
   CalendarOutlined,
   CheckCircleOutlined,
   EnvironmentOutlined,
-  FireOutlined,
   HomeOutlined,
   LoginOutlined,
   TeamOutlined,
@@ -14,7 +13,6 @@ import {
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import ViewerHomeTab from "./ViewerHomeTab";
-import ViewerAuctionTab from "./ViewerAuctionTab";
 import ViewerFixturesResultsTab from "./ViewerFixturesResultsTab";
 import ViewerTableTab from "./ViewerTableTab";
 import ViewerRulesTab from "./ViewerRulesTab";
@@ -54,14 +52,12 @@ const isValidViewerTab = (
   tabKey: string | null,
   hasRules: boolean,
   isLoggedIn: boolean,
-  hasAuction: boolean = false,
 ) => {
   if (!tabKey) return false;
 
   return (
     ["home", "results", "table", "stats", "squad-lineup"].includes(tabKey) ||
     (tabKey === "rules" && hasRules) ||
-    (tabKey === "auction" && hasAuction) ||
     (tabKey === "login" && !isLoggedIn)
   );
 };
@@ -124,14 +120,12 @@ export default function MatchDayViewerPage({
     { skip: !selectedId },
   );
   const hasRules = Boolean(summaryData?.content?.[0]?.rules?.trim());
-  const hasAuction = Boolean(selectedMatchDay?.auctionMode);
 
   // Missing tab segment (bare /match-day-viewer/:id) reads as "home" without
   // forcing a redirect - only an actually-invalid tab (e.g. "rules" on a
-  // matchDay with none, or a stale link to "auction" once it's over)
-  // gets corrected below.
+  // matchDay with none) gets corrected below.
   const activeTab =
-    tabParam && isValidViewerTab(tabParam, hasRules, isLoggedIn, hasAuction)
+    tabParam && isValidViewerTab(tabParam, hasRules, isLoggedIn)
       ? tabParam
       : "home";
 
@@ -156,9 +150,9 @@ export default function MatchDayViewerPage({
   // of silently rendering a tab that doesn't match what's in the address bar.
   useEffect(() => {
     if (!selectedId || !tabParam) return;
-    if (isValidViewerTab(tabParam, hasRules, isLoggedIn, hasAuction)) return;
+    if (isValidViewerTab(tabParam, hasRules, isLoggedIn)) return;
     navigate(`/match-day-viewer/${selectedId}/home`, { replace: true });
-  }, [selectedId, tabParam, hasRules, isLoggedIn, hasAuction, navigate]);
+  }, [selectedId, tabParam, hasRules, isLoggedIn, navigate]);
 
   const tabItems = [
     {
@@ -198,20 +192,6 @@ export default function MatchDayViewerPage({
             children: selectedId ? (
               <ViewerRulesTab matchDayId={selectedId} />
             ) : null,
-          },
-        ]
-      : []),
-    ...(hasAuction
-      ? [
-          {
-            key: "auction",
-            label: (
-              <span>
-                <FireOutlined style={{ marginRight: 6 }} />
-                Auction
-              </span>
-            ),
-            children: selectedId ? <ViewerAuctionTab matchDayId={selectedId} /> : null,
           },
         ]
       : []),

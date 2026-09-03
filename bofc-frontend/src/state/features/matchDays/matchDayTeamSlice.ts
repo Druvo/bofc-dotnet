@@ -191,9 +191,9 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                     teams: {
                         teamId: number;
                         teamName: string;
-                        assigned: boolean;
-                        playerId?: number | null;
-                        playerName?: string | null;
+                        /** Every player newly assigned goalkeeper for this team this run - empty if none
+                         * (already at/past the configured minimum, or no eligible players left). */
+                        assigned: { playerId: number; playerName: string }[];
                         skippedReason?: string | null;
                     }[];
                     pastMatchDaysMissingGoalkeeperData: number;

@@ -44,7 +44,6 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
             SportType = ParseEnumOrThrow<SportType>(request.SportType, "sportType") ?? SportType.FOOTBALL,
             MatchDayType = ParseEnumOrThrow<MatchDayType>(request.MatchDayType, "matchDayType") ?? MatchDayType.ROUND_ROBIN,
             GroupCount = request.GroupCount,
-            AuctionMode = request.AuctionMode,
             DefaultMatchDay = defaultMatchDay,
         };
 
@@ -178,8 +177,6 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         {
             matchDay.GroupCount = request.GroupCount;
         }
-        matchDay.AuctionMode = request.AuctionMode;
-
         // Transaction - see SaveMatchDayAsync's remarks; same reasoning applies to updates.
         await using var transaction = await db.Database.BeginTransactionAsync();
 
@@ -308,13 +305,6 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
 
         await db.MatchEvents.Where(e => e.Match.MatchDayId == matchDayId).ExecuteDeleteAsync();
         await db.MatchStatistics.Where(s => s.Match.MatchDayId == matchDayId).ExecuteDeleteAsync();
-
-        await db.AuctionBids.Where(b => b.MatchDayId == matchDayId).ExecuteDeleteAsync();
-        await db.AuctionPlayerRegistrations.Where(r => r.MatchDayId == matchDayId).ExecuteDeleteAsync();
-        await db.AuctionPlayers.Where(p => p.MatchDayId == matchDayId).ExecuteDeleteAsync();
-        await db.AuctionSessions.Where(s => s.MatchDayId == matchDayId).ExecuteDeleteAsync();
-        await db.AuctionSettingsSet.Where(s => s.MatchDayId == matchDayId).ExecuteDeleteAsync();
-        await db.TeamBudgets.Where(b => b.MatchDayId == matchDayId).ExecuteDeleteAsync();
 
         await db.TeamLineupPlayers.Where(p => p.TeamLineup.Team.MatchDayId == matchDayId).ExecuteDeleteAsync();
 
@@ -476,7 +466,6 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         SportType = matchDay.SportType.ToString(),
         MatchDayType = matchDay.MatchDayType.ToString(),
         GroupCount = matchDay.GroupCount,
-        AuctionMode = matchDay.AuctionMode,
         IsWeeklyMatchDay = matchDay.IsWeeklyMatchDay,
     };
 }

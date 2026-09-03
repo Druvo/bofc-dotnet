@@ -211,19 +211,22 @@ public class TeamService(
         var cleared = new List<ClearedGoalkeeper>();
         foreach (var team in teams)
         {
-            var currentGoalkeeper = team.TeamPlayers.FirstOrDefault(tp => tp.PlayingPosition == FootballPosition.GOALKEEPER);
-            if (currentGoalkeeper == null) continue;
-
-            currentGoalkeeper.PlayingPosition = FootballPosition.UNASSIGNED;
-            await RemoveGoalKeeperRoundAsync(currentGoalkeeper.PlayerId, matchDayId);
-
-            cleared.Add(new ClearedGoalkeeper
+            // A team can now carry more than one goalkeeper (see MinGoalkeepersPerTeam), so every
+            // one of them - not just the first found - goes back to UNASSIGNED.
+            var currentGoalkeepers = team.TeamPlayers.Where(tp => tp.PlayingPosition == FootballPosition.GOALKEEPER).ToList();
+            foreach (var currentGoalkeeper in currentGoalkeepers)
             {
-                TeamId = team.Id,
-                TeamName = team.TeamName,
-                PlayerId = currentGoalkeeper.PlayerId,
-                PlayerName = currentGoalkeeper.Player.Name,
-            });
+                currentGoalkeeper.PlayingPosition = FootballPosition.UNASSIGNED;
+                await RemoveGoalKeeperRoundAsync(currentGoalkeeper.PlayerId, matchDayId);
+
+                cleared.Add(new ClearedGoalkeeper
+                {
+                    TeamId = team.Id,
+                    TeamName = team.TeamName,
+                    PlayerId = currentGoalkeeper.PlayerId,
+                    PlayerName = currentGoalkeeper.Player.Name,
+                });
+            }
         }
 
         await db.SaveChangesAsync();
@@ -324,14 +327,17 @@ public class TeamService(
         return sent;
     }
 
-    /// <summary>One click, one goalkeeper per team: for every team on this MatchDay that doesn't
-    /// already have one, ranks that team's own roster by the club's fairness formula (see
-    /// ComputeGoalkeeperBalancesAsync) and assigns the top eligible player. Teams that already
-    /// have a goalkeeper are left untouched - this fills gaps, it never overrides a manual pick.
-    /// The organiser can still undo any single pick afterward via the normal "Remove from
-    /// Goalkeeper" action.</summary>
+    /// <summary>One click, N goalkeepers per team (a starter plus backup/rotation cover - see
+    /// SystemSettings.MinGoalkeepersPerTeam): for every team on this MatchDay short of that count,
+    /// ranks the remaining (not-already-goalkeeper) members of that team's own roster by the
+    /// club's fairness formula (see ComputeGoalkeeperBalancesAsync) and assigns the top eligible
+    /// players to fill the gap. Teams already at or past the configured count are left untouched -
+    /// this only ever fills gaps, it never overrides or demotes a manual pick. The organiser can
+    /// still undo any pick afterward via the normal "Remove from Goalkeeper" action.</summary>
     public async Task<GoalkeeperAutoAssignResponse> AutoAssignGoalkeepersAsync(long matchDayId)
     {
+        var minGoalkeepersPerTeam = await GetMinGoalkeepersPerTeamAsync();
+
         var teams = await db.Teams.Include(t => t.TeamPlayers).ThenInclude(tp => tp.Player)
             .Where(t => t.MatchDayId == matchDayId)
             .ToListAsync();
@@ -344,53 +350,47 @@ public class TeamService(
 
         foreach (var team in teams)
         {
-            var existingGoalkeeper = team.TeamPlayers.FirstOrDefault(tp => tp.PlayingPosition == FootballPosition.GOALKEEPER);
-            if (existingGoalkeeper != null)
+            var existingGoalkeepers = team.TeamPlayers.Where(tp => tp.PlayingPosition == FootballPosition.GOALKEEPER).ToList();
+            var slotsToFill = minGoalkeepersPerTeam - existingGoalkeepers.Count;
+
+            if (slotsToFill <= 0)
             {
                 results.Add(new TeamGoalkeeperAssignmentResult
                 {
                     TeamId = team.Id,
                     TeamName = team.TeamName,
-                    Assigned = false,
-                    PlayerId = existingGoalkeeper.PlayerId,
-                    PlayerName = existingGoalkeeper.Player.Name,
-                    SkippedReason = "Already has a goalkeeper",
+                    Assigned = [],
+                    SkippedReason = "Already has enough goalkeepers",
                 });
                 continue;
             }
 
-            // Highest balance (most owed) first among this team's own eligible members; playerId
-            // is just a stable tiebreaker, not a meaningful ranking signal.
-            var pick = team.TeamPlayers
-                .Where(tp => balances.TryGetValue(tp.PlayerId, out var b) && b.IsEligible)
+            // Highest balance (most owed) first among this team's own eligible, not-already-
+            // goalkeeper members; playerId is just a stable tiebreaker, not a meaningful signal.
+            var picks = team.TeamPlayers
+                .Where(tp => tp.PlayingPosition != FootballPosition.GOALKEEPER
+                    && balances.TryGetValue(tp.PlayerId, out var b) && b.IsEligible)
                 .OrderByDescending(tp => balances[tp.PlayerId].Balance)
                 .ThenBy(tp => tp.PlayerId)
-                .FirstOrDefault();
+                .Take(slotsToFill)
+                .ToList();
 
-            if (pick == null)
+            foreach (var pick in picks)
             {
-                results.Add(new TeamGoalkeeperAssignmentResult
-                {
-                    TeamId = team.Id,
-                    TeamName = team.TeamName,
-                    Assigned = false,
-                    SkippedReason = team.TeamPlayers.Count == 0
-                        ? "No players on this team"
-                        : "No eligible players (all resting or excluded)",
-                });
-                continue;
+                pick.PlayingPosition = FootballPosition.GOALKEEPER;
+                await TrackGoalKeeperRoundAsync(pick.PlayerId, matchDayId);
             }
-
-            pick.PlayingPosition = FootballPosition.GOALKEEPER;
-            await TrackGoalKeeperRoundAsync(pick.PlayerId, matchDayId);
 
             results.Add(new TeamGoalkeeperAssignmentResult
             {
                 TeamId = team.Id,
                 TeamName = team.TeamName,
-                Assigned = true,
-                PlayerId = pick.PlayerId,
-                PlayerName = pick.Player.Name,
+                Assigned = picks.Select(p => new AssignedGoalkeeperPlayer { PlayerId = p.PlayerId, PlayerName = p.Player.Name }).ToList(),
+                SkippedReason = picks.Count < slotsToFill
+                    ? (team.TeamPlayers.Count == 0
+                        ? "No players on this team"
+                        : "Not enough eligible players (all resting or excluded)")
+                    : null,
             });
         }
 
@@ -404,6 +404,12 @@ public class TeamService(
         };
     }
 
+    /// <summary>Falls back to the entity default (2) if the settings row doesn't exist yet (fresh
+    /// install, Settings page never opened) rather than throwing.</summary>
+    private async Task<int> GetMinGoalkeepersPerTeamAsync() =>
+        (await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1))?.MinGoalkeepersPerTeam
+            ?? new SystemSettings().MinGoalkeepersPerTeam;
+
     private sealed record PlayerGoalkeeperBalance(int Played, int InGoal, double Balance, bool IsResting, bool IsExcluded)
     {
         public bool IsEligible => !IsResting && !IsExcluded;
@@ -414,6 +420,8 @@ public class TeamService(
     /// ranked, NEXT UP marked) before or instead of actually assigning anyone.</summary>
     public async Task<GoalkeeperRankingResponse> GetGoalkeeperRankingAsync(long matchDayId)
     {
+        var minGoalkeepersPerTeam = await GetMinGoalkeepersPerTeamAsync();
+
         var teams = await db.Teams.Include(t => t.TeamPlayers).ThenInclude(tp => tp.Player)
             .Where(t => t.MatchDayId == matchDayId)
             .ToListAsync();
@@ -425,7 +433,8 @@ public class TeamService(
         var teamRankings = new List<TeamGoalkeeperRanking>();
         foreach (var team in teams)
         {
-            var hasExistingGoalkeeper = team.TeamPlayers.Any(tp => tp.PlayingPosition == FootballPosition.GOALKEEPER);
+            var existingGoalkeeperCount = team.TeamPlayers.Count(tp => tp.PlayingPosition == FootballPosition.GOALKEEPER);
+            var slotsToFill = minGoalkeepersPerTeam - existingGoalkeeperCount;
 
             var ranked = team.TeamPlayers
                 .Select(tp => (TeamPlayer: tp, Balance: balances.GetValueOrDefault(tp.PlayerId)))
@@ -434,12 +443,16 @@ public class TeamService(
                 .ThenBy(x => x.TeamPlayer.PlayerId)
                 .ToList();
 
-            // Only the single top-ranked eligible player is "next up" to actually be picked (and
-            // only when nobody's wearing the gloves for this team yet) - everyone else eligible is
-            // still just "eligible", same as the reference table's Rakib/Sunipoon/Nahid/Badrul rows.
-            var nextUpPlayerId = !hasExistingGoalkeeper
-                ? ranked.FirstOrDefault(x => x.Balance!.IsEligible).TeamPlayer?.PlayerId
-                : null;
+            // The top `slotsToFill` eligible, not-already-goalkeeper players are "next up" to
+            // actually be picked - everyone else eligible is still just "eligible", same as the
+            // reference table's Rakib/Sunipoon/Nahid/Badrul rows. Empty once the team has already
+            // reached MinGoalkeepersPerTeam.
+            var nextUpPlayerIds = slotsToFill > 0
+                ? ranked.Where(x => x.Balance!.IsEligible && x.TeamPlayer.PlayingPosition != FootballPosition.GOALKEEPER)
+                    .Take(slotsToFill)
+                    .Select(x => x.TeamPlayer.PlayerId)
+                    .ToHashSet()
+                : [];
 
             var rows = ranked.Select((x, i) => new GoalkeeperRankingPlayer
             {
@@ -452,7 +465,7 @@ public class TeamService(
                 Status = x.TeamPlayer.PlayingPosition == FootballPosition.GOALKEEPER ? "CURRENT_GOALKEEPER"
                     : x.Balance.IsExcluded ? "NOT_IN_ROTATION"
                     : x.Balance.IsResting ? "RESTING"
-                    : x.TeamPlayer.PlayerId == nextUpPlayerId ? "NEXT_UP"
+                    : nextUpPlayerIds.Contains(x.TeamPlayer.PlayerId) ? "NEXT_UP"
                     : "ELIGIBLE",
             }).ToList();
 

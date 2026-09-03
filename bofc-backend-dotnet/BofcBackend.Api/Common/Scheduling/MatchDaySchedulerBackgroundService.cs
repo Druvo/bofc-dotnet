@@ -133,7 +133,6 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
                     IsActive = true,
                     SportType = settings.WeeklyMatchDaySportType,
                     MatchDayType = MatchDayType.ROUND_ROBIN,
-                    AuctionMode = false,
                     IsWeeklyMatchDay = true,
                     AutoGenSlotDayOfWeek = slot.DayOfWeek,
                     AutoGenWeekStart = weekStart,

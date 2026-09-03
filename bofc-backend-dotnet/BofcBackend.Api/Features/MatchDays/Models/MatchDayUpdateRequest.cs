@@ -27,6 +27,5 @@ public class MatchDayUpdateRequest
 
     [Range(1, 32, ErrorMessage = "Group count must be between 1 and 32")]
     public int? GroupCount { get; set; }
-    public bool AuctionMode { get; set; }
     public bool? DefaultMatchDay { get; set; }
 }

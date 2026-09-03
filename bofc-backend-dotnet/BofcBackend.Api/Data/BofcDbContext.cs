@@ -53,14 +53,6 @@ public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUser
     public DbSet<AcCollection> AcCollections => Set<AcCollection>();
     public DbSet<PaymentAccount> PaymentAccounts => Set<PaymentAccount>();
 
-    // Phase 5 - auction domain
-    public DbSet<AuctionSession> AuctionSessions => Set<AuctionSession>();
-    public DbSet<AuctionPlayer> AuctionPlayers => Set<AuctionPlayer>();
-    public DbSet<AuctionBid> AuctionBids => Set<AuctionBid>();
-    public DbSet<AuctionPlayerRegistration> AuctionPlayerRegistrations => Set<AuctionPlayerRegistration>();
-    public DbSet<AuctionSettings> AuctionSettingsSet => Set<AuctionSettings>();
-    public DbSet<TeamBudget> TeamBudgets => Set<TeamBudget>();
-
     // Phase 6 - notifications
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<NotificationRecipient> NotificationRecipients => Set<NotificationRecipient>();

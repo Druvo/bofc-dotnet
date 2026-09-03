@@ -29,7 +29,7 @@ const TABS: TabItem[] = [
  * destinations - dashboard, next match day, live score/fixtures, roster - are
  * one tap away instead of hamburger -> drawer -> menu item. "More" opens the
  * exact same sidebar drawer the header hamburger already does (onOpenMore),
- * so Finance/Venue/Club Rules/Auction/Profile stay reachable without
+ * so Finance/Venue/Club Rules/Profile stay reachable without
  * duplicating nav. Desktop (>=768px) renders nothing - layout/Sidebar.tsx is
  * the nav there.
  */

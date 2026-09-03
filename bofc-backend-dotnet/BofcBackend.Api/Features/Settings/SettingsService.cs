@@ -46,7 +46,6 @@ public class SettingsService(
         settings.PaymentDueReminderRepeatDays = request.PaymentDueReminderRepeatDays;
         settings.NotifyCustomEmailEnabled = request.NotifyCustomEmailEnabled;
         settings.PushNotificationsEnabled = request.PushNotificationsEnabled;
-        settings.AuctionEnabled = request.AuctionEnabled;
         settings.MatchDayStatusCheckIntervalHours = request.MatchDayStatusCheckIntervalHours;
         settings.VotingLockEnabled = request.VotingLockEnabled;
         settings.VotingLockHoursBeforeMatch = request.VotingLockHoursBeforeMatch;
@@ -78,6 +77,7 @@ public class SettingsService(
         settings.WeeklyMatchDayMaxPlayersPerTeam = request.WeeklyMatchDayMaxPlayersPerTeam;
         settings.WeeklyMatchDayAutoTeamsEnabled = request.WeeklyMatchDayAutoTeamsEnabled;
         settings.WeeklyMatchDayAutoTeamsLeadHours = request.WeeklyMatchDayAutoTeamsLeadHours;
+        settings.MinGoalkeepersPerTeam = request.MinGoalkeepersPerTeam;
 
         // Full replace - this is a small config list (max ~7 rows), not worth diffing.
         db.WeeklyMatchDaySlots.RemoveRange(settings.WeeklyMatchDaySlots);
@@ -159,9 +159,6 @@ public class SettingsService(
 
     public async Task<bool> GetPushNotificationsEnabledAsync() =>
         (await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1))?.PushNotificationsEnabled ?? true;
-
-    public async Task<bool> GetAuctionEnabledAsync() =>
-        (await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1))?.AuctionEnabled ?? true;
 
     public async Task<GenerateWeeklyMatchesResponse> GenerateWeeklyMatchesNowAsync()
     {
@@ -262,7 +259,6 @@ public class SettingsService(
             PaymentDueReminderRepeatDays = s.PaymentDueReminderRepeatDays,
             NotifyCustomEmailEnabled = s.NotifyCustomEmailEnabled,
             PushNotificationsEnabled = s.PushNotificationsEnabled,
-            AuctionEnabled = s.AuctionEnabled,
             MatchDayStatusCheckIntervalHours = s.MatchDayStatusCheckIntervalHours,
             VotingLockEnabled = s.VotingLockEnabled,
             VotingLockHoursBeforeMatch = s.VotingLockHoursBeforeMatch,
@@ -280,6 +276,7 @@ public class SettingsService(
             WeeklyMatchDayMaxPlayersPerTeam = s.WeeklyMatchDayMaxPlayersPerTeam,
             WeeklyMatchDayAutoTeamsEnabled = s.WeeklyMatchDayAutoTeamsEnabled,
             WeeklyMatchDayAutoTeamsLeadHours = s.WeeklyMatchDayAutoTeamsLeadHours,
+            MinGoalkeepersPerTeam = s.MinGoalkeepersPerTeam,
             CashChartCode = effectiveCashCode,
             CashChartName = cashChartName,
             CollectionIncomeChartCode = effectiveCollectionCode,

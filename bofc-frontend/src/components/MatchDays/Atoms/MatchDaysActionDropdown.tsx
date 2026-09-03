@@ -11,7 +11,6 @@ import Button from "../../ui/button";
 import Modal from "../../ui/modal";
 import FormSelect from "../../ui/form-select";
 import FormInput from "../../ui/form-input";
-import useAuctionEnabled from "../../../hooks/useAuctionEnabled";
 
 interface MatchDaysActionDropdownProps {
   record: IoMatchDaySingleSummaryType;
@@ -36,7 +35,6 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
 
   const loginInfo = useSelector(selectLoginInfo);
   const canManage = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN") || loginInfo.roles.includes("COORDINATOR");
-  const auctionEnabled = useAuctionEnabled();
 
   const fireMenuClick = (key: string, close: () => void) => {
     close();
@@ -96,8 +94,6 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
         {(close) => (
           <>
             {record.activeStatus && <DropdownItem onClick={() => fireMenuClick("join", close)}>Join Match Day</DropdownItem>}
-            {auctionEnabled && record.auctionMode && <DropdownItem onClick={() => fireMenuClick("auction-register", close)}>Register for Auction</DropdownItem>}
-            {auctionEnabled && record.auctionMode && <DropdownItem onClick={() => fireMenuClick("auction-live", close)}>Live Auction</DropdownItem>}
             <DropdownItem onClick={() => fireMenuClick("team-building", close)}>Team Building</DropdownItem>
             <DropdownItem onClick={() => fireMenuClick("fixtures", close)}>Teams and Fixtures</DropdownItem>
             {canManage && <DropdownItem onClick={() => fireMenuClick("update", close)}>Update Match Day</DropdownItem>}
@@ -184,7 +180,7 @@ const MatchDaysActionDropdown: React.FC<MatchDaysActionDropdownProps> = ({
       >
         <p className="mb-3 text-theme-sm text-gray-600 dark:text-gray-400">
           This permanently deletes <strong>{record.name}</strong> and everything under it - teams, fixtures, lineups,
-          rounds/groups, auction data, prizes and participants. <strong>This cannot be undone.</strong>
+          rounds/groups, prizes and participants. <strong>This cannot be undone.</strong>
         </p>
         <p className="mb-2 text-theme-sm text-gray-600 dark:text-gray-400">
           Type <strong>{record.name}</strong> to confirm:

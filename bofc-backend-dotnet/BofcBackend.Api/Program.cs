@@ -13,9 +13,7 @@ using BofcBackend.Api.Common.Security;
 using BofcBackend.Api.Common.Storage;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
-using BofcBackend.Api.Common.RealTime.Stomp;
 using BofcBackend.Api.Features.Accounting;
-using BofcBackend.Api.Features.Auction;
 using BofcBackend.Api.Features.Auth;
 using BofcBackend.Api.Features.ClubRules;
 using BofcBackend.Api.Features.EmailTemplates;
@@ -140,19 +138,6 @@ builder.Services.AddScoped<AcBillPaymentService>();
 builder.Services.AddScoped<AcCollectionService>();
 builder.Services.AddScoped<AccountReportService>();
 builder.Services.AddScoped<IPaymentAccountService, PaymentAccountService>();
-
-// --- Auction domain. WebSocket contract is STOMP-over-SockJS (@stomp/stompjs + sockjs-client
-// on the frontend, see useAuctionWebSocket.ts) - SignalR would speak a different wire protocol
-// entirely and the frontend can't be touched, so this is a hand-rolled minimal SockJS+STOMP
-// server (see Common/RealTime/Stomp/) rather than the plan's original "swap to SignalR" idea.
-builder.Services.AddSingleton<AuctionStompHub>();
-builder.Services.AddSingleton<IAuctionBroadcaster, AuctionBroadcaster>();
-builder.Services.AddScoped<AuctionSessionService>();
-builder.Services.AddScoped<AuctionSettingsService>();
-builder.Services.AddScoped<AuctionPlayerPoolService>();
-builder.Services.AddScoped<AuctionRegistrationService>();
-builder.Services.AddScoped<TeamBudgetService>();
-builder.Services.AddHostedService<AuctionTimerBackgroundService>();
 
 var jwtSecret = builder.Configuration["Jwt:Secret"];
 if (string.IsNullOrWhiteSpace(jwtSecret))
@@ -299,9 +284,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Port of WebSocketConfig.java's registry.addEndpoint("/ws/auction").withSockJS().
-app.UseWebSockets();
-app.MapAuctionSockJsStomp("/ws/auction");
 
 app.Run();
 

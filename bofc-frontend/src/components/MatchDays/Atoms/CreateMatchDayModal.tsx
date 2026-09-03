@@ -9,7 +9,6 @@ import {
     usePresignRoadmapImageUploadMutation,
 } from "../../../state/features/matchDays/matchDaysSlice";
 import { IoMatchDaySingleSummaryType } from "../../../state/features/matchDays/matchDayTypes";
-import useAuctionEnabled from "../../../hooks/useAuctionEnabled";
 import { toAbsoluteLogoUrl } from "../../MatchDayViewer/teamLogoUtils";
 import { validateImageFile, compressImage } from "../../../utils/imageUploadUtils";
 import Modal from "../../ui/modal";
@@ -34,7 +33,6 @@ interface FormValues {
     matchDayTime: string; // HH:mm
     durationMinutes: string;
     venueId: string;
-    auctionMode: boolean;
     defaultMatchDay: boolean;
     season: string;
     description: string;
@@ -47,7 +45,6 @@ const emptyValues: FormValues = {
     matchDayTime: "",
     durationMinutes: "90",
     venueId: "",
-    auctionMode: false,
     defaultMatchDay: false,
     season: "",
     description: "",
@@ -61,7 +58,6 @@ export default function CreateMatchDay({
     matchDayData,
 }: CreateMatchDayProps) {
     const { data: venuesData, isLoading: isVenuesLoading } = useGetVanuesQuery();
-    const auctionEnabled = useAuctionEnabled();
     const isAutoMatchDay = Boolean(matchDayData?.isWeeklyMatchDay);
     const [createMatchDay, { isLoading: isCreating }] = useCreateMatchDayMutation();
     const [updateMatchDay, { isLoading: isUpdating }] = useUpdateMatchDayMutation();
@@ -106,7 +102,6 @@ export default function CreateMatchDay({
             matchDayDate: matchDayDateNaive,
             durationMinutes: values.durationMinutes ? Number(values.durationMinutes) : undefined,
             venueId: Number(values.venueId),
-            auctionMode: isAutoMatchDay ? false : values.auctionMode || false,
             defaultMatchDay: isAutoMatchDay ? true : Boolean(values.defaultMatchDay),
             season: values.season,
             description: values.description,
@@ -192,7 +187,6 @@ export default function CreateMatchDay({
                 // (or preselected the wrong venue) if a venue was ever renamed or two venues
                 // shared a display name.
                 venueId: String(matchDayData.venueId ?? ""),
-                auctionMode: matchDayData.auctionMode || false,
             });
             setRoadmapImageUrl(matchDayData.roadmapImageUrl);
         }
@@ -279,22 +273,6 @@ export default function CreateMatchDay({
                             error={errors.venueId}
                             options={venuesData?.content.map((venue: any) => ({ value: venue.id, label: venue.name })) || []}
                         />
-
-                        {auctionEnabled && (
-                            <div>
-                                <FormSwitch
-                                    label="Auction Mode"
-                                    checked={isAutoMatchDay ? false : values.auctionMode}
-                                    disabled={isAutoMatchDay}
-                                    onChange={(checked) => setField("auctionMode", checked)}
-                                />
-                                <p className="mt-1 text-theme-xs text-gray-400 dark:text-gray-500">
-                                    {isAutoMatchDay
-                                        ? "Auto-created Match Days never use auction mode."
-                                        : "Enable if teams will be formed by bidding auction instead of manual selection"}
-                                </p>
-                            </div>
-                        )}
 
                         <div>
                             <FormSwitch

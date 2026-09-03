@@ -41,7 +41,6 @@ public class MatchDay : AuditableEntity
     public SportType SportType { get; set; }
     public MatchDayType MatchDayType { get; set; }
     public int? GroupCount { get; set; }
-    public bool AuctionMode { get; set; }
 
     /// <summary>When the "MatchDay starting soon" reminder last actually went out (to whoever
     /// hadn't voted yet at the time) - paired with SystemSettings.MatchDayReminderRepeatHours to

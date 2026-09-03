@@ -43,7 +43,6 @@ export interface SystemSettings {
     paymentDueReminderRepeatDays: number;
     notifyCustomEmailEnabled: boolean;
     pushNotificationsEnabled: boolean;
-    auctionEnabled: boolean;
     matchDayStatusCheckIntervalHours: number;
     /** Master switch for closing RSVP voting some hours before kickoff. */
     votingLockEnabled: boolean;
@@ -63,6 +62,8 @@ export interface SystemSettings {
     weeklyMatchDayMaxPlayersPerTeam: number;
     weeklyMatchDayAutoTeamsEnabled: boolean;
     weeklyMatchDayAutoTeamsLeadHours: number;
+    /** How many goalkeepers "Auto-Assign Goalkeepers" fills per team (starter + backup/rotation cover). */
+    minGoalkeepersPerTeam: number;
     cashChartCode: string;
     cashChartName?: string | null;
     collectionIncomeChartCode: string;
@@ -97,7 +98,6 @@ export interface UpdateSystemSettingsRequest {
     paymentDueReminderRepeatDays: number;
     notifyCustomEmailEnabled: boolean;
     pushNotificationsEnabled: boolean;
-    auctionEnabled: boolean;
     matchDayStatusCheckIntervalHours: number;
     /** Master switch for closing RSVP voting some hours before kickoff. */
     votingLockEnabled: boolean;
@@ -117,6 +117,8 @@ export interface UpdateSystemSettingsRequest {
     weeklyMatchDayMaxPlayersPerTeam: number;
     weeklyMatchDayAutoTeamsEnabled: boolean;
     weeklyMatchDayAutoTeamsLeadHours: number;
+    /** How many goalkeepers "Auto-Assign Goalkeepers" fills per team (starter + backup/rotation cover). */
+    minGoalkeepersPerTeam: number;
     /** Null/omitted to clear the override and fall back to the appsettings default. */
     cashChartCode?: string | null;
     /** Null/omitted to clear the override and fall back to the appsettings default. */
@@ -146,7 +148,6 @@ export function toUpdateSystemSettingsRequest(s: SystemSettings): UpdateSystemSe
         paymentDueReminderRepeatDays: s.paymentDueReminderRepeatDays,
         notifyCustomEmailEnabled: s.notifyCustomEmailEnabled,
         pushNotificationsEnabled: s.pushNotificationsEnabled,
-        auctionEnabled: s.auctionEnabled,
         matchDayStatusCheckIntervalHours: s.matchDayStatusCheckIntervalHours,
         votingLockEnabled: s.votingLockEnabled,
         votingLockHoursBeforeMatch: s.votingLockHoursBeforeMatch,
@@ -161,6 +162,7 @@ export function toUpdateSystemSettingsRequest(s: SystemSettings): UpdateSystemSe
         weeklyMatchDayMaxPlayersPerTeam: s.weeklyMatchDayMaxPlayersPerTeam,
         weeklyMatchDayAutoTeamsEnabled: s.weeklyMatchDayAutoTeamsEnabled,
         weeklyMatchDayAutoTeamsLeadHours: s.weeklyMatchDayAutoTeamsLeadHours,
+        minGoalkeepersPerTeam: s.minGoalkeepersPerTeam,
         cashChartCode: s.cashChartCodeIsOverridden ? s.cashChartCode : null,
         collectionIncomeChartCode: s.collectionIncomeChartCodeIsOverridden ? s.collectionIncomeChartCode : null,
         jerseyColors: s.jerseyColors,
@@ -193,11 +195,6 @@ export const settingsApi = apiWithTags.injectEndpoints({
 
         getPushNotificationsEnabled: builder.query<BasicResType & { content: boolean }, void>({
             query: () => "settings/push-notifications-enabled",
-            providesTags: ["systemSettings"],
-        }),
-
-        getAuctionEnabled: builder.query<BasicResType & { content: boolean }, void>({
-            query: () => "settings/auction-enabled",
             providesTags: ["systemSettings"],
         }),
 
@@ -238,7 +235,6 @@ export const {
     useUpdateSystemSettingsMutation,
     useSendTestEmailMutation,
     useGetPushNotificationsEnabledQuery,
-    useGetAuctionEnabledQuery,
     useGenerateWeeklyMatchesNowMutation,
     useGenerateTeamsNowMutation,
     useSendPaymentDueReminderNowMutation,

@@ -8,7 +8,7 @@ import GenerateMatchDaysModal from "./Atoms/GenerateMatchDaysModal";
 import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../state/slices/loginInfoSlice";
 import { showBdLocalTimeRange, getEffectiveMatchDayStatus } from "../../utils/utils";
-import { CalendarOutlined, EnvironmentOutlined, SearchOutlined, ThunderboltOutlined, TrophyOutlined } from "@ant-design/icons";
+import { CalendarOutlined, EnvironmentOutlined, SearchOutlined, TrophyOutlined } from "@ant-design/icons";
 import { canManageMatchDays } from "../../utils/roleUtils";
 import Button from "../ui/button";
 import Pagination from "../ui/pagination";
@@ -71,10 +71,6 @@ const MatchDaysPage: React.FC = () => {
   const handleMenuClick = (e: any, record: IoMatchDaySingleSummaryType) => {
     if (e.key === "join") {
       navigate(`/match-days/join-match-day/${record.id}`);
-    } else if (e.key === "auction-register") {
-      navigate(`/auction/register/${record.id}`);
-    } else if (e.key === "auction-live") {
-      navigate(`/auction/live/${record.id}`);
     } else if (e.key === "team-building" || e.key === "fixtures") {
       navigate(`/match-days/team-building/${record.id}`);
     }
@@ -241,17 +237,6 @@ const MatchDaysPage: React.FC = () => {
                         </span>
                       )}
                     </div>
-
-                    {t.auctionMode && (
-                      <Button
-                        size="sm"
-                        startIcon={<ThunderboltOutlined />}
-                        className="mt-3.5 w-full"
-                        onClick={(e) => { e.stopPropagation(); navigate(`/auction/register/${t.id}`); }}
-                      >
-                        Auction
-                      </Button>
-                    )}
                   </div>
                 </div>
               );

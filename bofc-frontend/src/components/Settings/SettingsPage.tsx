@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { SettingOutlined, MailOutlined, CalendarOutlined, BankOutlined, BellOutlined, FireOutlined, SkinOutlined, ClockCircleOutlined, FileTextOutlined, LockOutlined } from "@ant-design/icons";
+import { SettingOutlined, MailOutlined, CalendarOutlined, BankOutlined, BellOutlined, SkinOutlined, ClockCircleOutlined, FileTextOutlined, LockOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import FormInput from "../ui/form-input";
 import FormSelect from "../ui/form-select";
@@ -73,7 +73,7 @@ function JerseyColorPicker({ label, value, onChange }: { label: string; value: s
 const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 /** My Account (Change Password / Update Player Data) is visible to every logged-in
- * user. Everything else on this page (SMTP, notifications, push, auction, accounting,
+ * user. Everything else on this page (SMTP, notifications, push, accounting,
  * Next Match, Jersey Colors) is admin/superadmin-only - the backend's
  * SettingsController is already role-gated on every action, so `skip` below just
  * avoids firing a request every non-admin would get a 403 back from. */
@@ -107,7 +107,6 @@ function SettingsPage() {
     const [paymentDueReminderRepeatDays, setPaymentDueReminderRepeatDays] = useState(10);
     const [notifyCustomEmailEnabled, setNotifyCustomEmailEnabled] = useState(false);
     const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
-    const [auctionEnabled, setAuctionEnabled] = useState(true);
     const [matchDayStatusCheckIntervalHours, setMatchDayStatusCheckIntervalHours] = useState(1);
     const [votingLockEnabled, setVotingLockEnabled] = useState(false);
     const [votingLockHoursBeforeMatch, setVotingLockHoursBeforeMatch] = useState(5);
@@ -124,6 +123,7 @@ function SettingsPage() {
     const [weeklyMatchDayMaxPlayersPerTeam, setWeeklyMatchDayMaxPlayersPerTeam] = useState(6);
     const [weeklyMatchDayAutoTeamsEnabled, setWeeklyMatchDayAutoTeamsEnabled] = useState(false);
     const [weeklyMatchDayAutoTeamsLeadHours, setWeeklyMatchDayAutoTeamsLeadHours] = useState(24);
+    const [minGoalkeepersPerTeam, setMinGoalkeepersPerTeam] = useState(2);
 
     const handleMatchDaysPerWeekChange = (count: number) => {
         const clamped = Math.min(7, Math.max(1, count || 1));
@@ -229,10 +229,9 @@ function SettingsPage() {
         setPaymentDueReminderRepeatDays(s.paymentDueReminderRepeatDays || 10);
         setNotifyCustomEmailEnabled(s.notifyCustomEmailEnabled);
         setPushNotificationsEnabled(s.pushNotificationsEnabled);
-        setAuctionEnabled(s.auctionEnabled);
+        setMatchDayStatusCheckIntervalHours(s.matchDayStatusCheckIntervalHours || 1);
         setVotingLockEnabled(s.votingLockEnabled);
         setVotingLockHoursBeforeMatch(s.votingLockHoursBeforeMatch || 5);
-        setMatchDayStatusCheckIntervalHours(s.matchDayStatusCheckIntervalHours || 1);
         setWeeklyMatchDayEnabled(s.weeklyMatchDayEnabled);
         setWeeklyMatchDayNamePrefix(s.weeklyMatchDayNamePrefix);
         setWeeklyMatchDayVenueId(s.weeklyMatchDayVenueId ?? undefined);
@@ -246,6 +245,7 @@ function SettingsPage() {
         setWeeklyMatchDayMaxPlayersPerTeam(s.weeklyMatchDayMaxPlayersPerTeam || 6);
         setWeeklyMatchDayAutoTeamsEnabled(s.weeklyMatchDayAutoTeamsEnabled);
         setWeeklyMatchDayAutoTeamsLeadHours(s.weeklyMatchDayAutoTeamsLeadHours || 24);
+        setMinGoalkeepersPerTeam(s.minGoalkeepersPerTeam || 2);
         setCashChartCode(s.cashChartCodeIsOverridden ? s.cashChartCode : undefined);
         setCollectionIncomeChartCode(s.collectionIncomeChartCodeIsOverridden ? s.collectionIncomeChartCode : undefined);
         setJerseyColors(s.jerseyColors?.length ? s.jerseyColors : ["red", "yellow"]);
@@ -287,10 +287,9 @@ function SettingsPage() {
                 paymentDueReminderRepeatDays,
                 notifyCustomEmailEnabled,
                 pushNotificationsEnabled,
-                auctionEnabled,
+                matchDayStatusCheckIntervalHours,
                 votingLockEnabled,
                 votingLockHoursBeforeMatch,
-                matchDayStatusCheckIntervalHours,
                 weeklyMatchDayEnabled,
                 weeklyMatchDayNamePrefix,
                 weeklyMatchDayOfWeek: weeklyMatchDaySlots[0]?.dayOfWeek || "Friday",
@@ -302,6 +301,7 @@ function SettingsPage() {
                 weeklyMatchDayMaxPlayersPerTeam,
                 weeklyMatchDayAutoTeamsEnabled,
                 weeklyMatchDayAutoTeamsLeadHours,
+                minGoalkeepersPerTeam,
                 cashChartCode: cashChartCode ?? null,
                 collectionIncomeChartCode: collectionIncomeChartCode ?? null,
                 jerseyColors,
@@ -545,18 +545,6 @@ function SettingsPage() {
 
             <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
                 <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
-                    <FireOutlined className="text-brand-500 dark:text-brand-400" />
-                    Auction
-                </h2>
-                <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
-                    Master switch for the player-auction feature. When off, the Auction nav entry and the "Auction Mode" toggle on Match Day creation are hidden club-wide.
-                </p>
-
-                <FormSwitch label="Enable auction" checked={auctionEnabled} onChange={setAuctionEnabled} />
-            </div>
-
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
-                <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
                     <ClockCircleOutlined className="text-brand-500 dark:text-brand-400" />
                     Scheduler
                 </h2>
@@ -783,6 +771,21 @@ function SettingsPage() {
                             />
                             <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
                                 The number of teams is worked out automatically from how many players confirm - e.g. 13 confirmed at a cap of 6 makes 3 teams - rather than a fixed team count. An admin can still add/remove players by hand afterward on any given Match Day.
+                            </p>
+                        </div>
+
+                        <div className="mb-3">
+                            <FormInput
+                                label="Goalkeepers per Team (min)"
+                                hint="A starter plus backup/rotation cover, not just one."
+                                type="number"
+                                min={1}
+                                max={5}
+                                value={minGoalkeepersPerTeam}
+                                onChange={(e) => setMinGoalkeepersPerTeam(Number(e.target.value) || 2)}
+                            />
+                            <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
+                                How many goalkeepers "Auto-Assign Goalkeepers" fills per team on any Match Day - it only ever fills the gap up to this count, never overrides an existing pick.
                             </p>
                         </div>
 

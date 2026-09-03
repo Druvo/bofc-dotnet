@@ -24,6 +24,5 @@ public class MatchDayResponse
     public string? SportType { get; set; }
     public string? MatchDayType { get; set; }
     public int? GroupCount { get; set; }
-    public bool AuctionMode { get; set; }
     public bool IsWeeklyMatchDay { get; set; }
 }

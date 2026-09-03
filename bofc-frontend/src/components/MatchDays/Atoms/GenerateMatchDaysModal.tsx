@@ -114,7 +114,6 @@ export default function GenerateMatchDaysModal() {
           matchDayDate: matchDayDateNaive,
           durationMinutes: values.durationMinutes ? Number(values.durationMinutes) : undefined,
           venueId: Number(values.venueId),
-          auctionMode: false,
           defaultMatchDay: false,
         }).unwrap();
         successCount++;

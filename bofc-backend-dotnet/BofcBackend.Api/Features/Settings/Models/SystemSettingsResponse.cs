@@ -28,8 +28,6 @@ public class SystemSettingsResponse
 
     public bool PushNotificationsEnabled { get; set; }
 
-    public bool AuctionEnabled { get; set; }
-
     /// <summary>How often (hours) the background job re-checks and concludes overdue MatchDays.</summary>
     public int MatchDayStatusCheckIntervalHours { get; set; } = 1;
 
@@ -55,6 +53,7 @@ public class SystemSettingsResponse
     public int WeeklyMatchDayMaxPlayersPerTeam { get; set; } = 6;
     public bool WeeklyMatchDayAutoTeamsEnabled { get; set; }
     public int WeeklyMatchDayAutoTeamsLeadHours { get; set; } = 24;
+    public int MinGoalkeepersPerTeam { get; set; } = 2;
 
     /// <summary>Effective code in use right now (Settings override, or the appsettings default if never set) - never null, so the UI always has something to show.</summary>
     public string CashChartCode { get; set; } = string.Empty;

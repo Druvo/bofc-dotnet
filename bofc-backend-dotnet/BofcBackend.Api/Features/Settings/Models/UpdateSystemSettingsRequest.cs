@@ -47,8 +47,6 @@ public class UpdateSystemSettingsRequest
 
     public bool PushNotificationsEnabled { get; set; } = true;
 
-    public bool AuctionEnabled { get; set; } = true;
-
     /// <summary>How often (hours) the background job re-checks and concludes overdue MatchDays.</summary>
     [Range(1, 24)]
     public int MatchDayStatusCheckIntervalHours { get; set; } = 1;
@@ -90,6 +88,10 @@ public class UpdateSystemSettingsRequest
 
     [Range(1, 168)]
     public int WeeklyMatchDayAutoTeamsLeadHours { get; set; } = 24;
+
+    /// <summary>How many goalkeepers "Auto-Assign Goalkeepers" fills per team (starter + backup/rotation cover).</summary>
+    [Range(1, 5)]
+    public int MinGoalkeepersPerTeam { get; set; } = 2;
 
     /// <summary>Null/empty = clear the override, fall back to the Accounting:CashChartCode appsettings default.</summary>
     public string? CashChartCode { get; set; }

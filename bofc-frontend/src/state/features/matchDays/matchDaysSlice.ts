@@ -27,7 +27,6 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
         matchDayDate: string | Date;
         durationMinutes?: number;
         venueId: number;
-        auctionMode?: boolean;
         defaultMatchDay?: boolean;
         season?: string;
         description?: string;
@@ -35,10 +34,10 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
         roadmapImageUrl?: string;
       }
     >({
-      query: ({ matchDayName, matchDayDate, durationMinutes, venueId, auctionMode, defaultMatchDay, season, description, rules, roadmapImageUrl }) => ({
+      query: ({ matchDayName, matchDayDate, durationMinutes, venueId, defaultMatchDay, season, description, rules, roadmapImageUrl }) => ({
         url: "match-days",
         method: "POST",
-        body: { matchDayName, matchDayDate, durationMinutes, venueId, auctionMode: auctionMode || false, defaultMatchDay, season, description, rules, roadmapImageUrl },
+        body: { matchDayName, matchDayDate, durationMinutes, venueId, defaultMatchDay, season, description, rules, roadmapImageUrl },
       }),
       invalidatesTags: ["matchDays"],
     }),
@@ -57,7 +56,6 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
         matchDayDate: string | Date;
         durationMinutes?: number;
         venueId: number;
-        auctionMode?: boolean;
         defaultMatchDay?: boolean;
         season?: string;
         description?: string;
@@ -65,10 +63,10 @@ export const matchDaysApi = apiWithTags.injectEndpoints({
         roadmapImageUrl?: string;
       }
     >({
-      query: ({ id, matchDayName, matchDayDate, durationMinutes, venueId, auctionMode, defaultMatchDay, season, description, rules, roadmapImageUrl }) => ({
+      query: ({ id, matchDayName, matchDayDate, durationMinutes, venueId, defaultMatchDay, season, description, rules, roadmapImageUrl }) => ({
         url: `match-days/${id}`,
         method: "PUT",
-        body: { matchDayName, matchDayDate, durationMinutes, venueId, auctionMode: auctionMode || false, defaultMatchDay, season, description, rules, roadmapImageUrl },
+        body: { matchDayName, matchDayDate, durationMinutes, venueId, defaultMatchDay, season, description, rules, roadmapImageUrl },
       }),
       invalidatesTags: ["matchDays"],
     }),

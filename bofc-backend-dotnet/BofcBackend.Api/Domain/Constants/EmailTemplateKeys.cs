@@ -9,4 +9,5 @@ public static class EmailTemplateKeys
     public const string PaymentDueReminder = "PAYMENT_DUE_REMINDER";
     public const string MatchDayReminder = "MATCHDAY_REMINDER";
     public const string TeamsGenerated = "TEAMS_GENERATED";
+    public const string PasswordReset = "PASSWORD_RESET";
 }

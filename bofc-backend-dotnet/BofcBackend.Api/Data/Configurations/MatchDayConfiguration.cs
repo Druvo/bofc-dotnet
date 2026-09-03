@@ -33,7 +33,6 @@ public class MatchDayConfiguration : IEntityTypeConfiguration<MatchDay>
         builder.Property(t => t.SportType).HasColumnName("sport_type").HasConversion<string>().IsRequired();
         builder.Property(t => t.MatchDayType).HasColumnName("match_day_type").HasConversion<string>().IsRequired();
         builder.Property(t => t.GroupCount).HasColumnName("group_count");
-        builder.Property(t => t.AuctionMode).HasColumnName("auction_mode").IsRequired();
         builder.Property(t => t.VenueId).HasColumnName("venue_id");
         builder.Property(t => t.ReminderSentAt).HasColumnName("reminder_sent_at");
         builder.Property(t => t.IsWeeklyMatchDay).HasColumnName("is_weekly_match_day").IsRequired();

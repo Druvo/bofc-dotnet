@@ -33,16 +33,6 @@ import EmailTemplatesPage from "../Settings/EmailTemplatesPage";
 import MonthlyPaymentsPage from "../Dashboard/MonthlyPaymentsPage";
 import MatchDayPage from "../MatchDay/MatchDayPage";
 import MatchDetailsPage from "../MatchDays/Fixtures/MatchDetailsPage";
-import {
-  AuctionHubPage,
-  AuctionRegistrationPage,
-  AuctionAdminApprovalPage,
-  AuctionSettingsPage,
-  AuctionPlayerPoolPage,
-  AuctionTeamBudgetsPage,
-  LiveAuctionPage,
-  AuctionResultsPage,
-} from "../Auction";
 import MatchDayViewerPage from "../MatchDayViewer/MatchDayViewerPage";
 import NotificationsPage from "../Notifications/NotificationsPage";
 import AppFooter from "../CommonAtoms/AppFooter";
@@ -181,7 +171,7 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                             {/* AcVoucherType/AcNature/AcChart/AcVouchers all fetch on mount from
                                 controllers restricted to Admin/SuperAdmin only - gating the route
                                 (not just hiding the Sidebar link) keeps a direct URL nav from
-                                403-ing for every other role, same fix as useAuctionEnabled. */}
+                                403-ing for every other role. */}
                             {(loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN")) && (
                                 <>
                                     <Route
@@ -235,16 +225,6 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                             )}
 
                             <Route path="match-day" element={<MatchDayPage />} />
-
-                            {/* Auction Routes */}
-                            <Route path="auction" element={<AuctionHubPage />} />
-                            <Route path="auction/register/:matchDayId" element={<AuctionRegistrationPage />} />
-                            <Route path="auction/registrations/:matchDayId" element={<AuctionAdminApprovalPage />} />
-                            <Route path="auction/settings/:matchDayId" element={<AuctionSettingsPage />} />
-                            <Route path="auction/players/:matchDayId" element={<AuctionPlayerPoolPage />} />
-                            <Route path="auction/team-budgets/:matchDayId" element={<AuctionTeamBudgetsPage />} />
-                            <Route path="auction/live/:matchDayId" element={<LiveAuctionPage />} />
-                            <Route path="auction/results/:matchDayId" element={<AuctionResultsPage />} />
                         </Route>
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>

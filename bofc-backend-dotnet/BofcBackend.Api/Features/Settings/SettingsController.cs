@@ -45,16 +45,6 @@ public class SettingsController(ISettingsService settingsService) : ControllerBa
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, enabled);
     }
 
-    /// <summary>Any authenticated user - lets Sidebar/Dashboard/etc. decide whether to show auction UI
-    /// without needing the full admin-only GetSettings response (regular players 403'd on every page
-    /// load before this existed, since useAuctionEnabled called the admin-only GET /settings).</summary>
-    [HttpGet("auction-enabled")]
-    public async Task<IActionResult> GetAuctionEnabled()
-    {
-        var enabled = await settingsService.GetAuctionEnabledAsync();
-        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, enabled);
-    }
-
     /// <summary>Runs the weekly-match slot generator (and team auto-draft, if enabled) immediately instead of waiting for the hourly tick - for testing.</summary>
     [HttpPost("weekly-match/generate-now")]
     [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]

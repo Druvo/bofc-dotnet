@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { CalendarOutlined, SettingOutlined, BellOutlined, BulbOutlined, BulbFilled, LogoutOutlined } from "@ant-design/icons";
 import { selectLoginInfo, selectUserImage, selectUserRoles } from "../../state/slices/loginInfoSlice";
-import useAuctionEnabled from "../../hooks/useAuctionEnabled";
 import { useAuthHook } from "../../hooks/useAuthHook";
 import { useGetMyNotificationsQuery } from "../../state/features/notifications/notificationSlice";
 import Avatar from "../CommonAtoms/Avatar";
@@ -132,7 +131,6 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
 
   const roles = useSelector(selectUserRoles);
   const isUserAdmin = roles.includes("ADMIN") || roles.includes("SUPERADMIN");
-  const auctionEnabled = useAuctionEnabled();
   const loginInfo = useSelector(selectLoginInfo);
   const userImage = useSelector(selectUserImage);
   const { logout } = useAuthHook();
@@ -166,11 +164,10 @@ export default function Sidebar({ sidebarToggle, setSidebarToggle, sidebarExpand
       key: "matchDays",
       label: "Match Management",
       icon: FieldIcon,
-      matchPrefixes: ["/match-days", "/venues", "/auction"],
+      matchPrefixes: ["/match-days", "/venues"],
       children: [
         { label: "Match Days", path: "/match-days" },
         { label: "Venues", path: "/venues" },
-        ...(auctionEnabled ? [{ label: "Auction", path: "/auction", adminOnly: true }] : []),
       ],
     },
     {

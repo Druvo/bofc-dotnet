@@ -11,7 +11,6 @@ export interface IoMatchDaySingleSummaryType {
     activeStatus: boolean;
     defaultMatchDay?: boolean;
     matchDayStatus?: string;
-    auctionMode?: boolean;
     season?: string;
     description?: string;
     rules?: string;

@@ -45,9 +45,6 @@ public class SystemSettings : AuditableEntity
     /// <summary>Master switch for Web Push delivery - when off, no push is sent regardless of individual player subscriptions.</summary>
     public bool PushNotificationsEnabled { get; set; } = true;
 
-    /// <summary>Master switch for the player-auction feature - when off, the Auction nav entry and "Auction Mode" toggle are hidden.</summary>
-    public bool AuctionEnabled { get; set; } = true;
-
     /// <summary>When the payment-due reminder last actually sent (to whoever was still unpaid at
     /// the time) - paired with PaymentDueReminderDayOfMonth/PaymentDueReminderRepeatDays to decide
     /// when the next re-send is due. Null before the first send ever.</summary>
@@ -108,6 +105,11 @@ public class SystemSettings : AuditableEntity
     /// <summary>How many hours before kickoff the scheduler auto-drafts teams from confirmed
     /// participants (RSVPs need time to come in first - can't draft before anyone's confirmed).</summary>
     public int WeeklyMatchDayAutoTeamsLeadHours { get; set; } = 24;
+
+    /// <summary>How many goalkeepers "Auto-Assign Goalkeepers" fills per team (a starter plus
+    /// backup/rotation cover, not just one) - see TeamService.AutoAssignGoalkeepersAsync. Only
+    /// fills the gap up to this count; never demotes an existing pick.</summary>
+    public int MinGoalkeepersPerTeam { get; set; } = 2;
 
     // --- Accounting: which chart-of-account postings auto-generated vouchers hit. Null = fall
     // back to the Accounting:CashChartCode/CollectionIncomeChartCode appsettings defaults (see

@@ -15,8 +15,16 @@ public class TeamGoalkeeperAssignmentResult
 {
     public long TeamId { get; init; }
     public string TeamName { get; init; } = string.Empty;
-    public bool Assigned { get; init; }
-    public long? PlayerId { get; init; }
-    public string? PlayerName { get; init; }
+
+    /// <summary>Every player newly assigned to goalkeeper for this team this run - empty if none
+    /// (the team was already at or past the configured MinGoalkeepersPerTeam, or had no eligible
+    /// players left to fill the remaining gap; see SkippedReason).</summary>
+    public List<AssignedGoalkeeperPlayer> Assigned { get; init; } = [];
     public string? SkippedReason { get; init; }
+}
+
+public class AssignedGoalkeeperPlayer
+{
+    public long PlayerId { get; init; }
+    public string PlayerName { get; init; } = string.Empty;
 }

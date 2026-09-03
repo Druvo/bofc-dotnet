@@ -15,6 +15,7 @@ export default function useJoinMatchDay(matchDayId: number) {
         data: nextMatchDay,
         isLoading,
         isError,
+        refetch,
     } = useGetMatchDayParticipantsListQuery({ matchDayId });
 
     const [addParticipationToMatchDay, { isLoading: isUpdating }] =
@@ -82,12 +83,20 @@ export default function useJoinMatchDay(matchDayId: number) {
                         isLoading: false,
                         autoClose: 3000,
                     });
+                    // A failure here (e.g. 409 "already voted") most often means the
+                    // matchDayParticipantId we just sent was stale - this hook's own
+                    // `players` list can go stale if this tab's been open since before
+                    // the player last voted some other way (email link, another tab).
+                    // Without refetching, every retry would resend the same stale id and
+                    // hit the exact same conflict forever - refetch so the next click
+                    // actually has the real one.
+                    refetch();
                 })
                 .finally(() => {
                     pendingPlayerIds.current.delete(playerId);
                 });
         },
-        [players, matchDayId, addParticipationToMatchDay]
+        [players, matchDayId, addParticipationToMatchDay, refetch]
     );
 
     return {

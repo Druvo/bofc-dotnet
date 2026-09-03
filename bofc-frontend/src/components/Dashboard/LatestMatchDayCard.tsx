@@ -85,10 +85,18 @@ const LatestMatchDayCard: React.FC = () => {
                 : 'Updated to not participating';
 
             toast.success(statusMessage);
-            refetch();
         } catch (error: any) {
             toast.error(getErrorMessage(error));
         } finally {
+            // Refetch on BOTH outcomes, not just success. This card's payload relies on a
+            // cached matchDayParticipantId (from useGetLatestMatchDayWithUserStatusQuery,
+            // which has no matchDayId param so its cache never naturally expires) - if that
+            // cache was stale (e.g. the player voted via the email link, or from another
+            // tab, since this card last loaded) the request goes out without it, the server
+            // correctly rejects it as "already voted" (409), and without this refetch the
+            // stale cache would never self-correct - every retry would hit the exact same
+            // conflict forever, which is what this fixes.
+            refetch();
             setIsUpdating(false);
         }
     };

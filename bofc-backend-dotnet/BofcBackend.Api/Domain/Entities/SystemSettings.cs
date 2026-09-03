@@ -56,6 +56,20 @@ public class SystemSettings : AuditableEntity
     /// <summary>How often MatchDayStatusSchedulerBackgroundService re-checks and concludes overdue MatchDays. Re-read fresh on every cycle, so a change here takes effect after the current cycle finishes - no restart needed.</summary>
     public int MatchDayStatusCheckIntervalHours { get; set; } = 1;
 
+    /// <summary>Master switch for closing RSVP voting some hours before kickoff. When off, players
+    /// can change their vote right up until MatchDayDate, as before.</summary>
+    public bool VotingLockEnabled { get; set; }
+
+    /// <summary>How many hours before kickoff voting closes, once VotingLockEnabled is on - checked
+    /// against DateTime.Now by both vote paths (the in-app RSVP and the anonymous email-link vote).</summary>
+    public int VotingLockHoursBeforeMatch { get; set; } = 5;
+
+    /// <summary>True once "now" is inside the lock window for the given MatchDay - shared by both
+    /// vote paths (MatchDayParticipantService, MatchDayVoteController) so the cutoff math lives in
+    /// exactly one place.</summary>
+    public bool IsVotingLockedFor(DateTime matchDayDate, DateTime now) =>
+        VotingLockEnabled && now >= matchDayDate.AddHours(-VotingLockHoursBeforeMatch);
+
     // --- Match Day: drives MatchDaySchedulerBackgroundService, which auto-creates a MatchDay
     // (IsWeeklyMatchDay=true) for every configured WeeklyMatchDaySlot each week - venue/sport are
     // shared across all slots; duration + time-gap drive the sequential match time-slotting

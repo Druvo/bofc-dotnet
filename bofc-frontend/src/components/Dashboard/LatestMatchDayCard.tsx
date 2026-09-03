@@ -20,16 +20,11 @@ import { useSelector } from 'react-redux';
 import { selectLoginInfo } from '../../state/slices/loginInfoSlice';
 import { Link } from 'react-router-dom';
 import { MatchDayPlayerInfoType } from '../../state/features/matchDays/matchDayTypes';
-import { normalizeErrorMessage } from '../../utils/normalizeErrorMessage';
 import AddToCalendarButton from '../CommonAtoms/AddToCalendarButton';
 import VenueLink from '../CommonAtoms/VenueLink';
 import Button from '../ui/button';
 import Modal from '../ui/modal';
 import Loader from '../ui/loader';
-
-const getErrorMessage = (error: any) => {
-    return normalizeErrorMessage(error, 'Failed to update participation status');
-};
 
 const LatestMatchDayCard: React.FC = () => {
     const loginInfo = useSelector(selectLoginInfo);
@@ -85,8 +80,10 @@ const LatestMatchDayCard: React.FC = () => {
                 : 'Updated to not participating';
 
             toast.success(statusMessage);
-        } catch (error: any) {
-            toast.error(getErrorMessage(error));
+        } catch {
+            // No toast here on purpose - apiSlice's baseQuery already shows one error
+            // notification for every failed request app-wide (see customBaseQuery in
+            // apiSlice.ts). A second one here just meant two popups for the same failure.
         } finally {
             // Refetch on BOTH outcomes, not just success. This card's payload relies on a
             // cached matchDayParticipantId (from useGetLatestMatchDayWithUserStatusQuery,
@@ -118,7 +115,7 @@ const LatestMatchDayCard: React.FC = () => {
         );
     }
 
-    const { matchDay, totalParticipant, remainParticipant, totalPlayer, isUserParticipated } = latestMatchDayData.content;
+    const { matchDay, totalParticipant, remainParticipant, totalPlayer, isUserParticipated, votingLocked } = latestMatchDayData.content;
 
     const matchDayPlayers = matchDayParticipantsData?.content?.players || [];
     const hasPlayerStatusData = matchDayPlayers.length > 0;
@@ -315,10 +312,15 @@ const LatestMatchDayCard: React.FC = () => {
                     {myParticipation && (
                         <div className="rounded-xl border border-gray-100 bg-gray-50 p-3.5 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]">
                             <div className="mb-2.5 text-theme-sm font-medium text-gray-600 dark:text-gray-300">Are you participating?</div>
+                            {votingLocked && (
+                                <p className="mb-2.5 text-theme-xs text-warning-600 dark:text-warning-500">
+                                    Voting is locked for this Match Day - contact a coordinator if you need to change your RSVP.
+                                </p>
+                            )}
                             <div className="flex gap-2">
                                 <button
                                     type="button"
-                                    disabled={isUpdating}
+                                    disabled={isUpdating || votingLocked}
                                     onClick={() => handleParticipationChange(true, myParticipation.comments ?? '')}
                                     className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                                         myParticipation.participationStatus === true
@@ -330,7 +332,7 @@ const LatestMatchDayCard: React.FC = () => {
                                 </button>
                                 <button
                                     type="button"
-                                    disabled={isUpdating}
+                                    disabled={isUpdating || votingLocked}
                                     onClick={() => handleParticipationChange(false, myParticipation.comments ?? '')}
                                     className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-3.5 py-1.5 text-theme-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                                         myParticipation.participationStatus === false

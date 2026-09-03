@@ -61,6 +61,7 @@ export default function JoinMatchDay() {
   const matchDayId = Number(id);
   const navigate = useNavigate();
   const { players, isLoading, isUpdating, handleUpdate, nextMatchDay } = useJoinMatchDay(matchDayId);
+  const votingLocked = nextMatchDay?.votingLocked ?? false;
 
   const [editedComments, setEditedComments] = useState<{ [key: number]: string }>({});
   const [searchTerm, setSearchTerm] = useState("");
@@ -176,6 +177,11 @@ export default function JoinMatchDay() {
               <CalendarOutlined className="text-brand-500 dark:text-brand-400" />
               {nextMatchDay?.matchDayDate && showBdLocalTimeRange(nextMatchDay.matchDayDate, nextMatchDay.durationMinutes)}
             </span>
+            {votingLocked && (
+              <span className="mt-1.5 flex items-center gap-1.5 text-theme-xs font-medium text-warning-600 dark:text-warning-500">
+                <ClockCircleOutlined /> Voting is locked for this Match Day
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-4 gap-2">
@@ -228,10 +234,16 @@ export default function JoinMatchDay() {
 
             <div className="mb-2 text-theme-xs font-semibold uppercase tracking-wide text-brand-500 dark:text-brand-400">Are you participating?</div>
 
+            {votingLocked && (
+              <p className="mb-2 text-theme-xs text-warning-600 dark:text-warning-500">
+                Voting is locked for this Match Day - contact a coordinator if you need to change your RSVP.
+              </p>
+            )}
+
             <div className="mb-2 grid grid-cols-2 gap-2.5">
               <button
                 type="button"
-                disabled={isUpdating}
+                disabled={isUpdating || votingLocked}
                 onClick={() => handleUpdate(myParticipation.playerId, editedComments[myParticipation.playerId] ?? myParticipation.comments ?? "", true)}
                 className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-theme-sm font-semibold transition disabled:opacity-60 ${
                   myParticipation.participationStatus === true
@@ -243,7 +255,7 @@ export default function JoinMatchDay() {
               </button>
               <button
                 type="button"
-                disabled={isUpdating}
+                disabled={isUpdating || votingLocked}
                 onClick={() => handleUpdate(myParticipation.playerId, editedComments[myParticipation.playerId] ?? myParticipation.comments ?? "", false)}
                 className={`flex items-center justify-center gap-2 rounded-lg border py-2.5 text-theme-sm font-semibold transition disabled:opacity-60 ${
                   myParticipation.participationStatus === false
@@ -256,7 +268,7 @@ export default function JoinMatchDay() {
             </div>
 
             <DebouncedInput
-              isDisabled={false}
+              isDisabled={votingLocked}
               placeholder="Leave a comment (optional)..."
               debounceDuration={1000}
               onChange={(value) => {
@@ -389,7 +401,7 @@ export default function JoinMatchDay() {
                           className="!h-9 w-[92px] !py-1 !text-theme-xs"
                           placeholder="Pending"
                           value={r.participationStatus === true ? "true" : r.participationStatus === false ? "false" : ""}
-                          disabled={isUpdating}
+                          disabled={isUpdating || votingLocked}
                           onChange={(e) => handleUpdate(r.playerId, editedComments[r.playerId] ?? r.comments ?? "", e.target.value === "true")}
                           options={[{ value: "true", label: "Yes" }, { value: "false", label: "No" }]}
                         />
@@ -408,12 +420,12 @@ export default function JoinMatchDay() {
                           className="!h-9 mb-2 !py-1 !text-theme-xs"
                           placeholder="Pending"
                           value={r.participationStatus === true ? "true" : r.participationStatus === false ? "false" : ""}
-                          disabled={isUpdating}
+                          disabled={isUpdating || votingLocked}
                           onChange={(e) => handleUpdate(r.playerId, editedComments[r.playerId] ?? r.comments ?? "", e.target.value === "true")}
                           options={[{ value: "true", label: "Yes" }, { value: "false", label: "No" }]}
                         />
                         <DebouncedInput
-                          isDisabled={false}
+                          isDisabled={votingLocked}
                           placeholder="Comment..."
                           debounceDuration={1000}
                           autoSize

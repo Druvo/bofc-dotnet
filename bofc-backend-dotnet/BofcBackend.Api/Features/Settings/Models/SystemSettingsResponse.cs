@@ -33,6 +33,12 @@ public class SystemSettingsResponse
     /// <summary>How often (hours) the background job re-checks and concludes overdue MatchDays.</summary>
     public int MatchDayStatusCheckIntervalHours { get; set; } = 1;
 
+    /// <summary>Master switch for closing RSVP voting some hours before kickoff.</summary>
+    public bool VotingLockEnabled { get; set; }
+
+    /// <summary>How many hours before kickoff voting closes, once VotingLockEnabled is on.</summary>
+    public int VotingLockHoursBeforeMatch { get; set; } = 5;
+
     public bool WeeklyMatchDayEnabled { get; set; }
     public string WeeklyMatchDayNamePrefix { get; set; } = "Next Match";
     public string WeeklyMatchDayOfWeek { get; set; } = "Friday";

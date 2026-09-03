@@ -44,6 +44,10 @@ public class MatchDayParticipantPlayerService(BofcDbContext db) : IMatchDayParti
 
         var totalParticipants = players.Count(p => p.ParticipationStatus == true);
 
+        var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
+        var teamsBuilt = await db.Teams.AnyAsync(t => t.MatchDayId == matchDay.Id);
+        var votingLocked = teamsBuilt || (settings?.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now) ?? false);
+
         return new MatchDayWithPlayersResponse
         {
             MatchDayId = matchDay.Id,
@@ -52,6 +56,7 @@ public class MatchDayParticipantPlayerService(BofcDbContext db) : IMatchDayParti
             DurationMinutes = matchDay.DurationMinutes,
             TotalParticipants = totalParticipants,
             Players = players,
+            VotingLocked = votingLocked,
         };
     }
 

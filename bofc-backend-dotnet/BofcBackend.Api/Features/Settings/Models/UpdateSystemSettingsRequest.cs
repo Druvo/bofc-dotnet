@@ -53,6 +53,12 @@ public class UpdateSystemSettingsRequest
     [Range(1, 24)]
     public int MatchDayStatusCheckIntervalHours { get; set; } = 1;
 
+    public bool VotingLockEnabled { get; set; }
+
+    /// <summary>How many hours before kickoff voting closes, once VotingLockEnabled is on.</summary>
+    [Range(0, 168)]
+    public int VotingLockHoursBeforeMatch { get; set; } = 5;
+
     public bool WeeklyMatchDayEnabled { get; set; }
 
     [MaxLength(100)]

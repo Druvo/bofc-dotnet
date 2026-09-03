@@ -45,6 +45,10 @@ export interface SystemSettings {
     pushNotificationsEnabled: boolean;
     auctionEnabled: boolean;
     matchDayStatusCheckIntervalHours: number;
+    /** Master switch for closing RSVP voting some hours before kickoff. */
+    votingLockEnabled: boolean;
+    /** How many hours before kickoff voting closes, once votingLockEnabled is on. */
+    votingLockHoursBeforeMatch: number;
     weeklyMatchDayEnabled: boolean;
     weeklyMatchDayNamePrefix: string;
     weeklyMatchDayOfWeek: string;
@@ -95,6 +99,10 @@ export interface UpdateSystemSettingsRequest {
     pushNotificationsEnabled: boolean;
     auctionEnabled: boolean;
     matchDayStatusCheckIntervalHours: number;
+    /** Master switch for closing RSVP voting some hours before kickoff. */
+    votingLockEnabled: boolean;
+    /** How many hours before kickoff voting closes, once votingLockEnabled is on. */
+    votingLockHoursBeforeMatch: number;
     weeklyMatchDayEnabled: boolean;
     weeklyMatchDayNamePrefix: string;
     weeklyMatchDayOfWeek: string;
@@ -140,6 +148,8 @@ export function toUpdateSystemSettingsRequest(s: SystemSettings): UpdateSystemSe
         pushNotificationsEnabled: s.pushNotificationsEnabled,
         auctionEnabled: s.auctionEnabled,
         matchDayStatusCheckIntervalHours: s.matchDayStatusCheckIntervalHours,
+        votingLockEnabled: s.votingLockEnabled,
+        votingLockHoursBeforeMatch: s.votingLockHoursBeforeMatch,
         weeklyMatchDayEnabled: s.weeklyMatchDayEnabled,
         weeklyMatchDayNamePrefix: s.weeklyMatchDayNamePrefix,
         weeklyMatchDayOfWeek: s.weeklyMatchDaySlots[0]?.dayOfWeek || s.weeklyMatchDayOfWeek,

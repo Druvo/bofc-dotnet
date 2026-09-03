@@ -56,6 +56,20 @@ public class MatchDayParticipantService(
             throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayAlreadyConcluded, HttpStatusCode.BadRequest);
         }
 
+        // Always-on guard, independent of the admin's VotingLockEnabled toggle: once teams are
+        // drafted for this MatchDay, they're built FROM the confirmed RSVPs at that moment - a
+        // vote change afterward would silently desync from the roster rather than do anything.
+        if (await db.Teams.AnyAsync(t => t.MatchDayId == matchDay.Id))
+        {
+            throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayTeamsAlreadyBuilt, HttpStatusCode.BadRequest);
+        }
+
+        var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
+        if (settings != null && settings.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now))
+        {
+            throw new MatchDayServiceException(RestErrorMessageDetail.VotingLocked, HttpStatusCode.BadRequest);
+        }
+
         MatchDayParticipant participant;
         if (request.MatchDayParticipantId != null)
         {
@@ -181,6 +195,10 @@ public class MatchDayParticipantService(
         var isUserParticipated = participantPlayer?.ParticipationStatus == true;
         var matchDayParticipantId = participantPlayer?.MatchDayParticipantId;
 
+        var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
+        var teamsBuilt = await db.Teams.AnyAsync(t => t.MatchDayId == latestMatchDay.Id);
+        var votingLocked = teamsBuilt || (settings?.IsVotingLockedFor(latestMatchDay.MatchDayDate, DateTime.Now) ?? false);
+
         return new LatestMatchDayWithUserParticipantsResponse
         {
             MatchDay = latestMatchDay,
@@ -189,6 +207,7 @@ public class MatchDayParticipantService(
             RemainParticipant = totalPlayers - totalParticipants,
             IsUserParticipated = isUserParticipated,
             MatchDayParticipantId = matchDayParticipantId,
+            VotingLocked = votingLocked,
         };
     }
 }

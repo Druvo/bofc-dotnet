@@ -5,11 +5,7 @@ import {
     useGetMatchDayParticipantsListQuery,
 } from "../state/features/matchDays/matchDaysSlice";
 import { MatchDayPlayerInfoType } from "../state/features/matchDays/matchDayTypes";
-import { normalizeErrorMessage } from "../utils/normalizeErrorMessage";
 
-const getErrorMessage = (error: any) => {
-    return normalizeErrorMessage(error, "Failed to update player information");
-};
 export default function useJoinMatchDay(matchDayId: number) {
     const {
         data: nextMatchDay,
@@ -76,13 +72,12 @@ export default function useJoinMatchDay(matchDayId: number) {
                         autoClose: 3000,
                     });
                 })
-                .catch((error) => {
-                    toast.update(playerId, {
-                        render: getErrorMessage(error),
-                        type: "error",
-                        isLoading: false,
-                        autoClose: 3000,
-                    });
+                .catch(() => {
+                    // Dismiss the loading toast rather than turning it into an error one -
+                    // apiSlice's baseQuery already shows one error notification for every
+                    // failed request app-wide (see customBaseQuery in apiSlice.ts). Updating
+                    // this toast to an error too just meant two popups for the same failure.
+                    toast.dismiss(playerId);
                     // A failure here (e.g. 409 "already voted") most often means the
                     // matchDayParticipantId we just sent was stale - this hook's own
                     // `players` list can go stale if this tab's been open since before

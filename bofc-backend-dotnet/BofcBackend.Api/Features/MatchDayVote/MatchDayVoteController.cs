@@ -56,6 +56,20 @@ public class MatchDayVoteController(BofcDbContext db, IMatchDayVoteTokenService 
             return Page("Match day concluded", $"\"{Encode(matchDay.Name)}\" has already concluded, so RSVPs are closed.", false);
         }
 
+        // Always-on guard, independent of the admin's VotingLockEnabled toggle: once teams are
+        // drafted for this MatchDay, they're built FROM the confirmed RSVPs at that moment - a
+        // vote change afterward would silently desync from the roster rather than do anything.
+        if (await db.Teams.AnyAsync(t => t.MatchDayId == matchDayId))
+        {
+            return Page("Teams already set", $"Teams have already been drafted for \"{Encode(matchDay.Name)}\", so RSVPs are closed. Contact a coordinator if you need to change your response.", false);
+        }
+
+        var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
+        if (settings != null && settings.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now))
+        {
+            return Page("Voting locked", $"RSVPs for \"{Encode(matchDay.Name)}\" closed {settings.VotingLockHoursBeforeMatch} hour(s) before kickoff. Open the app to contact a coordinator if you need to change your response.", false);
+        }
+
         var player = await db.Players.FirstOrDefaultAsync(p => p.Id == playerId && p.IsActive);
         if (player == null)
         {

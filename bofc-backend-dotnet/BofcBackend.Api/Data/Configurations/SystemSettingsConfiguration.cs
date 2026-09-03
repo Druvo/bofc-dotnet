@@ -34,6 +34,8 @@ public class SystemSettingsConfiguration : IEntityTypeConfiguration<SystemSettin
         builder.Property(s => s.MatchDayReminderRepeatHours).HasColumnName("match_day_reminder_repeat_hours").HasDefaultValue(48).IsRequired();
         builder.Property(s => s.PaymentDueReminderRepeatDays).HasColumnName("payment_due_reminder_repeat_days").HasDefaultValue(7).IsRequired();
         builder.Property(s => s.MatchDayStatusCheckIntervalHours).HasColumnName("match_day_status_check_interval_hours").HasDefaultValue(1).IsRequired();
+        builder.Property(s => s.VotingLockEnabled).HasColumnName("voting_lock_enabled").IsRequired();
+        builder.Property(s => s.VotingLockHoursBeforeMatch).HasColumnName("voting_lock_hours_before_match").HasDefaultValue(5).IsRequired();
 
         builder.Property(s => s.WeeklyMatchDayEnabled).HasColumnName("weekly_match_day_enabled").IsRequired();
         builder.Property(s => s.WeeklyMatchDayNamePrefix).HasColumnName("weekly_match_day_name_prefix").HasMaxLength(100).IsRequired();

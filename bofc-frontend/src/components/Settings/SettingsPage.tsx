@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { SettingOutlined, MailOutlined, CalendarOutlined, BankOutlined, BellOutlined, FireOutlined, SkinOutlined, ClockCircleOutlined, FileTextOutlined } from "@ant-design/icons";
+import { SettingOutlined, MailOutlined, CalendarOutlined, BankOutlined, BellOutlined, FireOutlined, SkinOutlined, ClockCircleOutlined, FileTextOutlined, LockOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import FormInput from "../ui/form-input";
 import FormSelect from "../ui/form-select";
@@ -109,6 +109,8 @@ function SettingsPage() {
     const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(true);
     const [auctionEnabled, setAuctionEnabled] = useState(true);
     const [matchDayStatusCheckIntervalHours, setMatchDayStatusCheckIntervalHours] = useState(1);
+    const [votingLockEnabled, setVotingLockEnabled] = useState(false);
+    const [votingLockHoursBeforeMatch, setVotingLockHoursBeforeMatch] = useState(5);
 
     const [weeklyMatchDayEnabled, setWeeklyMatchDayEnabled] = useState(false);
     const [weeklyMatchDayNamePrefix, setWeeklyMatchDayNamePrefix] = useState("Next Match");
@@ -228,6 +230,8 @@ function SettingsPage() {
         setNotifyCustomEmailEnabled(s.notifyCustomEmailEnabled);
         setPushNotificationsEnabled(s.pushNotificationsEnabled);
         setAuctionEnabled(s.auctionEnabled);
+        setVotingLockEnabled(s.votingLockEnabled);
+        setVotingLockHoursBeforeMatch(s.votingLockHoursBeforeMatch || 5);
         setMatchDayStatusCheckIntervalHours(s.matchDayStatusCheckIntervalHours || 1);
         setWeeklyMatchDayEnabled(s.weeklyMatchDayEnabled);
         setWeeklyMatchDayNamePrefix(s.weeklyMatchDayNamePrefix);
@@ -284,6 +288,8 @@ function SettingsPage() {
                 notifyCustomEmailEnabled,
                 pushNotificationsEnabled,
                 auctionEnabled,
+                votingLockEnabled,
+                votingLockHoursBeforeMatch,
                 matchDayStatusCheckIntervalHours,
                 weeklyMatchDayEnabled,
                 weeklyMatchDayNamePrefix,
@@ -491,6 +497,36 @@ function SettingsPage() {
                         <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
                             When on, the "Also send email" option becomes available in the Notify button's Send Notification dialog.
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] md:p-6">
+                <h2 className="mb-1 flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white/90">
+                    <LockOutlined className="text-brand-500 dark:text-brand-400" />
+                    Voting Lock
+                </h2>
+                <p className="mb-5 text-theme-sm text-gray-500 dark:text-gray-400">
+                    Close RSVP voting some hours before kickoff - applies to both the in-app Yes/No and the one-click email link. Off by default: players can then change their vote right up until teams are drafted for the Match Day, or it starts/concludes, whichever comes first - teams are always a hard cutoff regardless of this setting, since they're built from whoever's confirmed at that moment.
+                </p>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-100 p-4 dark:border-[var(--color-rule)]">
+                    <div>
+                        <FormSwitch label="Lock voting before kickoff" checked={votingLockEnabled} onChange={setVotingLockEnabled} />
+                        <p className="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">
+                            Once locked, Yes/No is disabled everywhere (Dashboard, Join Match Day, email link) until the next Match Day.
+                        </p>
+                    </div>
+                    <div className="w-44">
+                        <FormInput
+                            label="Hours before kickoff"
+                            type="number"
+                            min={0}
+                            max={168}
+                            value={votingLockHoursBeforeMatch}
+                            onChange={(e) => setVotingLockHoursBeforeMatch(Number(e.target.value) || 0)}
+                            disabled={!votingLockEnabled}
+                        />
                     </div>
                 </div>
             </div>

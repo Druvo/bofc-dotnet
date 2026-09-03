@@ -51,6 +51,8 @@ public static class RestErrorMessageDetail
     public const string AlreadyParticipant = "Already given vote for participant";
     public const string MatchDayDateCannotBePastDate = "This MatchDay is already past";
     public const string MatchDayAlreadyConcluded = "This MatchDay has already been concluded";
+    public const string VotingLocked = "Voting is locked for this MatchDay - it's too close to kickoff to change your RSVP";
+    public const string MatchDayTeamsAlreadyBuilt = "Teams have already been drafted for this MatchDay - RSVP is closed";
     public const string NoUpcomingMatchDay = "No upcoming MatchDay";
     public const string PlayerIsNotParticipantYet = "Player is not a confirmed participant in the MatchDay";
     public const string PlayerAlreadyAddedAnotherTeam = "This player is already added another team";

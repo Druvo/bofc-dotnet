@@ -48,6 +48,8 @@ public class SettingsService(
         settings.PushNotificationsEnabled = request.PushNotificationsEnabled;
         settings.AuctionEnabled = request.AuctionEnabled;
         settings.MatchDayStatusCheckIntervalHours = request.MatchDayStatusCheckIntervalHours;
+        settings.VotingLockEnabled = request.VotingLockEnabled;
+        settings.VotingLockHoursBeforeMatch = request.VotingLockHoursBeforeMatch;
 
         // Null = leave the stored password untouched (the UI never re-sends it back).
         // Empty string = admin explicitly cleared the field, so wipe it.
@@ -262,6 +264,8 @@ public class SettingsService(
             PushNotificationsEnabled = s.PushNotificationsEnabled,
             AuctionEnabled = s.AuctionEnabled,
             MatchDayStatusCheckIntervalHours = s.MatchDayStatusCheckIntervalHours,
+            VotingLockEnabled = s.VotingLockEnabled,
+            VotingLockHoursBeforeMatch = s.VotingLockHoursBeforeMatch,
             WeeklyMatchDayEnabled = s.WeeklyMatchDayEnabled,
             WeeklyMatchDayNamePrefix = s.WeeklyMatchDayNamePrefix,
             WeeklyMatchDayOfWeek = (s.WeeklyMatchDaySlots.OrderBy(sl => sl.SortOrder).FirstOrDefault()?.DayOfWeek ?? s.WeeklyMatchDayOfWeek).ToString(),

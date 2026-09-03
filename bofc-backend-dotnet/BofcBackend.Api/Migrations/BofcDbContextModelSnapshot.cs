@@ -2897,6 +2897,16 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("updated_date");
 
+                    b.Property<bool>("VotingLockEnabled")
+                        .HasColumnType("bit")
+                        .HasColumnName("voting_lock_enabled");
+
+                    b.Property<int>("VotingLockHoursBeforeMatch")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(5)
+                        .HasColumnName("voting_lock_hours_before_match");
+
                     b.Property<bool>("WeeklyMatchDayAutoTeamsEnabled")
                         .HasColumnType("bit")
                         .HasColumnName("weekly_match_day_auto_teams_enabled");

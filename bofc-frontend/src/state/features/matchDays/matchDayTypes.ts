@@ -59,6 +59,9 @@ export interface NextMatchDayResType {
         durationMinutes?: number | null;
         totalParticipants: number;
         players: MatchDayPlayerInfoType[];
+        /** True once voting has closed for this MatchDay (admin-configured lock window before
+         * kickoff, see Settings > Voting Lock) - Yes/No is disabled instead of erroring on click. */
+        votingLocked?: boolean;
     };
 }
 
@@ -140,6 +143,9 @@ export interface LatestMatchDayWithUserStatusType extends BasicResType {
         totalPlayer: number;
         isUserParticipated: boolean | null;
         matchDayParticipantId?: number;
+        /** True once voting has closed for this MatchDay (admin-configured lock window before
+         * kickoff, see Settings > Voting Lock) - Yes/No is disabled instead of erroring on click. */
+        votingLocked?: boolean;
     };
 }
 

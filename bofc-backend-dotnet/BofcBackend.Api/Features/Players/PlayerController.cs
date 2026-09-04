@@ -79,6 +79,23 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
     }
 
+    /// <summary>Admin-only opt-in to always play goalkeeper - never exposed via the anonymous-readable PlayerResponse endpoints above.</summary>
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpGet("{id}/default-goalkeeper")]
+    public async Task<IActionResult> GetDefaultGoalkeeper(long id)
+    {
+        var isDefault = await playerService.GetDefaultGoalkeeperAsync(id);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, isDefault);
+    }
+
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpPut("{id}/default-goalkeeper")]
+    public async Task<IActionResult> SetDefaultGoalkeeper(long id, [FromBody] DefaultGoalkeeperRequest request)
+    {
+        await playerService.SetDefaultGoalkeeperAsync(id, request.IsDefault);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
+    }
+
     /// <summary>Feeds the admin drag-and-drop rank board - separate from the plain player list/edit page.</summary>
     [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
     [HttpGet("ranks")]

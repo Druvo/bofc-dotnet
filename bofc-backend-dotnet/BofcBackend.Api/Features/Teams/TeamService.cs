@@ -37,11 +37,18 @@ public class TeamService(
         Team team;
         if (request.Id == null)
         {
-            team = new Team { TeamName = request.TeamName!, LogoKey = request.LogoKey, MatchDayId = matchDay.Id, MatchDay = matchDay };
+            var teamName = string.IsNullOrWhiteSpace(request.TeamName)
+                ? await GenerateDefaultTeamNameAsync(matchDay.Id)
+                : request.TeamName;
+            team = new Team { TeamName = teamName, LogoKey = request.LogoKey, MatchDayId = matchDay.Id, MatchDay = matchDay };
             db.Teams.Add(team);
         }
         else
         {
+            if (string.IsNullOrWhiteSpace(request.TeamName))
+            {
+                throw new BadRequestException("Team name is required");
+            }
             (team, oldLogoKeyToDelete) = await UpdateExistingTeamAsync(request, matchDay);
         }
 
@@ -55,6 +62,18 @@ public class TeamService(
         }
 
         return ConvertToTeamResponse(team, matchDay.Name);
+    }
+
+    /// <summary>Server is the authoritative source for the next default name (COUNT at insert
+    /// time, same request/transaction) - the frontend used to compute this itself from a team
+    /// count prop that lags behind an in-flight create until the list re-fetches, so two
+    /// "+ Add Team" clicks close together both computed the same "next" letter (see
+    /// CreateTeamComponent.tsx). Wraps to a number past 'Z' rather than emitting a non-letter
+    /// character for the vanishingly rare 27th team.</summary>
+    private async Task<string> GenerateDefaultTeamNameAsync(long matchDayId)
+    {
+        var count = await db.Teams.CountAsync(t => t.MatchDayId == matchDayId);
+        return count < 26 ? $"Team {(char)('A' + count)}" : $"Team {count + 1}";
     }
 
     private async Task<(Team Team, string? OldLogoKeyToDelete)> UpdateExistingTeamAsync(TeamRequest request, MatchDay matchDay)
@@ -329,9 +348,9 @@ public class TeamService(
 
     /// <summary>One click, N goalkeepers per team (a starter plus backup/rotation cover - see
     /// SystemSettings.MinGoalkeepersPerTeam): for every team on this MatchDay short of that count,
-    /// ranks the remaining (not-already-goalkeeper) members of that team's own roster by the
-    /// club's fairness formula (see ComputeGoalkeeperBalancesAsync) and assigns the top eligible
-    /// players to fill the gap. Teams already at or past the configured count are left untouched -
+    /// fills the gap from that team's own roster - DefaultGoalkeeper players first (see
+    /// SelectGoalkeepersForTeam), the club's fairness formula (see ComputeGoalkeeperBalancesAsync)
+    /// for whatever's left. Teams already at or past the configured count are left untouched -
     /// this only ever fills gaps, it never overrides or demotes a manual pick. The organiser can
     /// still undo any pick afterward via the normal "Remove from Goalkeeper" action.</summary>
     public async Task<GoalkeeperAutoAssignResponse> AutoAssignGoalkeepersAsync(long matchDayId)
@@ -365,15 +384,7 @@ public class TeamService(
                 continue;
             }
 
-            // Highest balance (most owed) first among this team's own eligible, not-already-
-            // goalkeeper members; playerId is just a stable tiebreaker, not a meaningful signal.
-            var picks = team.TeamPlayers
-                .Where(tp => tp.PlayingPosition != FootballPosition.GOALKEEPER
-                    && balances.TryGetValue(tp.PlayerId, out var b) && b.IsEligible)
-                .OrderByDescending(tp => balances[tp.PlayerId].Balance)
-                .ThenBy(tp => tp.PlayerId)
-                .Take(slotsToFill)
-                .ToList();
+            var picks = SelectGoalkeepersForTeam(team, balances, slotsToFill);
 
             foreach (var pick in picks)
             {
@@ -385,7 +396,12 @@ public class TeamService(
             {
                 TeamId = team.Id,
                 TeamName = team.TeamName,
-                Assigned = picks.Select(p => new AssignedGoalkeeperPlayer { PlayerId = p.PlayerId, PlayerName = p.Player.Name }).ToList(),
+                Assigned = picks.Select(p => new AssignedGoalkeeperPlayer
+                {
+                    PlayerId = p.PlayerId,
+                    PlayerName = p.Player.Name,
+                    IsDefaultGoalkeeper = balances[p.PlayerId].IsDefaultGoalkeeper,
+                }).ToList(),
                 SkippedReason = picks.Count < slotsToFill
                     ? (team.TeamPlayers.Count == 0
                         ? "No players on this team"
@@ -410,9 +426,48 @@ public class TeamService(
         (await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1))?.MinGoalkeepersPerTeam
             ?? new SystemSettings().MinGoalkeepersPerTeam;
 
-    private sealed record PlayerGoalkeeperBalance(int Played, int InGoal, double Balance, bool IsResting, bool IsExcluded)
+    private sealed record PlayerGoalkeeperBalance(int Played, int InGoal, double Balance, bool IsResting, bool IsExcluded, bool IsDefaultGoalkeeper)
     {
         public bool IsEligible => !IsResting && !IsExcluded;
+    }
+
+    /// <summary>Who fills this team's open goalkeeper slot(s), shared by AutoAssignGoalkeepersAsync
+    /// (which actually assigns) and GetGoalkeeperRankingAsync (which just previews it as NEXT_UP) -
+    /// one place for the pick order so the preview never lies about what the button will do.
+    ///
+    /// DefaultGoalkeeper players (Player.DefaultGoalkeeper - "only ever wants to play goalkeeper")
+    /// get first claim on the open slots, ahead of the fairness balance math:
+    ///  - enough slots for all of them -> every one gets a slot, any slots left over go to the
+    ///    balance-ranked pool same as before.
+    ///  - more of them than slots -> the balance pool sits this one out entirely (the slots are
+    ///    already spoken for) and who among the default goalkeepers gets picked is a random draw,
+    ///    not a balance ranking - they're all "always goalkeeper" players, so balance doesn't
+    ///    distinguish them, and a fixed order (e.g. by playerId) would always favor the same few.
+    /// Never touches a slot a human already filled - slotsToFill only ever covers what's still
+    /// open (see callers).</summary>
+    private static List<TeamPlayer> SelectGoalkeepersForTeam(Team team, Dictionary<long, PlayerGoalkeeperBalance> balances, int slotsToFill)
+    {
+        if (slotsToFill <= 0) return [];
+
+        var eligibleNonGoalkeepers = team.TeamPlayers
+            .Where(tp => tp.PlayingPosition != FootballPosition.GOALKEEPER
+                && balances.TryGetValue(tp.PlayerId, out var b) && b.IsEligible)
+            .ToList();
+
+        var defaultGoalkeepers = eligibleNonGoalkeepers.Where(tp => balances[tp.PlayerId].IsDefaultGoalkeeper).ToList();
+
+        if (defaultGoalkeepers.Count > slotsToFill)
+        {
+            return defaultGoalkeepers.OrderBy(_ => Random.Shared.Next()).Take(slotsToFill).ToList();
+        }
+
+        var others = eligibleNonGoalkeepers.Where(tp => !balances[tp.PlayerId].IsDefaultGoalkeeper).ToList();
+        var balancedPicks = others
+            .OrderByDescending(tp => balances[tp.PlayerId].Balance)
+            .ThenBy(tp => tp.PlayerId)
+            .Take(slotsToFill - defaultGoalkeepers.Count);
+
+        return defaultGoalkeepers.Concat(balancedPicks).ToList();
     }
 
     /// <summary>Read-only view of the same ranking AutoAssignGoalkeepersAsync acts on - lets the
@@ -443,16 +498,13 @@ public class TeamService(
                 .ThenBy(x => x.TeamPlayer.PlayerId)
                 .ToList();
 
-            // The top `slotsToFill` eligible, not-already-goalkeeper players are "next up" to
-            // actually be picked - everyone else eligible is still just "eligible", same as the
-            // reference table's Rakib/Sunipoon/Nahid/Badrul rows. Empty once the team has already
-            // reached MinGoalkeepersPerTeam.
-            var nextUpPlayerIds = slotsToFill > 0
-                ? ranked.Where(x => x.Balance!.IsEligible && x.TeamPlayer.PlayingPosition != FootballPosition.GOALKEEPER)
-                    .Take(slotsToFill)
-                    .Select(x => x.TeamPlayer.PlayerId)
-                    .ToHashSet()
-                : [];
+            // Same selection AutoAssignGoalkeepersAsync would actually make (default-goalkeepers
+            // first, balance-ranked fill after) - see SelectGoalkeepersForTeam. In the "more
+            // default goalkeepers than slots" case this preview's random draw won't necessarily
+            // match the real click's draw, same as the real button re-drawing every time it runs.
+            var nextUpPlayerIds = SelectGoalkeepersForTeam(team, balances, slotsToFill)
+                .Select(tp => tp.PlayerId)
+                .ToHashSet();
 
             var rows = ranked.Select((x, i) => new GoalkeeperRankingPlayer
             {
@@ -462,6 +514,7 @@ public class TeamService(
                 Played = x.Balance!.Played,
                 InGoal = x.Balance.InGoal,
                 Balance = Math.Round(x.Balance.Balance, 2),
+                IsDefaultGoalkeeper = x.Balance.IsDefaultGoalkeeper,
                 Status = x.TeamPlayer.PlayingPosition == FootballPosition.GOALKEEPER ? "CURRENT_GOALKEEPER"
                     : x.Balance.IsExcluded ? "NOT_IN_ROTATION"
                     : x.Balance.IsResting ? "RESTING"
@@ -531,6 +584,15 @@ public class TeamService(
             .ToListAsync();
         var excludedSet = excludedPlayerIds.ToHashSet();
 
+        // Players who only ever want to play goalkeeper - see Player.DefaultGoalkeeper. Mutually
+        // exclusive with ExcludeFromGoalkeeperRotation (enforced in PlayerService), so no overlap
+        // with excludedSet above.
+        var defaultGoalkeeperPlayerIds = await db.Players
+            .Where(p => candidatePlayerIds.Contains(p.Id) && p.DefaultGoalkeeper)
+            .Select(p => p.Id)
+            .ToListAsync();
+        var defaultGoalkeeperSet = defaultGoalkeeperPlayerIds.ToHashSet();
+
         var balances = new Dictionary<long, PlayerGoalkeeperBalance>();
         foreach (var playerId in candidatePlayerIds)
         {
@@ -551,8 +613,9 @@ public class TeamService(
             var served = goalkeeperMatchDaysByPlayer.TryGetValue(playerId, out var gkDays) ? gkDays.Count : 0;
             var isResting = gkDays != null && lastTwoMatchDayIds.Overlaps(gkDays);
             var isExcluded = excludedSet.Contains(playerId);
+            var isDefaultGoalkeeper = defaultGoalkeeperSet.Contains(playerId);
 
-            balances[playerId] = new PlayerGoalkeeperBalance(played, served, owed - served, isResting, isExcluded);
+            balances[playerId] = new PlayerGoalkeeperBalance(played, served, owed - served, isResting, isExcluded, isDefaultGoalkeeper);
         }
 
         var pastMatchDaysMissingGkData = pastMatchDays.Count(t =>

@@ -6,11 +6,9 @@ import Button from "../../ui/button";
 
 export default function CreateTeamComponent({
     matchDayId,
-    existingTeams,
     refetchSummary,
 }: {
     matchDayId: number;
-    existingTeams: string[];
     refetchSummary: () => void;
 }) {
     const [createTeam, { isLoading: isCreating }] = useCreateMatchDayTeamMutation();
@@ -18,9 +16,11 @@ export default function CreateTeamComponent({
     const getErrorMessage = (error: any) => normalizeErrorMessage(error, "Failed to create team");
 
     const handleCreateTeam = () => {
-        const teamName = `Team ${String.fromCharCode(65 + existingTeams.length)}`;
-        const teamData = { matchDayId, teamName };
-        createTeam(teamData)
+        // No teamName here on purpose - the server assigns the next "Team {letter}" itself
+        // (authoritative COUNT at insert time). Computing it here from an existingTeams prop
+        // used to race: two clicks close together could both see the same stale count before
+        // either create's list re-fetch landed, and both got e.g. "Team B".
+        createTeam({ matchDayId })
             .unwrap()
             .then(() => {
                 toast.success("Team created successfully");

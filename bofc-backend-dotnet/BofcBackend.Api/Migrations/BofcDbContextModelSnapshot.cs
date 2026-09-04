@@ -1824,6 +1824,12 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("created_date");
 
+                    b.Property<bool>("DefaultGoalkeeper")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("default_goalkeeper");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")

@@ -34,6 +34,16 @@ public class Player : AuditableEntity
     /// convention as Rank.</summary>
     public bool ExcludeFromGoalkeeperRotation { get; set; }
 
+    /// <summary>Admin-set opt-IN: this player only ever wants to play goalkeeper. Mutually
+    /// exclusive with ExcludeFromGoalkeeperRotation (setting one clears the other - see
+    /// PlayerService). Gets first claim on a team's goalkeeper slot(s) in auto-assign, ahead of
+    /// the fairness balance math; if more default goalkeepers exist on one team than the
+    /// configured MinGoalkeepersPerTeam slots, who gets picked is a random draw among them rather
+    /// than by balance (see TeamService.SelectGoalkeepersForTeam). Never overrides a slot a human
+    /// already filled - only ever competes for open slots, same as the balance-ranked picks.
+    /// Never surfaced to non-admin player-facing responses, same convention as Rank.</summary>
+    public bool DefaultGoalkeeper { get; set; }
+
     /// <summary>Player's own opt-in/out of system-generated emails (payment/matchday reminders,
     /// teams-announced). Defaults to true - only an explicit opt-out stops delivery. Checked
     /// alongside IsActive everywhere reminder emails go out (see PlayerService's active-player

@@ -5,7 +5,7 @@ import {
   Droppable,
   DropResult,
 } from "react-beautiful-dnd";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import useMatchDayTeams from "../../hooks/useMatchDayTeams";
 import "./matchDay.css";
 import CreateTeamComponent from "./Atoms/CreateTeamComponent";
@@ -20,7 +20,7 @@ import { RootState } from "../../state/store";
 import { setActiveMainTab } from "../../state/features/matchDays/matchDayUISlice";
 import PickerWheelModal from "./Atoms/pickerWheel/PickerWheelModal";
 import AutoAssignGoalkeeperButton from "./Atoms/AutoAssignGoalkeeperButton";
-import { BarChartOutlined, FileExcelOutlined, RightSquareOutlined, TrophyOutlined, SearchOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, BarChartOutlined, FileExcelOutlined, RightSquareOutlined, TrophyOutlined, SearchOutlined } from "@ant-design/icons";
 import { exportToExcel, showBdLocalTimeRange } from "../../utils/utils";
 import FixturesPanel from "./Fixtures/FixturesPanel";
 import SimpleMatchesPanel from "./Fixtures/SimpleMatchesPanel";
@@ -54,6 +54,7 @@ const buildMainTabs = (hasTeams: boolean, isWeeklyMatchDay: boolean) => [
 function SingleMatchDay() {
   const { id = "" } = useParams();
   const matchDayId = Number(id);
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const loginInfo = useSelector(selectLoginInfo);
   const activeTab = useSelector((state: RootState) => state.matchDayUI.activeMainTab);
@@ -172,9 +173,14 @@ function SingleMatchDay() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-6">
-          <h5 className="flex items-center gap-1.5 text-base font-semibold text-gray-800 dark:text-white/90">
-            <TrophyOutlined /> {matchDaySummary?.content[0]?.name}
-          </h5>
+          <div className="flex items-center gap-3">
+            <Button type="button" variant="outline" size="sm" startIcon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+              Back
+            </Button>
+            <h5 className="flex items-center gap-1.5 text-base font-semibold text-gray-800 dark:text-white/90">
+              <TrophyOutlined /> {matchDaySummary?.content[0]?.name}
+            </h5>
+          </div>
           <span className="flex items-center gap-1.5 text-theme-sm text-gray-500 dark:text-gray-400">
             <RightSquareOutlined />
             {matchDaySummary?.content[0]?.matchDayDate &&
@@ -189,7 +195,6 @@ function SingleMatchDay() {
           {isAdmin && (
             <CreateTeamComponent
               matchDayId={matchDayId}
-              existingTeams={teams.map((team) => team.teamName)}
               refetchSummary={refetchMatchDay}
             />
           )}

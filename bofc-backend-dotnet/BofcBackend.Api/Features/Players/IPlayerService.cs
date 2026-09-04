@@ -21,8 +21,16 @@ public interface IPlayerService
     /// <summary>Admin-only opt-out from goalkeeper auto-assignment - see Player.ExcludeFromGoalkeeperRotation.</summary>
     Task<bool> GetGoalkeeperRotationExclusionAsync(long id);
 
-    /// <summary>Admin-only - see Player.ExcludeFromGoalkeeperRotation for what this drives.</summary>
+    /// <summary>Admin-only - see Player.ExcludeFromGoalkeeperRotation for what this drives.
+    /// Setting excluded=true also clears Player.DefaultGoalkeeper (the two are mutually exclusive).</summary>
     Task SetGoalkeeperRotationExclusionAsync(long id, bool excluded);
+
+    /// <summary>Admin-only opt-in to always be considered goalkeeper-first in auto-assign - see Player.DefaultGoalkeeper.</summary>
+    Task<bool> GetDefaultGoalkeeperAsync(long id);
+
+    /// <summary>Admin-only - see Player.DefaultGoalkeeper for what this drives. Setting
+    /// isDefault=true also clears Player.ExcludeFromGoalkeeperRotation (mutually exclusive).</summary>
+    Task SetDefaultGoalkeeperAsync(long id, bool isDefault);
 
     /// <summary>Every player plus its current Rank, ordered by rank (unranked last) - feeds the
     /// admin drag-and-drop rank board. Multiple players can share the same Rank (it's a tier,

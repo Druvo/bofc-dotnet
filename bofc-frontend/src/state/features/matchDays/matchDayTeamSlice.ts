@@ -22,7 +22,10 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
     endpoints: (builder) => ({
         createMatchDayTeam: builder.mutation<
             MatchDayPlayerInfoType,
-            { matchDayId: number; teamName: string; logoKey?: string }
+            /** teamName omitted/blank - server assigns the next "Team {letter}" itself (COUNT at
+             * insert time), rather than the client computing it from a possibly-stale team list -
+             * see CreateTeamComponent.tsx. */
+            { matchDayId: number; teamName?: string; logoKey?: string }
         >({
             query: ({ matchDayId, teamName, logoKey }) => ({
                 url: `teams`,
@@ -193,7 +196,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                         teamName: string;
                         /** Every player newly assigned goalkeeper for this team this run - empty if none
                          * (already at/past the configured minimum, or no eligible players left). */
-                        assigned: { playerId: number; playerName: string }[];
+                        assigned: { playerId: number; playerName: string; isDefaultGoalkeeper: boolean }[];
                         skippedReason?: string | null;
                     }[];
                     pastMatchDaysMissingGoalkeeperData: number;
@@ -225,6 +228,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                             played: number;
                             inGoal: number;
                             balance: number;
+                            isDefaultGoalkeeper: boolean;
                             status: "NEXT_UP" | "ELIGIBLE" | "RESTING" | "NOT_IN_ROTATION" | "CURRENT_GOALKEEPER";
                         }[];
                     }[];

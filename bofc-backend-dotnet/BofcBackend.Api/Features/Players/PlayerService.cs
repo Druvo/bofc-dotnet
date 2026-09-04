@@ -178,6 +178,21 @@ public class PlayerService(
     {
         var player = await GetPlayerEntityAsync(id);
         player.ExcludeFromGoalkeeperRotation = excluded;
+        // Mutually exclusive with DefaultGoalkeeper - "never goalkeeper" and "only goalkeeper"
+        // can't both hold.
+        if (excluded) player.DefaultGoalkeeper = false;
+        await db.SaveChangesAsync();
+    }
+
+    public async Task<bool> GetDefaultGoalkeeperAsync(long id) =>
+        (await GetPlayerEntityAsync(id)).DefaultGoalkeeper;
+
+    public async Task SetDefaultGoalkeeperAsync(long id, bool isDefault)
+    {
+        var player = await GetPlayerEntityAsync(id);
+        player.DefaultGoalkeeper = isDefault;
+        // Mutually exclusive with ExcludeFromGoalkeeperRotation - see SetGoalkeeperRotationExclusionAsync.
+        if (isDefault) player.ExcludeFromGoalkeeperRotation = false;
         await db.SaveChangesAsync();
     }
 

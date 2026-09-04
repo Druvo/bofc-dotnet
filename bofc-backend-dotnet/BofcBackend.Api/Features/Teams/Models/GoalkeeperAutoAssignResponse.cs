@@ -27,4 +27,8 @@ public class AssignedGoalkeeperPlayer
 {
     public long PlayerId { get; init; }
     public string PlayerName { get; init; } = string.Empty;
+
+    /// <summary>True if this pick was made because the player only ever wants to play goalkeeper
+    /// (Player.DefaultGoalkeeper), rather than by the fairness balance ranking.</summary>
+    public bool IsDefaultGoalkeeper { get; init; }
 }

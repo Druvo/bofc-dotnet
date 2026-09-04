@@ -151,6 +151,14 @@ public class FixtureGenerationService(
             }
         }
 
+        // Rotation-mode continuity: a team that just played keeps the same jersey into its next
+        // match instead of swapping every single match regardless of whether it's even still
+        // playing. Only a genuinely new team to this MatchDay (or an unlucky same-color collision
+        // between two teams that both arrive already wearing it) gets handed a different color.
+        // Keyed by team, not match slot - see PickDifferentJerseyColor for the "no color on
+        // record yet" / "collision" fallback.
+        var lastJerseyColorByTeamId = new Dictionary<long, string>();
+
         var matches = new List<Match>();
         var matchOrder = 1;
         var matchIndex = 0;
@@ -173,11 +181,43 @@ public class FixtureGenerationService(
             }
             else if (assignJerseys)
             {
-                // Consecutive indices mod N are always different as long as N >= 2, so home and
-                // away never land on the same color.
-                var n = jerseyColors.Count;
-                homeJerseyColor = jerseyColors[matchIndex % n];
-                awayJerseyColor = jerseyColors[(matchIndex + 1) % n];
+                lastJerseyColorByTeamId.TryGetValue(home.Id, out var homeLastColor);
+                lastJerseyColorByTeamId.TryGetValue(away.Id, out var awayLastColor);
+
+                if (homeLastColor != null && awayLastColor != null && homeLastColor != awayLastColor)
+                {
+                    // Both teams already have a color on record and they don't clash - the ideal
+                    // case, e.g. two teams meeting for the first time against each other after
+                    // each already played someone else. Neither has to change.
+                    homeJerseyColor = homeLastColor;
+                    awayJerseyColor = awayLastColor;
+                }
+                else if (homeLastColor != null && (awayLastColor == null || awayLastColor == homeLastColor))
+                {
+                    // Home keeps its color (it's the one with an established color, or - in a
+                    // same-color collision - the one that gets priority); away is either new to
+                    // the MatchDay or the unlucky collision side, either way it takes whatever's
+                    // left over.
+                    homeJerseyColor = homeLastColor;
+                    awayJerseyColor = PickDifferentJerseyColor(jerseyColors, homeLastColor, matchIndex);
+                }
+                else if (awayLastColor != null)
+                {
+                    awayJerseyColor = awayLastColor;
+                    homeJerseyColor = PickDifferentJerseyColor(jerseyColors, awayLastColor, matchIndex);
+                }
+                else
+                {
+                    // Neither team has played yet this MatchDay - same deterministic rotation as
+                    // before, just seeded from the match slot so a fresh MatchDay's opening
+                    // fixtures still vary instead of always starting on the same two colors.
+                    var n = jerseyColors.Count;
+                    homeJerseyColor = jerseyColors[matchIndex % n];
+                    awayJerseyColor = jerseyColors[(matchIndex + 1) % n];
+                }
+
+                lastJerseyColorByTeamId[home.Id] = homeJerseyColor;
+                lastJerseyColorByTeamId[away.Id] = awayJerseyColor;
             }
 
             matches.Add(new Match
@@ -229,6 +269,21 @@ public class FixtureGenerationService(
         await db.SaveChangesAsync();
         liveMatchUpdatePublisher.PublishMatchUpdate(matchDayId, null, "FIXTURES_GENERATED");
         return matches;
+    }
+
+    /// <summary>First configured color that isn't <paramref name="avoid"/>, starting the search at
+    /// <paramref name="seed"/> and wrapping - jerseyColors always has >= 2 entries wherever this is
+    /// called (assignJerseys gate above), so a non-avoid candidate always exists. Seeding from the
+    /// match index rather than always starting at index 0 means a club with 3+ colors doesn't hand
+    /// every incoming team the exact same "second" color.</summary>
+    private static string PickDifferentJerseyColor(List<string> jerseyColors, string avoid, int seed)
+    {
+        for (var i = 0; i < jerseyColors.Count; i++)
+        {
+            var candidate = jerseyColors[(seed + i) % jerseyColors.Count];
+            if (candidate != avoid) return candidate;
+        }
+        return jerseyColors[0];
     }
 
     public async Task ClearFixturesAsync(long matchDayId)

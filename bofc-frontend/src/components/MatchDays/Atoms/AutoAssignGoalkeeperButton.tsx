@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
-import { SafetyOutlined, LoadingOutlined } from "@ant-design/icons";
+import { SafetyOutlined, LoadingOutlined, StarFilled } from "@ant-design/icons";
 import {
     useAutoAssignGoalkeepersMutation,
     useLazyGetGoalkeeperRankingQuery,
@@ -18,6 +18,7 @@ type RankingPlayer = {
     played: number;
     inGoal: number;
     balance: number;
+    isDefaultGoalkeeper: boolean;
     status: "NEXT_UP" | "ELIGIBLE" | "RESTING" | "NOT_IN_ROTATION" | "CURRENT_GOALKEEPER";
 };
 
@@ -178,7 +179,10 @@ export default function AutoAssignGoalkeeperButton({
                 <p className="mb-4 text-theme-sm text-gray-600 dark:text-gray-400">
                     Ranked by turns owed (attendance-weighted) minus turns served. Resting (kept goal in
                     either of the last two match days) and excluded players are never picked, however
-                    much they're owed. Only the highlighted <span className="font-semibold">Next Up</span> players
+                    much they're owed. <StarFilled className="text-warning-500" /> <span className="font-semibold">Default goalkeepers</span> (players
+                    who only ever want to play goalkeeper) get first claim on a team's slot(s) ahead of the balance
+                    ranking - if more of them exist on a team than it has slots for, who's picked is a random draw.
+                    Only the highlighted <span className="font-semibold">Next Up</span> players
                     per team get assigned (up to the configured minimum goalkeepers per team, see Settings) -
                     teams already at that count are left untouched.
                 </p>
@@ -231,7 +235,14 @@ export default function AutoAssignGoalkeeperButton({
                                                 {team.players.map((p) => (
                                                     <tr key={p.playerId} className={p.status === "NEXT_UP" ? "bg-success-50/40 dark:bg-success-500/10" : ""}>
                                                         <td className="px-2.5 py-2 text-gray-500 dark:text-gray-400">{p.rank}</td>
-                                                        <td className="px-2.5 py-2 font-medium text-gray-700 dark:text-gray-300">{p.playerName}</td>
+                                                        <td className="px-2.5 py-2 font-medium text-gray-700 dark:text-gray-300">
+                                                            <span className="flex items-center gap-1">
+                                                                {p.isDefaultGoalkeeper && (
+                                                                    <StarFilled className="text-theme-xs text-warning-500" title="Default goalkeeper" />
+                                                                )}
+                                                                {p.playerName}
+                                                            </span>
+                                                        </td>
                                                         <td className="px-2.5 py-2 text-right text-gray-600 dark:text-gray-400">{p.played}</td>
                                                         <td className="px-2.5 py-2 text-right text-gray-600 dark:text-gray-400">{p.inGoal}</td>
                                                         <td className="px-2.5 py-2"><BalanceBar balance={p.balance} maxAbs={maxAbs} /></td>

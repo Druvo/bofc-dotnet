@@ -39,6 +39,10 @@ interface PlayerFormValues {
     /** Admin-only - same fetch/save pattern as rank. Opts this player out of the goalkeeper
      * auto-assign button's picks; they still count toward attendance/fairness history. */
     excludeFromGoalkeeperRotation: boolean;
+    /** Admin-only - same fetch/save pattern as rank. Opts this player IN to only ever playing
+     * goalkeeper - first claim on their team's open slot(s) in auto-assign, ahead of the fairness
+     * balance. Mutually exclusive with excludeFromGoalkeeperRotation. */
+    defaultGoalkeeper: boolean;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,6 +59,7 @@ const emptyValues: PlayerFormValues = {
     active: false,
     rank: "",
     excludeFromGoalkeeperRotation: false,
+    defaultGoalkeeper: false,
 };
 
 function Player() {
@@ -161,6 +166,9 @@ function Player() {
                         followUps.push(axiosApi.put(`players/${id}/goalkeeper-rotation-exclusion`, {
                             excluded: values.excludeFromGoalkeeperRotation,
                         }));
+                        followUps.push(axiosApi.put(`players/${id}/default-goalkeeper`, {
+                            isDefault: values.defaultGoalkeeper,
+                        }));
                     }
                     Promise.all(followUps)
                         .then(() => {
@@ -197,6 +205,7 @@ function Player() {
                     jerseyNumber: c.jerseyNumber != null ? String(c.jerseyNumber) : "",
                     rank: "",
                     excludeFromGoalkeeperRotation: false,
+                    defaultGoalkeeper: false,
                 });
                 if (c.photoKey) {
                     setPhotoKey(c.photoKey);
@@ -227,6 +236,17 @@ function Player() {
                         })
                         .catch((err: any) => {
                             toast.error(normalizeErrorMessage(err?.response?.data || err, "Error loading goalkeeper rotation setting"));
+                        });
+
+                    axiosApi
+                        .get(`players/${id}/default-goalkeeper`, {
+                            headers: { Authorization: `Bearer ${getTokenFromLocalStorage(tokenContent)}` },
+                        })
+                        .then((defaultGkResponse) => {
+                            setValues((prev) => ({ ...prev, defaultGoalkeeper: !!defaultGkResponse.data.content }));
+                        })
+                        .catch((err: any) => {
+                            toast.error(normalizeErrorMessage(err?.response?.data || err, "Error loading default goalkeeper setting"));
                         });
                 }
             })
@@ -453,16 +473,40 @@ function Player() {
                             )}
 
                             {isAdmin && formState === "UPDATE" && (
-                                <div className="mt-4">
-                                    <FormCheckbox
-                                        id="excludeFromGoalkeeperRotation"
-                                        label="Exclude from goalkeeper rotation (admin only)"
-                                        checked={values.excludeFromGoalkeeperRotation}
-                                        onChange={(checked) => setField("excludeFromGoalkeeperRotation", checked)}
-                                    />
-                                    <p className="mt-1 ml-8 text-theme-xs text-gray-500 dark:text-gray-400">
-                                        Keeps this player off the goalkeeper auto-assign button's picks. They still count toward attendance/fairness history.
-                                    </p>
+                                <div className="mt-4 flex flex-col gap-4">
+                                    <div>
+                                        <FormCheckbox
+                                            id="excludeFromGoalkeeperRotation"
+                                            label="Exclude from goalkeeper rotation (admin only)"
+                                            checked={values.excludeFromGoalkeeperRotation}
+                                            onChange={(checked) => {
+                                                setField("excludeFromGoalkeeperRotation", checked);
+                                                // Mutually exclusive with "default goalkeeper" - "never
+                                                // goalkeeper" and "only goalkeeper" can't both hold.
+                                                if (checked) setField("defaultGoalkeeper", false);
+                                            }}
+                                        />
+                                        <p className="mt-1 ml-8 text-theme-xs text-gray-500 dark:text-gray-400">
+                                            Keeps this player off the goalkeeper auto-assign button's picks. They still count toward attendance/fairness history.
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <FormCheckbox
+                                            id="defaultGoalkeeper"
+                                            label="Default goalkeeper (admin only)"
+                                            checked={values.defaultGoalkeeper}
+                                            onChange={(checked) => {
+                                                setField("defaultGoalkeeper", checked);
+                                                if (checked) setField("excludeFromGoalkeeperRotation", false);
+                                            }}
+                                        />
+                                        <p className="mt-1 ml-8 text-theme-xs text-gray-500 dark:text-gray-400">
+                                            This player only ever wants to play goalkeeper - whichever team they're on, they get first claim
+                                            on that team's open goalkeeper slot(s) in auto-assign, ahead of the fairness balance. If more
+                                            default goalkeepers end up on one team than it has slots for, who gets picked is a random draw.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
 

@@ -70,6 +70,18 @@
   --dur-short: 150ms;
   --dur-med:   220ms;
   --dur-long:  400ms;
+  --dur-drawer: 300ms; /* off-canvas nav drawer slide/backdrop fade (MobileNavDrawer) */
+
+  /* ---- Mobile/tablet (<lg) app-shell chrome ----
+   * --app-header-h is measured at runtime by DefaultLayout (ResizeObserver on
+   * whichever top bar - MobileTopBar or the tablet-width desktop Header - is
+   * actually rendered) since neither has a fixed height; the value here is
+   * only the pre-measurement fallback. --app-bottombar-h is a real constant
+   * (MobileTabBar's own fixed 58px box) plus the iOS home-indicator inset, so
+   * anything anchoring above the bar (the nav drawer, page content padding)
+   * clears the true footprint, not just the 58px box. */
+  --app-header-h: 56px;
+  --app-bottombar-h: calc(58px + env(safe-area-inset-bottom, 0px));
 
   /* ---- Radius ---- */
   --radius-card:  10px;
@@ -120,5 +132,23 @@
     --dur-short: 1ms;
     --dur-med: 1ms;
     --dur-long: 1ms;
+    --dur-drawer: 1ms;
   }
+}
+
+/* An off-screen (translateX) drawer still contributes to the page's scroll
+ * width unless the ancestor clips it - without this every mobile/tablet page
+ * gets a phantom sideways scrollbar/shift from the closed nav drawer. */
+html, body {
+  overflow-x: clip;
+}
+
+/* Global fallback focus ring for anything that doesn't define its own -
+ * components with a bespoke `focus:ring-*`/`focus:border-*` utility still win
+ * since their rule is more specific, this only fills the gap (nav drawer/tab
+ * bar items, plain buttons and links elsewhere). */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

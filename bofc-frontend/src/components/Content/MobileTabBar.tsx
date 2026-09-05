@@ -25,13 +25,14 @@ const TABS: TabItem[] = [
 ];
 
 /**
- * Mobile-only (<768px) persistent bottom nav so the highest-frequency
- * destinations - dashboard, next match day, live score/fixtures, roster - are
- * one tap away instead of hamburger -> drawer -> menu item. "More" opens the
- * exact same sidebar drawer the header hamburger already does (onOpenMore),
- * so Finance/Venue/Club Rules/Profile stay reachable without
- * duplicating nav. Desktop (>=768px) renders nothing - layout/Sidebar.tsx is
- * the nav there.
+ * Mobile/tablet-only (<lg, 1024px - see ContentComponent's showMobileNav)
+ * persistent bottom nav so the highest-frequency destinations - dashboard,
+ * next match day, live score/fixtures, roster - are one tap away instead of
+ * hamburger -> drawer -> menu item. "More" opens the same off-canvas nav
+ * drawer (layout/MobileNavDrawer.tsx) the header hamburger does
+ * (onOpenMore), so Finance/Venue/Club Rules/Settings stay reachable without
+ * duplicating nav. Desktop (>=lg) renders nothing there - layout/Sidebar.tsx
+ * is the nav.
  */
 export default function MobileTabBar({ onOpenMore }: MobileTabBarProps) {
   const navigate = useNavigate();
@@ -52,7 +53,8 @@ export default function MobileTabBar({ onOpenMore }: MobileTabBarProps) {
 
   return (
     <nav
-      className="mobile-tab-bar"
+      className="mobile-tab-bar z-bottomBar"
+      aria-label="Primary"
       style={{
         position: "fixed",
         bottom: 0,
@@ -62,10 +64,9 @@ export default function MobileTabBar({ onOpenMore }: MobileTabBarProps) {
         display: "flex",
         background: "var(--color-paper-2)",
         borderTop: "1px solid var(--color-rule)",
-        // Below layout/Sidebar.tsx's mobile overlay (999) and Sider (1000)
-        // so an open "More" drawer correctly covers the tab bar, not the
-        // other way around.
-        zIndex: 998,
+        // Above the nav drawer/backdrop (see tailwind.config.js's navDrawer/
+        // navBackdrop tiers) so "More" stays clickable - and thus able to
+        // close the drawer again - even while it's open.
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
       }}
     >
@@ -74,6 +75,8 @@ export default function MobileTabBar({ onOpenMore }: MobileTabBarProps) {
         return (
           <button
             key={tab.key}
+            aria-label={tab.label}
+            aria-current={active ? "page" : undefined}
             onClick={() => (tab.path ? navigate(tab.path) : onOpenMore())}
             style={{
               flex: 1,

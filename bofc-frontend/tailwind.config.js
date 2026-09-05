@@ -170,6 +170,14 @@ module.exports = {
         raised: '10',
         sticky: '200',
         dropdown: '300',
+        // Mobile/tablet (<lg) app-shell chrome, in the exact stacking order it
+        // needs (bottom bar > drawer > backdrop): all three sit above dropdown
+        // (a drawer open over a page should cover any lingering header dropdown)
+        // but below modal/toast/tooltip, so a real dialog or toast still covers
+        // the nav chrome the way it covers everything else.
+        navBackdrop: '310',
+        navDrawer: '320',
+        bottomBar: '330',
         modal: '400',
         toast: '500',
         tooltip: '600',

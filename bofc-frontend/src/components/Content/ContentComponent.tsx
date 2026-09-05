@@ -1,6 +1,7 @@
 import { TrophyOutlined, CloseOutlined } from "@ant-design/icons";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import useIsMobile from "../../hooks/useIsMobile";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuthHook } from "../../hooks/useAuthHook";
 import { useGetUserProfileQuery } from "../../state/features/auth/authSlice";
@@ -51,7 +52,14 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
     setIsDarkMode,
 }) => {
     const loginInfo = useSelector(selectLoginInfo);
-    const [isMobile, setIsMobile] = useState(false);
+    // <lg (1024px) - matches the bottom tab bar / off-canvas nav drawer's own
+    // breakpoint (tailwind.config.js's `lg`), not the old <768 split. Computed
+    // synchronously on first render (useIsMobile reads window.innerWidth in its
+    // initial useState, not after a mount effect) - a useEffect-based version
+    // previously defaulted to "desktop" for one frame on every real mobile
+    // load before flipping true, which is exactly the wrong-state flash this
+    // kind of check needs to avoid.
+    const showMobileNav = useIsMobile(1023);
     const appShell = useAppShell();
 
     const { user } = useAuthHook();
@@ -79,16 +87,6 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [appShell.goalkeepingHistoryOpen]);
 
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-
-        checkMobile();
-        window.addEventListener("resize", checkMobile);
-        return () => window.removeEventListener("resize", checkMobile);
-    }, []);
-
     // Sync the real profile photo into the store so the header avatar and the
     // sidebar footer (both read loginInfo.image) show the user's actual photo.
     useEffect(() => {
@@ -107,9 +105,10 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                     display: 'flex',
                     flexDirection: 'column',
                     minHeight: '100%',
-                    // Leaves room for the fixed mobile bottom tab bar so it
+                    // Leaves room for the fixed mobile/tablet bottom tab bar
+                    // (plus the iOS safe-area inset it itself pads for) so it
                     // doesn't cover the last bit of page content.
-                    paddingBottom: isMobile ? 58 : 0,
+                    paddingBottom: showMobileNav ? "var(--app-bottombar-h)" : 0,
                 }}
             >
                         <div style={{ flex: 1 }}>
@@ -231,7 +230,7 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                         </div>
                         <AppFooter />
             </div>
-                {isMobile && user?.token && (
+                {showMobileNav && user?.token && (
                     <MobileTabBar onOpenMore={() => appShell.openSidebar()} />
                 )}
 
@@ -241,7 +240,7 @@ const ContentComponent: React.FC<ContentComponentProps> = ({
                     <div className="fixed inset-0 bg-gray-400/50 backdrop-blur-[2px] dark:bg-[var(--color-paper-3)]/50" onClick={appShell.closeGoalkeepingHistory} />
                     <div
                         className="fixed right-0 top-0 h-full overflow-y-auto bg-white shadow-theme-lg dark:bg-[var(--color-paper-3)]"
-                        style={{ width: isMobile ? '100%' : 480, padding: 24 }}
+                        style={{ width: showMobileNav ? '100%' : 480, padding: 24 }}
                     >
                         <div className="mb-5 flex items-center justify-between">
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

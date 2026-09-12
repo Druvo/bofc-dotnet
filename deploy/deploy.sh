@@ -1,5 +1,7 @@
 #!/bin/bash
-# Deploy script — called by Jenkins after SCP of artifacts
+# Deploy script — historically called by Jenkins after SCP of artifacts.
+# Deployment now runs from .github/workflows/deploy.yml, which performs these
+# steps inline over SSH; kept for manual/recovery use.
 # Runs on the VPS
 set -euo pipefail
 

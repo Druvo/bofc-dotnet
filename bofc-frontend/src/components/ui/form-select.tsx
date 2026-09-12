@@ -20,7 +20,12 @@ export default function FormSelect({ label, error, hint, placeholder, options, i
       <div className="relative">
         <select
           id={id}
-          className={`h-11 w-full appearance-none rounded-lg border px-4 py-2.5 pr-9 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] ${
+          // py-0, not py-2.5: a select centres its text in the content box, so at the
+          // default h-11 this renders identically - but vertical padding eats the content
+          // box, and callers that shrink the control (!h-9) were left with 14.4px for a
+          // 20px line-height, clipping the descenders. Keeping the padding at zero means
+          // a height override is all a caller needs.
+          className={`h-11 w-full appearance-none rounded-lg border px-4 py-0 pr-9 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] ${
             error
               ? "border-error-500 focus:border-error-300 focus:ring-error-500/10 dark:border-error-500 dark:focus:border-error-800"
               : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90 dark:focus:border-brand-800"

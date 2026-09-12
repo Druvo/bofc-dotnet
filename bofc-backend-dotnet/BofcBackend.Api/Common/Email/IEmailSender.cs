@@ -16,5 +16,10 @@ public interface IEmailSender
     Task<string> RenderPreviewAsync(string subject, string htmlBody);
 }
 
-/// <summary>Per-recipient outcome so a scheduler can log/skip individually instead of one failure aborting the whole batch.</summary>
-public record EmailSendResult(int Sent, int Failed, bool SmtpConfigured);
+/// <summary>Per-recipient outcome so a scheduler can log/skip individually instead of one failure
+/// aborting the whole batch. <paramref name="ErrorMessage"/> carries the underlying reason for the
+/// first failure (the SMTP server's own response, or a configuration problem) so callers can show
+/// an admin what actually went wrong instead of a generic "check your settings" - the real message
+/// used to exist only in a server log file, which is why a dead Gmail app password went
+/// undiagnosed for days.</summary>
+public record EmailSendResult(int Sent, int Failed, bool SmtpConfigured, string? ErrorMessage = null);

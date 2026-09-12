@@ -125,6 +125,15 @@ public class PaymentDueReminderBackgroundService(IServiceScopeFactory scopeFacto
             }
         }
 
+        // Same reasoning as the MatchDay reminder: the "last sent" marker moves regardless, so a
+        // wholly-failed batch is invisible unless it announces itself.
+        if (sent == 0 && duePlayers.Count > 0)
+        {
+            logger.LogError(
+                "Payment-due reminder for {Month} reached none of its {Count} target player(s) - every send failed. Check the SMTP settings.",
+                monthYear, duePlayers.Count);
+        }
+
         return (duePlayers.Count, sent);
     }
 }

@@ -153,7 +153,12 @@ public class SettingsService(
 
         if (result.Sent == 0)
         {
-            throw new BadRequestException("Failed to send the test email - check the SMTP host/port/credentials and try again.");
+            // Pass the underlying reason straight through. The mail server's own words
+            // ("5.7.0 Authentication Required", "connection timed out") tell an admin what to
+            // fix; the generic fallback below only applies when we genuinely have nothing.
+            throw new BadRequestException(string.IsNullOrWhiteSpace(result.ErrorMessage)
+                ? "Failed to send the test email - check the SMTP host/port/credentials and try again."
+                : $"Failed to send the test email: {result.ErrorMessage}");
         }
     }
 

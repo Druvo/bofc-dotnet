@@ -32,5 +32,8 @@ export default function MatchDayPage() {
     );
   }
 
-  return <Navigate to={`/match-day-viewer/${matchDay.id}`} replace />;
+  // The join screen, not the viewer: "Next Match Day" is the players' own entry point,
+  // and what they need there is their RSVP and the participant list - the viewer is the
+  // read-only broadcast view, which buries the one action the link exists to offer.
+  return <Navigate to={`/match-days/join-match-day/${matchDay.id}`} replace />;
 }

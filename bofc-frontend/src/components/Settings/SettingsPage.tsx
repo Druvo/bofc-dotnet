@@ -118,7 +118,7 @@ function SettingsPage() {
 
     const [matchDaysPerWeek, setMatchDaysPerWeek] = useState(1);
     const [weeklyMatchDaySlots, setWeeklyMatchDaySlots] = useState<WeeklyMatchDaySlot[]>([
-        { dayOfWeek: "Friday", time: "19:00", durationMinutes: 90, matchDurationMinutes: 13, timeGapMinutes: 15 },
+        { dayOfWeek: "Friday", time: "19:00", durationMinutes: 90, matchDurationMinutes: 13, timeGapMinutes: 2 },
     ]);
     const [weeklyMatchDayMaxPlayersPerTeam, setWeeklyMatchDayMaxPlayersPerTeam] = useState(6);
     const [weeklyMatchDayAutoTeamsEnabled, setWeeklyMatchDayAutoTeamsEnabled] = useState(false);
@@ -136,7 +136,7 @@ function SettingsPage() {
                 time: "19:00",
                 durationMinutes: 90,
                 matchDurationMinutes: 13,
-                timeGapMinutes: 15,
+                timeGapMinutes: 2,
             }));
             return [...prev, ...extra];
         });
@@ -240,7 +240,7 @@ function SettingsPage() {
         setWeeklyMatchDaySlots(
             s.weeklyMatchDaySlots?.length
                 ? s.weeklyMatchDaySlots
-                : [{ dayOfWeek: s.weeklyMatchDayOfWeek, time: s.weeklyMatchTime, durationMinutes: 90, matchDurationMinutes: 13, timeGapMinutes: 15 }]
+                : [{ dayOfWeek: s.weeklyMatchDayOfWeek, time: s.weeklyMatchTime, durationMinutes: 90, matchDurationMinutes: 13, timeGapMinutes: 2 }]
         );
         setWeeklyMatchDayMaxPlayersPerTeam(s.weeklyMatchDayMaxPlayersPerTeam || 6);
         setWeeklyMatchDayAutoTeamsEnabled(s.weeklyMatchDayAutoTeamsEnabled);

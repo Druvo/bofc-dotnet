@@ -6,6 +6,7 @@ using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Common.Scheduling;
 using BofcBackend.Api.Common.Security;
 using BofcBackend.Api.Common.Storage;
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
@@ -73,7 +74,7 @@ public class TeamService(
     private async Task<string> GenerateDefaultTeamNameAsync(long matchDayId)
     {
         var count = await db.Teams.CountAsync(t => t.MatchDayId == matchDayId);
-        return count < 26 ? $"Team {(char)('A' + count)}" : $"Team {count + 1}";
+        return TeamNaming.DefaultName(count);
     }
 
     private async Task<(Team Team, string? OldLogoKeyToDelete)> UpdateExistingTeamAsync(TeamRequest request, MatchDay matchDay)

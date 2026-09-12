@@ -329,7 +329,7 @@ export default function DeclareTeamsButton({
       }
       toast.success(
         asTest
-          ? `Test sent to ${testEmail.trim()}.`
+          ? `Test sent to ${content.sent} address${content.sent === 1 ? "" : "es"}.`
           : `Teams declared - emailed ${content.sent} player${content.sent === 1 ? "" : "s"}.`
       );
       if (!asTest) setImages(null);
@@ -627,10 +627,10 @@ export default function DeclareTeamsButton({
             id="declare-teams-test-email"
             type="email"
             label="Send a test to (optional)"
-            placeholder="you@example.com"
+            placeholder="you@yourdomain.com, teammate@yourdomain.com"
             value={testEmail}
             onChange={(e) => setTestEmail(e.target.value)}
-            hint="Sends the identical email to this one address only - no in-app notifications, nothing to the players."
+            hint="Sends the identical email to these addresses only - no in-app notifications, nothing to the players. Separate several with commas."
           />
         </div>
       </Modal>

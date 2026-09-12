@@ -291,14 +291,24 @@ public class TeamService(
         var venueName = await db.Venues.Where(v => v.Id == matchDay.VenueId).Select(v => v.Name).FirstOrDefaultAsync() ?? "TBD";
         var teamBuildingUrl = $"{appUrlOptions.Value.WebsiteUrl.TrimEnd('/')}/match-days/join-match-day/{matchDay.Id}";
 
-        var testEmail = request.TestEmail?.Trim();
-        if (!string.IsNullOrEmpty(testEmail))
+        var testAddresses = SplitAddresses(request.TestEmail);
+        if (testAddresses.Count > 0)
         {
             // Deliberately no in-app notification and no participant lookup: a preview that
             // notified 28 people would defeat the point of previewing.
-            var (testSubject, testBody) = await RenderDeclarationAsync(
-                LocalPartAsName(testEmail), matchDay.Name, matchDay.MatchDayDate, venueName, teamBuildingUrl);
-            var testResult = await emailSender.SendAsync([testEmail], testSubject, testBody, inlineImages);
+            //
+            // Goes through the same SendPersonalizedAsync batch the real declaration uses, rather
+            // than a simpler one-off send, so that timing a test against a realistic number of
+            // addresses measures what the real thing will actually do.
+            var testMessages = new List<PersonalizedEmail>();
+            foreach (var address in testAddresses)
+            {
+                var (testSubject, testBody) = await RenderDeclarationAsync(
+                    LocalPartAsName(address), matchDay.Name, matchDay.MatchDayDate, venueName, teamBuildingUrl);
+                testMessages.Add(new PersonalizedEmail(address, testSubject, testBody));
+            }
+
+            var testResult = await emailSender.SendPersonalizedAsync(testMessages, inlineImages);
             return new DeclareTeamsResult(testResult.Sent, testResult.Failed, true, testResult.ErrorMessage);
         }
 
@@ -454,6 +464,17 @@ public class TeamService(
         var cleaned = new string(name.Select(c => char.IsLetterOrDigit(c) ? c : '-').ToArray());
         return string.Join('-', cleaned.Split('-', StringSplitOptions.RemoveEmptyEntries));
     }
+
+    /// <summary>Test recipients, comma/semicolon/whitespace separated. More than one is allowed
+    /// because a declaration is only ever sent once for real: checking how a batch behaves - how
+    /// long 25 messages carrying a megabyte of images actually take - is otherwise impossible
+    /// without aiming it at the whole club.</summary>
+    private static List<string> SplitAddresses(string? value) =>
+        string.IsNullOrWhiteSpace(value)
+            ? []
+            : value.Split([',', ';', ' ', '\t', '\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
     /// <summary>"saifulhoque30@gmail.com" -> "Saifulhoque30". Only ever used for the PlayerName
     /// greeting in a test send, where there is no player record to take a real name from.</summary>

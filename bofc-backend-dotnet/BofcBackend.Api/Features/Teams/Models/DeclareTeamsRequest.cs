@@ -16,10 +16,11 @@ public class DeclareTeamsRequest
     /// instead of being half of one wide graphic.</summary>
     public string? ScheduleImageBase64 { get; set; }
 
-    /// <summary>When set, the declaration goes to this one address instead of the participants,
+    /// <summary>When set, the declaration goes to these addresses instead of the participants,
     /// and no in-app notifications are created. Lets an admin see exactly what will land in 28
     /// inboxes before it does - the images are generated fresh per send, so there is no other way
-    /// to preview the real thing.</summary>
+    /// to preview the real thing. Comma, semicolon or whitespace separated; more than one is
+    /// allowed so a realistic batch can be timed without aiming it at the whole club.</summary>
     public string? TestEmail { get; set; }
 }
 

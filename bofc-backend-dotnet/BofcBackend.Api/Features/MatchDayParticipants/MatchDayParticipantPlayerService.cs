@@ -46,7 +46,7 @@ public class MatchDayParticipantPlayerService(BofcDbContext db) : IMatchDayParti
 
         var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
         var teamsBuilt = await db.Teams.AnyAsync(t => t.MatchDayId == matchDay.Id);
-        var votingLocked = teamsBuilt || (settings?.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now) ?? false);
+        var votingLocked = settings?.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now, teamsBuilt) ?? false;
 
         return new MatchDayWithPlayersResponse
         {

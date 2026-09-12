@@ -67,6 +67,19 @@ public class SystemSettings : AuditableEntity
     public bool IsVotingLockedFor(DateTime matchDayDate, DateTime now) =>
         VotingLockEnabled && now >= matchDayDate.AddHours(-VotingLockHoursBeforeMatch);
 
+    /// <summary>The complete RSVP lock: the time window above, plus the freeze that applies once
+    /// teams have been drafted. Both are governed by VotingLockEnabled, so turning the toggle off
+    /// releases an existing team freeze as well - that is deliberate and admin-facing. The freeze
+    /// exists because teams are built FROM the confirmed RSVPs at that moment, so a later vote
+    /// change leaves the roster out of step with the votes; with the toggle off, reconciling that
+    /// is the organiser's job in Team Building.
+    ///
+    /// Every caller must use this rather than testing <paramref name="teamsBuilt"/> on its own:
+    /// the freeze used to be applied inline at each vote path, which is exactly how it came to
+    /// ignore the toggle.</summary>
+    public bool IsVotingLockedFor(DateTime matchDayDate, DateTime now, bool teamsBuilt) =>
+        VotingLockEnabled && (teamsBuilt || now >= matchDayDate.AddHours(-VotingLockHoursBeforeMatch));
+
     // --- Match Day: drives MatchDaySchedulerBackgroundService, which auto-creates a MatchDay
     // (IsWeeklyMatchDay=true) for every configured WeeklyMatchDaySlot each week - venue/sport are
     // shared across all slots; duration + time-gap drive the sequential match time-slotting

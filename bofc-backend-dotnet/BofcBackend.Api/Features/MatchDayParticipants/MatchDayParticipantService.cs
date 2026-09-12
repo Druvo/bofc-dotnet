@@ -56,18 +56,26 @@ public class MatchDayParticipantService(
             throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayAlreadyConcluded, HttpStatusCode.BadRequest);
         }
 
-        // Always-on guard, independent of the admin's VotingLockEnabled toggle: once teams are
-        // drafted for this MatchDay, they're built FROM the confirmed RSVPs at that moment - a
-        // vote change afterward would silently desync from the roster rather than do anything.
-        if (await db.Teams.AnyAsync(t => t.MatchDayId == matchDay.Id))
-        {
-            throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayTeamsAlreadyBuilt, HttpStatusCode.BadRequest);
-        }
-
+        // Both halves of the lock hang off VotingLockEnabled, so an admin turning the toggle off
+        // reopens RSVPs even for a MatchDay whose teams are already drafted. Settings are loaded
+        // before the teams check (they used to be loaded after it) precisely so the toggle can
+        // gate it.
         var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
-        if (settings != null && settings.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now))
+        if (settings is { VotingLockEnabled: true })
         {
-            throw new MatchDayServiceException(RestErrorMessageDetail.VotingLocked, HttpStatusCode.BadRequest);
+            var teamsBuilt = await db.Teams.AnyAsync(t => t.MatchDayId == matchDay.Id);
+            if (teamsBuilt)
+            {
+                // Distinct from the time-window message below: "teams are drafted" and "kickoff is
+                // too close" are different problems with different remedies, and collapsing them
+                // into one message is what made the toggle look broken.
+                throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayTeamsAlreadyBuilt, HttpStatusCode.BadRequest);
+            }
+
+            if (settings.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now))
+            {
+                throw new MatchDayServiceException(RestErrorMessageDetail.VotingLocked, HttpStatusCode.BadRequest);
+            }
         }
 
         MatchDayParticipant participant;
@@ -197,7 +205,7 @@ public class MatchDayParticipantService(
 
         var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
         var teamsBuilt = await db.Teams.AnyAsync(t => t.MatchDayId == latestMatchDay.Id);
-        var votingLocked = teamsBuilt || (settings?.IsVotingLockedFor(latestMatchDay.MatchDayDate, DateTime.Now) ?? false);
+        var votingLocked = settings?.IsVotingLockedFor(latestMatchDay.MatchDayDate, DateTime.Now, teamsBuilt) ?? false;
 
         return new LatestMatchDayWithUserParticipantsResponse
         {

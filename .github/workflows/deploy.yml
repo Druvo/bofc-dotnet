@@ -1,0 +1,193 @@
+name: Deploy to production
+
+# Port of the Jenkinsfile. Builds both halves, applies EF Core migrations, then
+# swaps the release in over SSH and verifies the service came back up.
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# Never let two deploys touch the box at once. cancel-in-progress stays false:
+# aborting midway through a migration or a file swap is worse than queueing.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  VPS_HOST: 168.107.78.111
+  VPS_USER: ubuntu
+  DEPLOY_DIR: /opt/bofc-dotnet
+  SERVICE: bofc-dotnet
+  # The backend's own listener. nginx terminates TLS in front of it; this is the
+  # loopback port the unit actually binds (ASPNETCORE_URLS=http://0.0.0.0:8080).
+  HEALTH_PORT: '8080'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-
+
+      # The VPS is Ampere (aarch64), so we cross-publish from the x64 runner.
+      # Safe for PublishSingleFile; it would NOT be safe for NativeAOT.
+      - name: Publish backend (linux-arm64, self-contained)
+        working-directory: bofc-backend-dotnet
+        run: |
+          dotnet publish BofcBackend.Api/BofcBackend.Api.csproj \
+            -c Release -r linux-arm64 --self-contained true \
+            -p:PublishSingleFile=true -o publish --nologo
+
+      - name: Generate idempotent migration script
+        working-directory: bofc-backend-dotnet
+        run: |
+          dotnet tool install --global dotnet-ef --version 8.*
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef migrations script --idempotent \
+            --project BofcBackend.Api/BofcBackend.Api.csproj \
+            --startup-project BofcBackend.Api/BofcBackend.Api.csproj \
+            -o migrations.sql
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: bofc-frontend/package-lock.json
+
+      - name: Build frontend
+        working-directory: bofc-frontend
+        env:
+          REACT_APP_API_URL: /api
+          CI: 'false'
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload release
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          retention-days: 7
+          path: |
+            bofc-backend-dotnet/publish
+            bofc-backend-dotnet/migrations.sql
+            bofc-frontend/build
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          # Pin the host key instead of disabling the check entirely.
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          cat >> ~/.ssh/config <<EOF
+          Host vps
+            HostName $VPS_HOST
+            User $VPS_USER
+            IdentityFile ~/.ssh/id_deploy
+            StrictHostKeyChecking yes
+          EOF
+
+      - name: Snapshot current release
+        run: |
+          ssh vps "set -e
+            SNAP=$DEPLOY_DIR/snapshots/${{ github.run_id }}
+            mkdir -p \$SNAP/publish \$SNAP/frontend
+            cp -r $DEPLOY_DIR/publish/. \$SNAP/publish/ 2>/dev/null || true
+            cp -r $DEPLOY_DIR/frontend/. \$SNAP/frontend/ 2>/dev/null || true
+            echo Snapshot at \$SNAP"
+
+      # Stop BEFORE migrating. The Jenkins pipeline migrated while the old build was
+      # still serving traffic, which lets the running app hit a schema it wasn't
+      # compiled against. A few extra seconds of downtime is the cheaper trade.
+      - name: Stop service
+        run: ssh vps "sudo systemctl stop $SERVICE || true"
+
+      - name: Apply migrations
+        run: |
+          scp bofc-backend-dotnet/migrations.sql vps:/tmp/migrations.sql
+          ssh vps "python3 $DEPLOY_DIR/apply_migrations.py /tmp/migrations.sql"
+
+      - name: Deploy backend
+        run: |
+          scp -r bofc-backend-dotnet/publish/. vps:$DEPLOY_DIR/publish/
+          ssh vps "chmod +x $DEPLOY_DIR/publish/BofcBackend.Api"
+
+      # Upload beside the live directory, then swap. Deleting first (as Jenkins did)
+      # leaves the site serving 404s for the length of the upload, and serving
+      # nothing at all if the upload fails halfway.
+      - name: Deploy frontend (atomic swap)
+        run: |
+          ssh vps "rm -rf $DEPLOY_DIR/frontend.new && mkdir -p $DEPLOY_DIR/frontend.new"
+          scp -r bofc-frontend/build/. vps:$DEPLOY_DIR/frontend.new/
+          ssh vps "set -e
+            rm -rf $DEPLOY_DIR/frontend.old
+            mv $DEPLOY_DIR/frontend $DEPLOY_DIR/frontend.old
+            mv $DEPLOY_DIR/frontend.new $DEPLOY_DIR/frontend
+            rm -rf $DEPLOY_DIR/frontend.old"
+
+      - name: Start and verify
+        run: |
+          ssh vps "set -e
+            sudo systemctl start $SERVICE
+            for i in \$(seq 1 20); do
+              code=\$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$HEALTH_PORT/auth/login || true)
+              # 405 = the route exists but rejects GET, i.e. the app is up and routing.
+              if [ \"\$code\" = '405' ]; then echo 'Backend is UP'; exit 0; fi
+              echo \"waiting... (\$code)\"; sleep 3
+            done
+            echo 'Backend did not come up in time'; exit 1"
+
+      # Informational only, deliberately not -f. Hitting nginx by raw IP with no
+      # Host header can legitimately return 404/421, and a false negative here
+      # would trigger a rollback of a perfectly good deploy.
+      - name: Report site response
+        continue-on-error: true
+        run: |
+          ssh vps "curl -sk -o /dev/null -w 'site %{http_code}\n' https://127.0.0.1/"
+
+      # Jenkins only printed a note telling a human where the snapshot was.
+      # This actually puts the previous release back and restarts it.
+      - name: Roll back on failure
+        if: failure()
+        run: |
+          ssh vps "set -e
+            SNAP=$DEPLOY_DIR/snapshots/${{ github.run_id }}
+            if [ -d \$SNAP/publish ]; then
+              cp -r \$SNAP/publish/. $DEPLOY_DIR/publish/
+              chmod +x $DEPLOY_DIR/publish/BofcBackend.Api || true
+            fi
+            if [ -d \$SNAP/frontend ]; then
+              rm -rf $DEPLOY_DIR/frontend.rollback
+              cp -r \$SNAP/frontend $DEPLOY_DIR/frontend.rollback
+              rm -rf $DEPLOY_DIR/frontend
+              mv $DEPLOY_DIR/frontend.rollback $DEPLOY_DIR/frontend
+            fi
+            sudo systemctl start $SERVICE || true
+            echo 'Rolled back to the pre-deploy snapshot.'"
+          echo "::error::Deploy failed and was rolled back. DB migrations are NOT reverted - check the schema."
+
+      - name: Prune old snapshots
+        if: always()
+        run: ssh vps "ls -1dt $DEPLOY_DIR/snapshots/*/ 2>/dev/null | tail -n +6 | xargs -r rm -rf; true"

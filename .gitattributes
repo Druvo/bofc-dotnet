@@ -1,0 +1,3 @@
+# Workflow files are executed by bash on Linux runners - a CR would break
+# every `run:` block. Scoped to .github so the rest of the tree is untouched.
+.github/** text eol=lf

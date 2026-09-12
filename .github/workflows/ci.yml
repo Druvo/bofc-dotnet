@@ -33,6 +33,13 @@ jobs:
       # which otherwise only shows up as a runtime error in production.
       - name: Check for un-scaffolded model changes
         working-directory: bofc-backend-dotnet
+        # dotnet-ef boots the real application host to resolve the DbContext, so Program.cs's
+        # startup guards apply: it throws without Jwt:Secret, and AddDbContext is skipped
+        # without a connection string. Both are placeholders - nothing here connects to a
+        # database or issues a token; EF only needs the model to exist.
+        env:
+          Jwt__Secret: ci-placeholder-not-a-real-secret-0000000000000000
+          ConnectionStrings__Default: 'Server=localhost;Database=bofc_football;User Id=sa;Password=placeholder;TrustServerCertificate=True'
         run: |
           dotnet tool install --global dotnet-ef --version 8.*
           export PATH="$PATH:$HOME/.dotnet/tools"

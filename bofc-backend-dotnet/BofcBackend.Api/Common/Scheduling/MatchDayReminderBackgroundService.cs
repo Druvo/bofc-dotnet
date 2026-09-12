@@ -151,13 +151,28 @@ public class MatchDayReminderBackgroundService(IServiceScopeFactory scopeFactory
 
             try
             {
-                await emailSender.SendAsync([player.Email], title, body);
-                sent++;
+                // Count what actually went out, not what we attempted. SendAsync swallows
+                // per-recipient SMTP failures by design (one bad address mustn't abort the
+                // batch), so an unconditional sent++ here reported a full batch as delivered
+                // while every single message was being rejected.
+                var result = await emailSender.SendAsync([player.Email], title, body);
+                sent += result.Sent;
             }
             catch (Exception ex)
             {
                 logger.LogWarning(ex, "Failed emailing MatchDay reminder to player {PlayerId} for MatchDay {MatchDayId}", player.Id, matchDay.Id);
             }
+        }
+
+        // ReminderSentAt was already advanced above, so a silently-failing batch would otherwise
+        // wait a full MatchDayReminderRepeatHours before anyone noticed - and produce no signal at
+        // all in between. Say so loudly instead.
+        if (sent == 0 && targetPlayers.Count > 0)
+        {
+            logger.LogError(
+                "MatchDay reminder for {MatchDayId} reached none of its {Count} target player(s) - every send failed. "
+                + "Check the SMTP settings; the next attempt is not due for another reminder interval.",
+                matchDay.Id, targetPlayers.Count);
         }
 
         return sent;

@@ -8,9 +8,9 @@ ExecStart=/usr/bin/dotnet /opt/bofc-dotnet/publish/BofcBackend.Api.dll
 Restart=always
 RestartSec=10
 SyslogIdentifier=bofc-dotnet
-User=druvo
+User=ubuntu
 Environment=ASPNETCORE_ENVIRONMENT=Production
-Environment=ASPNETCORE_URLS=http://0.0.0.0:9292
+Environment=ASPNETCORE_URLS=http://0.0.0.0:8080
 Environment="ConnectionStrings__Default=Server=localhost,1433;Database=bofc_football;User Id=sa;Password=BofcDotnet2026!;TrustServerCertificate=True;Encrypt=False;"
 Environment=Jwt__Secret=YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY3ODkwYWJjZGVmZ2hpamts
 Environment=Player__DefaultPassword=Bjit@123#

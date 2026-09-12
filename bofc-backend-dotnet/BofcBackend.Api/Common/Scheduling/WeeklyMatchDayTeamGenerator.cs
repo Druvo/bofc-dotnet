@@ -1,3 +1,4 @@
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Domain.Enums;
@@ -111,8 +112,8 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
             return TeamGenerationResult.Fail("Teams already exist for this MatchDay.");
         }
 
-        var teams = Enumerable.Range(1, teamCount)
-            .Select(i => new Team { TeamName = $"Team {i}", MatchDayId = matchDayId, MatchDay = matchDay })
+        var teams = Enumerable.Range(0, teamCount)
+            .Select(i => new Team { TeamName = TeamNaming.DefaultName(i), MatchDayId = matchDayId, MatchDay = matchDay })
             .ToList();
         db.Teams.AddRange(teams);
 

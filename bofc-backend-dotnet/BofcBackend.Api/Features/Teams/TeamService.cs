@@ -253,15 +253,53 @@ public class TeamService(
         return new ClearGoalkeepersResponse { Cleared = cleared };
     }
 
-    /// <summary>The "Send Teams Email" button on Team Building - manually triggered only, never
-    /// fired automatically off team/fixture generation. Emails every confirmed participant (not
-    /// just players who ended up on a team) with a link to the live Team Building page.</summary>
-    public async Task<int> SendTeamsGeneratedEmailAsync(long matchDayId)
+    // Content ids the outgoing HTML points at with <img src="cid:...">. Stable strings rather
+    // than per-send guids so an admin can hand-place the images in a customised template.
+    private const string TeamsImageContentId = "bofc-teams";
+    private const string ScheduleImageContentId = "bofc-schedule";
+
+    // Generous next to a ~600KB render, but well under nginx's 10MB body cap, so a runaway
+    // pixelRatio fails here with a clear message instead of as an opaque 413 at the proxy.
+    private const int MaxImageBytes = 4 * 1024 * 1024;
+
+    /// <summary>The "Declare Teams" button on Team Building - manually triggered only, never fired
+    /// automatically off team/fixture generation. Emails every confirmed participant the line-ups
+    /// and the schedule as two inline images, so "who am I playing with" is answered in the inbox
+    /// without following a link, and still links through to the live page for whatever changes
+    /// after the declaration.
+    ///
+    /// Two images rather than one wide graphic: the combined export was laid out to be read on a
+    /// laptop, and arrives on a phone as an unreadable thumbnail.</summary>
+    public async Task<DeclareTeamsResult> DeclareTeamsAsync(long matchDayId, DeclareTeamsRequest request)
     {
         var matchDay = await GetMatchDayOrThrowAsync(matchDayId);
         if (!await db.Teams.AnyAsync(t => t.MatchDayId == matchDayId))
         {
-            throw new BadRequestException("Generate teams for this MatchDay before sending the teams email.");
+            throw new BadRequestException("Generate teams for this MatchDay before declaring them.");
+        }
+
+        var teamsImage = DecodeImageOrThrow(request.TeamsImageBase64, "team line-ups");
+        var scheduleImage = DecodeImageOrThrow(request.ScheduleImageBase64, "schedule");
+
+        var slug = SlugifyForFileName(matchDay.Name);
+        var inlineImages = new List<EmailInlineImage>
+        {
+            new(TeamsImageContentId, $"{slug}-teams.png", teamsImage),
+            new(ScheduleImageContentId, $"{slug}-schedule.png", scheduleImage),
+        };
+
+        var venueName = await db.Venues.Where(v => v.Id == matchDay.VenueId).Select(v => v.Name).FirstOrDefaultAsync() ?? "TBD";
+        var teamBuildingUrl = $"{appUrlOptions.Value.WebsiteUrl.TrimEnd('/')}/match-days/join-match-day/{matchDay.Id}";
+
+        var testEmail = request.TestEmail?.Trim();
+        if (!string.IsNullOrEmpty(testEmail))
+        {
+            // Deliberately no in-app notification and no participant lookup: a preview that
+            // notified 28 people would defeat the point of previewing.
+            var (testSubject, testBody) = await RenderDeclarationAsync(
+                LocalPartAsName(testEmail), matchDay.Name, matchDay.MatchDayDate, venueName, teamBuildingUrl);
+            var testResult = await emailSender.SendAsync([testEmail], testSubject, testBody, inlineImages);
+            return new DeclareTeamsResult(testResult.Sent, testResult.Failed, true, testResult.ErrorMessage);
         }
 
         var participants = await db.MatchDayParticipants
@@ -269,10 +307,10 @@ public class TeamService(
             .Where(p => p.MatchDayId == matchDayId && p.ParticipationStatus)
             .Select(p => p.Player)
             .ToListAsync();
-        if (participants.Count == 0) return 0;
-
-        var venueName = await db.Venues.Where(v => v.Id == matchDay.VenueId).Select(v => v.Name).FirstOrDefaultAsync() ?? "TBD";
-        var teamBuildingUrl = $"{appUrlOptions.Value.WebsiteUrl.TrimEnd('/')}/match-days/join-match-day/{matchDay.Id}";
+        if (participants.Count == 0)
+        {
+            return new DeclareTeamsResult(0, 0, false, "No confirmed participants to declare the teams to.");
+        }
 
         var notification = new Notification
         {
@@ -289,39 +327,140 @@ public class TeamService(
         }));
         await db.SaveChangesAsync();
 
-        var sent = 0;
-
-        // Personalized per player (not a single batch send), matching the other reminder emails.
-        // In-app notifications above go to every participant regardless - only the email itself
-        // respects IsActive/EmailNotificationsEnabled, same gate as the other reminder emails.
+        // Body is personalized per player, but rendered up front and handed over as one batch:
+        // the in-app notifications above reach every participant regardless, while the email
+        // itself still respects IsActive/EmailNotificationsEnabled, the same gate the other
+        // reminder emails use.
+        var outgoing = new List<PersonalizedEmail>();
         foreach (var player in participants)
         {
             if (string.IsNullOrWhiteSpace(player.Email)) continue;
             if (!player.IsActive || !player.EmailNotificationsEnabled) continue;
 
-            var (title, body) = await emailTemplateService.RenderAsync(
-                EmailTemplateKeys.TeamsGenerated,
-                new Dictionary<string, string>
-                {
-                    ["PlayerName"] = player.Name,
-                    ["MatchDayName"] = matchDay.Name,
-                    ["MatchDayDateTime"] = matchDay.MatchDayDate.ToString("MMMM d, yyyy 'at' h:mm tt"),
-                    ["VenueName"] = venueName,
-                    ["TeamBuildingUrl"] = teamBuildingUrl,
-                });
-
-            try
-            {
-                var result = await emailSender.SendAsync([player.Email], title, body);
-                sent += result.Sent;
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Failed emailing teams-generated notice to player {PlayerId} for MatchDay {MatchDayId}", player.Id, matchDay.Id);
-            }
+            var (subject, body) = await RenderDeclarationAsync(
+                player.Name, matchDay.Name, matchDay.MatchDayDate, venueName, teamBuildingUrl);
+            outgoing.Add(new PersonalizedEmail(player.Email, subject, body));
         }
 
-        return sent;
+        if (outgoing.Count == 0)
+        {
+            return new DeclareTeamsResult(0, 0, false,
+                "None of the confirmed participants can receive email - they are inactive, have email notifications "
+                + "switched off, or have no address on file.");
+        }
+
+        // One SMTP connection for the whole batch. See IEmailSender.SendPersonalizedAsync: a
+        // connection per player is fine for a plain reminder and much too slow once every message
+        // carries a megabyte of images.
+        var result = await emailSender.SendPersonalizedAsync(outgoing, inlineImages);
+
+        if (result.Sent == 0)
+        {
+            logger.LogError("Team declaration for MatchDay {MatchDayId} reached none of its {Count} mailable participant(s). First error: {Error}",
+                matchDay.Id, outgoing.Count, result.ErrorMessage);
+        }
+
+        return new DeclareTeamsResult(result.Sent, result.Failed, false, result.ErrorMessage);
+    }
+
+    /// <summary>Renders the admin-editable TEAMS_GENERATED template and guarantees the two images
+    /// are actually in the result. The guarantee matters because the template is stored in the
+    /// database: an installation that saved the old, image-free template would otherwise keep
+    /// sending an email whose whole point is a picture it never includes. A template that does
+    /// reference the placeholders is left exactly as the admin arranged it.</summary>
+    private async Task<(string Subject, string Body)> RenderDeclarationAsync(
+        string playerName, string matchDayName, DateTime matchDayDate, string venueName, string teamBuildingUrl)
+    {
+        var (subject, body) = await emailTemplateService.RenderAsync(
+            EmailTemplateKeys.TeamsGenerated,
+            new Dictionary<string, string>
+            {
+                ["PlayerName"] = playerName,
+                ["MatchDayName"] = matchDayName,
+                ["MatchDayDateTime"] = matchDayDate.ToString("MMMM d, yyyy 'at' h:mm tt"),
+                ["VenueName"] = venueName,
+                ["TeamBuildingUrl"] = teamBuildingUrl,
+                ["TeamsImage"] = $"cid:{TeamsImageContentId}",
+                ["ScheduleImage"] = $"cid:{ScheduleImageContentId}",
+            });
+
+        if (!body.Contains($"cid:{TeamsImageContentId}", StringComparison.Ordinal))
+        {
+            body = AppendImagesToBody(body);
+        }
+
+        return (subject, body);
+    }
+
+    private static string AppendImagesToBody(string body)
+    {
+        const string block = """
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;">
+            <tr><td style="padding:18px 22px 6px;font-size:12px;font-weight:bold;letter-spacing:1.4px;color:#667085;text-transform:uppercase;">Today's teams</td></tr>
+            <tr><td style="padding:0 22px;"><img src="cid:bofc-teams" alt="Today's teams" style="display:block;width:100%;height:auto;border:0;border-radius:12px;"></td></tr>
+            <tr><td style="padding:22px 22px 6px;font-size:12px;font-weight:bold;letter-spacing:1.4px;color:#667085;text-transform:uppercase;">Today's schedule</td></tr>
+            <tr><td style="padding:0 22px 22px;"><img src="cid:bofc-schedule" alt="Today's schedule" style="display:block;width:100%;height:auto;border:0;border-radius:12px;"></td></tr>
+            </table>
+            """;
+
+        var closingBody = body.LastIndexOf("</body>", StringComparison.OrdinalIgnoreCase);
+        return closingBody < 0 ? body + block : body.Insert(closingBody, block);
+    }
+
+    /// <summary>Accepts what the browser's canvas actually produces - a
+    /// <c>data:image/png;base64,</c> data URL - as well as a bare base64 payload.</summary>
+    private static byte[] DecodeImageOrThrow(string? value, string label)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new BadRequestException($"The {label} image is missing - try again, and check the browser console if it keeps happening.");
+        }
+
+        var payload = value;
+        var comma = payload.IndexOf(',');
+        if (payload.StartsWith("data:", StringComparison.OrdinalIgnoreCase) && comma > 0)
+        {
+            payload = payload[(comma + 1)..];
+        }
+
+        byte[] bytes;
+        try
+        {
+            bytes = Convert.FromBase64String(payload);
+        }
+        catch (FormatException)
+        {
+            throw new BadRequestException($"The {label} image could not be read - it was not valid base64.");
+        }
+
+        if (bytes.Length > MaxImageBytes)
+        {
+            throw new BadRequestException(
+                $"The {label} image is {bytes.Length / (1024 * 1024)}MB, over the {MaxImageBytes / (1024 * 1024)}MB limit.");
+        }
+
+        // PNG magic number. Guards against a truncated or failed render arriving as a few bytes of
+        // nothing and being mailed to the whole club as a broken image.
+        if (bytes.Length < 8 || bytes[0] != 0x89 || bytes[1] != 0x50 || bytes[2] != 0x4E || bytes[3] != 0x47)
+        {
+            throw new BadRequestException($"The {label} image was not a valid PNG.");
+        }
+
+        return bytes;
+    }
+
+    private static string SlugifyForFileName(string name)
+    {
+        var cleaned = new string(name.Select(c => char.IsLetterOrDigit(c) ? c : '-').ToArray());
+        return string.Join('-', cleaned.Split('-', StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    /// <summary>"saifulhoque30@gmail.com" -> "Saifulhoque30". Only ever used for the PlayerName
+    /// greeting in a test send, where there is no player record to take a real name from.</summary>
+    private static string LocalPartAsName(string email)
+    {
+        var localPart = email.Split('@')[0];
+        return string.IsNullOrEmpty(localPart) ? "there" : char.ToUpperInvariant(localPart[0]) + localPart[1..];
     }
 
     /// <summary>The "Send Match Day Reminder" button on Team Building - manually triggered, reuses

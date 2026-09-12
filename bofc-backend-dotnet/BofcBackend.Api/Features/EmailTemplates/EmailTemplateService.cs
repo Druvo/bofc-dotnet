@@ -447,7 +447,23 @@ public class EmailTemplateService(
             </div>
             </td></tr>
 
-            <tr><td align="center" style="padding:20px 42px 34px;">
+            <!-- LINE-UPS + SCHEDULE (attached to the message, not hotlinked - they show without
+                 the "display images" prompt, and can be saved straight out of the mail) -->
+            <tr><td class="mobile-pad" style="padding:26px 42px 0;">
+            <div style="font-size:12px;line-height:18px;font-weight:bold;letter-spacing:1.4px;color:#667085;text-transform:uppercase;">
+            Today's teams
+            </div>
+            <img src="{{TeamsImage}}" alt="Today's teams" style="display:block;width:100%;height:auto;border:0;border-radius:12px;margin-top:10px;">
+            </td></tr>
+
+            <tr><td class="mobile-pad" style="padding:24px 42px 0;">
+            <div style="font-size:12px;line-height:18px;font-weight:bold;letter-spacing:1.4px;color:#667085;text-transform:uppercase;">
+            Today's schedule
+            </div>
+            <img src="{{ScheduleImage}}" alt="Today's schedule" style="display:block;width:100%;height:auto;border:0;border-radius:12px;margin-top:10px;">
+            </td></tr>
+
+            <tr><td align="center" style="padding:28px 42px 34px;">
             <a href="{{TeamBuildingUrl}}" target="_blank" class="cta" style="display:inline-block;background:#2f9e1f;color:#ffffff;font-size:16px;line-height:21px;font-weight:900;border-radius:9px;padding:15px 28px;">
             VIEW TEAM →
             </a>
@@ -478,7 +494,7 @@ public class EmailTemplateService(
             </body>
             </html>
             """,
-            ["PlayerName", "MatchDayName", "MatchDayDateTime", "VenueName", "TeamBuildingUrl"]),
+            ["PlayerName", "MatchDayName", "MatchDayDateTime", "VenueName", "TeamBuildingUrl", "TeamsImage", "ScheduleImage"]),
 
         [EmailTemplateKeys.PasswordReset] = new TemplateDefault(
             "Password Reset",
@@ -763,6 +779,8 @@ public class EmailTemplateService(
                     ["MatchDayDateTime"] = matchDay.MatchDayDate.ToString("MMMM d, yyyy 'at' h:mm tt"),
                     ["VenueName"] = matchDay.Venue.Name,
                     ["TeamBuildingUrl"] = $"{websiteBaseUrl}/match-days/join-match-day/{matchDay.Id}",
+                    ["TeamsImage"] = TeamsGeneratedSampleImage("TEAM LINE-UPS"),
+                    ["ScheduleImage"] = TeamsGeneratedSampleImage("MATCH SCHEDULE"),
                 };
             }
 
@@ -773,6 +791,8 @@ public class EmailTemplateService(
                 ["MatchDayDateTime"] = DateTime.Now.AddDays(3).ToString("MMMM d, yyyy 'at' h:mm tt"),
                 ["VenueName"] = "Sample Venue",
                 ["TeamBuildingUrl"] = $"{websiteBaseUrl}/match-days/join-match-day/0",
+                ["TeamsImage"] = TeamsGeneratedSampleImage("TEAM LINE-UPS"),
+                ["ScheduleImage"] = TeamsGeneratedSampleImage("MATCH SCHEDULE"),
             };
         }
 
@@ -787,6 +807,23 @@ public class EmailTemplateService(
         }
 
         return [];
+    }
+
+    /// <summary>Stand-in for the preview only. A real send replaces TeamsImage/ScheduleImage with
+    /// a <c>cid:</c> reference to a PNG attached to that message, which by definition does not
+    /// exist yet when an admin is editing the template - so the preview draws a labelled grey
+    /// panel of roughly the right proportions instead of a broken-image icon.</summary>
+    private static string TeamsGeneratedSampleImage(string label)
+    {
+        var svg = $"""
+            <svg xmlns="http://www.w3.org/2000/svg" width="556" height="300">
+              <rect width="556" height="300" rx="12" fill="#eef1f0" stroke="#d6dbd9"/>
+              <text x="278" y="150" text-anchor="middle" dominant-baseline="middle"
+                    font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold"
+                    letter-spacing="1.5" fill="#8a9793">{label}</text>
+            </svg>
+            """;
+        return "data:image/svg+xml;base64," + Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(svg));
     }
 
     /// <summary>Placeholders every template can use regardless of call site (the logo image URL) -

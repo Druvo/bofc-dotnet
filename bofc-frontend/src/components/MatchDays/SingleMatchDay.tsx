@@ -27,8 +27,7 @@ import SimpleMatchesPanel from "./Fixtures/SimpleMatchesPanel";
 import PrizesPanel from "./Prizes/PrizesPanel";
 import StatsLeaderboardPanel from "./Statistics/StatsLeaderboardPanel";
 import SquadLineupTab from "./SquadLineup/SquadLineupTab";
-import TeamsScreenshotButton from "./Atoms/TeamsScreenshotButton";
-import SendTeamsEmailButton from "./Atoms/SendTeamsEmailButton";
+import DeclareTeamsButton from "./Atoms/DeclareTeamsButton";
 import SendMatchDayReminderButton from "./Atoms/SendMatchDayReminderButton";
 import Button from "../ui/button";
 import Tabs from "../ui/tabs";
@@ -216,8 +215,8 @@ function SingleMatchDay() {
           <Button type="button" variant="outline" size="sm" startIcon={<FileExcelOutlined />} onClick={handleExportTeams}>
             Export
           </Button>
-          {hasTeams && (
-            <TeamsScreenshotButton
+          {isAdmin && hasTeams && (
+            <DeclareTeamsButton
               matchDayId={matchDayId}
               matchDayName={matchDaySummary?.content[0]?.name}
               matchDayDate={matchDaySummary?.content[0]?.matchDayDate}
@@ -226,7 +225,6 @@ function SingleMatchDay() {
               teams={teams}
             />
           )}
-          {isAdmin && hasTeams && <SendTeamsEmailButton matchDayId={matchDayId} />}
           {isAdmin && <SendMatchDayReminderButton matchDayId={matchDayId} />}
         </div>
       </div>

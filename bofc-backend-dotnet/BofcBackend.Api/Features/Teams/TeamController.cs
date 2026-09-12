@@ -92,13 +92,15 @@ public class TeamController(ITeamService teamService, WeeklyMatchDayTeamGenerato
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, result);
     }
 
-    /// <summary>"Send Teams Email" button on Team Building - emails every confirmed participant a
-    /// link to this page. Manual only, never fired automatically off generation.</summary>
-    [HttpPost("matchday/{matchDayId}/send-teams-email")]
-    public async Task<IActionResult> SendTeamsGeneratedEmail(long matchDayId)
+    /// <summary>"Declare Teams" button on Team Building - emails every confirmed participant the
+    /// line-ups and the schedule as two inline images. Manual only, never fired automatically off
+    /// generation. Pass testEmail in the body to send the identical mail to one address instead,
+    /// which creates no in-app notifications.</summary>
+    [HttpPost("matchday/{matchDayId}/declare-teams")]
+    public async Task<IActionResult> DeclareTeams(long matchDayId, [FromBody] DeclareTeamsRequest request)
     {
-        var sent = await teamService.SendTeamsGeneratedEmailAsync(matchDayId);
-        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.CreateOk, new { sent });
+        var result = await teamService.DeclareTeamsAsync(matchDayId, request);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.CreateOk, result);
     }
 
     /// <summary>"Send Match Day Reminder" button on Team Building - manually triggers the same

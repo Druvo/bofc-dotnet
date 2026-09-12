@@ -259,12 +259,23 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
             invalidatesTags: ["matchDayTeam", "matchDays"],
         }),
 
-        /** "Send Teams Email" button - manual only, emails every confirmed participant a link to
-         * this Team Building page. Never fired automatically off generation. */
-        sendTeamsGeneratedEmail: builder.mutation<BasicResType & { content: { sent: number } }, { matchDayId: number }>({
-            query: ({ matchDayId }) => ({
-                url: `teams/matchday/${matchDayId}/send-teams-email`,
+        /** "Declare Teams" button - manual only, emails every confirmed participant the line-ups
+         * and the schedule as two inline images. Never fired automatically off generation: teams
+         * are generated hours before kickoff and routinely adjusted afterwards, so an automatic
+         * send would announce a draft roster to the whole club.
+         *
+         * The images are base64 PNG data URLs produced in the browser - the layout only exists as
+         * React components, so rendering them server-side would mean maintaining the design twice.
+         * Passing testEmail diverts the identical mail to that one address and skips the in-app
+         * notifications. */
+        declareTeams: builder.mutation<
+            BasicResType & { content: { sent: number; failed: number; isTest: boolean; errorMessage?: string | null } },
+            { matchDayId: number; teamsImageBase64: string; scheduleImageBase64: string; testEmail?: string }
+        >({
+            query: ({ matchDayId, ...body }) => ({
+                url: `teams/matchday/${matchDayId}/declare-teams`,
                 method: "POST",
+                body,
             }),
         }),
 
@@ -292,6 +303,6 @@ export const {
     useAutoAssignGoalkeepersMutation,
     useLazyGetGoalkeeperRankingQuery,
     useClearGoalkeepersMutation,
-    useSendTeamsGeneratedEmailMutation,
+    useDeclareTeamsMutation,
     useSendMatchDayReminderEmailMutation,
 } = matchDayTeamApi;

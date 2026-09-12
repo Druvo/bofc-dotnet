@@ -1,0 +1,74 @@
+name: CI
+
+# Build-only verification for pull requests and non-master branches.
+# Deployment lives in deploy.yml and never runs from here.
+on:
+  pull_request:
+  push:
+    branches-ignore: [master]
+
+jobs:
+  backend:
+    name: Build backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: nuget-
+
+      - name: Build
+        working-directory: bofc-backend-dotnet
+        run: dotnet build BofcBackend.Api/BofcBackend.Api.csproj -c Release --nologo
+
+      # Catches the "forgot to add a migration after changing an entity" class of bug,
+      # which otherwise only shows up as a runtime error in production.
+      - name: Check for un-scaffolded model changes
+        working-directory: bofc-backend-dotnet
+        # dotnet-ef boots the real application host to resolve the DbContext, so Program.cs's
+        # startup guards apply: it throws without Jwt:Secret, and AddDbContext is skipped
+        # without a connection string. Both are placeholders - nothing here connects to a
+        # database or issues a token; EF only needs the model to exist.
+        env:
+          Jwt__Secret: ci-placeholder-not-a-real-secret-0000000000000000
+          ConnectionStrings__Default: 'Server=localhost;Database=bofc_football;User Id=sa;Password=placeholder;TrustServerCertificate=True'
+        run: |
+          dotnet tool install --global dotnet-ef --version 8.*
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef migrations has-pending-model-changes \
+            --project BofcBackend.Api/BofcBackend.Api.csproj \
+            --startup-project BofcBackend.Api/BofcBackend.Api.csproj \
+            && echo "No pending model changes."
+
+  frontend:
+    name: Build frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: bofc-frontend/package-lock.json
+
+      - name: Install
+        working-directory: bofc-frontend
+        run: npm ci
+
+      # CI=false because react-scripts treats lint warnings as errors when CI is set,
+      # and this tree carries pre-existing warnings (unused vars, hook deps).
+      - name: Build
+        working-directory: bofc-frontend
+        env:
+          REACT_APP_API_URL: /api
+          CI: 'false'
+        run: npm run build

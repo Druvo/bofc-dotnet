@@ -20,6 +20,41 @@ public class FixtureGenerationService(
     ILogger<FixtureGenerationService> logger)
     : IFixtureGenerationService
 {
+    /// <summary>The club's own running order for the two team counts it actually plays with,
+    /// given rather than derived. Each slot is (home index, away index, does the home team wear
+    /// red) - indices point into the selected-team list in selection order, so index 0 is the
+    /// "Team A" of the club's printed schedule.
+    ///
+    /// Worth stating why these aren't generated: the plain sequential round-robin below pairs
+    /// 1v2, 1v3, 1v4, ... which puts team 1 in the first three matches back to back with no rest.
+    /// These orders space each team out instead. The 3-team schedule plays every pairing twice,
+    /// which is what fills a 90-minute window six 15-minute matches wide; the 4-team one is a
+    /// single round-robin of all six pairings.
+    ///
+    /// Both are exactly six slots, so they only make sense for a single-day generation, and a
+    /// window too short for six matches will overrun (the existing overrun warning covers it).</summary>
+    private static readonly Dictionary<int, (int Home, int Away, bool HomeWearsRed)[]> FixedSchedules = new()
+    {
+        [3] =
+        [
+            (0, 1, true),   // A (red) v B (white)
+            (0, 2, true),   // A (red) v C (white)
+            (2, 1, true),   // C (red) v B (white)
+            (0, 1, true),   // A (red) v B (white)
+            (2, 0, true),   // C (red) v A (white)
+            (2, 1, true),   // C (red) v B (white)
+        ],
+        [4] =
+        [
+            (0, 1, true),   // A (red)   v B (white)
+            (2, 3, false),  // C (white) v D (red)   - the one slot where home isn't in red
+            (0, 2, true),   // A (red)   v C (white)
+            (1, 3, true),   // B (red)   v D (white)
+            (0, 3, true),   // A (red)   v D (white)
+            (1, 2, true),   // B (red)   v C (white)
+        ],
+    };
+
     public async Task<List<Match>> GenerateFixturesAsync(long matchDayId, FixtureGenerationRequest request)
     {
         var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
@@ -94,12 +129,14 @@ public class FixtureGenerationService(
         var startDate = request.MatchDates[0];
 
         // One full round-robin cycle - each selected team plays every other once.
-        var basePairings = new List<(Team Home, Team Away)>();
+        // HomeColor/AwayColor stay null here: the generic path works its jerseys out per match in
+        // the loop below. Only the club's fixed schedules (see FixedSchedules) fill them in.
+        var basePairings = new List<(Team Home, Team Away, string? HomeColor, string? AwayColor)>();
         for (var i = 0; i < selectedTeams.Count; i++)
         {
             for (var j = i + 1; j < selectedTeams.Count; j++)
             {
-                basePairings.Add((selectedTeams[i], selectedTeams[j]));
+                basePairings.Add((selectedTeams[i], selectedTeams[j], null, null));
             }
         }
 
@@ -115,7 +152,7 @@ public class FixtureGenerationService(
             var capacity = Math.Max(basePairings.Count, totalDurationMinutes / slotMinutes);
             if (capacity > basePairings.Count)
             {
-                pairings = new List<(Team Home, Team Away)>(capacity);
+                pairings = new List<(Team Home, Team Away, string? HomeColor, string? AwayColor)>(capacity);
                 while (pairings.Count < capacity)
                 {
                     pairings.AddRange(basePairings);
@@ -151,6 +188,36 @@ public class FixtureGenerationService(
             }
         }
 
+        // The club's own running order wins over the generated round-robin for the team counts it
+        // actually plays with. Only for a single-day generation: a multi-day request is asking for
+        // something these six-slot orders don't describe.
+        if (request.MatchDates.Count == 1 && FixedSchedules.TryGetValue(selectedTeams.Count, out var fixedSchedule))
+        {
+            // Resolved by name, not by position in the configured list: the club's schedule names
+            // the red and white shirts specifically, and JerseyColors is sorted white-first, so
+            // taking colors[0]/colors[1] would hand every "red" row a white shirt. Falls back to
+            // the first two configured colors when a club isn't using red/white at all.
+            var redJersey = jerseyColors.FirstOrDefault(c => string.Equals(c, "red", StringComparison.OrdinalIgnoreCase));
+            var whiteJersey = jerseyColors.FirstOrDefault(c => string.Equals(c, "white", StringComparison.OrdinalIgnoreCase));
+            if (assignJerseys && (redJersey == null || whiteJersey == null))
+            {
+                redJersey = jerseyColors[0];
+                whiteJersey = jerseyColors[1];
+            }
+
+            pairings = fixedSchedule
+                .Select(slot => (
+                    Home: selectedTeams[slot.Home],
+                    Away: selectedTeams[slot.Away],
+                    HomeColor: assignJerseys ? (slot.HomeWearsRed ? redJersey : whiteJersey) : null,
+                    AwayColor: assignJerseys ? (slot.HomeWearsRed ? whiteJersey : redJersey) : null))
+                .ToList();
+
+            // Both halves of a fixed slot are set together, so a team's shirt for its next match
+            // is already decided - nothing downstream should carry a rotation forward from here.
+            fixedTeamJerseyColors = null;
+        }
+
         // Rotation-mode continuity: a team that just played keeps the same jersey into its next
         // match instead of swapping every single match regardless of whether it's even still
         // playing. Only a genuinely new team to this MatchDay (or an unlucky same-color collision
@@ -163,7 +230,7 @@ public class FixtureGenerationService(
         var matchOrder = 1;
         var matchIndex = 0;
 
-        foreach (var (home, away) in pairings)
+        foreach (var (home, away, fixedHomeColor, fixedAwayColor) in pairings)
         {
             var dayOffset = matchIndex / matchesPerDay;
             var matchIndexOnDay = matchIndex % matchesPerDay;
@@ -174,7 +241,13 @@ public class FixtureGenerationService(
 
             string? homeJerseyColor = null;
             string? awayJerseyColor = null;
-            if (fixedTeamJerseyColors != null)
+            if (fixedHomeColor != null && fixedAwayColor != null)
+            {
+                // Club's fixed schedule already named both shirts for this slot.
+                homeJerseyColor = fixedHomeColor;
+                awayJerseyColor = fixedAwayColor;
+            }
+            else if (fixedTeamJerseyColors != null)
             {
                 homeJerseyColor = fixedTeamJerseyColors[home.Id];
                 awayJerseyColor = fixedTeamJerseyColors[away.Id];

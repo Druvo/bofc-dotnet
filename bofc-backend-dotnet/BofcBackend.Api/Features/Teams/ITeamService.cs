@@ -18,6 +18,6 @@ public interface ITeamService
     /// <summary>Emails every confirmed participant of this MatchDay that teams/fixtures are ready,
     /// with a link to the live Team Building page - the "Send Teams Email" button on Team
     /// Building, manually triggered (never automatic). Returns how many emails actually sent.</summary>
-    Task<int> SendTeamsGeneratedEmailAsync(long matchDayId);
+    Task<DeclareTeamsResult> DeclareTeamsAsync(long matchDayId, DeclareTeamsRequest request);
     Task<int> SendMatchDayReminderNowAsync(long matchDayId);
 }

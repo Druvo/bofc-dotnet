@@ -396,6 +396,14 @@ public class TeamService(
 
         if (!body.Contains($"cid:{TeamsImageContentId}", StringComparison.Ordinal))
         {
+            // Warned about rather than done quietly. The append can only put the images after
+            // everything else the template contains - including its footer - which is exactly how
+            // one declaration went out reading header, greeting, footer, and only then the
+            // line-ups. The images being present is the important part, but a stored template
+            // this old wants resetting to default on the Email Templates page.
+            logger.LogWarning(
+                "TEAMS_GENERATED has no {{TeamsImage}} placeholder, so the images were appended after the template body - "
+                + "they will render below the footer. Reset the template to default to place them properly.");
             body = AppendImagesToBody(body);
         }
 

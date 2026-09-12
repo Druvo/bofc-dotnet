@@ -463,12 +463,10 @@ public class EmailTemplateService(
             <img src="{{ScheduleImage}}" alt="Today's schedule" style="display:block;width:100%;height:auto;border:0;border-radius:12px;margin-top:10px;">
             </td></tr>
 
-            <tr><td align="center" style="padding:28px 42px 34px;">
-            <a href="{{TeamBuildingUrl}}" target="_blank" class="cta" style="display:inline-block;background:#2f9e1f;color:#ffffff;font-size:16px;line-height:21px;font-weight:900;border-radius:9px;padding:15px 28px;">
-            VIEW TEAM →
-            </a>
-            <div style="font-size:14px;line-height:22px;color:#667085;margin-top:15px;">
-            See your team, your teammates, and who you're up against.
+            <tr><td class="mobile-pad" style="padding:18px 42px 34px;">
+            <div style="font-size:13px;line-height:20px;color:#98a2b3;text-align:center;">
+            Anything changes after this goes out and the app has the live version -
+            <a href="{{TeamBuildingUrl}}" target="_blank" style="color:#2f9e1f;font-weight:700;">open Team Building</a>.
             </div>
             </td></tr>
             </table>

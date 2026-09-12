@@ -91,6 +91,7 @@ jobs:
             bofc-backend-dotnet/publish
             bofc-backend-dotnet/migrations.sql
             bofc-frontend/build
+            deploy/backup.py
 
   deploy:
     name: Deploy
@@ -125,6 +126,37 @@ jobs:
             cp -r $DEPLOY_DIR/publish/. \$SNAP/publish/ 2>/dev/null || true
             cp -r $DEPLOY_DIR/frontend/. \$SNAP/frontend/ 2>/dev/null || true
             echo Snapshot at \$SNAP"
+
+      # Runs before the service is stopped, not after: SQL Server backups are online
+      # and transactionally consistent, so taking it first means a backup failure
+      # aborts the deploy with zero downtime rather than leaving the app down. The
+      # migration step below is the destructive one - nothing irreversible has
+      # happened until this has succeeded.
+      - name: Back up database and uploads
+        run: |
+          # Deployed to its permanent path rather than /tmp, so the optional daily
+          # systemd timer (deploy/bofc-backup.timer) always runs the current version
+          # instead of whatever was copied there by hand once.
+          scp deploy/backup.py vps:$DEPLOY_DIR/backup.py
+          ssh vps "python3 $DEPLOY_DIR/backup.py --label ${{ github.run_id }} --keep-days 30 --keep-min 10"
+
+      # An on-box backup does not survive losing the box. The compressed dump is
+      # well under a megabyte, so keeping an off-site copy per deploy is nearly free.
+      - name: Retrieve backup for off-box retention
+        run: |
+          mkdir -p backup-artifact
+          # `|| true` on the remote side: steps run under `bash -e`, and a non-matching
+          # glob would exit non-zero and fail the step rather than yielding an empty list.
+          for f in $(ssh vps "ls -1 $DEPLOY_DIR/backups/*${{ github.run_id }}* 2>/dev/null || true"); do
+            scp "vps:$f" backup-artifact/
+          done
+          ls -lh backup-artifact/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backup-artifact
+          retention-days: 30
 
       # Stop BEFORE migrating. The Jenkins pipeline migrated while the old build was
       # still serving traffic, which lets the running app hit a schema it wasn't

@@ -1,0 +1,11 @@
+# Daily database + uploads backup. Not installed by default - see the header of
+# bofc-backup.timer for how to enable it.
+[Unit]
+Description=BOFC database and uploads backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+ExecStart=/usr/bin/python3 /opt/bofc-dotnet/backup.py --keep-days 30 --keep-min 10

@@ -1,0 +1,24 @@
+# Daily backup, independent of the deploy pipeline.
+#
+# The pipeline backs up before every deploy, which covers the risky moment but
+# leaves a gap: go a month without deploying and the newest backup is a month
+# old. This closes that gap.
+#
+# To install:
+#   sudo cp deploy/backup.py /opt/bofc-dotnet/backup.py
+#   sudo cp deploy/bofc-backup.{service,timer} /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now bofc-backup.timer
+#   systemctl list-timers bofc-backup.timer
+
+[Unit]
+Description=Run the BOFC backup daily
+
+[Timer]
+OnCalendar=daily
+# The VPS is not always up at exactly 00:00; run a missed backup on next boot.
+Persistent=true
+RandomizedDelaySec=15m
+
+[Install]
+WantedBy=timers.target

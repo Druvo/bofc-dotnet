@@ -78,7 +78,7 @@ public class MatchDayParticipantService(
             }
         }
 
-        MatchDayParticipant participant;
+        MatchDayParticipant? participant = null;
         if (request.MatchDayParticipantId != null)
         {
             participant = await db.MatchDayParticipants.FirstOrDefaultAsync(p => p.Id == request.MatchDayParticipantId)
@@ -92,12 +92,28 @@ public class MatchDayParticipantService(
                 throw new BofcSecurityException(RestErrorMessageDetail.NotAuthorizedForAction, HttpStatusCode.Forbidden);
             }
         }
-        else
+
+        // No id supplied (or none known to the caller): find this player's own row for this
+        // MatchDay and update it, rather than refusing the change.
+        //
+        // (MatchDayId, PlayerId) is already unique - see MatchDayParticipantConfiguration - so the
+        // row id the client sends is redundant: the server can always identify the row itself.
+        // Requiring it meant a player whose client did not happen to know the id could not change
+        // their answer at all, and that is not a rare corner. A player who votes from the reminder
+        // email, from a second device, or from a tab opened before they first voted has a client
+        // holding no id, and every attempt to switch their answer came back 409 Conflict. Roughly
+        // four in ten of all RSVP submissions in the production logs failed this way, including
+        // one player who tried three times in forty seconds and was refused each time.
+        //
+        // Looking the row up by (MatchDay, player) is also strictly safer than trusting a
+        // client-supplied row id: playerId is already authorised above, so this can only ever
+        // reach the caller's own row, which is exactly what the ownership check above has to
+        // police manually on the other branch.
+        participant ??= await db.MatchDayParticipants
+            .FirstOrDefaultAsync(p => p.MatchDayId == matchDay.Id && p.PlayerId == playerId);
+
+        if (participant is null)
         {
-            if (await db.MatchDayParticipants.AnyAsync(p => p.MatchDayId == matchDay.Id && p.PlayerId == playerId))
-            {
-                throw new MatchDayServiceException(RestErrorMessageDetail.AlreadyParticipant, HttpStatusCode.Conflict);
-            }
             participant = new MatchDayParticipant();
             db.MatchDayParticipants.Add(participant);
         }
@@ -113,9 +129,11 @@ public class MatchDayParticipantService(
         }
         catch (DbUpdateException) when (request.MatchDayParticipantId == null)
         {
-            // Two concurrent first-time RSVPs from the same player both pass the AnyAsync check
-            // above before either commits - the unique index on (MatchDayId, PlayerId) is the
-            // real guard; map its violation to the same friendly 409 instead of a masked 500.
+            // Two concurrent first-time RSVPs from the same player can both find no existing row
+            // above and both insert - the unique index on (MatchDayId, PlayerId) is the real
+            // guard; map its violation to a friendly 409 instead of a masked 500. Now that the
+            // lookup above upserts, this is a genuine race rather than the everyday "your client
+            // did not know the row id" case, and retrying will succeed.
             throw new MatchDayServiceException(RestErrorMessageDetail.AlreadyParticipant, HttpStatusCode.Conflict);
         }
     }

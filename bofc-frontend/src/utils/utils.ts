@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { isTokenContentValid } from "./session";
 
 /**
  * The backend only assigns matchDayStatus once (at creation) and relies on a slow
@@ -148,17 +149,17 @@ export const showBdLocalTimeRange = (start?: string | null, durationMinutes?: nu
     return `${startStr} – ${endStr}`;
 };
 
-export const checkTockenValidity = (tokenContent: string) => {
-    if (!tokenContent) return false;
-
-    const contentData = JSON.parse(tokenContent);
-
-    const decodedToken = JSON.parse(atob(contentData.token.split(".")[1]));
-    const now = new Date();
-    const exp = new Date(decodedToken.exp * 1000);
-    if (exp < now) return false;
-    return true;
-};
+/**
+ * Whether the stored session's JWT is still within its lifetime.
+ *
+ * Kept under its long-standing name for its existing callers, but the logic now lives in
+ * `utils/session`, which owns everything that decides what "signed in" means. Note the behaviour
+ * change that came with the move: this no longer throws on content it cannot parse. It used to -
+ * and two of its three call sites had no try/catch - and it is now also reached from a repeating
+ * timer, where an exception would be both invisible and fatal to the watchdog. Unreadable content
+ * is in any case the same answer as expired: this session cannot be used.
+ */
+export const checkTockenValidity = (tokenContent: string) => isTokenContentValid(tokenContent);
 
 /**
  * Function to export data to Excel

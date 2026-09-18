@@ -40,16 +40,19 @@ interface MobileTopBarProps {
  */
 export default function MobileTopBar({ isDarkMode, setIsDarkMode }: MobileTopBarProps) {
   const navigate = useNavigate();
-  const { logout } = useAuthHook();
+  const { logout, isAuthenticated } = useAuthHook();
   const loginInfo = useSelector(selectLoginInfo);
   const userImage = useSelector(selectUserImage);
   const appShell = useAppShell();
   const [notifOpen, setNotifOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
 
+  // Skipped once the session is no longer valid, so an expired tab stops polling instead of
+  // firing a request that can only 401 every thirty seconds. Production logs caught one tab doing
+  // exactly that for five days after its token died, raising an error toast each time.
   const { data: notifData } = useGetMyNotificationsQuery(
     { offSet: 0, pageSize: NOTIF_PREVIEW_LIMIT },
-    { pollingInterval: 30000 }
+    { pollingInterval: 30000, skip: !isAuthenticated() }
   );
   const [markNotificationRead] = useMarkNotificationReadMutation();
   const [markAllNotificationsRead] = useMarkAllNotificationsReadMutation();

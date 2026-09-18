@@ -48,16 +48,19 @@ interface HeaderProps {
 export default function Header({ sidebarToggle, setSidebarToggle, isDarkMode, setIsDarkMode }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuthHook();
+  const { logout, isAuthenticated } = useAuthHook();
   const loginInfo = useSelector(selectLoginInfo);
   const userImage = useSelector(selectUserImage);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const appShell = useAppShell();
 
+  // Skipped once the session is no longer valid, so an expired tab stops polling instead of
+  // firing a request that can only 401 every thirty seconds. Production logs caught one tab doing
+  // exactly that for five days after its token died, raising an error toast each time.
   const { data: notifData } = useGetMyNotificationsQuery(
     { offSet: 0, pageSize: NOTIF_PREVIEW_LIMIT },
-    { pollingInterval: 30000 }
+    { pollingInterval: 30000, skip: !isAuthenticated() }
   );
   const [markNotificationRead] = useMarkNotificationReadMutation();
   const [markAllNotificationsRead] = useMarkAllNotificationsReadMutation();

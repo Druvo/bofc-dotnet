@@ -3,6 +3,7 @@ import { RootState } from "../store";
 import { API_URL } from "../../settings";
 import { showErrorNotification } from "../../utils/errorNotification";
 import { normalizeErrorMessage } from "../../utils/normalizeErrorMessage";
+import { endExpiredSession, isExpiredSessionResponse } from "../../utils/session";
 
 // Define types for the error response
 interface FieldError {
@@ -66,6 +67,23 @@ const customBaseQuery: typeof baseQuery = async (args, api, extraOptions) => {
     const errorStatus = (result.error as any)?.status;
     if (errorStatus === "FETCH_ERROR" || errorStatus === 502 || errorStatus === 503 || errorStatus === 504) {
       window.dispatchEvent(new Event("bofc:network-error"));
+      return result;
+    }
+
+    // An expired session is not an error to report, it is a session to end. Without this the
+    // backend's "You are not authorized to access this resource." arrived as an ordinary toast
+    // and nothing else happened: the app still looked signed in, and the notification bell -
+    // which polls every thirty seconds - raised that same toast every thirty seconds, for as long
+    // as the tab stayed open. That is the "random unauthorized errors while logged in" people
+    // reported. The axios instance always handled this; RTK Query, which serves most of the app,
+    // did not.
+    //
+    // isExpiredSessionResponse is deliberately narrow: the login and change-password endpoints
+    // answer a wrong password with 401 too, and signing someone out for a typo would be worse
+    // than the bug being fixed.
+    const requestUrl = typeof args === "string" ? args : (args as any)?.url;
+    if (isExpiredSessionResponse(errorStatus, requestUrl)) {
+      endExpiredSession();
       return result;
     }
 

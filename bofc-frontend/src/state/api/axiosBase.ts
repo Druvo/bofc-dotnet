@@ -1,6 +1,7 @@
 import axios from "axios";
 import { selectLoginInfo } from "../slices/loginInfoSlice";
 import store from "../store";
+import { endExpiredSession, isExpiredSessionResponse } from "../../utils/session";
 
 // Create an axios instance
 // Falls back to "/api" so a plain `npm start` (no REACT_APP_API_URL set) behaves the same
@@ -39,10 +40,12 @@ axiosApi.interceptors.request.use(
 axiosApi.interceptors.response.use(
     (response) => response, // Return the response if successful
     (error) => {
-        // Handle unauthorized errors globally (e.g., token expiration)
-        if (error.response && error.response.status === 401) {
-            // For example, redirect to login page
-            window.location.href = "/login"; // Or dispatch a logout action
+        // Shares its definition of "the session ran out" with RTK Query, so the two layers cannot
+        // disagree. This used to redirect on any 401 at all, which included the login endpoint
+        // answering "wrong password" - that reloaded the login page and threw away the very
+        // message telling the user what they had got wrong.
+        if (isExpiredSessionResponse(error?.response?.status, error?.config?.url)) {
+            endExpiredSession();
         }
 
         return Promise.reject(error);

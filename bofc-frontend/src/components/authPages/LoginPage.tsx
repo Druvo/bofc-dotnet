@@ -5,7 +5,7 @@ import {
     UserOutlined,
     LockOutlined,
 } from "@ant-design/icons";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setAllData } from "../../state/slices/loginInfoSlice";
 import { useLoginMutation } from "../../state/features/auth/authSlice";
@@ -30,6 +30,10 @@ const LoginPage: React.FC = () => {
     const [login] = useLoginMutation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    // Set by endExpiredSession when it redirects here. Without it the user arrives at the login
+    // page with no idea why - they were signed in a moment ago, and nothing they did signed them
+    // out. A query parameter rather than a toast because getting here is a full page load.
+    const sessionExpired = new URLSearchParams(useLocation().search).get("expired") === "1";
 
     // Load stored credentials and perform auto-login on component mount
     useEffect(() => {
@@ -190,7 +194,9 @@ const LoginPage: React.FC = () => {
                         </h2>
                    
                         <p className="welcome-text">
-                            Sign in to access your dashboard and stay on top of the club
+                            {sessionExpired
+                                ? "Your session has expired. Please sign in again to continue."
+                                : "Sign in to access your dashboard and stay on top of the club"}
                         </p>
                     </div>
 

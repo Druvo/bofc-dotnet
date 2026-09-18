@@ -6,6 +6,7 @@ import {
     removeUser,
 } from "../state/slices/loginInfoSlice";
 import { clearStoredCredentials } from "../utils/utils";
+import { isStoredSessionValid } from "../utils/session";
 
 export const useAuthHook = () => {
     const dispatch = useDispatch();
@@ -26,8 +27,13 @@ export const useAuthHook = () => {
         navigate("/");
     };
 
+    /**
+     * Signed in means the token is present AND still within its lifetime. Presence alone - which
+     * is all this used to check - stayed true for the whole seven-day life of a tab, so an
+     * expired session kept reading as authenticated and kept firing requests that could only 401.
+     */
     const isAuthenticated = () => {
-        return !!loginInfo?.token;
+        return !!loginInfo?.token && isStoredSessionValid();
     };
 
     return {

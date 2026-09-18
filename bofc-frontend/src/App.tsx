@@ -10,6 +10,7 @@ import DefaultLayout from "./components/layout/DefaultLayout";
 import MatchDayViewerPage from "./components/MatchDayViewer/MatchDayViewerPage";
 import { useAuthHook } from "./hooks/useAuthHook";
 import { checkTockenValidity } from "./utils/utils";
+import { useSessionExpiryWatch } from "./hooks/useSessionExpiryWatch";
 import LoginPage from "./components/authPages/LoginPage";
 import PasswordResetPage from "./components/authPages/PasswordResetPage";
 import ForgotPasswordPage from "./components/authPages/ForgotPasswordPage";
@@ -105,6 +106,11 @@ function App() {
             login(tokenContent);
         }
     }, []);
+
+    // The check above runs once, on mount. This keeps checking, so a tab open across the token's
+    // seven-day expiry is signed out and told why, rather than sitting there looking logged in
+    // while every request it makes comes back 401.
+    useSessionExpiryWatch();
 
     if (!user?.token) {
         return (

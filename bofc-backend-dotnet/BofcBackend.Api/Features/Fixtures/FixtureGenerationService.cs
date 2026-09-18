@@ -35,14 +35,17 @@ public class FixtureGenerationService(
     /// window too short for six matches will overrun (the existing overrun warning covers it).</summary>
     private static readonly Dictionary<int, (int Home, int Away, bool HomeWearsRed)[]> FixedSchedules = new()
     {
+        // Three teams is the same three pairings played twice, with the jerseys swapped the
+        // second time round - so every team plays four matches, two in red and two in white,
+        // and no pairing ever meets twice in the same colours.
         [3] =
         [
-            (0, 1, true),   // A (red) v B (white)
-            (0, 2, true),   // A (red) v C (white)
-            (2, 1, true),   // C (red) v B (white)
-            (0, 1, true),   // A (red) v B (white)
-            (2, 0, true),   // C (red) v A (white)
-            (2, 1, true),   // C (red) v B (white)
+            (0, 1, true),   // A (red)   v B (white)
+            (0, 2, true),   // A (red)   v C (white)
+            (1, 2, true),   // B (red)   v C (white)
+            (0, 1, false),  // A (white) v B (red)
+            (0, 2, false),  // A (white) v C (red)
+            (1, 2, false),  // B (white) v C (red)
         ],
         [4] =
         [

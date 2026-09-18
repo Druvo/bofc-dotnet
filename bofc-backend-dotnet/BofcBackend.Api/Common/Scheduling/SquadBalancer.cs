@@ -66,6 +66,7 @@ public static class SquadBalancer
         var teams = SnakeDeal(players, teamCount, rng);
         SpreadDefaultGoalkeepers(teams, rng);
         RepairGoalkeeperCover(teams, minGoalkeepersPerTeam);
+        RefineBalance(teams, minGoalkeepersPerTeam);
         return teams;
     }
 
@@ -209,5 +210,101 @@ public static class SquadBalancer
             teams[donor].Add(swap.Returning);
             teams[receiver].Add(swap.Moving);
         }
+    }
+
+    /// <summary>Closes the remaining strength gap by swapping players between the strongest and
+    /// weakest teams, keeping any swap that narrows it.
+    ///
+    /// The snake deal is already good - it leaves a gap of about 0.8 of a rank tier between the
+    /// best and worst team on this club's real turnout - but it deals in a fixed pattern and
+    /// cannot revisit an early choice once a later one makes it look wrong. A few swaps afterwards
+    /// take that gap to roughly a quarter of a tier.
+    ///
+    /// Runs last, and never at the goalkeepers' expense: a swap is rejected outright if it would
+    /// leave either team less able to field its keepers, or pile two default keepers onto one
+    /// roster. Balance is the thing worth having only once the match can actually be played.</summary>
+    private static void RefineBalance(List<List<DraftCandidate>> teams, int minGoalkeepersPerTeam)
+    {
+        if (teams.Count < 2) return;
+
+        static double Average(List<DraftCandidate> team) =>
+            team.Count == 0 ? 0 : team.Sum(p => p.Strength) / (double)team.Count;
+
+        // Bounded: each accepted swap strictly narrows the spread, and the spread is a bounded
+        // quantity over a finite set of arrangements, but a cap means a future change to the
+        // acceptance test degrades into "less refined" rather than spinning.
+        var maxPasses = teams.Count * 8;
+
+        for (var pass = 0; pass < maxPasses; pass++)
+        {
+            var averages = teams.Select(Average).ToList();
+            var strongest = averages.IndexOf(averages.Max());
+            var weakest = averages.IndexOf(averages.Min());
+            if (strongest == weakest) return;
+
+            var spread = averages[strongest] - averages[weakest];
+            var bestGain = 0.0;
+            (DraftCandidate From, DraftCandidate To)? bestSwap = null;
+
+            foreach (var fromStrong in teams[strongest])
+            {
+                foreach (var fromWeak in teams[weakest])
+                {
+                    // Only a downhill trade can help, and an equal one just churns the rosters
+                    // for no gain - skip both without the arithmetic.
+                    if (fromStrong.Strength <= fromWeak.Strength) continue;
+                    if (!SwapKeepsGoalkeepersCovered(teams[strongest], teams[weakest], fromStrong, fromWeak, minGoalkeepersPerTeam)) continue;
+
+                    // Sizes are unchanged by a swap, so the new averages follow from the moved
+                    // strength alone - no need to rebuild the rosters to score a candidate.
+                    var delta = fromStrong.Strength - fromWeak.Strength;
+                    var newStrong = averages[strongest] - delta / (double)teams[strongest].Count;
+                    var newWeak = averages[weakest] + delta / (double)teams[weakest].Count;
+                    var gain = spread - Math.Abs(newStrong - newWeak);
+
+                    if (gain > bestGain)
+                    {
+                        bestGain = gain;
+                        bestSwap = (fromStrong, fromWeak);
+                    }
+                }
+            }
+
+            if (bestSwap is not { } chosen) return;
+
+            teams[strongest].Remove(chosen.From);
+            teams[weakest].Remove(chosen.To);
+            teams[strongest].Add(chosen.To);
+            teams[weakest].Add(chosen.From);
+        }
+    }
+
+    /// <summary>Whether trading <paramref name="fromA"/> for <paramref name="fromB"/> leaves both
+    /// teams able to field their goalkeepers.
+    ///
+    /// Judged as "no worse than before" rather than "satisfies the requirement", so that a squad
+    /// which genuinely cannot cover its slots still gets its balance improved instead of every
+    /// swap being refused on a constraint that was already unmet.</summary>
+    private static bool SwapKeepsGoalkeepersCovered(
+        List<DraftCandidate> teamA, List<DraftCandidate> teamB,
+        DraftCandidate fromA, DraftCandidate fromB, int minGoalkeepersPerTeam)
+    {
+        static int Delta(DraftCandidate leaving, DraftCandidate arriving, Func<DraftCandidate, bool> counts) =>
+            (counts(arriving) ? 1 : 0) - (counts(leaving) ? 1 : 0);
+
+        var coverA = teamA.Count(p => p.CanKeepGoal);
+        var coverB = teamB.Count(p => p.CanKeepGoal);
+        var newCoverA = coverA + Delta(fromA, fromB, p => p.CanKeepGoal);
+        var newCoverB = coverB + Delta(fromB, fromA, p => p.CanKeepGoal);
+
+        if (newCoverA < Math.Min(minGoalkeepersPerTeam, coverA)) return false;
+        if (newCoverB < Math.Min(minGoalkeepersPerTeam, coverB)) return false;
+
+        var defaultA = teamA.Count(p => p.IsDefaultGoalkeeper);
+        var defaultB = teamB.Count(p => p.IsDefaultGoalkeeper);
+        var newDefaultA = defaultA + Delta(fromA, fromB, p => p.IsDefaultGoalkeeper);
+        var newDefaultB = defaultB + Delta(fromB, fromA, p => p.IsDefaultGoalkeeper);
+
+        return newDefaultA <= Math.Max(1, defaultA) && newDefaultB <= Math.Max(1, defaultB);
     }
 }

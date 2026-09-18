@@ -137,7 +137,10 @@ spread from 0.80 to 0.20 deterministically. It preserves roster sizes because it
 swaps. Both the current and the refined figures have zero variance across 3,000 runs, so
 this is a real structural gain, not simulation noise.
 
-Whether 0.80 → 0.20 is worth the code is a judgement call. It is roughly "one rank tier of
+**Built** (ticket 09). Measured in place, after the goalkeeper repairs and constrained not to
+undo them, it holds at 0.200 mean and worst across 5,000 drafts with keeper cover unaffected.
+
+Whether 0.80 → 0.20 is worth the code was a judgement call. It is roughly "one rank tier of
 difference between the best and worst team" becoming "a quarter of one". The same swap
 machinery is needed for the goalkeeper repair in Finding 1 anyway, so the marginal cost is
 low once that exists.

@@ -96,6 +96,25 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
     }
 
+    /// <summary>Admin-only "temporarily away" flag - see Player.IsPaused. Never exposed via the
+    /// anonymous-readable PlayerResponse endpoints above, same convention as Rank and the
+    /// goalkeeper flags.</summary>
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpGet("{id}/paused")]
+    public async Task<IActionResult> GetPaused(long id)
+    {
+        var paused = await playerService.GetPausedAsync(id);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, paused);
+    }
+
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
+    [HttpPut("{id}/paused")]
+    public async Task<IActionResult> SetPaused(long id, [FromBody] PlayerPausedRequest request)
+    {
+        await playerService.SetPausedAsync(id, request.Paused);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
+    }
+
     /// <summary>Feeds the admin drag-and-drop rank board - separate from the plain player list/edit page.</summary>
     [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
     [HttpGet("ranks")]

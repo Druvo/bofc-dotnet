@@ -64,7 +64,7 @@ public class MatchDayReminderBackgroundService(IServiceScopeFactory scopeFactory
 
         if (dueMatchDays.Count == 0) return;
 
-        var activePlayers = await db.Players.Where(p => p.IsActive && p.EmailNotificationsEnabled)
+        var activePlayers = await db.Players.Where(p => p.IsActive && !p.IsPaused && p.EmailNotificationsEnabled)
             .Select(p => new ReminderPlayer(p.Id, p.Name, p.Email)).ToListAsync();
         if (activePlayers.Count == 0) return;
 

@@ -29,4 +29,10 @@ public class PlayerResponse
     public string? PhotoUrl { get; set; }
     public string? ThemePreference { get; set; }
     public bool EmailNotificationsEnabled { get; set; }
+
+    /// <summary>Temporarily away - see Player.IsPaused. Carried here, unlike Rank and the
+    /// goalkeeper flags, because it is availability rather than tactics: `active` is already on
+    /// this response and this is the same kind of fact, and the player list needs it to show who
+    /// is paused without opening every profile in turn.</summary>
+    public bool Paused { get; set; }
 }

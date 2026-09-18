@@ -38,6 +38,7 @@ interface PlayerFormValues {
     rank: string;
     /** Admin-only - same fetch/save pattern as rank. Opts this player out of the goalkeeper
      * auto-assign button's picks; they still count toward attendance/fairness history. */
+    paused: boolean;
     excludeFromGoalkeeperRotation: boolean;
     /** Admin-only - same fetch/save pattern as rank. Opts this player IN to only ever playing
      * goalkeeper - first claim on their team's open slot(s) in auto-assign, ahead of the fairness
@@ -58,6 +59,7 @@ const emptyValues: PlayerFormValues = {
     jerseyNumber: "",
     active: false,
     rank: "",
+    paused: false,
     excludeFromGoalkeeperRotation: false,
     defaultGoalkeeper: false,
 };
@@ -163,6 +165,9 @@ function Player() {
                         followUps.push(axiosApi.put(`players/${id}/rank`, {
                             rank: values.rank ? Number(values.rank) : null,
                         }));
+                        followUps.push(axiosApi.put(`players/${id}/paused`, {
+                            paused: values.paused,
+                        }));
                         followUps.push(axiosApi.put(`players/${id}/goalkeeper-rotation-exclusion`, {
                             excluded: values.excludeFromGoalkeeperRotation,
                         }));
@@ -204,6 +209,10 @@ function Player() {
                     playingPosition: c.playingPosition || "UNASSIGNED",
                     jerseyNumber: c.jerseyNumber != null ? String(c.jerseyNumber) : "",
                     rank: "",
+                    // Seeded false and filled in by the admin-only GET players/{id}/paused below,
+                    // the same way rank and the goalkeeper flags are - they are not on this
+                    // response, which anyone signed in can read.
+                    paused: false,
                     excludeFromGoalkeeperRotation: false,
                     defaultGoalkeeper: false,
                 });
@@ -225,6 +234,17 @@ function Player() {
                         })
                         .catch((err: any) => {
                             toast.error(normalizeErrorMessage(err?.response?.data || err, "Error loading player rank"));
+                        });
+
+                    axiosApi
+                        .get(`players/${id}/paused`, {
+                            headers: { Authorization: `Bearer ${getTokenFromLocalStorage(tokenContent)}` },
+                        })
+                        .then((pausedResponse) => {
+                            setValues((prev) => ({ ...prev, paused: !!pausedResponse.data.content }));
+                        })
+                        .catch((err: any) => {
+                            toast.error(normalizeErrorMessage(err?.response?.data || err, "Error loading paused setting"));
                         });
 
                     axiosApi
@@ -474,6 +494,21 @@ function Player() {
 
                             {isAdmin && formState === "UPDATE" && (
                                 <div className="mt-4 flex flex-col gap-4">
+                                    <div>
+                                        <FormCheckbox
+                                            id="paused"
+                                            label="Paused (temporarily away)"
+                                            checked={values.paused}
+                                            onChange={(checked) => setField("paused", checked)}
+                                        />
+                                        <p className="mt-1 ml-8 text-theme-xs text-gray-500 dark:text-gray-400">
+                                            For a player who is travelling, injured or otherwise away for a while. They keep their history
+                                            and stay in this list, but they are not counted in a Match Day's expected turnout, not listed as
+                                            still to respond, and receive no Match Day or payment reminders. Use this rather than
+                                            deactivating - deactivating reads as having left the club.
+                                        </p>
+                                    </div>
+
                                     <div>
                                         <FormCheckbox
                                             id="excludeFromGoalkeeperRotation"

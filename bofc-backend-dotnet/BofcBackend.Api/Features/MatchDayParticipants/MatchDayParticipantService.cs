@@ -141,7 +141,8 @@ public class MatchDayParticipantService(
     public async Task<List<PlayerParticipationResponse>> PlayersToBeSelectedForTeamAsync(long matchDayId)
     {
         var participants = await db.MatchDayParticipants.Include(p => p.Player)
-            .Where(p => p.MatchDayId == matchDayId && p.ParticipationStatus)
+            .Where(p => p.MatchDayId == matchDayId && p.ParticipationStatus
+                && p.Player.IsActive && !p.Player.IsPaused)
             .ToListAsync();
 
         var teamIds = await db.Teams.Where(t => t.MatchDayId == matchDayId).Select(t => t.Id).ToListAsync();
@@ -190,8 +191,12 @@ public class MatchDayParticipantService(
     {
         var latestMatchDay = await matchDayService.GetMostRecentMatchDayAsync();
         var totalPlayers = await playerService.CountActivePlayersAsync();
+        // Joined to the player rather than counting participation rows alone: someone who answered
+        // yes and was paused afterwards still has their row, and counting it would put them in the
+        // "IN" column of a Match Day they are not expected at.
         var totalParticipants = await db.MatchDayParticipants
-            .CountAsync(p => p.MatchDayId == latestMatchDay.Id && p.ParticipationStatus);
+            .CountAsync(p => p.MatchDayId == latestMatchDay.Id && p.ParticipationStatus
+                && p.Player.IsActive && !p.Player.IsPaused);
 
         return new LatestMatchDayWithParticipantsResponse
         {
@@ -211,8 +216,11 @@ public class MatchDayParticipantService(
         }
 
         var totalPlayers = await playerService.CountActivePlayersAsync();
+        // Same join as the sibling method above - a "yes" from someone since paused is not a
+        // response this Match Day is counting on.
         var totalParticipants = await db.MatchDayParticipants
-            .CountAsync(p => p.MatchDayId == latestMatchDay.Id && p.ParticipationStatus);
+            .CountAsync(p => p.MatchDayId == latestMatchDay.Id && p.ParticipationStatus
+                && p.Player.IsActive && !p.Player.IsPaused);
 
         var loggedInPlayerId = currentUser.GetPlayerId();
         var participantPlayer = await db.MatchDayParticipantPlayers

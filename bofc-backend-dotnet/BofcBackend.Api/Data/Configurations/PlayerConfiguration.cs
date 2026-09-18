@@ -17,6 +17,9 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.Property(p => p.TeamsId).HasColumnName("teams_id").IsRequired();
         builder.Property(p => p.MobileNo).HasColumnName("mobile_no");
         builder.Property(p => p.IsActive).HasColumnName("is_active").IsRequired();
+        // Defaulted in the database as well as in the entity so the migration can add the column
+        // to a populated table without rewriting every existing row by hand.
+        builder.Property(p => p.IsPaused).HasColumnName("is_paused").HasDefaultValue(false).IsRequired();
         builder.Property(p => p.JerseyNumber).HasColumnName("jersey_number");
         builder.Property(p => p.Position)
             .HasColumnName("playing_position")

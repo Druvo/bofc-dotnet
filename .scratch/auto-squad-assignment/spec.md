@@ -21,6 +21,9 @@ Settled by the club; the rest of this document assumes them.
    reduces, but never removes, the team's rotation burden. (Finding 6)
 2. **Captains and goalkeepers are drawn only from confirmed participants of that match day.**
    Team membership alone is not sufficient. This is not automatic today — see Finding 7.
+3. **Captaincy rotates.** One captain per team, drawn at random from every active player ranked
+   3 or better (thirteen players today). Not the best-ranked player on each roster — that rule
+   concentrates captaincy on the same handful of people. (Finding 4, ticket 06)
 
 ---
 
@@ -348,8 +351,8 @@ Two things to preserve from the current design, both of which are better than th
 
 ### Open questions for the club
 
-1. Should captaincy rotate, or genuinely sit with the same four players every week?
-2. Should a captain be allowed to also be a goalkeeper?
+1. ~~Should captaincy rotate?~~ **Answered:** it rotates — random draw from rank 3 or better.
+2. Should a captain be allowed to also be a goalkeeper? Still open; nothing currently prevents it.
 3. When the eligible-keeper pool is smaller than the number of slots, should generation
    fail loudly, or fill what it can and warn?
 4. If a player withdraws after being assigned keeper, should their

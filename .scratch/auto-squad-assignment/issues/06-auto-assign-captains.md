@@ -1,6 +1,6 @@
 # 06 — Auto-assign captains during team generation
 
-Status: needs-info
+Status: resolved
 Blocked by: an unanswered club decision — see Context. Not a ticket dependency.
 
 ## Context
@@ -73,3 +73,40 @@ Once the club has answered:
 - [ ] Captains are confirmed participants of that match day.
 - [ ] A manually named captain survives a regeneration.
 - [ ] `IsCaptain` and `TeamPlayerRole` agree on every row written.
+
+## Decision
+
+The club settled this: captaincy rotates. The rule is a random draw, per team, from a senior
+pool defined as **every active player ranked 3 or better** - thirteen players today.
+
+Expressed as a rank threshold rather than "the top twelve" because rank is a tier, not a
+running order: a headcount cut would have to break a tie between players the club has declared
+equal, and would break it on player id. A threshold excludes nobody arbitrarily and keeps
+meaning the same thing as the squad changes.
+
+Simulated over 400 seasons of 26 weeks with turnout varying (22 of 30 each week):
+
+| | Highest-rank rule | Random from rank <= 3 |
+|---|---|---|
+| Distinct captains | 13 of 30 | 13 of 30 |
+| Busiest player's share of all captaincies | 18.5 % | **8.6 %** |
+| Teams with nobody from the pool | n/a | **0.00 %** |
+
+The pool is drawn from the whole active club rather than from the night's turnout: it expresses
+who the club considers senior, which does not change with who happened to RSVP. Turnout then
+decides which of them are available to captain that week.
+
+Correction to the figure in spec.md: the "4 distinct captains, 26 weeks of 26" result assumed
+the *same* 22 players every week. With turnout varying, the highest-rank rule reaches 13
+distinct captains but still concentrates them more than twice as heavily as the rule adopted
+here. The conclusion stands; the mechanism is concentration rather than a hard lock.
+
+## Comments
+
+Implemented on branch `feat/auto-squad-assignment`. Runs automatically at the end of team
+generation and is exposed at `POST /team/matchday/{matchDayId}/auto-assign-captains` for a
+manual re-run. Fills only empty posts - an organiser's own pick is never replaced. Candidates
+are confirmed participants only. `dotnet build` clean.
+
+Left open deliberately: nothing stops the captain also being a goalkeeper. Raised twice, not
+yet answered, and not worth guessing at.

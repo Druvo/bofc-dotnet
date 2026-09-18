@@ -590,6 +590,84 @@ public class TeamService(
         };
     }
 
+    /// <summary>One captain per team, drawn at random from the club's senior pool - see
+    /// <see cref="CaptainSelector"/> for why it is a random draw and not simply the best-ranked
+    /// player on each roster.
+    ///
+    /// Only ever fills an empty post: a team that already has a captain is left exactly as it is,
+    /// same as goalkeeper auto-assignment, so an organiser's own choice is never overwritten by a
+    /// later re-run. Candidates are confirmed participants only, so a player who withdrew after
+    /// the teams were drawn cannot be handed the armband.</summary>
+    public async Task<CaptainAutoAssignResponse> AutoAssignCaptainsAsync(long matchDayId)
+    {
+        var teams = await db.Teams.Include(t => t.TeamPlayers).ThenInclude(tp => tp.Player)
+            .Where(t => t.MatchDayId == matchDayId)
+            .ToListAsync();
+
+        var confirmedPlayerIds = (await FilterToConfirmedParticipantsAsync(
+            matchDayId, teams.SelectMany(t => t.TeamPlayers).Select(tp => tp.PlayerId).Distinct().ToList()))
+            .ToHashSet();
+
+        // The pool is drawn from the whole active club, not from this match day's turnout: it
+        // expresses who the club considers senior, which does not change with who happened to
+        // RSVP. Turnout then decides which of them are actually available to captain tonight.
+        var activePlayers = await db.Players.AsNoTracking()
+            .Where(p => p.IsActive)
+            .Select(p => new { p.Id, p.Rank })
+            .ToListAsync();
+        var pool = CaptainSelector.BuildPool(activePlayers.Select(p => (p.Id, p.Rank)).ToList());
+
+        var results = new List<TeamCaptainAssignmentResult>();
+        foreach (var team in teams)
+        {
+            if (team.TeamPlayers.Any(tp => tp.IsCaptain))
+            {
+                results.Add(new TeamCaptainAssignmentResult
+                {
+                    TeamId = team.Id,
+                    TeamName = team.TeamName,
+                    SkippedReason = "Already has a captain",
+                });
+                continue;
+            }
+
+            var candidates = team.TeamPlayers
+                .Where(tp => confirmedPlayerIds.Contains(tp.PlayerId))
+                .ToList();
+
+            var pickedId = CaptainSelector.PickCaptain(
+                candidates.Select(tp => (tp.PlayerId, tp.Player.Rank)).ToList(), pool);
+
+            if (pickedId is null)
+            {
+                results.Add(new TeamCaptainAssignmentResult
+                {
+                    TeamId = team.Id,
+                    TeamName = team.TeamName,
+                    SkippedReason = "No confirmed participants on this team",
+                });
+                continue;
+            }
+
+            var picked = candidates.First(tp => tp.PlayerId == pickedId.Value);
+            picked.IsCaptain = true;
+            picked.TeamPlayerRole = Domain.Enums.TeamPlayerRole.CAPTAIN;
+
+            results.Add(new TeamCaptainAssignmentResult
+            {
+                TeamId = team.Id,
+                TeamName = team.TeamName,
+                PlayerId = picked.PlayerId,
+                PlayerName = picked.Player.Name,
+                FromCaptainPool = pool.Contains(picked.PlayerId),
+            });
+        }
+
+        await db.SaveChangesAsync();
+
+        return new CaptainAutoAssignResponse { Teams = results, CaptainPoolSize = pool.Count };
+    }
+
     /// <summary>Narrows a set of team members to those actually confirmed for this match day.
     ///
     /// Team membership and confirmed participation are not the same set, and the gap is not

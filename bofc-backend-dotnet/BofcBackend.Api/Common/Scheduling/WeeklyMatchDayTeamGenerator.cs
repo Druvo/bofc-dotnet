@@ -162,6 +162,7 @@ public class WeeklyMatchDayTeamGenerator(
         // nothing, never a half-arranged one. It fills only empty slots and never overrides a
         // human pick, so re-running it later from the admin page stays safe.
         await teamService.AutoAssignGoalkeepersAsync(matchDayId);
+        await teamService.AutoAssignCaptainsAsync(matchDayId);
 
         await GenerateFixturesForTeamsAsync(matchDay, teams.Select(t => t.Id).ToList());
 

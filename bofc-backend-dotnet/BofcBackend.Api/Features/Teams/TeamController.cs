@@ -73,6 +73,16 @@ public class TeamController(ITeamService teamService, WeeklyMatchDayTeamGenerato
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, result);
     }
 
+    /// <summary>Names a captain for every team on this MatchDay that doesn't already have one,
+    /// drawn at random from the club's senior pool (see CaptainSelector). Never replaces a captain
+    /// an organiser has already chosen, so re-running it only ever fills gaps.</summary>
+    [HttpPost("matchday/{matchDayId}/auto-assign-captains")]
+    public async Task<IActionResult> AutoAssignCaptains(long matchDayId)
+    {
+        var result = await teamService.AutoAssignCaptainsAsync(matchDayId);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, result);
+    }
+
     /// <summary>Bulk-undo for AutoAssignGoalkeepers - every team's current goalkeeper (if any) goes
     /// back to UNASSIGNED, so the ranking can be re-run from a clean slate.</summary>
     [HttpPost("matchday/{matchDayId}/clear-goalkeepers")]

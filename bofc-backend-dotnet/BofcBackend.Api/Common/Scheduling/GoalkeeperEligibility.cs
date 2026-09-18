@@ -58,8 +58,10 @@ public class GoalkeeperEligibility(BofcDbContext db)
                 .Distinct()
                 .ToListAsync();
 
+        // Deactivated as well as admin-excluded: a player who is no longer active should not be
+        // drafted into a keeper slot even if a stale roster still carries them.
         var excludedPlayerIds = await db.Players.AsNoTracking()
-            .Where(p => candidatePlayerIds.Contains(p.Id) && p.ExcludeFromGoalkeeperRotation)
+            .Where(p => candidatePlayerIds.Contains(p.Id) && (p.ExcludeFromGoalkeeperRotation || !p.IsActive))
             .Select(p => p.Id)
             .ToListAsync();
 

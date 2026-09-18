@@ -34,7 +34,7 @@ public class GoalkeeperRankingPlayer
     public bool IsDefaultGoalkeeper { get; init; }
 
     /// <summary>One of: NEXT_UP (top eligible pick for this team), ELIGIBLE, RESTING (kept goal in
-    /// either of the last two MatchDays), NOT_IN_ROTATION (admin-excluded), CURRENT_GOALKEEPER
+    /// either of the last two MatchDays), CURRENT_GOALKEEPER
     /// (already wearing the gloves for this team this MatchDay).</summary>
     public string Status { get; init; } = string.Empty;
 }

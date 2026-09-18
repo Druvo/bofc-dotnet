@@ -709,9 +709,11 @@ public class TeamService(
         (await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1))?.MinGoalkeepersPerTeam
             ?? new SystemSettings().MinGoalkeepersPerTeam;
 
-    private sealed record PlayerGoalkeeperBalance(int Played, int InGoal, double Balance, bool IsResting, bool IsExcluded, bool IsDefaultGoalkeeper)
+    /// <summary>One player's standing in the rotation. Only players actually in the rotation get
+    /// one - see ComputeGoalkeeperBalancesAsync - so there is no "excluded" state to carry here.</summary>
+    private sealed record PlayerGoalkeeperBalance(int Played, int InGoal, double Balance, bool IsResting, bool IsDefaultGoalkeeper)
     {
-        public bool IsEligible => !IsResting && !IsExcluded;
+        public bool IsEligible => !IsResting;
     }
 
     /// <summary>Who fills this team's open goalkeeper slot(s), shared by AutoAssignGoalkeepersAsync
@@ -746,7 +748,7 @@ public class TeamService(
         // opposite of what the flag is for. Admin exclusion still applies to everyone, though it
         // cannot bite here in practice, since PlayerService keeps the two flags mutually exclusive.
         var defaultGoalkeepers = candidates
-            .Where(tp => balances[tp.PlayerId].IsDefaultGoalkeeper && !balances[tp.PlayerId].IsExcluded)
+            .Where(tp => balances[tp.PlayerId].IsDefaultGoalkeeper)
             .ToList();
 
         if (defaultGoalkeepers.Count > slotsToFill)
@@ -815,7 +817,6 @@ public class TeamService(
                 // but resting no longer applies to them (see SelectGoalkeepersForTeam), so NEXT_UP
                 // has to be tested before RESTING or the table would contradict the button.
                 Status = x.TeamPlayer.PlayingPosition == FootballPosition.GOALKEEPER ? "CURRENT_GOALKEEPER"
-                    : x.Balance.IsExcluded ? "NOT_IN_ROTATION"
                     : nextUpPlayerIds.Contains(x.TeamPlayer.PlayerId) ? "NEXT_UP"
                     : x.Balance.IsResting ? "RESTING"
                     : "ELIGIBLE",
@@ -877,23 +878,24 @@ public class TeamService(
         var attendanceByPlayer = attendance.GroupBy(a => a.PlayerId).ToDictionary(g => g.Key, g => g.Select(a => a.MatchDayId).ToList());
         var goalkeeperMatchDaysByPlayer = goalkeeperRows.GroupBy(g => g.PlayerId).ToDictionary(g => g.Key, g => g.Select(x => x.MatchDayId).ToHashSet());
 
-        var excludedPlayerIds = await db.Players
-            .Where(p => candidatePlayerIds.Contains(p.Id) && p.ExcludeFromGoalkeeperRotation)
-            .Select(p => p.Id)
+        // Anyone who cannot take a turn in goal is dropped here rather than carried through and
+        // labelled: an admin-excluded player and a deactivated one are not "ranked last", they are
+        // not in this conversation, and a rotation table that lists them makes the organiser read
+        // past names that were never going to be picked. Dropping them at the source also means
+        // every consumer - the ranking table, the auto-assign pass, anything added later - gets
+        // the rule for free instead of having to remember it.
+        //
+        // Note this does NOT drop permanent goalkeepers. They are very much in the conversation:
+        // they hold a slot on their team, and the organiser needs to see that.
+        var rotationPlayers = await db.Players.AsNoTracking()
+            .Where(p => candidatePlayerIds.Contains(p.Id) && p.IsActive && !p.ExcludeFromGoalkeeperRotation)
+            .Select(p => new { p.Id, p.DefaultGoalkeeper })
             .ToListAsync();
-        var excludedSet = excludedPlayerIds.ToHashSet();
 
-        // Players who only ever want to play goalkeeper - see Player.DefaultGoalkeeper. Mutually
-        // exclusive with ExcludeFromGoalkeeperRotation (enforced in PlayerService), so no overlap
-        // with excludedSet above.
-        var defaultGoalkeeperPlayerIds = await db.Players
-            .Where(p => candidatePlayerIds.Contains(p.Id) && p.DefaultGoalkeeper)
-            .Select(p => p.Id)
-            .ToListAsync();
-        var defaultGoalkeeperSet = defaultGoalkeeperPlayerIds.ToHashSet();
+        var defaultGoalkeeperSet = rotationPlayers.Where(p => p.DefaultGoalkeeper).Select(p => p.Id).ToHashSet();
 
         var balances = new Dictionary<long, PlayerGoalkeeperBalance>();
-        foreach (var playerId in candidatePlayerIds)
+        foreach (var playerId in rotationPlayers.Select(p => p.Id))
         {
             var owed = 0.0;
             var played = 0;
@@ -911,10 +913,9 @@ public class TeamService(
 
             var served = goalkeeperMatchDaysByPlayer.TryGetValue(playerId, out var gkDays) ? gkDays.Count : 0;
             var isResting = gkDays != null && lastTwoMatchDayIds.Overlaps(gkDays);
-            var isExcluded = excludedSet.Contains(playerId);
             var isDefaultGoalkeeper = defaultGoalkeeperSet.Contains(playerId);
 
-            balances[playerId] = new PlayerGoalkeeperBalance(played, served, owed - served, isResting, isExcluded, isDefaultGoalkeeper);
+            balances[playerId] = new PlayerGoalkeeperBalance(played, served, owed - served, isResting, isDefaultGoalkeeper);
         }
 
         var pastMatchDaysMissingGkData = pastMatchDays.Count(t =>
@@ -1143,6 +1144,21 @@ public class TeamService(
     /// rather than another row with an incremented round number.</summary>
     private async Task TrackGoalKeeperRoundAsync(long playerId, long matchDayId)
     {
+        // A permanent goalkeeper leaves no trace in the rotation record, because they are not in
+        // the rotation. This table answers one question - whose turn is it next - and a player who
+        // is in goal every week is not waiting for a turn. Recording them made every week they
+        // played look like a turn served, which is meaningless for them and quietly distorted the
+        // shared history the other players are ranked against: each of their appearances raised
+        // that match day's keeper count, so everyone else appeared to owe more than they did.
+        //
+        // The rule lives here rather than at the call sites because there are four of them - the
+        // auto-assign pass and three manual paths - and a caller that forgot would be a silent
+        // corruption of the record with nothing to point at.
+        if (await db.Players.AsNoTracking().AnyAsync(p => p.Id == playerId && p.DefaultGoalkeeper))
+        {
+            return;
+        }
+
         // A row for this pair can already sit in either of two places and both have to be checked.
         // The change tracker holds rows added earlier in the same unit of work - AutoAssignGoalkeepers
         // walks every team and adds all its picks before a single SaveChangesAsync - which a database

@@ -23,5 +23,12 @@ public class PlayerGoalkeepingHistoryConfiguration : IEntityTypeConfiguration<Pl
 
         builder.HasOne(h => h.Player).WithMany().HasForeignKey(h => h.PlayerId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(h => h.MatchDay).WithMany().HasForeignKey(h => h.MatchDayId).OnDelete(DeleteBehavior.Restrict);
+
+        // A player keeps goal at most once on a given MatchDay, so one row per (player, MatchDay)
+        // is the whole truth. Without this constraint every re-entry into the goalkeeper position -
+        // assign, remove, re-assign, or a second click of Auto-Assign - appended another row with an
+        // incremented round number, inflating the player-facing goalkeeping history. TeamService
+        // guards against that in code too; the index is what makes it impossible.
+        builder.HasIndex(h => new { h.PlayerId, h.MatchDayId }).IsUnique();
     }
 }

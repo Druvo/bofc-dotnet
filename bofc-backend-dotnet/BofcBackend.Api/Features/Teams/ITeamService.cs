@@ -15,6 +15,10 @@ public interface ITeamService
     Task<GoalkeeperRankingResponse> GetGoalkeeperRankingAsync(long matchDayId);
     Task<ClearGoalkeepersResponse> ClearGoalkeepersAsync(long matchDayId);
 
+    /// <summary>One captain per team, drawn at random from the club's senior pool. Fills only
+    /// empty posts - an existing captain is never replaced.</summary>
+    Task<CaptainAutoAssignResponse> AutoAssignCaptainsAsync(long matchDayId);
+
     /// <summary>Emails every confirmed participant of this MatchDay that teams/fixtures are ready,
     /// with a link to the live Team Building page - the "Send Teams Email" button on Team
     /// Building, manually triggered (never automatic). Returns how many emails actually sent.</summary>

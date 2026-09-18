@@ -124,6 +124,7 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<ISquadLineupService, SquadLineupService>();
 builder.Services.AddScoped<IFixtureGenerationService, FixtureGenerationService>();
+builder.Services.AddScoped<BofcBackend.Api.Common.Scheduling.GoalkeeperEligibility>();
 builder.Services.AddScoped<BofcBackend.Api.Common.Scheduling.WeeklyMatchDayTeamGenerator>();
 
 // --- Accounting/ledger domain. AcVoucherService is deliberately concrete (no interface,

@@ -530,7 +530,8 @@ public class TeamService(
             .Where(t => t.MatchDayId == matchDayId)
             .ToListAsync();
 
-        var candidatePlayerIds = teams.SelectMany(t => t.TeamPlayers).Select(tp => tp.PlayerId).Distinct().ToList();
+        var candidatePlayerIds = await FilterToConfirmedParticipantsAsync(
+            matchDayId, teams.SelectMany(t => t.TeamPlayers).Select(tp => tp.PlayerId).Distinct().ToList());
         var (balances, pastMatchDaysConsidered, pastMatchDaysMissingGkData) =
             await ComputeGoalkeeperBalancesAsync(matchDayId, candidatePlayerIds);
 
@@ -589,6 +590,119 @@ public class TeamService(
         };
     }
 
+    /// <summary>One captain per team, drawn at random from the club's senior pool - see
+    /// <see cref="CaptainSelector"/> for why it is a random draw and not simply the best-ranked
+    /// player on each roster.
+    ///
+    /// Only ever fills an empty post: a team that already has a captain is left exactly as it is,
+    /// same as goalkeeper auto-assignment, so an organiser's own choice is never overwritten by a
+    /// later re-run. Candidates are confirmed participants only, so a player who withdrew after
+    /// the teams were drawn cannot be handed the armband.</summary>
+    public async Task<CaptainAutoAssignResponse> AutoAssignCaptainsAsync(long matchDayId)
+    {
+        var teams = await db.Teams.Include(t => t.TeamPlayers).ThenInclude(tp => tp.Player)
+            .Where(t => t.MatchDayId == matchDayId)
+            .ToListAsync();
+
+        var confirmedPlayerIds = (await FilterToConfirmedParticipantsAsync(
+            matchDayId, teams.SelectMany(t => t.TeamPlayers).Select(tp => tp.PlayerId).Distinct().ToList()))
+            .ToHashSet();
+
+        // The pool is drawn from the whole active club, not from this match day's turnout: it
+        // expresses who the club considers senior, which does not change with who happened to
+        // RSVP. Turnout then decides which of them are actually available to captain tonight.
+        var activePlayers = await db.Players.AsNoTracking()
+            .Where(p => p.IsActive)
+            .Select(p => new { p.Id, p.Rank })
+            .ToListAsync();
+        var pool = CaptainSelector.BuildPool(activePlayers.Select(p => (p.Id, p.Rank)).ToList());
+
+        var results = new List<TeamCaptainAssignmentResult>();
+        foreach (var team in teams)
+        {
+            if (team.TeamPlayers.Any(tp => tp.IsCaptain))
+            {
+                results.Add(new TeamCaptainAssignmentResult
+                {
+                    TeamId = team.Id,
+                    TeamName = team.TeamName,
+                    SkippedReason = "Already has a captain",
+                });
+                continue;
+            }
+
+            var candidates = team.TeamPlayers
+                .Where(tp => confirmedPlayerIds.Contains(tp.PlayerId))
+                .ToList();
+
+            var pickedId = CaptainSelector.PickCaptain(
+                candidates.Select(tp => (tp.PlayerId, tp.Player.Rank)).ToList(), pool);
+
+            if (pickedId is null)
+            {
+                results.Add(new TeamCaptainAssignmentResult
+                {
+                    TeamId = team.Id,
+                    TeamName = team.TeamName,
+                    SkippedReason = "No confirmed participants on this team",
+                });
+                continue;
+            }
+
+            var picked = candidates.First(tp => tp.PlayerId == pickedId.Value);
+            picked.IsCaptain = true;
+            picked.TeamPlayerRole = Domain.Enums.TeamPlayerRole.CAPTAIN;
+
+            results.Add(new TeamCaptainAssignmentResult
+            {
+                TeamId = team.Id,
+                TeamName = team.TeamName,
+                PlayerId = picked.PlayerId,
+                PlayerName = picked.Player.Name,
+                FromCaptainPool = pool.Contains(picked.PlayerId),
+            });
+        }
+
+        await db.SaveChangesAsync();
+
+        return new CaptainAutoAssignResponse { Teams = results, CaptainPoolSize = pool.Count };
+    }
+
+    /// <summary>Narrows a set of team members to those actually confirmed for this match day.
+    ///
+    /// Team membership and confirmed participation are not the same set, and the gap is not
+    /// theoretical: a player can be added to a team by hand without ever RSVPing, and - more
+    /// commonly - a player can RSVP yes, be drafted, and then withdraw, leaving the team_player
+    /// row behind. Production carries both cases, and one of them was recorded as a goalkeeper for
+    /// a match day they were not confirmed for.
+    ///
+    /// Filtering here rather than at each call site is deliberate: every goalkeeper decision reads
+    /// the balances dictionary keyed by these ids, so a player who is dropped here is automatically
+    /// absent from selection, from the ranking table, and from any future caller, without each of
+    /// them having to remember the rule.</summary>
+    private async Task<List<long>> FilterToConfirmedParticipantsAsync(long matchDayId, List<long> playerIds)
+    {
+        if (playerIds.Count == 0) return playerIds;
+
+        var confirmed = await db.MatchDayParticipants.AsNoTracking()
+            .Where(p => p.MatchDayId == matchDayId && p.ParticipationStatus && playerIds.Contains(p.PlayerId))
+            .Select(p => p.PlayerId)
+            .ToListAsync();
+
+        var confirmedSet = confirmed.ToHashSet();
+        var dropped = playerIds.Count - confirmedSet.Count;
+        if (dropped > 0)
+        {
+            // Worth a log line rather than silence: the organiser sees a player on the team sheet
+            // but never in the goalkeeper table, and without this there is nothing to explain why.
+            logger.LogInformation(
+                "{Dropped} of {Total} team member(s) on MatchDay {MatchDayId} are not confirmed participants "
+                + "and are excluded from goalkeeper/captain selection.", dropped, playerIds.Count, matchDayId);
+        }
+
+        return playerIds.Where(confirmedSet.Contains).ToList();
+    }
+
     /// <summary>Falls back to the entity default (2) if the settings row doesn't exist yet (fresh
     /// install, Settings page never opened) rather than throwing.</summary>
     private async Task<int> GetMinGoalkeepersPerTeamAsync() =>
@@ -618,19 +732,31 @@ public class TeamService(
     {
         if (slotsToFill <= 0) return [];
 
-        var eligibleNonGoalkeepers = team.TeamPlayers
-            .Where(tp => tp.PlayingPosition != FootballPosition.GOALKEEPER
-                && balances.TryGetValue(tp.PlayerId, out var b) && b.IsEligible)
+        // Only players present in `balances` are considered, which is what keeps non-participants
+        // out - see FilterToConfirmedParticipantsAsync.
+        var candidates = team.TeamPlayers
+            .Where(tp => tp.PlayingPosition != FootballPosition.GOALKEEPER && balances.ContainsKey(tp.PlayerId))
             .ToList();
 
-        var defaultGoalkeepers = eligibleNonGoalkeepers.Where(tp => balances[tp.PlayerId].IsDefaultGoalkeeper).ToList();
+        // Default goalkeepers skip the resting rule; everyone else must clear it.
+        //
+        // Resting exists so nobody is put in goal two weeks running. Applied to a player whose
+        // whole record says "I only ever want to play goalkeeper" it is self-defeating: they keep
+        // goal once, are marked resting, and are then passed over indefinitely - which is the
+        // opposite of what the flag is for. Admin exclusion still applies to everyone, though it
+        // cannot bite here in practice, since PlayerService keeps the two flags mutually exclusive.
+        var defaultGoalkeepers = candidates
+            .Where(tp => balances[tp.PlayerId].IsDefaultGoalkeeper && !balances[tp.PlayerId].IsExcluded)
+            .ToList();
 
         if (defaultGoalkeepers.Count > slotsToFill)
         {
             return defaultGoalkeepers.OrderBy(_ => Random.Shared.Next()).Take(slotsToFill).ToList();
         }
 
-        var others = eligibleNonGoalkeepers.Where(tp => !balances[tp.PlayerId].IsDefaultGoalkeeper).ToList();
+        var others = candidates
+            .Where(tp => !balances[tp.PlayerId].IsDefaultGoalkeeper && balances[tp.PlayerId].IsEligible)
+            .ToList();
         var balancedPicks = others
             .OrderByDescending(tp => balances[tp.PlayerId].Balance)
             .ThenBy(tp => tp.PlayerId)
@@ -650,7 +776,8 @@ public class TeamService(
             .Where(t => t.MatchDayId == matchDayId)
             .ToListAsync();
 
-        var candidatePlayerIds = teams.SelectMany(t => t.TeamPlayers).Select(tp => tp.PlayerId).Distinct().ToList();
+        var candidatePlayerIds = await FilterToConfirmedParticipantsAsync(
+            matchDayId, teams.SelectMany(t => t.TeamPlayers).Select(tp => tp.PlayerId).Distinct().ToList());
         var (balances, pastMatchDaysConsidered, pastMatchDaysMissingGkData) =
             await ComputeGoalkeeperBalancesAsync(matchDayId, candidatePlayerIds);
 
@@ -684,10 +811,13 @@ public class TeamService(
                 InGoal = x.Balance.InGoal,
                 Balance = Math.Round(x.Balance.Balance, 2),
                 IsDefaultGoalkeeper = x.Balance.IsDefaultGoalkeeper,
+                // Order matters: a default goalkeeper who kept goal last week carries IsResting,
+                // but resting no longer applies to them (see SelectGoalkeepersForTeam), so NEXT_UP
+                // has to be tested before RESTING or the table would contradict the button.
                 Status = x.TeamPlayer.PlayingPosition == FootballPosition.GOALKEEPER ? "CURRENT_GOALKEEPER"
                     : x.Balance.IsExcluded ? "NOT_IN_ROTATION"
-                    : x.Balance.IsResting ? "RESTING"
                     : nextUpPlayerIds.Contains(x.TeamPlayer.PlayerId) ? "NEXT_UP"
+                    : x.Balance.IsResting ? "RESTING"
                     : "ELIGIBLE",
             }).ToList();
 
@@ -1006,8 +1136,39 @@ public class TeamService(
     private static string? BuildPlayerPhotoUrl(string? photoKey) =>
         string.IsNullOrWhiteSpace(photoKey) ? null : $"/files/player-photos/{photoKey}";
 
+    /// <summary>Records one goalkeeping round for a player on a MatchDay, at most once. Callers
+    /// reach this from several independent paths - manual position change, adding a player straight
+    /// into the goalkeeper slot, auto-assign - and none of them knows whether the player is already
+    /// down as a goalkeeper today, so a second call for the same (player, MatchDay) is a no-op
+    /// rather than another row with an incremented round number.</summary>
     private async Task TrackGoalKeeperRoundAsync(long playerId, long matchDayId)
     {
+        // A row for this pair can already sit in either of two places and both have to be checked.
+        // The change tracker holds rows added earlier in the same unit of work - AutoAssignGoalkeepers
+        // walks every team and adds all its picks before a single SaveChangesAsync - which a database
+        // query cannot see. The database holds everything written by earlier requests.
+        var tracked = db.ChangeTracker.Entries<PlayerGoalkeepingHistory>()
+            .FirstOrDefault(e => e.Entity.PlayerId == playerId && e.Entity.MatchDayId == matchDayId);
+
+        if (tracked is not null)
+        {
+            // A pending delete means this same unit of work took the player off goalkeeper duty and
+            // is now putting them back. Cancelling the delete restores the original round number and
+            // avoids emitting a delete plus an insert against the same unique key, whose relative
+            // ordering inside one SaveChangesAsync is EF's to decide, not ours.
+            if (tracked.State == EntityState.Deleted)
+            {
+                tracked.State = EntityState.Unchanged;
+            }
+
+            return;
+        }
+
+        if (await db.PlayerGoalkeepingHistories.AnyAsync(h => h.PlayerId == playerId && h.MatchDayId == matchDayId))
+        {
+            return;
+        }
+
         var lastRoundInPreviousMatchDays = await db.PlayerGoalkeepingHistories
             .Where(h => h.PlayerId == playerId)
             .Select(h => (int?)h.RoundNumber)

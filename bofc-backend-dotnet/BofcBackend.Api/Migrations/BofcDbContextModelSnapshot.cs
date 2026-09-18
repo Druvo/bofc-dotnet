@@ -1976,7 +1976,8 @@ namespace BofcBackend.Api.Migrations
 
                     b.HasIndex("MatchDayId");
 
-                    b.HasIndex("PlayerId");
+                    b.HasIndex("PlayerId", "MatchDayId")
+                        .IsUnique();
 
                     b.ToTable("player_goalkeeping_history", (string)null);
                 });

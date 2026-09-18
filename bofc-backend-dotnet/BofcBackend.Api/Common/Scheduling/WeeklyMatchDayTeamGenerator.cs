@@ -4,6 +4,7 @@ using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Domain.Enums;
 using BofcBackend.Api.Features.Fixtures;
 using BofcBackend.Api.Features.Fixtures.Models;
+using BofcBackend.Api.Features.Teams;
 using Microsoft.EntityFrameworkCore;
 
 namespace BofcBackend.Api.Common.Scheduling;
@@ -15,7 +16,11 @@ namespace BofcBackend.Api.Common.Scheduling;
 /// MatchDay is within its configured lead time, and by the admin "Generate now" action for
 /// on-demand testing.
 /// </summary>
-public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationService fixtureGenerationService)
+public class WeeklyMatchDayTeamGenerator(
+    BofcDbContext db,
+    IFixtureGenerationService fixtureGenerationService,
+    GoalkeeperEligibility goalkeeperEligibility,
+    ITeamService teamService)
 {
     /// <summary>No-op (Success=false, Reason explains why) if there aren't enough confirmed
     /// participants to fill every team, or if teams/fixtures already exist for this MatchDay -
@@ -117,21 +122,46 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
             .ToList();
         db.Teams.AddRange(teams);
 
-        foreach (var (player, team) in SnakeDraft(participants, teams))
+        // Who could take a goalkeeper slot this week. The draft needs this BEFORE it deals:
+        // goalkeeper selection later only ever picks from a team's own roster, so a deal that
+        // scatters the eligible keepers badly leaves some team unable to field one, however many
+        // the club has available overall.
+        var minGoalkeepersPerTeam = await GetMinGoalkeepersPerTeamAsync();
+        var rotationEligible = await goalkeeperEligibility.GetRotationEligibleAsync(
+            matchDayId, participants.Select(p => p.Id).ToList());
+
+        var candidates = participants
+            .Select(p => new DraftCandidate(p.Id, p.Rank, p.DefaultGoalkeeper, rotationEligible.Contains(p.Id)))
+            .ToList();
+
+        var playersById = participants.ToDictionary(p => p.Id);
+        var drafted = SquadBalancer.Draft(candidates, teamCount, minGoalkeepersPerTeam);
+
+        for (var i = 0; i < drafted.Count; i++)
         {
-            db.TeamPlayers.Add(new TeamPlayer
+            foreach (var candidate in drafted[i])
             {
-                TeamId = team.Id,
-                Team = team,
-                PlayerId = player.Id,
-                Player = player,
-                PlayingPosition = FootballPosition.UNASSIGNED,
-                TeamPlayerRole = TeamPlayerRole.PLAYER,
-                IsCaptain = false,
-            });
+                db.TeamPlayers.Add(new TeamPlayer
+                {
+                    TeamId = teams[i].Id,
+                    Team = teams[i],
+                    PlayerId = candidate.PlayerId,
+                    Player = playersById[candidate.PlayerId],
+                    PlayingPosition = FootballPosition.UNASSIGNED,
+                    TeamPlayerRole = TeamPlayerRole.PLAYER,
+                    IsCaptain = false,
+                });
+            }
         }
 
         await db.SaveChangesAsync();
+
+        // Fill the goalkeeper slots now rather than leaving it as a second button the organiser has
+        // to remember. This runs inside the same transaction, so a failure here rolls the teams
+        // back too - generation either produces a match day that is ready to play or produces
+        // nothing, never a half-arranged one. It fills only empty slots and never overrides a
+        // human pick, so re-running it later from the admin page stays safe.
+        await teamService.AutoAssignGoalkeepersAsync(matchDayId);
 
         await GenerateFixturesForTeamsAsync(matchDay, teams.Select(t => t.Id).ToList());
 
@@ -145,6 +175,12 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
     /// so an unbackfillable MatchDay still behaves the same as a fresh manual generation.</summary>
     private const int DefaultMatchDurationMinutes = 13;
     private const int DefaultTimeGapMinutes = 2;
+
+    /// <summary>Falls back to the entity default if the settings row doesn't exist yet, matching
+    /// what TeamService does for the same setting rather than inventing a second answer.</summary>
+    private async Task<int> GetMinGoalkeepersPerTeamAsync() =>
+        (await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1))?.MinGoalkeepersPerTeam
+            ?? new SystemSettings().MinGoalkeepersPerTeam;
 
     /// <summary>Fits as many round-robin cycles as the MatchDay's own duration allows - same
     /// repeat-to-fill-capacity logic as the manual "Generate Fixtures" flow (see
@@ -177,32 +213,6 @@ public class WeeklyMatchDayTeamGenerator(BofcDbContext db, IFixtureGenerationSer
             MatchDurationMinutes = matchDurationMinutes,
             TimeGapMinutes = timeGapMinutes,
         });
-    }
-
-    /// <summary>
-    /// Sorts by rank (nulls = lowest tier, shuffled within tied ranks so results aren't stuck in
-    /// player-ID order), then deals players to teams in a 1→2→3...→3→2→1 snake pattern so the
-    /// strongest and weakest players spread evenly instead of clustering on one team - robust even
-    /// when the player count doesn't divide evenly by team count, unlike a strict
-    /// "no same rank on one team" rule.
-    /// </summary>
-    private static IEnumerable<(Player Player, Team Team)> SnakeDraft(List<Player> players, List<Team> teams)
-    {
-        var rng = Random.Shared;
-        var ordered = players
-            .GroupBy(p => p.Rank ?? int.MaxValue)
-            .OrderBy(g => g.Key)
-            .SelectMany(g => g.OrderBy(_ => rng.Next()))
-            .ToList();
-
-        var teamCount = teams.Count;
-        for (var i = 0; i < ordered.Count; i++)
-        {
-            var round = i / teamCount;
-            var indexInRound = i % teamCount;
-            var teamIndex = round % 2 == 0 ? indexInRound : teamCount - 1 - indexInRound;
-            yield return (ordered[i], teams[teamIndex]);
-        }
     }
 }
 

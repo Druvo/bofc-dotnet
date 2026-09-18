@@ -229,7 +229,7 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
                             inGoal: number;
                             balance: number;
                             isDefaultGoalkeeper: boolean;
-                            status: "NEXT_UP" | "ELIGIBLE" | "RESTING" | "NOT_IN_ROTATION" | "CURRENT_GOALKEEPER";
+                            status: "NEXT_UP" | "ELIGIBLE" | "RESTING" | "CURRENT_GOALKEEPER";
                         }[];
                     }[];
                     pastMatchDaysConsidered: number;

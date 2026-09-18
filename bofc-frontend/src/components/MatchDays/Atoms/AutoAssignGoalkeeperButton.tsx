@@ -19,14 +19,13 @@ type RankingPlayer = {
     inGoal: number;
     balance: number;
     isDefaultGoalkeeper: boolean;
-    status: "NEXT_UP" | "ELIGIBLE" | "RESTING" | "NOT_IN_ROTATION" | "CURRENT_GOALKEEPER";
+    status: "NEXT_UP" | "ELIGIBLE" | "RESTING" | "CURRENT_GOALKEEPER";
 };
 
 const STATUS_LABEL: Record<RankingPlayer["status"], string> = {
     NEXT_UP: "Next Up",
     ELIGIBLE: "Eligible",
     RESTING: "Resting",
-    NOT_IN_ROTATION: "Not in Rotation",
     CURRENT_GOALKEEPER: "Current Goalkeeper",
 };
 
@@ -34,7 +33,6 @@ const STATUS_BADGE_VARIANT: Record<RankingPlayer["status"], "success" | "light" 
     NEXT_UP: "success",
     ELIGIBLE: "light",
     RESTING: "warning",
-    NOT_IN_ROTATION: "dark",
     CURRENT_GOALKEEPER: "info",
 };
 

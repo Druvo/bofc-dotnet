@@ -67,9 +67,12 @@ public class WeeklyMatchDayTeamGenerator(
                 : "Teams already exist for this MatchDay (added manually).");
         }
 
+        // The paused check matters even though a paused player is never asked: a player can answer
+        // yes and be paused afterwards, and the participation row outlives the change.
         var participants = await db.MatchDayParticipants
             .Include(p => p.Player)
-            .Where(p => p.MatchDayId == matchDayId && p.ParticipationStatus)
+            .Where(p => p.MatchDayId == matchDayId && p.ParticipationStatus
+                && p.Player.IsActive && !p.Player.IsPaused)
             .Select(p => p.Player)
             .ToListAsync();
 

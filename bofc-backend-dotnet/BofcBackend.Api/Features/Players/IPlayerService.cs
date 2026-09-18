@@ -41,6 +41,11 @@ public interface IPlayerService
     Task UpdateOwnThemePreferenceAsync(string? themePreference);
     Task UpdateOwnEmailNotificationsEnabledAsync(bool enabled);
     Task<int> CountActivePlayersAsync();
+
+    /// <summary>Temporarily out of circulation - see Player.IsPaused. Admin-only, like Rank and
+    /// the goalkeeper flags, and never surfaced on player-facing responses.</summary>
+    Task<bool> GetPausedAsync(long id);
+    Task SetPausedAsync(long id, bool paused);
     Task<Dictionary<int, List<GoalKeeperHistoryDto>>> GoalKeepingHistoryAsync();
     Task<List<GoalKeeperHistoryDto>> GetGoalKeeperHistoryByLoggedInUserAsync();
     Task<List<GoalKeeperHistoryDto>> GetGoalKeeperHistoryByPlayerIdAsync(long playerId);

@@ -249,14 +249,25 @@ function Players() {
     />
   );
 
-  const StatusBadge = ({ active }: { active: boolean }) => (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-theme-xs font-medium ${
-      active ? "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500" : "bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400"
-    }`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-success-500" : "bg-gray-400"}`} />
-      {active ? "Active" : "Inactive"}
-    </span>
-  );
+  // Paused shows ahead of Active because it is the more specific answer to "can I count on
+  // them this week": a paused player is still active, they are just not being asked. Inactive
+  // still wins over both - someone who has left is not merely away.
+  const StatusBadge = ({ active, paused }: { active: boolean; paused?: boolean }) => {
+    const state = !active ? "inactive" : paused ? "paused" : "active";
+    const tone = {
+      active: "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500",
+      paused: "bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-warning-500",
+      inactive: "bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400",
+    }[state];
+    const dot = { active: "bg-success-500", paused: "bg-warning-500", inactive: "bg-gray-400" }[state];
+    const label = { active: "Active", paused: "Paused", inactive: "Inactive" }[state];
+    return (
+      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-theme-xs font-medium ${tone}`}>
+        <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+        {label}
+      </span>
+    );
+  };
 
   const RowActions = ({ record }: { record: IPlayer }) => (
     <div className="flex flex-wrap items-center gap-1.5">
@@ -310,7 +321,7 @@ function Players() {
                   </div>
                   <div className="truncate text-theme-xs text-gray-400 dark:text-gray-500">{record.email}</div>
                 </div>
-                <StatusBadge active={!!record.active} />
+                <StatusBadge active={!!record.active} paused={record.paused} />
               </div>
 
               <div className="mt-2.5 flex flex-wrap gap-3">
@@ -451,7 +462,7 @@ function Players() {
                     </td>
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{record.employeeId || "-"}</td>
                     <td className="px-4 py-3">
-                      <StatusBadge active={!!record.active} />
+                      <StatusBadge active={!!record.active} paused={record.paused} />
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">

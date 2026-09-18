@@ -44,6 +44,17 @@ public class Player : AuditableEntity
     /// Never surfaced to non-admin player-facing responses, same convention as Rank.</summary>
     public bool DefaultGoalkeeper { get; set; }
 
+    /// <summary>Temporarily out of circulation - travelling, injured, on leave - while remaining
+    /// a member of the club.
+    ///
+    /// Distinct from <see cref="IsActive"/>, which means they have left: a paused player keeps
+    /// their history, their stats and their place in the player list, and an admin can bring them
+    /// back with one toggle. What pausing does is stop the club asking. They are not counted in a
+    /// Match Day's expected turnout, they are not listed as someone still to respond, and no
+    /// reminder - Match Day or payment - is addressed to them. Left unpaused, an away player sits
+    /// in the "pending" column week after week and quietly makes the turnout look worse than it is.</summary>
+    public bool IsPaused { get; set; }
+
     /// <summary>Player's own opt-in/out of system-generated emails (payment/matchday reminders,
     /// teams-announced). Defaults to true - only an explicit opt-out stops delivery. Checked
     /// alongside IsActive everywhere reminder emails go out (see PlayerService's active-player

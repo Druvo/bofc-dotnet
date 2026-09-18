@@ -1856,6 +1856,12 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsPaused")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_paused");
+
                     b.Property<int?>("JerseyNumber")
                         .HasColumnType("int")
                         .HasColumnName("jersey_number");

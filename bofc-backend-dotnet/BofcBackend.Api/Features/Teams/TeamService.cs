@@ -504,7 +504,7 @@ public class TeamService(
         var matchDay = await db.MatchDays.Include(m => m.Venue).FirstOrDefaultAsync(m => m.Id == matchDayId)
             ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
 
-        var activePlayers = await db.Players.Where(p => p.IsActive && p.EmailNotificationsEnabled)
+        var activePlayers = await db.Players.Where(p => p.IsActive && !p.IsPaused && p.EmailNotificationsEnabled)
             .Select(p => new MatchDayReminderBackgroundService.ReminderPlayer(p.Id, p.Name, p.Email))
             .ToListAsync();
 

@@ -21,7 +21,10 @@ public class MatchDayParticipantPlayerService(BofcDbContext db) : IMatchDayParti
         // The old MatchDayParticipantPlayers view only ever reflected existing rows,
         // so anyone who hadn't opted in yet (or an admin trying to set status on their
         // behalf) was invisible here.
-        var activePlayers = await db.Players.Where(p => p.IsActive).ToListAsync();
+        // Paused players are left out entirely rather than listed as not-yet-responded: they have
+        // not been asked, so showing them as outstanding misrepresents who the organiser is still
+        // waiting on (see Player.IsPaused).
+        var activePlayers = await db.Players.Where(p => p.IsActive && !p.IsPaused).ToListAsync();
         var existingParticipants = await db.MatchDayParticipants
             .Where(p => p.MatchDayId == matchDayId).ToListAsync();
         var participantByPlayerId = existingParticipants.ToDictionary(p => p.PlayerId);

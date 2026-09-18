@@ -227,7 +227,21 @@ public class PlayerService(
         await db.SaveChangesAsync();
     }
 
-    public async Task<int> CountActivePlayersAsync() => await db.Players.CountAsync(p => p.IsActive);
+    /// <summary>The number of players a Match Day can expect to hear from - active and not paused.
+    ///
+    /// This is the denominator behind "30 TOTAL" and "28 PENDING" on the Match Day card, so a
+    /// player who is away for a month otherwise shows up as an outstanding response every single
+    /// week and makes the squad look permanently half-filled.</summary>
+    public async Task<int> CountActivePlayersAsync() => await db.Players.CountAsync(p => p.IsActive && !p.IsPaused);
+
+    public async Task<bool> GetPausedAsync(long id) => (await GetPlayerEntityAsync(id)).IsPaused;
+
+    public async Task SetPausedAsync(long id, bool paused)
+    {
+        var player = await GetPlayerEntityAsync(id);
+        player.IsPaused = paused;
+        await db.SaveChangesAsync();
+    }
 
     public async Task<Dictionary<int, List<GoalKeeperHistoryDto>>> GoalKeepingHistoryAsync()
     {
@@ -565,5 +579,6 @@ public class PlayerService(
         PhotoUrl = player.PhotoKey != null ? $"/files/player-photos/{player.PhotoKey}" : null,
         ThemePreference = player.ThemePreference,
         EmailNotificationsEnabled = player.EmailNotificationsEnabled,
+        Paused = player.IsPaused,
     };
 }

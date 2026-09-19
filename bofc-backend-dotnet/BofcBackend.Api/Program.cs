@@ -104,6 +104,7 @@ builder.Services.Configure<AppUrlOptions>(builder.Configuration.GetSection("Publ
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IMatchDayParticipantService, MatchDayParticipantService>();
 builder.Services.AddScoped<IMatchDayParticipantPlayerService, MatchDayParticipantPlayerService>();
+builder.Services.AddScoped<BofcBackend.Api.Features.MatchDayGuests.IMatchDayGuestService, BofcBackend.Api.Features.MatchDayGuests.MatchDayGuestService>();
 
 // Port of MatchDaySchedulerService.java's @Scheduled cron job (Asia/Dhaka 00:00/08:00/11:00).
 builder.Services.AddHostedService<MatchDayStatusSchedulerBackgroundService>();

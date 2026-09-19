@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import { canManageTeams } from "../../../utils/roleUtils";
-import { Team } from "../teamBuilderTypes";
+import { LineupTeam } from "../teamBuilderTypes";
 import {
   useGetTeamLineupQuery,
   useUpdateTeamLineupMutation,
@@ -24,7 +24,7 @@ type SelectedPlayer = { playerId: number; from: "starter" | "bench" } | null;
 
 const DEFAULT_SQUAD_SIZE = 5;
 
-function buildDefaultLineup(team: Team): { starters: ILineupPlayer[]; bench: ILineupPlayer[] } {
+function buildDefaultLineup(team: LineupTeam): { starters: ILineupPlayer[]; bench: ILineupPlayer[] } {
   const pool: ILineupPlayer[] = team.players.map((p) => ({
     playerId: p.playerId,
     playerName: p.playerName,
@@ -58,7 +58,7 @@ function rebuildPoolsForSize(starters: ILineupPlayer[], bench: ILineupPlayer[], 
 }
 
 interface SquadLineupTabProps {
-  teams: Team[];
+  teams: LineupTeam[];
 }
 
 export default function SquadLineupTab({ teams }: SquadLineupTabProps) {

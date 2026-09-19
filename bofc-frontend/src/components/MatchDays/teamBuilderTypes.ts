@@ -14,6 +14,15 @@ export interface Player {
     photoKey?: string;
 }
 
+// Guest Type - a name on the team sheet with no player profile behind it. Kept separate
+// from Player rather than faked as one, so nothing that consumes Player (squad lineup,
+// goalkeeper assignment, statistics, the edit-details modal) has to know guests exist.
+export interface Guest {
+    guestId: number;
+    name: string;
+    teamId?: number | null;
+}
+
 // Team Type
 export interface Team {
     teamId: number;
@@ -21,7 +30,13 @@ export interface Team {
     logoKey?: string;
     logoUrl?: string;
     players: Player[];
+    guests: Guest[];
 }
+
+/** What the squad/line-up builder needs from a team. Guests never appear in a line-up, so
+ * this deliberately stops short of the full Team: callers that read teams straight off the
+ * Match Day summary (the public viewer) have no guest list to hand over and do not need one. */
+export type LineupTeam = Pick<Team, "teamId" | "teamName" | "players">;
 
 // DropResult Type (from react-beautiful-dnd)
 export interface DropResult {

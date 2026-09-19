@@ -1196,6 +1196,54 @@ namespace BofcBackend.Api.Migrations
                     b.ToTable("match_day", (string)null);
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayGuest", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<long>("MatchDayId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("match_day_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<long?>("TeamId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("team_id");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchDayId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("match_day_guest", (string)null);
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayParticipant", b =>
                 {
                     b.Property<long>("Id")
@@ -3132,6 +3180,24 @@ namespace BofcBackend.Api.Migrations
                         .HasConstraintName("fk_match_day_venue");
 
                     b.Navigation("Venue");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayGuest", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.MatchDay", "MatchDay")
+                        .WithMany()
+                        .HasForeignKey("MatchDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("MatchDay");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.MatchDayParticipant", b =>

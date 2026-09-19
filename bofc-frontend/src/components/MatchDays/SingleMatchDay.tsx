@@ -11,6 +11,8 @@ import "./matchDay.css";
 import CreateTeamComponent from "./Atoms/CreateTeamComponent";
 import GenerateTeamsButton from "./Atoms/GenerateTeamsButton";
 import PlayerCard from "./Atoms/PlayerCard";
+import GuestCard from "./Atoms/GuestCard";
+import AddGuestPlayerModal from "./Atoms/AddGuestPlayerModal";
 import TeamCard from "./Atoms/TeamCard";
 import GoalKeeperDrawer from "./Atoms/GoalKeeperDrawer";
 import Badge from "../ui/badge";
@@ -60,14 +62,19 @@ function SingleMatchDay() {
   const {
     teams,
     players,
+    unassignedGuests,
     matchDaySummary,
     handleAddPlayerToTeam,
     handleRemovePlayer,
     handleRenameTeam,
     handleUploadTeamLogo,
     handleRemoveTeam,
+    handleAddGuest,
+    handleAssignGuestToTeam,
+    handleRemoveGuest,
     refetchMatchDay,
     refetchPlayer,
+    refetchGuests,
   } = useMatchDayTeams(matchDayId);
 
   const [playerSearch, setPlayerSearch] = useState("");
@@ -82,6 +89,10 @@ function SingleMatchDay() {
   const filteredPlayers = players.filter((player) =>
     player.playerName.toLowerCase().includes(playerSearch.toLowerCase())
   );
+  const filteredGuests = unassignedGuests.filter((guest) =>
+    guest.name.toLowerCase().includes(playerSearch.toLowerCase())
+  );
+  const unassignedCount = filteredPlayers.length + filteredGuests.length;
 
   const handleTabChange = (key: string) => {
     if (key === "fixtures" && !hasTeams) return;
@@ -91,6 +102,7 @@ function SingleMatchDay() {
   useEffect(() => {
     refetchMatchDay();
     refetchPlayer();
+    refetchGuests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -108,6 +120,22 @@ function SingleMatchDay() {
 
     const destinationTeamId = destination.droppableId;
     if (destinationTeamId === source.droppableId) return;
+
+    if (draggableId.startsWith("guest-")) {
+      // "guest-<guestId>" from the pool, "guest-<teamId>-<guestId>" from a team card - either
+      // way the guest id is the last segment, and the destination is all the move needs.
+      const guestId = Number(draggableId.split("-").pop());
+      if (!Number.isFinite(guestId)) {
+        console.warn(`Invalid guest draggableId: ${draggableId}`);
+        return;
+      }
+
+      handleAssignGuestToTeam(
+        guestId,
+        destinationTeamId === "players" ? null : Number(destinationTeamId)
+      );
+      return;
+    }
 
     if (source.droppableId === "players") {
       const draggedPlayerId = Number(draggableId);
@@ -157,11 +185,17 @@ function SingleMatchDay() {
   };
 
   const handleExportTeams = () => {
-    const maxPlayersCount = Math.max(...teams.map((team) => team.players.length));
+    // Guests are on the team sheet, so they are in the export too - flagged, since the
+    // person reading the spreadsheet has no other way to tell them from club members.
+    const squadNamesByTeam = teams.map((team) => [
+      ...team.players.map((player) => player.playerName),
+      ...team.guests.map((guest) => `${guest.name} (Guest)`),
+    ]);
+    const maxPlayersCount = Math.max(0, ...squadNamesByTeam.map((names) => names.length));
     const dataToExport = Array.from({ length: maxPlayersCount }, (_, index) => {
       const row: { [key: string]: string } = {};
-      teams.forEach((team) => {
-        row[team.teamName] = team.players[index]?.playerName || "";
+      teams.forEach((team, teamIndex) => {
+        row[team.teamName] = squadNamesByTeam[teamIndex][index] || "";
       });
       return row;
     });
@@ -197,6 +231,7 @@ function SingleMatchDay() {
               refetchSummary={refetchMatchDay}
             />
           )}
+          {isAdmin && <AddGuestPlayerModal onAddGuest={handleAddGuest} />}
           {isAdmin && <PickerWheelModal teams={teams} />}
           {isAdmin && hasTeams && (
             <AutoAssignGoalkeeperButton
@@ -246,6 +281,7 @@ function SingleMatchDay() {
                     handleUploadTeamLogo={handleUploadTeamLogo}
                     handleRemoveTeam={handleRemoveTeam}
                     handleAddPlayerToTeam={handleAddPlayerToTeam}
+                    handleRemoveGuest={handleRemoveGuest}
                   />
                 ))
               ) : (
@@ -256,12 +292,12 @@ function SingleMatchDay() {
             <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)]">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5">
                 <span className="flex items-center gap-2 text-theme-sm font-semibold text-gray-800 dark:text-white/90">
-                  Unassigned Pool <Badge variant="light">{filteredPlayers.length}</Badge>
+                  Unassigned Pool <Badge variant="light">{unassignedCount}</Badge>
                 </span>
                 <div className="relative w-full sm:w-[250px]">
                   <SearchOutlined className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
-                    placeholder="Search players..."
+                    placeholder="Search players and guests..."
                     value={playerSearch}
                     onChange={(e) => setPlayerSearch(e.target.value)}
                     className="h-9 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
@@ -281,7 +317,7 @@ function SingleMatchDay() {
                     }`}
                     style={{ gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))" }}
                   >
-                    {filteredPlayers.length > 0 ? (
+                    {unassignedCount > 0 ? (
                       filteredPlayers.map((player, index) => (
                         <Draggable key={player.playerId.toString()} draggableId={player.playerId.toString()} index={index}>
                           {(provided, snapshot) => (
@@ -303,9 +339,37 @@ function SingleMatchDay() {
                       ))
                     ) : (
                       <p className="text-theme-sm text-gray-400 dark:text-gray-500">
-                        {playerSearch ? "No players match your search" : "No Player Found"}
+                        {playerSearch ? "Nobody matches your search" : "No Player Found"}
                       </p>
                     )}
+                    {/* Guests follow the players in the same droppable, so their draggable
+                        index has to continue where the players' left off. */}
+                    {filteredGuests.map((guest, guestIndex) => (
+                      <Draggable
+                        key={`guest-${guest.guestId}`}
+                        draggableId={`guest-${guest.guestId}`}
+                        index={filteredPlayers.length + guestIndex}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`cursor-grab rounded-lg border p-1.5 active:cursor-grabbing ${
+                              snapshot.isDragging
+                                ? "border-brand-300 bg-brand-50 shadow-lg dark:border-brand-500/40 dark:bg-brand-500/10"
+                                : "border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]"
+                            }`}
+                            style={provided.draggableProps.style}
+                          >
+                            <GuestCard
+                              guest={guest}
+                              handleRemoveGuest={isAdmin ? () => handleRemoveGuest(guest.guestId) : undefined}
+                            />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
                     {provided.placeholder}
                   </div>
                 )}

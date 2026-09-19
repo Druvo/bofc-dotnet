@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import PlayerCard from "./PlayerCard";
+import GuestCard from "./GuestCard";
 import EditPlayerDetailsModal from "./EditPlayerDetailsModal";
 import { Team, Player } from "../teamBuilderTypes";
 import { MoreOutlined, UploadOutlined } from "@ant-design/icons";
@@ -31,6 +32,7 @@ interface TeamCardProps {
         teamPlayerRole?: string,
         jerseyNumber?: number
     ) => void;
+    handleRemoveGuest: (guestId: number) => void;
 }
 
 const TeamCard: React.FC<TeamCardProps> = ({
@@ -41,6 +43,7 @@ const TeamCard: React.FC<TeamCardProps> = ({
     handleUploadTeamLogo,
     handleRemoveTeam,
     handleAddPlayerToTeam,
+    handleRemoveGuest,
 }) => {
     const loginInfo = useSelector(selectLoginInfo);
     const canManage = canManageTeams(loginInfo.roles);
@@ -64,7 +67,7 @@ const TeamCard: React.FC<TeamCardProps> = ({
                         {logoSrc ? <img src={logoSrc} alt="" className="h-full w-full object-cover" /> : team.teamName?.charAt(0)?.toUpperCase()}
                     </div>
                     <DoubleClickTextInputField initialName={team.teamName} onNameChange={handleRenameTeamClick} isDiabled={!canManage} />
-                    <Badge variant="light">{team.players.length}</Badge>
+                    <Badge variant="light">{team.players.length + team.guests.length}</Badge>
                 </div>
                 {canManage && (
                     <div className="flex items-center gap-1.5">
@@ -185,6 +188,32 @@ const TeamCard: React.FC<TeamCardProps> = ({
                                                         setSelectedPlayer(player);
                                                         setEditModalVisible(true);
                                                     }}
+                                                />
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {team.guests.map((guest, guestIndex) => (
+                                    <Draggable
+                                        key={`guest-${guest.guestId}`}
+                                        draggableId={`guest-${team.teamId}-${guest.guestId}`}
+                                        index={team.players.length + guestIndex}
+                                    >
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                className={`rounded-lg border p-1.5 ${
+                                                    snapshot.isDragging
+                                                        ? "border-brand-300 bg-brand-50 shadow-lg dark:border-brand-500/40 dark:bg-brand-500/10"
+                                                        : "border-gray-200 bg-white dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-2)]"
+                                                }`}
+                                                style={provided.draggableProps.style}
+                                            >
+                                                <GuestCard
+                                                    guest={guest}
+                                                    handleRemoveGuest={canManage ? () => handleRemoveGuest(guest.guestId) : undefined}
                                                 />
                                             </div>
                                         )}

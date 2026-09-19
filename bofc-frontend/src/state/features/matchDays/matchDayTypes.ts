@@ -92,6 +92,7 @@ export interface MatchDaySummeryResType {
                     logoKey?: string;
                     logoUrl?: string;
                     players: MatchDayPlayerInfoType[];
+                    guests?: MatchDayGuestInfoType[];
                 }
             ];
         }
@@ -100,6 +101,19 @@ export interface MatchDaySummeryResType {
 
 export interface PlayerListToAddToTeamType extends BasicResType {
     content: MatchDayPlayerInfoType[];
+}
+
+/** A guest player: someone playing this one Match Day who is not a club member and has no
+ * profile behind the name. teamId null means they are still in the Unassigned Pool. */
+export interface MatchDayGuestInfoType {
+    guestId: number;
+    name: string;
+    teamId?: number | null;
+    matchDayId?: number;
+}
+
+export interface MatchDayGuestListType extends BasicResType {
+    content: MatchDayGuestInfoType[];
 }
 
 export interface MatchDayGoalKeeperInfoType extends BasicResType {

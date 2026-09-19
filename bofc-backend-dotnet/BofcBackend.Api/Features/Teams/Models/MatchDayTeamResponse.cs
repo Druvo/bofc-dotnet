@@ -8,4 +8,7 @@ public class MatchDayTeamResponse
     public string? LogoKey { get; set; }
     public string? LogoUrl { get; set; }
     public List<TeamPlayerResponse> Players { get; set; } = [];
+
+    /// <summary>Guest players on this team - names with no Player profile behind them.</summary>
+    public List<TeamGuestResponse> Guests { get; set; } = [];
 }

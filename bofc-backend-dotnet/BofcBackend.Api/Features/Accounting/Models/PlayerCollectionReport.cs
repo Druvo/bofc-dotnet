@@ -12,6 +12,13 @@ public class PlayerCollectionReport
     [JsonPropertyName("active")]
     public bool IsActive { get; set; }
 
+    /// <summary>Temporarily away - see Player.IsPaused. Carried alongside `active` because the
+    /// "is this player behind this month?" question is answered from this payload, and a paused
+    /// player is never chased for payment (PaymentDueReminderBackgroundService has always
+    /// skipped them). Their history stays in the report either way - pausing stops the club
+    /// asking, it does not erase what they have paid.</summary>
+    public bool Paused { get; set; }
+
     /// <summary>year -> (month -> amount).</summary>
     public Dictionary<int, Dictionary<int, decimal>> YearMonthAmount { get; set; } = [];
 }

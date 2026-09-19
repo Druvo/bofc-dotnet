@@ -237,6 +237,7 @@ public class AcCollectionService(
                 PlayerId = player.Id,
                 PlayerName = player.Name,
                 IsActive = player.IsActive,
+                Paused = player.IsPaused,
                 YearMonthAmount = [],
             };
         }
@@ -252,6 +253,7 @@ public class AcCollectionService(
                         PlayerId = player.Id,
                         PlayerName = player.Name,
                         IsActive = player.IsActive,
+                        Paused = player.IsPaused,
                         YearMonthAmount = [],
                     };
                     reportMap[player.Id] = report;

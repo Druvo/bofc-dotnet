@@ -1,6 +1,7 @@
 import React from 'react';
 import { CalendarOutlined } from '@ant-design/icons';
 import { PlayerMetric } from '../../interfaces/IPlayerCollectionMetrics';
+import { isChasedForDues } from '../../utils/paymentDues';
 import IPlayer from '../../interfaces/IPlayer';
 import Avatar from '../CommonAtoms/Avatar';
 import { toAbsolutePlayerPhotoUrl } from '../../utils/playerPhotoUtils';
@@ -66,7 +67,7 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
 
       {dataSource.map((player, index) => {
         const playerData = metrics.find((p: PlayerMetric) => p.playerId === player.key);
-        const isActive = playerData?.active ?? false;
+        const isChased = isChasedForDues(playerData);
 
         const photoUrl = playersById[player.key]?.photoUrl;
 
@@ -77,6 +78,14 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
                 <Avatar src={toAbsolutePlayerPhotoUrl(photoUrl)} name={player.playerName} seed={player.key} size={28} />
                 <div>
                   <span className="text-theme-sm font-semibold text-gray-800 dark:text-white/90">{player.playerName}</span>
+                  {playerData?.paused && (
+                    <span
+                      title="Temporarily away - not being chased for dues"
+                      className="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-theme-xs font-medium text-gray-500 dark:bg-white/5 dark:text-gray-400"
+                    >
+                      Paused
+                    </span>
+                  )}
                   <span className="ml-2 text-theme-xs text-gray-400 dark:text-gray-500">{selectedYear}</span>
                 </div>
               </div>
@@ -88,7 +97,7 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
                 const monthNumber = idx + 1;
                 const amount = player[`month_${monthNumber}`] || 0;
                 const isCurrentCell = selectedYear === currentYear && monthNumber === currentMonth;
-                const showDue = isCurrentCell && amount <= 0 && isActive;
+                const showDue = isCurrentCell && amount <= 0 && isChased;
 
                 let variant: keyof typeof monthCellClasses = 'empty';
                 if (showDue) variant = 'due';

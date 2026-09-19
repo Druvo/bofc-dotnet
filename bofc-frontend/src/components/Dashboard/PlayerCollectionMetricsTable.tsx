@@ -12,6 +12,7 @@ import {
 import { useGetPlayerCollectionMetricsQuery } from "../../state/features/account/playerCollectionMetricsSlice";
 import { useGetPlayersQuery } from "../../state/features/player/playerSlice";
 import { PlayerMetric } from "../../interfaces/IPlayerCollectionMetrics";
+import { isChasedForDues } from "../../utils/paymentDues";
 import IPlayer from "../../interfaces/IPlayer";
 import PlayerCollectionMobileView from "./PlayerCollectionMobileView";
 import LogPaymentModal from "./LogPaymentModal";
@@ -204,21 +205,30 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
           {dataSource.map((record) => {
             const player = playersById[record.key];
+            const playerData = metrics.find((p: PlayerMetric) => p.playerId === record.key);
             return (
               <tr key={record.key} className="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                 <td className="sticky left-0 z-10 whitespace-nowrap bg-white px-3 py-2 dark:bg-[var(--color-paper-3)]">
                   <div className="flex items-center gap-2.5">
                     <Avatar src={toAbsolutePlayerPhotoUrl(player?.photoUrl)} name={record.playerName} seed={record.key} size={30} />
                     <span className="font-semibold text-gray-800 dark:text-white/90">{record.playerName}</span>
+                    {/* Without this, a paused player just silently has no "Due" and the
+                        table looks like it is missing someone. */}
+                    {playerData?.paused && (
+                      <span
+                        title="Temporarily away - not being chased for dues"
+                        className="rounded-full bg-gray-100 px-2 py-0.5 text-theme-xs font-medium text-gray-500 dark:bg-white/5 dark:text-gray-400"
+                      >
+                        Paused
+                      </span>
+                    )}
                   </div>
                 </td>
                 {monthNames.map((_, idx) => {
                   const monthNumber = idx + 1;
                   const amount = record[`month_${monthNumber}`] || 0;
                   const isCurrentCell = selectedYear === currentYear && monthNumber === currentMonth;
-                  const playerData = metrics.find((p: PlayerMetric) => p.playerId === record.key);
-                  const isActive = playerData?.active ?? false;
-                  const showDue = isCurrentCell && amount <= 0 && isActive;
+                  const showDue = isCurrentCell && amount <= 0 && isChasedForDues(playerData);
                   return (
                     <td
                       key={monthNumber}

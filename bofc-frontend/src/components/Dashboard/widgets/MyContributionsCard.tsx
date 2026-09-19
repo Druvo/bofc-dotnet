@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import { useGetPlayerCollectionMetricsQuery } from "../../../state/features/account/playerCollectionMetricsSlice";
 import { PlayerMetric } from "../../../interfaces/IPlayerCollectionMetrics";
+import { isChasedForDues } from "../../../utils/paymentDues";
 import Loader from "../../ui/loader";
 
 const monthNames = [
@@ -60,7 +61,7 @@ const MyContributionsCard: React.FC = () => {
             const monthNumber = idx + 1;
             const amount = myMetric.yearMonthAmount[currentYear.toString()]?.[monthNumber] || 0;
             const isCurrentCell = monthNumber === currentMonth;
-            const showDue = isCurrentCell && amount <= 0 && myMetric.active;
+            const showDue = isCurrentCell && amount <= 0 && isChasedForDues(myMetric);
 
             let variant: keyof typeof monthCellClasses = "empty";
             if (showDue) variant = "due";

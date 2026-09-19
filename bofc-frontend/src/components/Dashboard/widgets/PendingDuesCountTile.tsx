@@ -3,6 +3,7 @@ import { WarningOutlined } from "@ant-design/icons";
 import { useGetPlayerCollectionMetricsQuery } from "../../../state/features/account/playerCollectionMetricsSlice";
 import { useGetPlayersQuery } from "../../../state/features/player/playerSlice";
 import { PlayerMetric } from "../../../interfaces/IPlayerCollectionMetrics";
+import { isDueForMonth } from "../../../utils/paymentDues";
 import { toAbsolutePlayerPhotoUrl } from "../../../utils/playerPhotoUtils";
 import Avatar from "../../CommonAtoms/Avatar";
 import FinanceStatTile from "./FinanceStatTile";
@@ -30,11 +31,9 @@ const PendingDuesCountTile: React.FC = () => {
 
   const duePlayers = useMemo(
     () =>
-      (data?.content?.metrics || []).filter((p: PlayerMetric) => {
-        if (!p.active) return false;
-        const amount = p.yearMonthAmount?.[currentYear.toString()]?.[currentMonth] || 0;
-        return amount <= 0;
-      }),
+      (data?.content?.metrics || []).filter((p: PlayerMetric) =>
+        isDueForMonth(p, currentYear, currentMonth)
+      ),
     [data, currentYear, currentMonth]
   );
 

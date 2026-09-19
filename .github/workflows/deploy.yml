@@ -189,14 +189,20 @@ jobs:
 
       - name: Start and verify
         run: |
+          # Probes /health: a dedicated liveness endpoint (Program.cs), anonymous and with no
+          # database probe. This used to hit /auth/login and accept only a 405, on the reasoning
+          # that the route existing but rejecting GET proved the app was routing - which stopped
+          # being true the moment a fallback authorization policy made that method-mismatch
+          # response a 401, and failed a healthy deploy.
+          #
+          # Note the comment lives out here rather than inside the ssh string: everything between
+          # those double quotes is one argument being built by this shell first, so a bare quote
+          # in a remote-side comment closes it early and the whole script dies with
+          # "syntax error: unexpected end of file". Which is exactly what happened.
           ssh vps "set -e
             sudo systemctl start $SERVICE
             for i in \$(seq 1 20); do
               code=\$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$HEALTH_PORT/health || true)
-              # A dedicated liveness endpoint (Program.cs), anonymous and with no database probe.
-              # This used to hit /auth/login and accept only 405 - "the route exists but rejects
-              # GET" - which stopped being true the moment a fallback authorization policy made
-              # that method-mismatch response a 401, and failed a healthy deploy.
               if [ \"\$code\" = '200' ]; then echo 'Backend is UP'; exit 0; fi
               echo \"waiting... (\$code)\"; sleep 3
             done

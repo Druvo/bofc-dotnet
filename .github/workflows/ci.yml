@@ -8,6 +8,17 @@ on:
     branches-ignore: [master]
 
 jobs:
+  workflows:
+    name: Lint workflow shell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # See the script's own docstring for why this exists. Short version: deploy.yml runs only
+      # on master, so a shell mistake there is first noticed by a failing production deploy.
+      - name: Syntax-check every run block
+        run: python3 .github/scripts/lint_workflow_shell.py
+
   backend:
     name: Build backend
     runs-on: ubuntu-latest

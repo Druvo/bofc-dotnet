@@ -3,14 +3,14 @@ import { WarningOutlined } from "@ant-design/icons";
 import { useGetPlayerCollectionMetricsQuery } from "../../../state/features/account/playerCollectionMetricsSlice";
 import { useGetPlayersQuery } from "../../../state/features/player/playerSlice";
 import { PlayerMetric } from "../../../interfaces/IPlayerCollectionMetrics";
+import { isDueForMonth } from "../../../utils/paymentDues";
 import { toAbsolutePlayerPhotoUrl } from "../../../utils/playerPhotoUtils";
 import Avatar from "../../CommonAtoms/Avatar";
 import { Spinner } from "../../ui/loader";
 
-// Reuses the same "current month, no contribution yet, active player" rule
-// PlayerCollectionMetricsTable uses to flag a cell "Due" - surfaced here as a
-// standalone list so it doesn't require opening the full table to see who's
-// behind this month.
+// Reuses the same rule PlayerCollectionMetricsTable uses to flag a cell "Due"
+// (see utils/paymentDues) - surfaced here as a standalone list so it doesn't
+// require opening the full table to see who's behind this month.
 const UpcomingDuesWidget: React.FC = () => {
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -30,11 +30,7 @@ const UpcomingDuesWidget: React.FC = () => {
 
   const duePlayers = useMemo(
     () =>
-      metrics.filter((p: PlayerMetric) => {
-        if (!p.active) return false;
-        const amount = p.yearMonthAmount?.[currentYear.toString()]?.[currentMonth] || 0;
-        return amount <= 0;
-      }),
+      metrics.filter((p: PlayerMetric) => isDueForMonth(p, currentYear, currentMonth)),
     [metrics, currentYear, currentMonth]
   );
 

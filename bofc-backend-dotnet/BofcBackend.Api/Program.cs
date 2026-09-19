@@ -210,6 +210,12 @@ builder.Services.AddAuthentication(options =>
 // surface that opts out is: auth (login, forgot/reset password), the match-day viewer's
 // read-only endpoints, the emailed vote link, the live-match SSE stream (EventSource cannot
 // send an Authorization header), and serving stored images.
+// Liveness only - deliberately no database probe. This answers "is the process up and
+// routing", which is what the deploy gate needs in order to decide whether the new build
+// started; whether SQL Server is reachable is a separate question with a separate remedy, and
+// failing a deploy over it would roll back a perfectly good build.
+builder.Services.AddHealthChecks();
+
 builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
@@ -304,6 +310,15 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// The deploy's health gate. It used to probe GET /auth/login and accept only a 405, reasoning
+// that "the route exists but rejects GET" proved the app was routing. Adding the fallback
+// authorization policy turned that 405 into a 401 - the method-mismatch endpoint carries no
+// [AllowAnonymous] of its own - so a perfectly healthy deploy sat there answering 401 until the
+// gate gave up and tried to roll back. A purpose-built endpoint says what it means and does not
+// move when authorization does; AllowAnonymous is required, or the fallback policy would close
+// this one too.
+app.MapHealthChecks("/health").AllowAnonymous();
 
 app.MapControllers();
 

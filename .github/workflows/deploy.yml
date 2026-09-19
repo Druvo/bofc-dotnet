@@ -192,9 +192,12 @@ jobs:
           ssh vps "set -e
             sudo systemctl start $SERVICE
             for i in \$(seq 1 20); do
-              code=\$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$HEALTH_PORT/auth/login || true)
-              # 405 = the route exists but rejects GET, i.e. the app is up and routing.
-              if [ \"\$code\" = '405' ]; then echo 'Backend is UP'; exit 0; fi
+              code=\$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$HEALTH_PORT/health || true)
+              # A dedicated liveness endpoint (Program.cs), anonymous and with no database probe.
+              # This used to hit /auth/login and accept only 405 - "the route exists but rejects
+              # GET" - which stopped being true the moment a fallback authorization policy made
+              # that method-mismatch response a 401, and failed a healthy deploy.
+              if [ \"\$code\" = '200' ]; then echo 'Backend is UP'; exit 0; fi
               echo \"waiting... (\$code)\"; sleep 3
             done
             echo 'Backend did not come up in time'; exit 1"
@@ -214,6 +217,13 @@ jobs:
         run: |
           ssh vps "set -e
             SNAP=$DEPLOY_DIR/snapshots/${{ github.run_id }}
+            # Stop first. 'Start and verify' has already started the service by the time any
+            # rollback runs, so copying over its own files failed with 'Text file busy' on the
+            # apphost - and because of 'set -e', it failed *part way through*, leaving publish/ a
+            # mix of the old and new builds. The running process kept serving the new code it had
+            # already loaded, so nothing looked wrong until the next restart would silently have
+            # brought back the old build.
+            sudo systemctl stop $SERVICE || true
             if [ -d \$SNAP/publish ]; then
               cp -r \$SNAP/publish/. $DEPLOY_DIR/publish/
               chmod +x $DEPLOY_DIR/publish/BofcBackend.Api || true

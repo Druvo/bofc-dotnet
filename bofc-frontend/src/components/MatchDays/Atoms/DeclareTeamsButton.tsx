@@ -375,7 +375,7 @@ export default function DeclareTeamsButton({
                   flexShrink: 0,
                 }}
               >
-                {team.players.length}
+                {team.players.length + team.guests.length}
               </span>
             </div>
 
@@ -388,7 +388,10 @@ export default function DeclareTeamsButton({
                     alignItems: "center",
                     gap: 8,
                     padding: "5px 3px",
-                    borderBottom: pIndex < team.players.length - 1 ? `1px solid rgba(255,255,255,0.06)` : "none",
+                    borderBottom:
+                      pIndex < team.players.length - 1 || team.guests.length > 0
+                        ? `1px solid rgba(255,255,255,0.06)`
+                        : "none",
                   }}
                 >
                   <PlayerAvatar name={player.playerName} seed={player.playerId} size={22} src={toAbsolutePlayerPhotoUrl(player.photoUrl)} />
@@ -445,7 +448,51 @@ export default function DeclareTeamsButton({
                   )}
                 </div>
               ))}
-              {team.players.length === 0 && <span style={{ fontSize: 14, color: "#6b8172" }}>No players yet</span>}
+              {/* Guests sit under the players on the team sheet, marked as guests: they are
+                  playing, so the squad list would be wrong without them, but they are not club
+                  members and have no jersey, position or captaincy to show. */}
+              {team.guests.map((guest, gIndex) => (
+                <div
+                  key={`guest-${guest.guestId}`}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "5px 3px",
+                    borderBottom: gIndex < team.guests.length - 1 ? `1px solid rgba(255,255,255,0.06)` : "none",
+                  }}
+                >
+                  <PlayerAvatar name={guest.name} seed={`guest-${guest.guestId}`} size={22} />
+                  <span
+                    style={{
+                      fontSize: 14,
+                      minWidth: 0,
+                      flexShrink: 1,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {guest.name}
+                  </span>
+                  <span
+                    style={{
+                      background: "rgba(255,255,255,0.08)",
+                      color: "#dcdfe3",
+                      borderRadius: 999,
+                      padding: "2px 9px",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      flexShrink: 0,
+                    }}
+                  >
+                    Guest
+                  </span>
+                </div>
+              ))}
+              {team.players.length === 0 && team.guests.length === 0 && (
+                <span style={{ fontSize: 14, color: "#6b8172" }}>No players yet</span>
+              )}
             </div>
           </div>
         ))}

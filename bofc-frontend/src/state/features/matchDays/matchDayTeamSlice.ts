@@ -3,6 +3,8 @@ import { BasicResType } from "../../responesTypes";
 import {
     PlayerListToAddToTeamType,
     MatchDayPlayerInfoType,
+    MatchDayGuestListType,
+    MatchDayGuestInfoType,
 } from "./matchDayTypes";
 
 // "matchDays" is also declared in matchDaysSlice.ts - declaring the same tag type again here is
@@ -279,6 +281,49 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
             }),
         }),
 
+        /** Every guest player on this MatchDay, assigned and unassigned alike. Guests are names
+         * only - no player profile, no participation record, nothing in statistics - so they come
+         * from their own endpoint rather than the participant list the Unassigned Pool is built
+         * from. Callers split them on teamId (null = still in the pool). */
+        matchDayGuests: builder.query<MatchDayGuestListType, { matchDayId: number }>({
+            query: ({ matchDayId }) => `match-day-guests/matchday/${matchDayId}`,
+            providesTags: ["matchDayTeam"],
+        }),
+
+        addMatchDayGuest: builder.mutation<
+            BasicResType & { content: MatchDayGuestInfoType },
+            { matchDayId: number; name: string }
+        >({
+            query: ({ matchDayId, name }) => ({
+                url: `match-day-guests`,
+                method: "POST",
+                body: { matchDayId, name },
+            }),
+            invalidatesTags: ["matchDayTeam", "matchDays"],
+        }),
+
+        /** Drag-and-drop between the Unassigned Pool and a team card. teamId null sends the
+         * guest back to the pool. */
+        assignMatchDayGuestToTeam: builder.mutation<
+            BasicResType & { content: MatchDayGuestInfoType },
+            { guestId: number; teamId: number | null }
+        >({
+            query: ({ guestId, teamId }) => ({
+                url: `match-day-guests/${guestId}/team`,
+                method: "PUT",
+                body: { teamId },
+            }),
+            invalidatesTags: ["matchDayTeam", "matchDays"],
+        }),
+
+        deleteMatchDayGuest: builder.mutation<BasicResType, { guestId: number }>({
+            query: ({ guestId }) => ({
+                url: `match-day-guests/${guestId}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["matchDayTeam", "matchDays"],
+        }),
+
         /** "Send Match Day Reminder" button - manual only, triggers the exact same reminder email
          * the hourly scheduler sends automatically, right now, for just this MatchDay. */
         sendMatchDayReminderEmail: builder.mutation<BasicResType & { content: { sent: number } }, { matchDayId: number }>({
@@ -305,4 +350,8 @@ export const {
     useClearGoalkeepersMutation,
     useDeclareTeamsMutation,
     useSendMatchDayReminderEmailMutation,
+    useMatchDayGuestsQuery,
+    useAddMatchDayGuestMutation,
+    useAssignMatchDayGuestToTeamMutation,
+    useDeleteMatchDayGuestMutation,
 } = matchDayTeamApi;

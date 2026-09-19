@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 import { useGetMatchDaySummaryQuery } from "../state/features/matchDays/matchDaysSlice";
 import {
@@ -9,6 +9,10 @@ import {
     useRemovePlayerFromTeamMutation,
     useRenameTeamMutation,
     usePresignTeamLogoUploadMutation,
+    useMatchDayGuestsQuery,
+    useAddMatchDayGuestMutation,
+    useAssignMatchDayGuestToTeamMutation,
+    useDeleteMatchDayGuestMutation,
 } from "../state/features/matchDays/matchDayTeamSlice";
 import { normalizeErrorMessage } from "../utils/normalizeErrorMessage";
 
@@ -39,12 +43,21 @@ interface TeamPlayer {
     photoKey?: string;
 }
 
+/** A guest player - a name someone typed on the Team Building page for one Match Day, with
+ * no Player profile behind it. teamId null means they are still in the Unassigned Pool. */
+interface Guest {
+    guestId: number;
+    name: string;
+    teamId: number | null;
+}
+
 interface Teams {
     teamId: number;
     teamName: string;
     logoKey?: string;
     logoUrl?: string;
     players: TeamPlayer[];
+    guests: Guest[];
 }
 
 const useMatchDayTeams = (matchDayId: number) => {
@@ -56,15 +69,26 @@ const useMatchDayTeams = (matchDayId: number) => {
     const { data: playerListToAddToTeam, refetch: refetchPlayer } =
         usePlayerListToAddToTeamQuery(matchDayQueryParams);
 
+    // Guests come from their own endpoint rather than the MatchDay summary's per-team `guests`
+    // field, even though the summary carries them too (for the public viewer). One list is the
+    // single source for both the pool and the team cards here, so an optimistic drag can never
+    // leave the two halves of the page disagreeing about where a guest is.
+    const { data: guestList, refetch: refetchGuests } =
+        useMatchDayGuestsQuery(matchDayQueryParams);
+
     const [addPlayerToTeam] = useAddPlayerToTeamMutation();
     const [updatePlayerInTeam] = useUpdatePlayerInTeamMutation();
     const [deleteMatchDayTeam] = useDeleteMatchDayTeamMutation();
     const [removePlayerFromTeam] = useRemovePlayerFromTeamMutation();
     const [renameTeam] = useRenameTeamMutation();
     const [presignTeamLogoUpload] = usePresignTeamLogoUploadMutation();
+    const [addMatchDayGuest] = useAddMatchDayGuestMutation();
+    const [assignMatchDayGuestToTeam] = useAssignMatchDayGuestToTeamMutation();
+    const [deleteMatchDayGuest] = useDeleteMatchDayGuestMutation();
 
     const [teams, setTeams] = useState<Teams[]>([]);
     const [players, setPlayers] = useState<Player[]>([]);
+    const [guests, setGuests] = useState<Guest[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -89,6 +113,7 @@ const useMatchDayTeams = (matchDayId: number) => {
                     photoUrl: player.photoUrl,
                     photoKey: player.photoKey,
                 })),
+                guests: [],
             }));
             setTeams(teams);
         }
@@ -106,6 +131,32 @@ const useMatchDayTeams = (matchDayId: number) => {
             setPlayers(players);
         }
     }, [matchDaySummary, playerListToAddToTeam]);
+
+    useEffect(() => {
+        if (guestList) {
+            setGuests(
+                (guestList.content || []).map((guest) => ({
+                    guestId: guest.guestId,
+                    name: guest.name,
+                    teamId: guest.teamId ?? null,
+                }))
+            );
+        }
+    }, [guestList]);
+
+    const teamsWithGuests = useMemo(
+        () =>
+            teams.map((team) => ({
+                ...team,
+                guests: guests.filter((guest) => guest.teamId === team.teamId),
+            })),
+        [teams, guests]
+    );
+
+    const unassignedGuests = useMemo(
+        () => guests.filter((guest) => guest.teamId === null),
+        [guests]
+    );
 
     const handleAddPlayerToTeam = async (
         playingPosition: string,
@@ -426,9 +477,63 @@ const useMatchDayTeams = (matchDayId: number) => {
         }
     };
 
+    /** Returns whether the guest was actually added, so the caller's form can stay open with
+     * the typed name intact when it wasn't. */
+    const handleAddGuest = async (name: string): Promise<boolean> => {
+        const trimmedName = name.trim();
+        if (!trimmedName) return false;
+
+        try {
+            setIsLoading(true);
+            await addMatchDayGuest({ matchDayId, name: trimmedName }).unwrap();
+            toast.success(`${trimmedName} added to the Unassigned Pool`);
+            await refetchGuests();
+            return true;
+        } catch (error: any) {
+            toast.error(normalizeErrorMessage(error?.data || error, "Failed to add the guest player"));
+            await refetchGuests();
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    /** teamId null sends the guest back to the Unassigned Pool. */
+    const handleAssignGuestToTeam = async (guestId: number, teamId: number | null) => {
+        // Optimistic: dragging a card that snaps back while the request is in flight looks
+        // broken, and moving a guest is a single nullable column - nothing to reconcile.
+        const previousGuests = guests;
+        setGuests((prev) =>
+            prev.map((guest) => (guest.guestId === guestId ? { ...guest, teamId } : guest))
+        );
+
+        try {
+            await assignMatchDayGuestToTeam({ guestId, teamId }).unwrap();
+        } catch (error: any) {
+            setGuests(previousGuests);
+            toast.error(normalizeErrorMessage(error?.data || error, "Failed to move the guest player"));
+            await refetchGuests();
+        }
+    };
+
+    const handleRemoveGuest = async (guestId: number) => {
+        const previousGuests = guests;
+        setGuests((prev) => prev.filter((guest) => guest.guestId !== guestId));
+
+        try {
+            await deleteMatchDayGuest({ guestId }).unwrap();
+            toast.info("Guest player removed");
+        } catch (error: any) {
+            setGuests(previousGuests);
+            toast.error(normalizeErrorMessage(error?.data || error, "Failed to remove the guest player"));
+            await refetchGuests();
+        }
+    };
+
     return {
-        teams,
+        teams: teamsWithGuests,
         players,
+        unassignedGuests,
         isLoading,
         matchDaySummary,
         refetchMatchDay,
@@ -438,6 +543,10 @@ const useMatchDayTeams = (matchDayId: number) => {
         handleRenameTeam,
         handleUploadTeamLogo,
         handleRemoveTeam,
+        handleAddGuest,
+        handleAssignGuestToTeam,
+        handleRemoveGuest,
+        refetchGuests,
     };
 };
 

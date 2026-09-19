@@ -40,6 +40,7 @@ public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUser
     public DbSet<PlayerGoalkeepingHistory> PlayerGoalkeepingHistories => Set<PlayerGoalkeepingHistory>();
     public DbSet<MatchDayParticipant> MatchDayParticipants => Set<MatchDayParticipant>();
     public DbSet<MatchDayParticipantPlayer> MatchDayParticipantPlayers => Set<MatchDayParticipantPlayer>();
+    public DbSet<MatchDayGuest> MatchDayGuests => Set<MatchDayGuest>();
 
     // Phase 4 - accounting/ledger domain
     public DbSet<CostType> CostTypes => Set<CostType>();

@@ -112,6 +112,15 @@ public class TeamService(
             db.Matches.RemoveRange(teamMatches);
         }
 
+        // Back to the Unassigned Pool rather than deleted along with the team: the FK is
+        // deliberately non-cascading (see MatchDayGuestConfiguration), and an organiser who
+        // deletes a team to redo it should not have to retype the guests they added.
+        var teamGuests = await db.MatchDayGuests.Where(g => g.TeamId == teamId).ToListAsync();
+        foreach (var guest in teamGuests)
+        {
+            guest.TeamId = null;
+        }
+
         db.Teams.Remove(team);
 
         // If this was the last team on the MatchDay, clear the auto-team-generation flag too -
@@ -956,6 +965,16 @@ public class TeamService(
             .Where(t => t.MatchDayId == matchDay.Id)
             .ToListAsync();
 
+        // One query for the whole MatchDay rather than a navigation on Team: guests are a
+        // side table that only the team sheet cares about, and loading them here keeps every
+        // other Team query untouched.
+        var guestsByTeam = (await db.MatchDayGuests
+                .Where(g => g.MatchDayId == matchDay.Id && g.TeamId != null)
+                .OrderBy(g => g.Id)
+                .ToListAsync())
+            .GroupBy(g => g.TeamId!.Value)
+            .ToDictionary(group => group.Key, group => group.ToList());
+
         return new MatchDayWithTeamsResponse
         {
             Id = matchDay.Id,
@@ -970,11 +989,13 @@ public class TeamService(
             VenueMapLink = matchDay.Venue.MapLink,
             ActiveStatus = matchDay.IsActive,
             IsWeeklyMatchDay = matchDay.IsWeeklyMatchDay,
-            Teams = teams.Select(ConvertToMatchDayTeamResponse).ToList(),
+            Teams = teams.Select(team => ConvertToMatchDayTeamResponse(team, guestsByTeam)).ToList(),
         };
     }
 
-    private MatchDayTeamResponse ConvertToMatchDayTeamResponse(Team team) => new()
+    private MatchDayTeamResponse ConvertToMatchDayTeamResponse(
+        Team team,
+        IReadOnlyDictionary<long, List<MatchDayGuest>> guestsByTeam) => new()
     {
         TeamId = team.Id,
         TeamName = team.TeamName,
@@ -994,6 +1015,14 @@ public class TeamService(
             PhotoKey = tp.Player.PhotoKey,
             PhotoUrl = BuildPlayerPhotoUrl(tp.Player.PhotoKey),
         }).ToList(),
+        Guests = guestsByTeam.TryGetValue(team.Id, out var guests)
+            ? guests.Select(guest => new TeamGuestResponse
+            {
+                GuestId = guest.Id,
+                TeamId = team.Id,
+                Name = guest.Name,
+            }).ToList()
+            : [],
     };
 
     private async Task<bool> IsPlayerAssignedToAnyTeamInMatchDayAsync(long matchDayId, long playerId)

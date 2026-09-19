@@ -1,3 +1,4 @@
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Enums;
 using BofcBackend.Api.Features.Accounting.Models;
@@ -162,7 +163,7 @@ public class AccountReportService(BofcDbContext db, AcChartService acChartServic
     /// <summary>Scoped to the cash chart only - see GetMonthlyAccountSummaryAsync's remarks; same fix.</summary>
     public async Task<List<MonthWiseSummaryResponse>> GetMonthlyIncomeAndExpenseSummaryAsync(int? year)
     {
-        var targetYear = year ?? DateTime.Now.Year;
+        var targetYear = year ?? ClubTime.Now.Year;
         var cashChart = await acChartService.GetCashChartAsync();
 
         var rows = await db.AcVoucherDetails

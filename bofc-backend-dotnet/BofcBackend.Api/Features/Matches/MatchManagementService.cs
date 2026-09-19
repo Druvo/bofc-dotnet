@@ -2,6 +2,7 @@ using System.Net;
 using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Common.RealTime;
 using BofcBackend.Api.Common.Security;
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Domain.Enums;
@@ -640,13 +641,17 @@ public class MatchManagementService(
             // StartedAt is true UTC (DateTime.UtcNow) while MatchDate is naive-local Dhaka
             // wall-clock (see MatchDay.MatchDayDate's doc comment - Match inherits the same
             // convention from FixtureGenerationService/WeeklyMatchDayTeamGenerator, which build
-            // it directly off MatchDayDate with no conversion) - ConvertTimeFromUtc against the
-            // host's local timezone (the same "host is configured for Dhaka" assumption every
-            // DateTime.Now call in this codebase already relies on) brings it into the same
-            // naive-local space instead of mixing two different absolute epochs.
+            // it directly off MatchDayDate with no conversion) - so StartedAt has to be read as
+            // club time before the two can be compared, or the projected end mixes two different
+            // absolute epochs.
+            //
+            // This used to convert against TimeZoneInfo.Local, which is only Dhaka if the host
+            // says so. On production - Etc/UTC - the conversion was a no-op and the projected end
+            // time came out six hours adrift. ClubTime.FromUtc states the zone instead of
+            // inheriting it from the machine.
             EndTime = match.MatchDurationMinutes != null
                 ? (match.StartedAt is { } startedAtUtc
-                    ? TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(startedAtUtc, DateTimeKind.Utc), TimeZoneInfo.Local)
+                    ? ClubTime.FromUtc(startedAtUtc)
                     : match.MatchDate).AddMinutes(match.MatchDurationMinutes.Value)
                 : null,
             MatchStatus = match.MatchStatus.ToString(),

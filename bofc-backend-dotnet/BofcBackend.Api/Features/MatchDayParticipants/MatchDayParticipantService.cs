@@ -47,7 +47,7 @@ public class MatchDayParticipantService(
         // MatchDayDate is naive-local (Dhaka wall-clock, see MatchDay.cs) - compare against
         // DateTime.Now, not UtcNow, matching TeamService.ValidateMatchDayDateAsync's convention.
         // Comparing against UtcNow here previously let RSVPs happen up to ~6h after real kickoff.
-        if (matchDay.MatchDayDate < DateTime.Now)
+        if (matchDay.MatchDayDate < ClubTime.Now)
         {
             throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayDateCannotBePastDate, HttpStatusCode.BadRequest);
         }
@@ -72,7 +72,7 @@ public class MatchDayParticipantService(
                 throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayTeamsAlreadyBuilt, HttpStatusCode.BadRequest);
             }
 
-            if (settings.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now))
+            if (settings.IsVotingLockedFor(matchDay.MatchDayDate, ClubTime.Now))
             {
                 throw new MatchDayServiceException(RestErrorMessageDetail.VotingLocked, HttpStatusCode.BadRequest);
             }
@@ -231,7 +231,7 @@ public class MatchDayParticipantService(
 
         var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
         var teamsBuilt = await db.Teams.AnyAsync(t => t.MatchDayId == latestMatchDay.Id);
-        var votingLocked = settings?.IsVotingLockedFor(latestMatchDay.MatchDayDate, DateTime.Now, teamsBuilt) ?? false;
+        var votingLocked = settings?.IsVotingLockedFor(latestMatchDay.MatchDayDate, ClubTime.Now, teamsBuilt) ?? false;
 
         return new LatestMatchDayWithUserParticipantsResponse
         {

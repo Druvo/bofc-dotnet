@@ -1,6 +1,7 @@
 using System.Net;
 using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Common.Exceptions;
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Features.MatchDayParticipants.Models;
@@ -49,7 +50,7 @@ public class MatchDayParticipantPlayerService(BofcDbContext db) : IMatchDayParti
 
         var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
         var teamsBuilt = await db.Teams.AnyAsync(t => t.MatchDayId == matchDay.Id);
-        var votingLocked = settings?.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now, teamsBuilt) ?? false;
+        var votingLocked = settings?.IsVotingLockedFor(matchDay.MatchDayDate, ClubTime.Now, teamsBuilt) ?? false;
 
         return new MatchDayWithPlayersResponse
         {

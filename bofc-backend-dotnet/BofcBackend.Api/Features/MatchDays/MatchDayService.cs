@@ -217,7 +217,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
 
         // MatchDayDate is local (Dhaka) wall-clock time everywhere it's written - comparing
         // against DateTime.UtcNow here is a 6-hour-off comparison (see SaveMatchDayAsync).
-        var now = DateTime.Now;
+        var now = ClubTime.Now;
 
         // MatchDays without fixtures yet - date-based conclusion only.
         var withoutMatches = await db.MatchDays
@@ -349,7 +349,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         // Exclude those stale rows here instead of surfacing them as "latest".
         // MatchDayDate is local (Dhaka) wall-clock - DateTime.Now.Date, not UtcNow.Date, or this
         // filter is itself off by up to 6h (the exact bug it exists to guard against).
-        var today = DateTime.Now.Date;
+        var today = ClubTime.Today;
         var matchDay = await db.MatchDays.Include(t => t.Venue)
             .Where(t => t.MatchDayStatus == MatchDayStatus.UPCOMING
                 || (t.MatchDayStatus == MatchDayStatus.ONGOING && t.MatchDayDate.Date >= today))
@@ -361,7 +361,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
 
     public async Task<MatchDayResponse?> GetCurrentMatchDayAsync()
     {
-        var today = DateTime.Now.Date;
+        var today = ClubTime.Today;
         var matchDay = await db.MatchDays.Include(t => t.Venue)
             .Where(t => t.IsWeeklyMatchDay
                 && (t.MatchDayStatus == MatchDayStatus.UPCOMING
@@ -426,7 +426,7 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
 
     private static MatchDayStatus ComputeInitialStatus(DateTime matchDayDate, int? durationMinutes)
     {
-        var now = DateTime.Now;
+        var now = ClubTime.Now;
         if (matchDayDate > now) return MatchDayStatus.UPCOMING;
 
         var end = matchDayDate.AddMinutes(durationMinutes is > 0 ? durationMinutes.Value : 90);

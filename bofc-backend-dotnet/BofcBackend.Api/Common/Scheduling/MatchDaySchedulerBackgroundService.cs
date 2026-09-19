@@ -1,3 +1,4 @@
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
@@ -47,7 +48,7 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
         if (settings is not { WeeklyMatchDayEnabled: true } || settings.WeeklyMatchDayVenueId == null) return;
         if (settings.WeeklyMatchDaySlots.Count == 0) return;
 
-        await GenerateForCurrentMonthAsync(db, settings, DateTime.Now);
+        await GenerateForCurrentMonthAsync(db, settings, ClubTime.Now);
 
         if (settings.WeeklyMatchDayAutoTeamsEnabled)
         {
@@ -61,7 +62,7 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
     /// actually got teams (some may be skipped - see WeeklyMatchDayTeamGenerator.GenerateAsync).</summary>
     public static async Task<int> GenerateDueTeamsAsync(BofcDbContext db, WeeklyMatchDayTeamGenerator teamGenerator, int maxPlayersPerTeam, int leadHours, ILogger? logger = null)
     {
-        var now = DateTime.Now;
+        var now = ClubTime.Now;
         var dueMatchDayIds = await db.MatchDays
             .Where(t => t.IsWeeklyMatchDay && !t.AutoTeamsGenerated
                 && t.MatchDayDate > now && t.MatchDayDate <= now.AddHours(leadHours))

@@ -4,6 +4,7 @@ using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Common.Email;
 using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Common.Security;
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
@@ -745,7 +746,7 @@ public class EmailTemplateService(
             {
                 ["PlayerName"] = sampleName,
                 ["MatchDayName"] = "Saturday Football",
-                ["MatchDayDateTime"] = DateTime.Now.AddDays(3).ToString("MMMM d, yyyy 'at' h:mm tt"),
+                ["MatchDayDateTime"] = ClubTime.Now.AddDays(3).ToString("MMMM d, yyyy 'at' h:mm tt"),
                 ["VenueName"] = "Sample Venue",
                 ["VoteButtons"] = sampleVoteButtons,
             };
@@ -757,7 +758,7 @@ public class EmailTemplateService(
             return new Dictionary<string, string>
             {
                 ["PlayerName"] = sampleName,
-                ["MonthYear"] = DateTime.Now.ToString("MMMM yyyy"),
+                ["MonthYear"] = ClubTime.Now.ToString("MMMM yyyy"),
             };
         }
 
@@ -786,7 +787,7 @@ public class EmailTemplateService(
             {
                 ["PlayerName"] = sampleName,
                 ["MatchDayName"] = "Saturday Football",
-                ["MatchDayDateTime"] = DateTime.Now.AddDays(3).ToString("MMMM d, yyyy 'at' h:mm tt"),
+                ["MatchDayDateTime"] = ClubTime.Now.AddDays(3).ToString("MMMM d, yyyy 'at' h:mm tt"),
                 ["VenueName"] = "Sample Venue",
                 ["TeamBuildingUrl"] = $"{websiteBaseUrl}/match-days/join-match-day/0",
                 ["TeamsImage"] = TeamsGeneratedSampleImage("TEAM LINE-UPS"),

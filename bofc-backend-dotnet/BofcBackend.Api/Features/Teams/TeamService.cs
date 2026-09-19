@@ -509,7 +509,7 @@ public class TeamService(
             .ToListAsync();
 
         var sent = await MatchDayReminderBackgroundService.SendForMatchDayAsync(
-            db, emailSender, emailTemplateService, voteTokenService, appUrlOptions, logger, matchDay, activePlayers, DateTime.Now);
+            db, emailSender, emailTemplateService, voteTokenService, appUrlOptions, logger, matchDay, activePlayers, ClubTime.Now);
 
         await db.SaveChangesAsync();
         return sent;
@@ -1018,7 +1018,7 @@ public class TeamService(
     {
         var matchDay = await db.MatchDays.FirstOrDefaultAsync(t => t.Id == matchDayId)
             ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
-        if (matchDay.MatchDayDate < DateTime.Now)
+        if (matchDay.MatchDayDate < ClubTime.Now)
         {
             throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayDateCannotBePastDate, HttpStatusCode.BadRequest);
         }

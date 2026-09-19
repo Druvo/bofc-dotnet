@@ -1,6 +1,7 @@
 using System.Net;
 using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Common.Exceptions;
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Domain.Enums;
@@ -199,7 +200,7 @@ public class LogicNodeService(BofcDbContext db, LogicNodeExecutor logicNodeExecu
         var result = await logicNodeExecutor.ExecuteLogicNodeAsync(logicNode);
 
         logicNode.ExecutionCount += 1;
-        logicNode.LastExecutedAt = DateTime.Now;
+        logicNode.LastExecutedAt = ClubTime.Now;
         await db.SaveChangesAsync();
 
         logger.LogInformation("Logic node executed successfully. Execution count: {Count}. Teams advanced: {Teams}",

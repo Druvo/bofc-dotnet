@@ -1,5 +1,6 @@
 using BofcBackend.Api.Common.Email;
 using BofcBackend.Api.Common.Security;
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
@@ -51,7 +52,7 @@ public class MatchDayReminderBackgroundService(IServiceScopeFactory scopeFactory
         var settings = await db.SystemSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
         if (settings is not { NotifyMatchDayReminderEnabled: true }) return;
 
-        var now = DateTime.Now;
+        var now = ClubTime.Now;
         var cutoff = now.AddDays(settings.MatchDayReminderDaysBefore);
 
         var dueMatchDays = await db.MatchDays
@@ -101,10 +102,13 @@ public class MatchDayReminderBackgroundService(IServiceScopeFactory scopeFactory
             .ToHashSet();
         var targetPlayers = activePlayers.Where(p => !votedPlayerIds.Contains(p.Id)).ToList();
 
-        // Advance the "last sent" marker even with zero targets this round (everyone's
-        // already voted) so the interval check above doesn't re-query every single tick.
-        matchDay.ReminderSentAt = now;
-        if (targetPlayers.Count == 0) return 0;
+        // Nothing to send: everyone has already voted. Still advance the "last sent" marker, so
+        // the interval check above doesn't re-query this Match Day on every single tick.
+        if (targetPlayers.Count == 0)
+        {
+            matchDay.ReminderSentAt = now;
+            return 0;
+        }
 
         // The vote link must keep working right up to kickoff (the vote endpoint itself
         // rejects a past MatchDayDate) plus a little slack for clock drift/mail delay.
@@ -164,14 +168,21 @@ public class MatchDayReminderBackgroundService(IServiceScopeFactory scopeFactory
             }
         }
 
-        // ReminderSentAt was already advanced above, so a silently-failing batch would otherwise
-        // wait a full MatchDayReminderRepeatHours before anyone noticed - and produce no signal at
-        // all in between. Say so loudly instead.
-        if (sent == 0 && targetPlayers.Count > 0)
+        // The marker moves only once something actually went out. It used to be advanced before
+        // the sends, which meant a batch where every message failed still counted as "reminded"
+        // and the next attempt was a full MatchDayReminderRepeatHours away - the reminder for
+        // that Match Day could be silently lost for the day over a transient SMTP fault. Leaving
+        // it untouched lets the next tick retry, which for an hourly scheduler is the difference
+        // between one lost hour and one lost reminder.
+        if (sent > 0)
+        {
+            matchDay.ReminderSentAt = now;
+        }
+        else
         {
             logger.LogError(
                 "MatchDay reminder for {MatchDayId} reached none of its {Count} target player(s) - every send failed. "
-                + "Check the SMTP settings; the next attempt is not due for another reminder interval.",
+                + "Check the SMTP settings; this will be retried on the next scheduler tick.",
                 matchDay.Id, targetPlayers.Count);
         }
 

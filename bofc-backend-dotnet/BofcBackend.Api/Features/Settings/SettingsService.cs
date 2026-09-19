@@ -1,6 +1,7 @@
 using BofcBackend.Api.Common.Email;
 using BofcBackend.Api.Common.Exceptions;
 using BofcBackend.Api.Common.Scheduling;
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
@@ -177,7 +178,7 @@ public class SettingsService(
             throw new BadRequestException("At least one match day/time slot is required before generating.");
         }
 
-        var createdMatchDays = await MatchDaySchedulerBackgroundService.GenerateForCurrentMonthAsync(db, settings, DateTime.Now);
+        var createdMatchDays = await MatchDaySchedulerBackgroundService.GenerateForCurrentMonthAsync(db, settings, ClubTime.Now);
 
         var teamsGenerated = settings.WeeklyMatchDayAutoTeamsEnabled
             ? await MatchDaySchedulerBackgroundService.GenerateDueTeamsAsync(
@@ -195,7 +196,7 @@ public class SettingsService(
 
     public async Task<(int Due, int Sent)> SendPaymentDueReminderNowAsync(int? year, int? month)
     {
-        var now = DateTime.Now;
+        var now = ClubTime.Now;
         var targetYear = year ?? now.Year;
         var targetMonth = month ?? now.Month;
         if (targetMonth is < 1 or > 12) throw new BadRequestException("month must be between 1 and 12.");

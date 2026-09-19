@@ -1,4 +1,5 @@
 using BofcBackend.Api.Common.Email;
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
@@ -46,7 +47,7 @@ public class PaymentDueReminderBackgroundService(IServiceScopeFactory scopeFacto
         var settings = await db.SystemSettings.FirstOrDefaultAsync(s => s.Id == 1);
         if (settings is not { NotifyPaymentDueEnabled: true }) return;
 
-        var today = DateTime.Now;
+        var today = ClubTime.Now;
         if (today.Day < settings.PaymentDueReminderDayOfMonth) return;
         if (settings.LastPaymentReminderSentAt != null
             && (today - settings.LastPaymentReminderSentAt.Value).TotalDays < settings.PaymentDueReminderRepeatDays)

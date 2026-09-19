@@ -1,5 +1,6 @@
 using System.Net;
 using BofcBackend.Api.Common.Security;
+using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Domain.Enums;
@@ -47,7 +48,7 @@ public class MatchDayVoteController(BofcDbContext db, IMatchDayVoteTokenService 
         {
             return Page("Match day not found", "This match day no longer exists.", false);
         }
-        if (matchDay.MatchDayDate < DateTime.Now)
+        if (matchDay.MatchDayDate < ClubTime.Now)
         {
             return Page("Too late", $"\"{Encode(matchDay.Name)}\" has already started or finished, so RSVPs are closed.", false);
         }
@@ -68,7 +69,7 @@ public class MatchDayVoteController(BofcDbContext db, IMatchDayVoteTokenService 
                 return Page("Teams already set", $"Teams have already been drafted for \"{Encode(matchDay.Name)}\", so RSVPs are closed. Contact a coordinator if you need to change your response.", false);
             }
 
-            if (settings.IsVotingLockedFor(matchDay.MatchDayDate, DateTime.Now))
+            if (settings.IsVotingLockedFor(matchDay.MatchDayDate, ClubTime.Now))
             {
                 return Page("Voting locked", $"RSVPs for \"{Encode(matchDay.Name)}\" closed {settings.VotingLockHoursBeforeMatch} hour(s) before kickoff. Open the app to contact a coordinator if you need to change your response.", false);
             }

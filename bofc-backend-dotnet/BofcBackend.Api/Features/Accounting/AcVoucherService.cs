@@ -92,7 +92,7 @@ public class AcVoucherService(
         if (request.PostFlag && !existingVoucher.PostFlag)
         {
             existingVoucher.PostedById = currentUserService.GetPlayerId();
-            existingVoucher.PostDate = DateTime.Now;
+            existingVoucher.PostDate = ClubTime.Now;
             existingVoucher.PostFlag = true;
         }
 
@@ -245,7 +245,7 @@ public class AcVoucherService(
         if (request.PostFlag)
         {
             voucher.PostedById = currentUserService.GetPlayerId();
-            voucher.PostDate = DateTime.Now;
+            voucher.PostDate = ClubTime.Now;
             voucher.PostFlag = true;
         }
 
@@ -257,7 +257,7 @@ public class AcVoucherService(
         string code;
         do
         {
-            code = $"{voucherType.Alias}{DateTime.Now.Year}{RandomUtil.GenerateRandomString(4)}";
+            code = $"{voucherType.Alias}{ClubTime.Now.Year}{RandomUtil.GenerateRandomString(4)}";
         }
         while (await db.AcVouchers.AnyAsync(v => v.Code == code));
 

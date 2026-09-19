@@ -9,10 +9,16 @@ namespace BofcBackend.Api.Features.MatchDayParticipants;
 
 /// <summary>Port of controller/MatchDayParticipantController.java. No endpoint here is
 /// role-gated in Java - self/admin authorization for the write endpoint is enforced inside
-/// the service instead.</summary>
+/// the service instead.
+///
+/// The [AllowAnonymous] that used to sit on this class opened every action, the RSVP write
+/// included. That write was never actually reachable anonymously - the service checks
+/// IsUserAuthorizedForSelf and the admin roles, so a caller with no identity got a 403 - but
+/// it left the only thing standing between "anyone may RSVP as anyone" and the database as a
+/// check several call-levels away, with the attribute above saying the opposite. The opt-out
+/// now sits on the single action the public match-day viewer actually reads.</summary>
 [ApiController]
 [Route("match-day-participants")]
-[AllowAnonymous]
 public class MatchDayParticipantController(
     IMatchDayParticipantService matchDayParticipantService,
     IMatchDayParticipantPlayerService matchDayParticipantPlayerService) : ControllerBase
@@ -31,6 +37,9 @@ public class MatchDayParticipantController(
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, response);
     }
 
+    // Public: the match-day viewer's squad list. Carries names, photos and RSVP status -
+    // deliberately no email or mobile number (see PlayerParticipationResponse).
+    [AllowAnonymous]
     [HttpGet("{matchDayId}/to-be-selected")]
     public async Task<IActionResult> PlayersToBeSelectedForTeam(long matchDayId)
     {

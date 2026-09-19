@@ -1,6 +1,7 @@
 using System.Net;
 using BofcBackend.Api.Common;
 using BofcBackend.Api.Common.Storage;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BofcBackend.Api.Features.Storage;
@@ -30,6 +31,11 @@ public class TeamLogoController([FromKeyedServices("team-logo")] IMediaStoragePr
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, "Upload successful", new { key });
     }
 
+    // Public: team logos are rendered by the match-day viewer and by email clients, neither of
+    // which can present a token. Everything else on this controller - minting an upload URL,
+    // writing the file, deleting it - now requires a signed-in user via the global fallback
+    // policy; all four used to be anonymous.
+    [AllowAnonymous]
     [HttpGet("{key}")]
     public async Task<IActionResult> GetTeamLogo(string key)
     {
@@ -37,8 +43,11 @@ public class TeamLogoController([FromKeyedServices("team-logo")] IMediaStoragePr
         try
         {
             var stream = await provider.LoadAsync(key);
-            var contentType = await provider.DetectContentTypeAsync(key);
+            var detectedContentType = await provider.DetectContentTypeAsync(key);
             Response.Headers.CacheControl = "public, max-age=86400";
+            // The stored extension decides the detected type, and ValidateMeta only guards the
+            // presign step - so never serve the detected type directly. See SafeMediaServing.
+            var contentType = SafeMediaServing.ApplyTo(Response, detectedContentType, key);
             return File(stream, contentType);
         }
         catch (FileNotFoundException)

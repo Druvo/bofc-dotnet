@@ -6,12 +6,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BofcBackend.Api.Features.Accounting;
 
-/// <summary>Port of controller/account/AccountReportController.java - no @PreAuthorize in Java, so fully public here too.</summary>
+/// <summary>Port of controller/account/AccountReportController.java.
+///
+/// The Java original had no @PreAuthorize and this was ported as [AllowAnonymous] on every
+/// action to match, which published the club's accounting - account balances, collection
+/// summaries, per-player payment metrics - to anonymous callers on the public internet.
+/// Faithfulness to the original is not worth that, so the opt-outs are gone and the global
+/// fallback policy (Program.cs) now requires a signed-in user. Not role-gated beyond that:
+/// the dashboard shows these figures to ordinary members, and the club's own books being
+/// visible to the club's own players is the intent.</summary>
 [ApiController]
 [Route("ac/reports")]
 public class AccountReportController(AccountReportService service, AcCollectionService acCollectionService) : ControllerBase
 {
-    [AllowAnonymous]
     [HttpGet("accounts-summary")]
     public async Task<IActionResult> GetAccountsReport()
     {
@@ -19,7 +26,6 @@ public class AccountReportController(AccountReportService service, AcCollectionS
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, report);
     }
 
-    [AllowAnonymous]
     [HttpGet("balance-summary")]
     public async Task<IActionResult> GetAccountBalancesSummary()
     {
@@ -27,7 +33,6 @@ public class AccountReportController(AccountReportService service, AcCollectionS
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, summary);
     }
 
-    [AllowAnonymous]
     [HttpGet("balance-sheet")]
     public async Task<IActionResult> GetBalanceSheet()
     {
@@ -35,7 +40,6 @@ public class AccountReportController(AccountReportService service, AcCollectionS
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, report);
     }
 
-    [AllowAnonymous]
     [HttpGet("current-balance")]
     public async Task<IActionResult> GetCurrentBalance()
     {
@@ -43,7 +47,6 @@ public class AccountReportController(AccountReportService service, AcCollectionS
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, currentBalance);
     }
 
-    [AllowAnonymous]
     [HttpGet("summary")]
     public async Task<IActionResult> GetAccountSummary()
     {
@@ -51,7 +54,6 @@ public class AccountReportController(AccountReportService service, AcCollectionS
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, summary);
     }
 
-    [AllowAnonymous]
     [HttpGet("monthly-summary")]
     public async Task<IActionResult> GetMonthlySummary()
     {
@@ -59,7 +61,6 @@ public class AccountReportController(AccountReportService service, AcCollectionS
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, summary);
     }
 
-    [AllowAnonymous]
     [HttpGet("monthly-income-expense-summary")]
     public async Task<IActionResult> GetMonthlyIncomeAndExpenseSummary([FromQuery] int? year)
     {
@@ -67,7 +68,6 @@ public class AccountReportController(AccountReportService service, AcCollectionS
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, summary);
     }
 
-    [AllowAnonymous]
     [HttpGet("player-collection-metrics")]
     public async Task<IActionResult> GetPlayerCollectionMetrics([FromQuery] int? year)
     {

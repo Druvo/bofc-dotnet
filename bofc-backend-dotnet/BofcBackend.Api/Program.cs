@@ -33,6 +33,7 @@ using BofcBackend.Api.Features.MatchDayParticipants;
 using BofcBackend.Api.Features.MatchDays;
 using BofcBackend.Api.Features.Venues;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -193,7 +194,28 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddAuthorization();
+// Endpoints require a signed-in user unless they opt out with [AllowAnonymous].
+//
+// Without a fallback policy, ASP.NET Core leaves any endpoint carrying no authorization
+// attribute completely open - and this codebase had grown several controllers with no
+// class-level [Authorize] at all. That silently published the whole member roster (names,
+// email addresses and mobile numbers), the club's accounting reports, and the entire file
+// store including its upload and delete endpoints, all to anonymous callers on the public
+// internet. The scattered [AllowAnonymous] attributes on those same controllers made the
+// exposure look deliberate when nothing was actually being enforced either way.
+//
+// Failing closed also changes what a mistake costs. A missing [Authorize] is now a 401 that
+// someone reports, instead of a leak nobody sees; the price is that a genuinely public
+// endpoint must say so, which is the direction the annotation should run anyway. The public
+// surface that opts out is: auth (login, forgot/reset password), the match-day viewer's
+// read-only endpoints, the emailed vote link, the live-match SSE stream (EventSource cannot
+// send an Authorization header), and serving stored images.
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 // --- Storage: consolidates StorageConfig/PlayerPhotoStorageConfig/TeamLogoStorageConfig.java
 // (3 near-identical local-vs-R2 conditional bean setups) into 3 keyed registrations of 2 shared

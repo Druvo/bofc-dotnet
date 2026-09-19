@@ -13,7 +13,10 @@ namespace BofcBackend.Api.Features.Players;
 [Route("players")]
 public class PlayerController(IPlayerService playerService) : ControllerBase
 {
-    [AllowAnonymous]
+    // Was [AllowAnonymous]: anyone on the internet could create a club member, who is then
+    // issued the configured default password. Registration is an admin act - there is no
+    // self-signup anywhere in the product.
+    [Authorize(Roles = PlayerRoleNames.AdminOrSuperAdmin)]
     [HttpPost]
     public async Task<IActionResult> RegisterPlayer([FromBody] PlayerRegistrationRequest request)
     {
@@ -21,7 +24,10 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.Created, RestResponseMessage.CreateOk);
     }
 
-    [AllowAnonymous]
+    // Was [AllowAnonymous], which published every member's name, email address and mobile
+    // number to anonymous callers - PlayerResponse carries all three. Any signed-in member may
+    // still read it; the club's own roster is not a secret from the club.
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAllPlayers()
     {
@@ -29,7 +35,8 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, players);
     }
 
-    [AllowAnonymous]
+    // Was [AllowAnonymous] - same personal contact details as the list above.
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPlayerById(long id)
     {
@@ -154,7 +161,7 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk);
     }
 
-    [AllowAnonymous]
+    [Authorize]
     [HttpGet("goal-keeper-history")]
     public async Task<IActionResult> GoalKeepingHistory()
     {
@@ -170,9 +177,11 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, history);
     }
 
-    // Mirrors GetPlayerMatchHistory (StatisticsController) - same [AllowAnonymous] openness,
+    // Mirrored GetPlayerMatchHistory (StatisticsController)'s [AllowAnonymous] openness,
     // since goalkeeping appearances are non-sensitive roster/history info like match history.
-    [AllowAnonymous]
+    // but that alignment is dropped: the public viewer reads the statistics endpoints and does
+    // not touch this one, so there is nothing public relying on it.
+    [Authorize]
     [HttpGet("{playerId}/goalkeeping-history")]
     public async Task<IActionResult> GetGoalKeeperHistoryForPlayer(long playerId)
     {
@@ -180,9 +189,9 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, history);
     }
 
-    // Mirrors GetGoalKeeperHistoryForPlayer - same [AllowAnonymous] openness, captaincy history
+    // Mirrors GetGoalKeeperHistoryForPlayer - authenticated for the same reason, captaincy history
     // is non-sensitive roster info like match/goalkeeping history.
-    [AllowAnonymous]
+    [Authorize]
     [HttpGet("{playerId}/captain-history")]
     public async Task<IActionResult> GetCaptainHistoryForPlayer(long playerId)
     {
@@ -190,7 +199,7 @@ public class PlayerController(IPlayerService playerService) : ControllerBase
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.FetchOk, history);
     }
 
-    [AllowAnonymous]
+    [Authorize]
     [HttpGet("goalkeeper-queue")]
     public async Task<IActionResult> GetGoalKeeperPriorityQueue([FromQuery] long matchDayId)
     {

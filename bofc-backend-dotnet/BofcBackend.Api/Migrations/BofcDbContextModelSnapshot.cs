@@ -1859,6 +1859,52 @@ namespace BofcBackend.Api.Migrations
                     b.ToTable("payment_accounts", (string)null);
                 });
 
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.PaymentWaiver", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CreatedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_date");
+
+                    b.Property<long?>("LastModifiedBy")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<DateTime>("MonthOfPayment")
+                        .HasColumnType("date")
+                        .HasColumnName("month_of_payment");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("player_id");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "MonthOfPayment")
+                        .IsUnique();
+
+                    b.ToTable("payment_waivers", (string)null);
+                });
+
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.Player", b =>
                 {
                     b.Property<long>("Id")
@@ -3346,6 +3392,17 @@ namespace BofcBackend.Api.Migrations
                     b.Navigation("Notification");
 
                     b.Navigation("Recipient");
+                });
+
+            modelBuilder.Entity("BofcBackend.Api.Domain.Entities.PaymentWaiver", b =>
+                {
+                    b.HasOne("BofcBackend.Api.Domain.Entities.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("BofcBackend.Api.Domain.Entities.PlayerGoalkeepingHistory", b =>

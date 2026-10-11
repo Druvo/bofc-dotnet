@@ -139,6 +139,7 @@ builder.Services.AddScoped<CostTypeService>();
 builder.Services.AddScoped<AcVoucherService>();
 builder.Services.AddScoped<AcBillPaymentService>();
 builder.Services.AddScoped<AcCollectionService>();
+builder.Services.AddScoped<PaymentWaiverService>();
 builder.Services.AddScoped<AccountReportService>();
 builder.Services.AddScoped<IPaymentAccountService, PaymentAccountService>();
 

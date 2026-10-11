@@ -65,6 +65,7 @@ public class BofcDbContext(DbContextOptions<BofcDbContext> options, ICurrentUser
     public DbSet<JerseyColor> JerseyColors => Set<JerseyColor>();
     public DbSet<PlayerStatAdjustment> PlayerStatAdjustments => Set<PlayerStatAdjustment>();
     public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
+    public DbSet<PaymentWaiver> PaymentWaivers => Set<PaymentWaiver>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -59,7 +59,7 @@ function SendReminderModal({ onClose }: { onClose: () => void }) {
             }
         >
             <p className="mb-4 text-theme-sm text-gray-500 dark:text-gray-400">
-                Emails every active player who has no club-dues payment recorded for the month you pick below.
+                Emails every active player who has no club-dues payment recorded for the month you pick below - except anyone whose payment for that month has been omitted.
             </p>
             <FormInput label="Month" type="month" value={yearMonth} onChange={(e) => setYearMonth(e.target.value)} />
         </Modal>
@@ -98,7 +98,7 @@ export default function MonthlyPaymentsPage() {
             </div>
             <p className="mb-6 text-theme-sm text-gray-500 dark:text-gray-400">
                 Every player's club-dues collection status, month by month. "Due" marks an active player with nothing recorded for the current month.
-                Click any cell to see what's already recorded and log a payment for that player on any date.
+                Click any cell to see what's already recorded, log a payment for that player on any date, or omit that month's payment so they are neither shown as Due nor sent a reminder for it.
             </p>
 
             <PlayerCollectionMetrics />

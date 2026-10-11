@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
 import { useGetPlayerCollectionMetricsQuery } from "../../../state/features/account/playerCollectionMetricsSlice";
 import { PlayerMetric } from "../../../interfaces/IPlayerCollectionMetrics";
-import { isChasedForDues } from "../../../utils/paymentDues";
+import { isDueForMonth, isWaivedForMonth } from "../../../utils/paymentDues";
 import Loader from "../../ui/loader";
 
 const monthNames = [
@@ -61,7 +61,8 @@ const MyContributionsCard: React.FC = () => {
             const monthNumber = idx + 1;
             const amount = myMetric.yearMonthAmount[currentYear.toString()]?.[monthNumber] || 0;
             const isCurrentCell = monthNumber === currentMonth;
-            const showDue = isCurrentCell && amount <= 0 && isChasedForDues(myMetric);
+            const showDue = isCurrentCell && isDueForMonth(myMetric, currentYear, monthNumber);
+            const showOmitted = amount <= 0 && isWaivedForMonth(myMetric, currentYear, monthNumber);
 
             let variant: keyof typeof monthCellClasses = "empty";
             if (showDue) variant = "due";
@@ -72,7 +73,7 @@ const MyContributionsCard: React.FC = () => {
               <div key={monthNumber} className={`rounded-lg border px-1.5 py-1.5 text-center ${monthCellClasses[variant]}`}>
                 <div className="text-[10px] font-medium uppercase">{month}</div>
                 <div className="text-theme-xs font-semibold">
-                  {showDue ? "Due" : amount > 0 ? amount.toFixed(0) : "-"}
+                  {showDue ? "Due" : amount > 0 ? amount.toFixed(0) : showOmitted ? "Omitted" : "-"}
                 </div>
               </div>
             );

@@ -14,7 +14,8 @@ namespace BofcBackend.Api.Common.Scheduling;
 /// player who still has no AcCollection recorded for the current calendar month, every
 /// Settings.PaymentDueReminderRepeatDays - not just once. A player drops out of the recipient
 /// list the moment a collection is recorded for them, so the nagging naturally stops once they
-/// pay; nobody who's already paid ever gets a reminder. Guarded by LastPaymentReminderSentAt so a
+/// pay; nobody who's already paid ever gets a reminder, and nor does anyone an admin has
+/// omitted the month for (PaymentWaiver). Guarded by LastPaymentReminderSentAt so a
 /// 6-hourly tick doesn't re-send far more often than the configured interval.
 /// </summary>
 public class PaymentDueReminderBackgroundService(IServiceScopeFactory scopeFactory, ILogger<PaymentDueReminderBackgroundService> logger)
@@ -77,8 +78,16 @@ public class PaymentDueReminderBackgroundService(IServiceScopeFactory scopeFacto
             .Distinct()
             .ToListAsync();
 
+        // An admin omitting this month for a player (PaymentWaiver) means "stop asking them for
+        // it" - the same promise the dashboard makes by not showing them as Due.
+        var waivedPlayerIds = await db.PaymentWaivers
+            .Where(w => w.MonthOfPayment.Year == year && w.MonthOfPayment.Month == month)
+            .Select(w => w.PlayerId)
+            .ToListAsync();
+
         var duePlayers = await db.Players
-            .Where(p => p.IsActive && !p.IsPaused && p.EmailNotificationsEnabled && !paidPlayerIds.Contains(p.Id))
+            .Where(p => p.IsActive && !p.IsPaused && p.EmailNotificationsEnabled
+                && !paidPlayerIds.Contains(p.Id) && !waivedPlayerIds.Contains(p.Id))
             .Select(p => new { p.Id, p.Name, p.Email })
             .ToListAsync();
 

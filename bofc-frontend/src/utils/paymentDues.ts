@@ -35,11 +35,29 @@ export function contributionFor(
     return metric?.yearMonthAmount?.[year.toString()]?.[month] || 0;
 }
 
-/** Behind for this month: chased for dues, and nothing recorded against the month. */
+/**
+ * An admin has omitted this month's dues for this player ("Omit payment" on the Player Monthly
+ * Payments page). Unlike pausing, this covers one month and nothing else. The payment reminder
+ * emails skip the player for that month too (PaymentDueReminderBackgroundService).
+ */
+export function isWaivedForMonth(
+    metric: PlayerMetric | undefined | null,
+    year: number,
+    month: number
+): boolean {
+    return metric?.waivedMonths?.[year.toString()]?.includes(month) ?? false;
+}
+
+/** Behind for this month: chased for dues, the month not omitted, and nothing recorded
+ * against it. */
 export function isDueForMonth(
     metric: PlayerMetric | undefined | null,
     year: number,
     month: number
 ): boolean {
-    return isChasedForDues(metric) && contributionFor(metric, year, month) <= 0;
+    return (
+        isChasedForDues(metric) &&
+        !isWaivedForMonth(metric, year, month) &&
+        contributionFor(metric, year, month) <= 0
+    );
 }

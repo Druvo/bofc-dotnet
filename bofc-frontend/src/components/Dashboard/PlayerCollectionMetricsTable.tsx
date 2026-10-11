@@ -12,7 +12,7 @@ import {
 import { useGetPlayerCollectionMetricsQuery } from "../../state/features/account/playerCollectionMetricsSlice";
 import { useGetPlayersQuery } from "../../state/features/player/playerSlice";
 import { PlayerMetric } from "../../interfaces/IPlayerCollectionMetrics";
-import { isChasedForDues } from "../../utils/paymentDues";
+import { isDueForMonth, isWaivedForMonth } from "../../utils/paymentDues";
 import IPlayer from "../../interfaces/IPlayer";
 import PlayerCollectionMobileView from "./PlayerCollectionMobileView";
 import LogPaymentModal from "./LogPaymentModal";
@@ -228,7 +228,8 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
                   const monthNumber = idx + 1;
                   const amount = record[`month_${monthNumber}`] || 0;
                   const isCurrentCell = selectedYear === currentYear && monthNumber === currentMonth;
-                  const showDue = isCurrentCell && amount <= 0 && isChasedForDues(playerData);
+                  const showDue = isCurrentCell && !!selectedYear && isDueForMonth(playerData, selectedYear, monthNumber);
+                  const showOmitted = amount <= 0 && !!selectedYear && isWaivedForMonth(playerData, selectedYear, monthNumber);
                   return (
                     <td
                       key={monthNumber}
@@ -236,7 +237,15 @@ const PlayerCollectionMetrics: React.FC<PlayerCollectionMetricsProps> = ({
                       title="Click to view/log payments for this month"
                       className={`cursor-pointer px-2 py-2 text-center tabular-nums text-gray-600 hover:ring-1 hover:ring-inset hover:ring-brand-300 dark:text-gray-300 ${showDue ? "bg-warning-50 dark:bg-warning-500/10" : ""}`}
                     >
-                      {showDue ? <span className="font-bold text-warning-600 dark:text-orange-400">Due</span> : amount > 0 ? amount.toFixed(0) : <span className="text-gray-300 dark:text-gray-700">-</span>}
+                      {showDue ? (
+                        <span className="font-bold text-warning-600 dark:text-orange-400">Due</span>
+                      ) : amount > 0 ? (
+                        amount.toFixed(0)
+                      ) : showOmitted ? (
+                        <span title="Payment omitted for this month" className="text-theme-xs font-medium text-gray-400 dark:text-gray-500">Omitted</span>
+                      ) : (
+                        <span className="text-gray-300 dark:text-gray-700">-</span>
+                      )}
                     </td>
                   );
                 })}

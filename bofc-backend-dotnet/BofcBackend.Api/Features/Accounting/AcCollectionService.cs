@@ -272,6 +272,23 @@ public class AcCollectionService(
             }
         }
 
+        // Filtered on the waived month, not on Date like the collections above - a waiver has
+        // no payment date, and the month is what the report's cells are keyed by.
+        var waivers = await db.PaymentWaivers.AsNoTracking()
+            .Where(w => year == null || w.MonthOfPayment.Year == year)
+            .Select(w => new { w.PlayerId, w.MonthOfPayment })
+            .ToListAsync();
+        foreach (var waiver in waivers)
+        {
+            if (!reportMap.TryGetValue(waiver.PlayerId, out var report)) continue;
+            if (!report.WaivedMonths.TryGetValue(waiver.MonthOfPayment.Year, out var months))
+            {
+                months = [];
+                report.WaivedMonths[waiver.MonthOfPayment.Year] = months;
+            }
+            months.Add(waiver.MonthOfPayment.Month);
+        }
+
         var years = await db.AcCollections
             .Select(c => c.Date.Year)
             .Distinct()

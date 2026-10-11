@@ -21,4 +21,8 @@ public class PlayerCollectionReport
 
     /// <summary>year -> (month -> amount).</summary>
     public Dictionary<int, Dictionary<int, decimal>> YearMonthAmount { get; set; } = [];
+
+    /// <summary>year -> months (1-12) an admin has omitted for this player - see PaymentWaiver.
+    /// A waived month is never Due and never reminded about, whatever was paid.</summary>
+    public Dictionary<int, List<int>> WaivedMonths { get; set; } = [];
 }

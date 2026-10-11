@@ -1,7 +1,7 @@
 import React from 'react';
 import { CalendarOutlined } from '@ant-design/icons';
 import { PlayerMetric } from '../../interfaces/IPlayerCollectionMetrics';
-import { isChasedForDues } from '../../utils/paymentDues';
+import { isDueForMonth, isWaivedForMonth } from '../../utils/paymentDues';
 import IPlayer from '../../interfaces/IPlayer';
 import Avatar from '../CommonAtoms/Avatar';
 import { toAbsolutePlayerPhotoUrl } from '../../utils/playerPhotoUtils';
@@ -67,7 +67,6 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
 
       {dataSource.map((player, index) => {
         const playerData = metrics.find((p: PlayerMetric) => p.playerId === player.key);
-        const isChased = isChasedForDues(playerData);
 
         const photoUrl = playersById[player.key]?.photoUrl;
 
@@ -97,7 +96,8 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
                 const monthNumber = idx + 1;
                 const amount = player[`month_${monthNumber}`] || 0;
                 const isCurrentCell = selectedYear === currentYear && monthNumber === currentMonth;
-                const showDue = isCurrentCell && amount <= 0 && isChased;
+                const showDue = isCurrentCell && !!selectedYear && isDueForMonth(playerData, selectedYear, monthNumber);
+                const showOmitted = amount <= 0 && !!selectedYear && isWaivedForMonth(playerData, selectedYear, monthNumber);
 
                 let variant: keyof typeof monthCellClasses = 'empty';
                 if (showDue) variant = 'due';
@@ -113,7 +113,7 @@ const PlayerCollectionMobileView: React.FC<PlayerCollectionMobileViewProps> = ({
                   >
                     <div className="text-[10px] font-medium uppercase">{month}</div>
                     <div className="text-theme-xs font-semibold">
-                      {showDue ? 'Due' : (amount > 0 ? amount.toFixed(0) : '-')}
+                      {showDue ? 'Due' : amount > 0 ? amount.toFixed(0) : showOmitted ? 'Omitted' : '-'}
                     </div>
                   </button>
                 );

@@ -2,10 +2,15 @@ import React, { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, StopOutlined, UndoOutlined } from "@ant-design/icons";
 import { useGetAcCollectionsQuery, useCreateAcCollectionMutation } from "../../state/features/account/accountSlice";
 import { playerCollectionMetricsApi } from "../../state/features/account/playerCollectionMetricsSlice";
 import { useGetActivePaymentAccountsQuery } from "../../state/features/paymentAccounts/paymentAccountSlice";
+import {
+    useGetPaymentWaiversQuery,
+    useWaivePaymentMutation,
+    useRemovePaymentWaiverMutation,
+} from "../../state/features/account/paymentWaiverSlice";
 import { normalizeErrorMessage } from "../../utils/normalizeErrorMessage";
 import { toAbsolutePlayerPhotoUrl } from "../../utils/playerPhotoUtils";
 import Avatar from "../CommonAtoms/Avatar";
@@ -58,6 +63,32 @@ export default function LogPaymentModal({ playerId, playerName, photoUrl, month,
     const [amount, setAmount] = useState(1000);
     const [description, setDescription] = useState("");
     const [paymentAccountId, setPaymentAccountId] = useState<number | "">("");
+
+    const { data: waiversData } = useGetPaymentWaiversQuery({ year });
+    const waiver = (waiversData?.content || []).find((w) => w.playerId === playerId && w.month === month);
+    const [waivePayment, { isLoading: isWaiving }] = useWaivePaymentMutation();
+    const [removeWaiver, { isLoading: isRemovingWaiver }] = useRemovePaymentWaiverMutation();
+    const [waiverReason, setWaiverReason] = useState("");
+
+    const handleWaive = async () => {
+        try {
+            await waivePayment({ playerId, year, month, reason: waiverReason.trim() || undefined }).unwrap();
+            toast.success(`${playerName}'s payment for ${monthLabel} omitted`);
+            setWaiverReason("");
+        } catch (error: any) {
+            toast.error(normalizeErrorMessage(error?.data || error, "Failed to omit the payment"));
+        }
+    };
+
+    const handleRemoveWaiver = async () => {
+        if (!waiver) return;
+        try {
+            await removeWaiver({ id: waiver.id }).unwrap();
+            toast.info(`${playerName} is due for ${monthLabel} again`);
+        } catch (error: any) {
+            toast.error(normalizeErrorMessage(error?.data || error, "Failed to undo the omission"));
+        }
+    };
 
     const handleSubmit = async () => {
         if (!amount || amount <= 0) {
@@ -119,6 +150,43 @@ export default function LogPaymentModal({ playerId, playerName, photoUrl, month,
                             <span>৳{totalRecorded.toFixed(0)}</span>
                         </div>
                     </div>
+                )}
+            </div>
+
+            {/* Omitting is the alternative to logging a payment: the player is not shown as Due
+                for this month and gets no reminder for it. It records no money and posts no
+                voucher, so it lives apart from the payment form below. */}
+            <div className="mb-5 rounded-lg border border-gray-100 p-3 dark:border-[var(--color-rule)]">
+                <h4 className="mb-1 text-theme-sm font-semibold text-gray-700 dark:text-gray-300">Omit this month's payment</h4>
+                {waiver ? (
+                    <div className="flex items-center justify-between gap-3">
+                        <p className="text-theme-xs text-gray-500 dark:text-gray-400">
+                            Omitted - not shown as Due and no reminder emails for {monthLabel}.
+                            {waiver.reason && <span className="ml-1 text-gray-400 dark:text-gray-500">({waiver.reason})</span>}
+                        </p>
+                        <Button size="sm" variant="outline" onClick={handleRemoveWaiver} disabled={isRemovingWaiver} startIcon={<UndoOutlined />}>
+                            {isRemovingWaiver ? "Undoing..." : "Undo"}
+                        </Button>
+                    </div>
+                ) : (
+                    <>
+                        <p className="mb-2 text-theme-xs text-gray-500 dark:text-gray-400">
+                            {playerName} won't be shown as Due for {monthLabel} or emailed a payment reminder for it. No money is recorded.
+                        </p>
+                        <div className="flex items-end gap-2">
+                            <div className="flex-1">
+                                <FormInput
+                                    value={waiverReason}
+                                    maxLength={500}
+                                    onChange={(e) => setWaiverReason(e.target.value)}
+                                    placeholder="Reason (optional), e.g. away all month"
+                                />
+                            </div>
+                            <Button variant="outline" onClick={handleWaive} disabled={isWaiving} startIcon={<StopOutlined />}>
+                                {isWaiving ? "Omitting..." : "Omit Payment"}
+                            </Button>
+                        </div>
+                    </>
                 )}
             </div>
 

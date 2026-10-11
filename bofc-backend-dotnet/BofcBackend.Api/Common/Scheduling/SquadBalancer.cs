@@ -9,7 +9,11 @@ namespace BofcBackend.Api.Common.Scheduling;
 /// <param name="CanRotateInGoal">Eligible for the fairness rotation this match day: not
 /// admin-excluded, and not resting off a recent turn in goal. Note this is deliberately
 /// independent of <paramref name="IsDefaultGoalkeeper"/> - see <see cref="CanKeepGoal"/>.</param>
-public sealed record DraftCandidate(long PlayerId, int? Rank, bool IsDefaultGoalkeeper, bool CanRotateInGoal)
+/// <param name="IsGuest">A Match Day guest rather than a member, in which case
+/// <paramref name="PlayerId"/> is the guest's id - the two id spaces overlap, so the pair is what
+/// identifies a candidate. Guests are drafted for balance only: goalkeeper assignment never picks
+/// one, so callers pass false for both goalkeeping flags and the repairs treat them as outfield.</param>
+public sealed record DraftCandidate(long PlayerId, int? Rank, bool IsDefaultGoalkeeper, bool CanRotateInGoal, bool IsGuest = false)
 {
     /// <summary>Whether this player could take a goalkeeper slot at all.
     ///

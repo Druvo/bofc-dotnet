@@ -25,6 +25,13 @@ public class MatchDayGuest : AuditableEntity
 
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>The organiser's guess at how good this guest is, on the same 1-10 tier scale
+    /// as <see cref="Player.Rank"/> (1 = strongest), so "Generate Teams" can deal guests into
+    /// the draft alongside members instead of leaving them all for someone to place by hand.
+    /// Null = unranked, treated as the weakest tier like everywhere else Rank is read. Held
+    /// back from anonymous readers for the same reason Player.Rank is.</summary>
+    public int? Rank { get; set; }
+
     /// <summary>Null = unassigned (Unassigned Pool).</summary>
     public long? TeamId { get; set; }
     public Team? Team { get; set; }

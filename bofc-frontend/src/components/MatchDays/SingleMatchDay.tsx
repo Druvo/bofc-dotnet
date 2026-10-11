@@ -71,6 +71,7 @@ function SingleMatchDay() {
     handleRemoveTeam,
     handleAddGuest,
     handleAssignGuestToTeam,
+    handleSetGuestRank,
     handleRemoveGuest,
     refetchMatchDay,
     refetchPlayer,
@@ -282,6 +283,7 @@ function SingleMatchDay() {
                     handleRemoveTeam={handleRemoveTeam}
                     handleAddPlayerToTeam={handleAddPlayerToTeam}
                     handleRemoveGuest={handleRemoveGuest}
+                    handleSetGuestRank={handleSetGuestRank}
                   />
                 ))
               ) : (
@@ -365,6 +367,7 @@ function SingleMatchDay() {
                             <GuestCard
                               guest={guest}
                               handleRemoveGuest={isAdmin ? () => handleRemoveGuest(guest.guestId) : undefined}
+                              handleSetGuestRank={isAdmin ? (rank) => handleSetGuestRank(guest.guestId, rank) : undefined}
                             />
                           </div>
                         )}

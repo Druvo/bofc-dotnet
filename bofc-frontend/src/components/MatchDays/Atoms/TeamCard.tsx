@@ -33,6 +33,7 @@ interface TeamCardProps {
         jerseyNumber?: number
     ) => void;
     handleRemoveGuest: (guestId: number) => void;
+    handleSetGuestRank: (guestId: number, rank: number | null) => void;
 }
 
 const TeamCard: React.FC<TeamCardProps> = ({
@@ -44,6 +45,7 @@ const TeamCard: React.FC<TeamCardProps> = ({
     handleRemoveTeam,
     handleAddPlayerToTeam,
     handleRemoveGuest,
+    handleSetGuestRank,
 }) => {
     const loginInfo = useSelector(selectLoginInfo);
     const canManage = canManageTeams(loginInfo.roles);
@@ -214,6 +216,7 @@ const TeamCard: React.FC<TeamCardProps> = ({
                                                 <GuestCard
                                                     guest={guest}
                                                     handleRemoveGuest={canManage ? () => handleRemoveGuest(guest.guestId) : undefined}
+                                                    handleSetGuestRank={canManage ? (rank) => handleSetGuestRank(guest.guestId, rank) : undefined}
                                                 />
                                             </div>
                                         )}

@@ -17,5 +17,9 @@ public interface IMatchDayGuestService
     /// must belong to the same MatchDay as the guest.</summary>
     Task<MatchDayGuestResponse> AssignGuestToTeamAsync(long guestId, MatchDayGuestTeamRequest request);
 
+    /// <summary>Sets or clears (null) the guest's rank. Only the draft reads it, so this is
+    /// allowed after teams exist too - it simply has no effect until teams are regenerated.</summary>
+    Task<MatchDayGuestResponse> SetGuestRankAsync(long guestId, MatchDayGuestRankRequest request);
+
     Task RemoveGuestAsync(long guestId);
 }

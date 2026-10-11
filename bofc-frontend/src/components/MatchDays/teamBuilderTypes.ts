@@ -21,7 +21,22 @@ export interface Guest {
     guestId: number;
     name: string;
     teamId?: number | null;
+    /** 1-10, 1 = strongest; null = unranked. Only sent to organisers - always null otherwise. */
+    rank?: number | null;
 }
+
+/** Same 1-10 tier scale as the player rank board, so "Generate Teams" can weigh guests and
+ * members against each other. The empty value is "unranked", which the draft treats as the
+ * weakest tier. */
+export const GUEST_RANK_OPTIONS: { value: string; label: string }[] = [
+    { value: "", label: "Unranked" },
+    ...Array.from({ length: 10 }, (_, i) => ({
+        value: String(i + 1),
+        label: i === 0 ? "1 (strongest)" : i === 9 ? "10 (weakest)" : String(i + 1),
+    })),
+];
+
+export const parseGuestRank = (value: string): number | null => (value === "" ? null : Number(value));
 
 // Team Type
 export interface Team {

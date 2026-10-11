@@ -1227,6 +1227,10 @@ namespace BofcBackend.Api.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("name");
 
+                    b.Property<int?>("Rank")
+                        .HasColumnType("int")
+                        .HasColumnName("guest_rank");
+
                     b.Property<long?>("TeamId")
                         .HasColumnType("bigint")
                         .HasColumnName("team_id");

@@ -1,8 +1,10 @@
 using System.Net;
 using BofcBackend.Api.Common.Constants;
 using BofcBackend.Api.Common.Exceptions;
+using BofcBackend.Api.Common.Security;
 using BofcBackend.Api.Common.Util;
 using BofcBackend.Api.Data;
+using BofcBackend.Api.Domain.Constants;
 using BofcBackend.Api.Domain.Entities;
 using BofcBackend.Api.Features.MatchDayGuests.Models;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +15,21 @@ namespace BofcBackend.Api.Features.MatchDayGuests;
 /// match_day_guest table - no Player, MatchDayParticipant or TeamPlayer row is ever created,
 /// which is what keeps a guest out of attendance, statistics and the club's mailing lists
 /// without any of those needing to know guests exist.</summary>
-public class MatchDayGuestService(BofcDbContext db) : IMatchDayGuestService
+public class MatchDayGuestService(BofcDbContext db, ICurrentUserService currentUser) : IMatchDayGuestService
 {
     private const int MaxNameLength = 100;
 
+    /// <summary>The guest list is anonymous-readable (it backs the public team sheet), but a
+    /// guest's rank is the same kind of judgement as Player.Rank, which never leaves the admin
+    /// side. So it is only sent to the roles that may manage guests in the first place.</summary>
+    private bool CanSeeRank =>
+        currentUser.IsInRole(PlayerRoleNames.Admin)
+        || currentUser.IsInRole(PlayerRoleNames.SuperAdmin)
+        || currentUser.IsInRole(PlayerRoleNames.Coordinator);
+
     public async Task<List<MatchDayGuestResponse>> GetGuestsAsync(long matchDayId)
     {
+        var canSeeRank = CanSeeRank;
         return await db.MatchDayGuests
             .Where(g => g.MatchDayId == matchDayId)
             .OrderBy(g => g.Id)
@@ -28,6 +39,7 @@ public class MatchDayGuestService(BofcDbContext db) : IMatchDayGuestService
                 MatchDayId = g.MatchDayId,
                 Name = g.Name,
                 TeamId = g.TeamId,
+                Rank = canSeeRank ? g.Rank : null,
             })
             .ToListAsync();
     }
@@ -45,6 +57,7 @@ public class MatchDayGuestService(BofcDbContext db) : IMatchDayGuestService
             MatchDayId = matchDay.Id,
             Name = name,
             TeamId = null,
+            Rank = request.Rank,
         };
 
         db.MatchDayGuests.Add(guest);
@@ -85,6 +98,14 @@ public class MatchDayGuestService(BofcDbContext db) : IMatchDayGuestService
         return ToResponse(guest);
     }
 
+    public async Task<MatchDayGuestResponse> SetGuestRankAsync(long guestId, MatchDayGuestRankRequest request)
+    {
+        var guest = await GetGuestOrThrowAsync(guestId);
+        guest.Rank = request.Rank;
+        await db.SaveChangesAsync();
+        return ToResponse(guest);
+    }
+
     public async Task RemoveGuestAsync(long guestId)
     {
         var guest = await GetGuestOrThrowAsync(guestId);
@@ -118,11 +139,14 @@ public class MatchDayGuestService(BofcDbContext db) : IMatchDayGuestService
         return trimmed.Length > MaxNameLength ? trimmed[..MaxNameLength] : trimmed;
     }
 
+    /// <summary>Only ever called on write paths, which are already restricted to the roles
+    /// that may see rank - so no CanSeeRank check is needed here.</summary>
     private static MatchDayGuestResponse ToResponse(MatchDayGuest guest) => new()
     {
         GuestId = guest.Id,
         MatchDayId = guest.MatchDayId,
         Name = guest.Name,
         TeamId = guest.TeamId,
+        Rank = guest.Rank,
     };
 }

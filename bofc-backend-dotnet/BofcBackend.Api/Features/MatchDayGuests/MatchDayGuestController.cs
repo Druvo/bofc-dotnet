@@ -12,7 +12,8 @@ namespace BofcBackend.Api.Features.MatchDayGuests;
 /// <see cref="Domain.Entities.MatchDayGuest"/>. Writes are gated to the same roles that may
 /// manage teams at all; the read is open for the same reason the squad list
 /// (match-day-participants/{id}/to-be-selected) is - it carries nothing but names that are
-/// already on the public team sheet.</summary>
+/// already on the public team sheet. (A guest's rank is the exception, and the service leaves
+/// it out unless the caller is one of the roles below.)</summary>
 [ApiController]
 [Route("match-day-guests")]
 [Authorize(Roles = PlayerRoleNames.Admin + "," + PlayerRoleNames.SuperAdmin + "," + PlayerRoleNames.Coordinator)]
@@ -39,6 +40,13 @@ public class MatchDayGuestController(IMatchDayGuestService matchDayGuestService)
     public async Task<IActionResult> AssignGuestToTeam(long guestId, [FromBody] MatchDayGuestTeamRequest request)
     {
         var response = await matchDayGuestService.AssignGuestToTeamAsync(guestId, request);
+        return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, response);
+    }
+
+    [HttpPut("{guestId}/rank")]
+    public async Task<IActionResult> SetGuestRank(long guestId, [FromBody] MatchDayGuestRankRequest request)
+    {
+        var response = await matchDayGuestService.SetGuestRankAsync(guestId, request);
         return ResponseBuilder.BuildSuccessResponse(HttpStatusCode.OK, RestResponseMessage.UpdateOk, response);
     }
 

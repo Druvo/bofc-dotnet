@@ -11,6 +11,7 @@ import {
     usePresignTeamLogoUploadMutation,
     useMatchDayGuestsQuery,
     useAddMatchDayGuestMutation,
+    useSetMatchDayGuestRankMutation,
     useAssignMatchDayGuestToTeamMutation,
     useDeleteMatchDayGuestMutation,
 } from "../state/features/matchDays/matchDayTeamSlice";
@@ -49,6 +50,7 @@ interface Guest {
     guestId: number;
     name: string;
     teamId: number | null;
+    rank: number | null;
 }
 
 interface Teams {
@@ -83,6 +85,7 @@ const useMatchDayTeams = (matchDayId: number) => {
     const [renameTeam] = useRenameTeamMutation();
     const [presignTeamLogoUpload] = usePresignTeamLogoUploadMutation();
     const [addMatchDayGuest] = useAddMatchDayGuestMutation();
+    const [setMatchDayGuestRank] = useSetMatchDayGuestRankMutation();
     const [assignMatchDayGuestToTeam] = useAssignMatchDayGuestToTeamMutation();
     const [deleteMatchDayGuest] = useDeleteMatchDayGuestMutation();
 
@@ -139,6 +142,7 @@ const useMatchDayTeams = (matchDayId: number) => {
                     guestId: guest.guestId,
                     name: guest.name,
                     teamId: guest.teamId ?? null,
+                    rank: guest.rank ?? null,
                 }))
             );
         }
@@ -479,13 +483,13 @@ const useMatchDayTeams = (matchDayId: number) => {
 
     /** Returns whether the guest was actually added, so the caller's form can stay open with
      * the typed name intact when it wasn't. */
-    const handleAddGuest = async (name: string): Promise<boolean> => {
+    const handleAddGuest = async (name: string, rank: number | null): Promise<boolean> => {
         const trimmedName = name.trim();
         if (!trimmedName) return false;
 
         try {
             setIsLoading(true);
-            await addMatchDayGuest({ matchDayId, name: trimmedName }).unwrap();
+            await addMatchDayGuest({ matchDayId, name: trimmedName, rank }).unwrap();
             toast.success(`${trimmedName} added to the Unassigned Pool`);
             await refetchGuests();
             return true;
@@ -512,6 +516,19 @@ const useMatchDayTeams = (matchDayId: number) => {
         } catch (error: any) {
             setGuests(previousGuests);
             toast.error(normalizeErrorMessage(error?.data || error, "Failed to move the guest player"));
+            await refetchGuests();
+        }
+    };
+
+    const handleSetGuestRank = async (guestId: number, rank: number | null) => {
+        const previousGuests = guests;
+        setGuests((prev) => prev.map((guest) => (guest.guestId === guestId ? { ...guest, rank } : guest)));
+
+        try {
+            await setMatchDayGuestRank({ guestId, rank }).unwrap();
+        } catch (error: any) {
+            setGuests(previousGuests);
+            toast.error(normalizeErrorMessage(error?.data || error, "Failed to update the guest's rank"));
             await refetchGuests();
         }
     };
@@ -545,6 +562,7 @@ const useMatchDayTeams = (matchDayId: number) => {
         handleRemoveTeam,
         handleAddGuest,
         handleAssignGuestToTeam,
+        handleSetGuestRank,
         handleRemoveGuest,
         refetchGuests,
     };

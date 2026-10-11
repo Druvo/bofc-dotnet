@@ -76,22 +76,31 @@ public class WeeklyMatchDayTeamGenerator(
             .Select(p => p.Player)
             .ToListAsync();
 
+        // Guests are drafted too, by the rank the organiser gave them, so a week with friends
+        // making up the numbers still comes out balanced instead of leaving them all in the pool
+        // for someone to place by hand. Only pool guests: no team exists yet (checked above), so
+        // in practice that is every guest on the MatchDay.
+        var guests = await db.MatchDayGuests
+            .Where(g => g.MatchDayId == matchDayId && g.TeamId == null)
+            .ToListAsync();
+        var squadSize = participants.Count + guests.Count;
+
         // Team COUNT is derived from turnout, not fixed - maxPlayersPerTeam is a cap (e.g. 6
         // including goalkeeper for casual 5/6/7-a-side), so a big week gets more teams instead
         // of overstuffing a fixed number of them, and a small week still gets at least 2 (you
         // can't schedule a match with only one team). Floor division would let the last team
         // overflow past the cap when participants doesn't divide evenly, so this rounds up.
-        var teamCount = Math.Max(2, (int)Math.Ceiling(participants.Count / (double)maxPlayersPerTeam));
+        var teamCount = Math.Max(2, (int)Math.Ceiling(squadSize / (double)maxPlayersPerTeam));
 
         // Teams and their rosters are independent - more players can always be assigned to a
         // team later by hand from Team Building, so this only needs enough confirmed
         // participants to seed every team with at least one player, not a full/even roster
         // upfront (previously required 2 per team, blocking generation whenever RSVPs were
         // still trickling in).
-        if (participants.Count < teamCount)
+        if (squadSize < teamCount)
         {
             return TeamGenerationResult.Fail(
-                $"Not enough confirmed participants ({participants.Count}) to form at least {teamCount} teams.");
+                $"Not enough confirmed participants ({squadSize}) to form at least {teamCount} teams.");
         }
 
         // Everything from here on is one all-or-nothing unit: two overlapping callers for the
@@ -135,15 +144,23 @@ public class WeeklyMatchDayTeamGenerator(
 
         var candidates = participants
             .Select(p => new DraftCandidate(p.Id, p.Rank, p.DefaultGoalkeeper, rotationEligible.Contains(p.Id)))
+            .Concat(guests.Select(g => new DraftCandidate(g.Id, g.Rank, IsDefaultGoalkeeper: false, CanRotateInGoal: false, IsGuest: true)))
             .ToList();
 
         var playersById = participants.ToDictionary(p => p.Id);
+        var guestsById = guests.ToDictionary(g => g.Id);
         var drafted = SquadBalancer.Draft(candidates, teamCount, minGoalkeepersPerTeam);
 
         for (var i = 0; i < drafted.Count; i++)
         {
             foreach (var candidate in drafted[i])
             {
+                if (candidate.IsGuest)
+                {
+                    guestsById[candidate.PlayerId].Team = teams[i];
+                    continue;
+                }
+
                 db.TeamPlayers.Add(new TeamPlayer
                 {
                     TeamId = teams[i].Id,

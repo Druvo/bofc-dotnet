@@ -14,6 +14,8 @@ public class MatchDayGuestConfiguration : IEntityTypeConfiguration<MatchDayGuest
         builder.Property(g => g.MatchDayId).HasColumnName("match_day_id").IsRequired();
         builder.Property(g => g.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
         builder.Property(g => g.TeamId).HasColumnName("team_id");
+        // "rank" is reserved in SQL Server - same naming as players.player_rank.
+        builder.Property(g => g.Rank).HasColumnName("guest_rank");
 
         builder.Property(g => g.CreatedBy).HasColumnName("created_by").IsRequired();
         builder.Property(g => g.CreatedDate).HasColumnName("created_date").IsRequired();

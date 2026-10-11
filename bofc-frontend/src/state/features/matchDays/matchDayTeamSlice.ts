@@ -292,14 +292,27 @@ export const matchDayTeamApi = apiWithTags.injectEndpoints({
 
         addMatchDayGuest: builder.mutation<
             BasicResType & { content: MatchDayGuestInfoType },
-            { matchDayId: number; name: string }
+            { matchDayId: number; name: string; rank: number | null }
         >({
-            query: ({ matchDayId, name }) => ({
+            query: ({ matchDayId, name, rank }) => ({
                 url: `match-day-guests`,
                 method: "POST",
-                body: { matchDayId, name },
+                body: { matchDayId, name, rank },
             }),
             invalidatesTags: ["matchDayTeam", "matchDays"],
+        }),
+
+        /** null clears the rank. Only "Generate Teams" reads it. */
+        setMatchDayGuestRank: builder.mutation<
+            BasicResType & { content: MatchDayGuestInfoType },
+            { guestId: number; rank: number | null }
+        >({
+            query: ({ guestId, rank }) => ({
+                url: `match-day-guests/${guestId}/rank`,
+                method: "PUT",
+                body: { rank },
+            }),
+            invalidatesTags: ["matchDayTeam"],
         }),
 
         /** Drag-and-drop between the Unassigned Pool and a team card. teamId null sends the
@@ -352,6 +365,7 @@ export const {
     useSendMatchDayReminderEmailMutation,
     useMatchDayGuestsQuery,
     useAddMatchDayGuestMutation,
+    useSetMatchDayGuestRankMutation,
     useAssignMatchDayGuestToTeamMutation,
     useDeleteMatchDayGuestMutation,
 } = matchDayTeamApi;

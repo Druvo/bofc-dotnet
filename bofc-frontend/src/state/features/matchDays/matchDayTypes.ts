@@ -110,6 +110,8 @@ export interface MatchDayGuestInfoType {
     name: string;
     teamId?: number | null;
     matchDayId?: number;
+    /** 1-10, 1 = strongest; null = unranked. Only sent to organisers - always null otherwise. */
+    rank?: number | null;
 }
 
 export interface MatchDayGuestListType extends BasicResType {

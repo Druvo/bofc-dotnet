@@ -57,8 +57,9 @@ export default function GenerateTeamsButton({
                 }
             >
                 <p className="mb-4 text-theme-sm text-gray-600 dark:text-gray-400">
-                    Drafts confirmed participants into balanced teams using each player's admin-set
-                    rank (snake draft - strongest and weakest spread evenly across teams), then
+                    Drafts confirmed participants and guests in the Unassigned Pool into balanced
+                    teams using each player's admin-set rank and each guest's rank (snake draft -
+                    strongest and weakest spread evenly across teams), then
                     schedules their round-robin matches and assigns jerseys. The number of teams is
                     worked out automatically from turnout - e.g. 13 confirmed at a cap of 6 makes 3
                     teams - rather than chosen directly.

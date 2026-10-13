@@ -1,3 +1,8 @@
+---
+disable-kp-sync: true
+---
+@.claude/kp-instructions.md
+
 # BOFC
 
 BJIT-2.0 Originals Football Club — club management app. ASP.NET Core 8 backend

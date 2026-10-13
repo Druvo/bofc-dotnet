@@ -1,3 +1,8 @@
+---
+disable-kp-sync: true
+---
+@.claude/kp-instructions.md
+
 # BOFC — agent instructions
 
 `CLAUDE.md` is the canonical project doc for this repo. This file mirrors the

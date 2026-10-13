@@ -38,3 +38,32 @@ skills-lock.json
 
 publish-*/
 
+# >>> kp-managed files (Knowledge Platform) >>>
+# Written and owned by the Knowledge Platform (`kp setup sync`), which
+# adds the files it materialises here. Change that in the KP UI, not by
+# hand - a hand-removed line is re-added on the next sync. To keep these
+# files versioned instead, set the decision to "track" and the whole
+# block goes away.
+.claude/commands/kb_help.md
+.claude/commands/kb_state.md
+.claude/kp-instructions.md
+.claude/skills/kp-build/
+.claude/skills/kp-decision-pairing/
+.claude/skills/kp-design-match/
+.claude/skills/kp-gap-hunt/
+.claude/skills/kp-ingest/
+.claude/skills/kp-jira-push/
+.claude/skills/kp-kb-pull/
+.claude/skills/kp-kb-write/
+.claude/skills/kp-setup-sync/
+.claude/skills/kp-verify/
+.claude/skills/kp-wbs/
+.cursor/mcp.json
+.github/copilot-instructions.md
+.kp-state.json
+.kp/
+.mcp.json
+.vscode/mcp.json
+# AGENTS.md is tracked by git in this repo, so it is not listed (an ignore entry for a tracked path does nothing)
+# CLAUDE.md is tracked by git in this repo, so it is not listed (an ignore entry for a tracked path does nothing)
+# <<< kp-managed files (Knowledge Platform) <<<

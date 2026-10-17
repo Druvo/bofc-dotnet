@@ -349,10 +349,12 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
         // Exclude those stale rows here instead of surfacing them as "latest".
         // MatchDayDate is local (Dhaka) wall-clock - DateTime.Now.Date, not UtcNow.Date, or this
         // filter is itself off by up to 6h (the exact bug it exists to guard against).
+        // Inactivated MatchDays are hidden from "Next Match" entirely.
         var today = ClubTime.Today;
         var matchDay = await db.MatchDays.Include(t => t.Venue)
-            .Where(t => t.MatchDayStatus == MatchDayStatus.UPCOMING
-                || (t.MatchDayStatus == MatchDayStatus.ONGOING && t.MatchDayDate.Date >= today))
+            .Where(t => t.IsActive
+                && (t.MatchDayStatus == MatchDayStatus.UPCOMING
+                    || (t.MatchDayStatus == MatchDayStatus.ONGOING && t.MatchDayDate.Date >= today)))
             .OrderBy(t => t.MatchDayStatus == MatchDayStatus.ONGOING ? 0 : 1)
             .ThenBy(t => t.MatchDayDate)
             .FirstOrDefaultAsync();
@@ -363,14 +365,14 @@ public class MatchDayService(BofcDbContext db) : IMatchDayService
     {
         var today = ClubTime.Today;
         var matchDay = await db.MatchDays.Include(t => t.Venue)
-            .Where(t => t.IsWeeklyMatchDay
+            .Where(t => t.IsWeeklyMatchDay && t.IsActive
                 && (t.MatchDayStatus == MatchDayStatus.UPCOMING
                     || (t.MatchDayStatus == MatchDayStatus.ONGOING && t.MatchDayDate.Date >= today)))
             .OrderBy(t => t.MatchDayStatus == MatchDayStatus.ONGOING ? 0 : 1)
             .ThenBy(t => t.MatchDayDate)
             .FirstOrDefaultAsync()
             ?? await db.MatchDays.Include(t => t.Venue)
-                .Where(t => t.IsWeeklyMatchDay)
+                .Where(t => t.IsWeeklyMatchDay && t.IsActive)
                 .OrderByDescending(t => t.MatchDayDate)
                 .FirstOrDefaultAsync();
 

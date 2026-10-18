@@ -56,7 +56,7 @@ public class MatchDayReminderBackgroundService(IServiceScopeFactory scopeFactory
         var cutoff = now.AddDays(settings.MatchDayReminderDaysBefore);
 
         var dueMatchDays = await db.MatchDays
-            .Where(t => t.MatchDayStatus == MatchDayStatus.UPCOMING
+            .Where(t => t.IsActive && t.MatchDayStatus == MatchDayStatus.UPCOMING
                 && t.MatchDayDate <= cutoff
                 && t.MatchDayDate >= now
                 && (t.ReminderSentAt == null || EF.Functions.DateDiffHour(t.ReminderSentAt.Value, now) >= settings.MatchDayReminderRepeatHours))

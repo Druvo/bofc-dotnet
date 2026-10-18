@@ -283,6 +283,10 @@ public class TeamService(
     public async Task<DeclareTeamsResult> DeclareTeamsAsync(long matchDayId, DeclareTeamsRequest request)
     {
         var matchDay = await GetMatchDayOrThrowAsync(matchDayId);
+        if (!matchDay.IsActive)
+        {
+            throw new BadRequestException("This MatchDay is inactive - activate it before declaring teams.");
+        }
         if (!await db.Teams.AnyAsync(t => t.MatchDayId == matchDayId))
         {
             throw new BadRequestException("Generate teams for this MatchDay before declaring them.");
@@ -512,6 +516,10 @@ public class TeamService(
     {
         var matchDay = await db.MatchDays.Include(m => m.Venue).FirstOrDefaultAsync(m => m.Id == matchDayId)
             ?? throw new MatchDayServiceException(RestErrorMessageDetail.MatchDayIsNotFound, HttpStatusCode.NotFound);
+        if (!matchDay.IsActive)
+        {
+            throw new BadRequestException("This MatchDay is inactive - activate it before sending a reminder.");
+        }
 
         var activePlayers = await db.Players.Where(p => p.IsActive && !p.IsPaused && p.EmailNotificationsEnabled)
             .Select(p => new MatchDayReminderBackgroundService.ReminderPlayer(p.Id, p.Name, p.Email))

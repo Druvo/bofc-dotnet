@@ -64,7 +64,7 @@ public class MatchDaySchedulerBackgroundService(IServiceScopeFactory scopeFactor
     {
         var now = ClubTime.Now;
         var dueMatchDayIds = await db.MatchDays
-            .Where(t => t.IsWeeklyMatchDay && !t.AutoTeamsGenerated
+            .Where(t => t.IsWeeklyMatchDay && t.IsActive && !t.AutoTeamsGenerated
                 && t.MatchDayDate > now && t.MatchDayDate <= now.AddHours(leadHours))
             .Select(t => t.Id)
             .ToListAsync();

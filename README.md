@@ -1,19 +1,12 @@
-# BOFC — .NET reference stack
+# BOFC — .NET stack
 
-Standalone, portable copy of the BOFC platform running on the **.NET backend**
-(a port of `bofc-backend`, the Java/Spring Boot original) instead of Java.
-Point-in-time snapshot — copy this whole folder anywhere and run it; not
-git-linked to the source repos.
-
-Same frontend as the Java version — only the backend process and database
-engine are swapped (SQL Server instead of MySQL).
+BOFC platform running on the **.NET backend**
 
 ## Layout
 
 - `bofc-backend-dotnet/` — ASP.NET Core 8 Web API (`BofcBackend.Api`), port 9191.
-  EF Core (SQL Server) owns the schema via its own migrations — this is
-  **not** the Java side's MySQL/Flyway schema.
-- `bofc-frontend/` — same React/Ant Design frontend used with the Java
+  EF Core (SQL Server) owns the schema via its own migrations.
+- `bofc-frontend/` — React/Ant Design frontend
   backend, unmodified. Dev proxy forwards `/api/*` to `localhost:9191`.
 - `run-backend.cmd` / `run-frontend.cmd` — start each half.
 

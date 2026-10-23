@@ -118,7 +118,8 @@ public class AcVoucherService(
         .Include(v => v.PostedBy).ThenInclude(p => p!.Roles)
         .Include(v => v.Details)
         .Include(v => v.Collection).ThenInclude(c => c!.Players)
-        .Include(v => v.BillPayment).ThenInclude(p => p!.CostType);
+        .Include(v => v.BillPayment).ThenInclude(p => p!.CostType)
+        .AsSplitQuery();
 
     private async Task<AcVoucherResponse> BuildResponseAsync(AcVoucher voucher, bool? isDetailsResponse)
     {

@@ -220,6 +220,7 @@ public class SettingsService(
         var settings = await db.SystemSettings
             .Include(s => s.WeeklyMatchDaySlots)
             .Include(s => s.JerseyColors)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(s => s.Id == 1);
         if (settings != null) return settings;
 

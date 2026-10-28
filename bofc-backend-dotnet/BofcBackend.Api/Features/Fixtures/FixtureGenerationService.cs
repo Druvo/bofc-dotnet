@@ -21,9 +21,10 @@ public class FixtureGenerationService(
     : IFixtureGenerationService
 {
     /// <summary>The club's own running order for the two team counts it actually plays with,
-    /// given rather than derived. Each slot is (home index, away index, does the home team wear
-    /// red) - indices point into the selected-team list in selection order, so index 0 is the
-    /// "Team A" of the club's printed schedule.
+    /// given rather than derived. Each slot is (home index, away index, which of the two shared
+    /// bib colors the home team wears) - the team indices point into the selected-team list in
+    /// selection order, so index 0 is the "Team A" of the club's printed schedule, and the color
+    /// slot is 0 or 1 into the ordered pair <see cref="ResolveSharedJerseyPair"/> returns.
     ///
     /// Worth stating why these aren't generated: the plain sequential round-robin below pairs
     /// 1v2, 1v3, 1v4, ... which puts team 1 in the first three matches back to back with no rest.
@@ -33,28 +34,42 @@ public class FixtureGenerationService(
     ///
     /// Both are exactly six slots, so they only make sense for a single-day generation, and a
     /// window too short for six matches will overrun (the existing overrun warning covers it).</summary>
-    private static readonly Dictionary<int, (int Home, int Away, bool HomeWearsRed)[]> FixedSchedules = new()
+    private static readonly Dictionary<int, (int Home, int Away, int HomeColorSlot)[]> FixedSchedules = new()
     {
-        // Three teams is the same three pairings played twice, with the jerseys swapped the
-        // second time round - so every team plays four matches, two in red and two in white,
-        // and no pairing ever meets twice in the same colours.
+        // Three teams is the same three pairings played twice, with the bibs swapped the
+        // second time round - so every team plays four matches, two in each shirt, and no
+        // pairing ever meets twice in the same colours.
         [3] =
         [
-            (0, 1, true),   // A (red)   v B (white)
-            (0, 2, true),   // A (red)   v C (white)
-            (1, 2, true),   // B (red)   v C (white)
-            (0, 1, false),  // A (white) v B (red)
-            (0, 2, false),  // A (white) v C (red)
-            (1, 2, false),  // B (white) v C (red)
+            (0, 1, 0),  // A (slot 0) v B (slot 1)
+            (0, 2, 0),  // A (slot 0) v C (slot 1)
+            (1, 2, 0),  // B (slot 0) v C (slot 1)
+            (0, 1, 1),  // A (slot 1) v B (slot 0)
+            (0, 2, 1),  // A (slot 1) v C (slot 0)
+            (1, 2, 1),  // B (slot 1) v C (slot 0)
         ],
+        // Four teams is a single round-robin of all six pairings. This running order is
+        // rest-optimal and can't be bettered: two adjacent slots avoid repeating a team only
+        // when they're complementary pairings (AB|CD, AC|BD, AD|BC), and two complementary
+        // adjacencies can never themselves be adjacent without replaying a fixture - so at most
+        // three of the five adjacencies are rest-clean and exactly two teams have to play back
+        // to back. Here that falls on C (slots 2-3) and D (slots 4-5), and each of them keeps
+        // its bib across the double rather than changing shirt while winded.
+        //
+        // The color slots are picked so every team wears both shirts: 2-1 or 1-2 over its three
+        // matches, which is the best split available (six slot-0 shirts shared by four teams
+        // playing three matches each). The order these replace left team A in slot 0 for all
+        // three of its matches and team C in slot 1 for all three of its own. Bib handovers
+        // stay at eight, the minimum - a complementary transition has to move both bib sets,
+        // and each of the two shared-team transitions moves only one.
         [4] =
         [
-            (0, 1, true),   // A (red)   v B (white)
-            (2, 3, false),  // C (white) v D (red)   - the one slot where home isn't in red
-            (0, 2, true),   // A (red)   v C (white)
-            (1, 3, true),   // B (red)   v D (white)
-            (0, 3, true),   // A (red)   v D (white)
-            (1, 2, true),   // B (red)   v C (white)
+            (0, 1, 0),  // A (slot 0) v B (slot 1)
+            (2, 3, 0),  // C (slot 0) v D (slot 1)
+            (0, 2, 1),  // A (slot 1) v C (slot 0)
+            (1, 3, 1),  // B (slot 1) v D (slot 0)
+            (0, 3, 1),  // A (slot 1) v D (slot 0)
+            (1, 2, 0),  // B (slot 0) v C (slot 1)
         ],
     };
 
@@ -196,29 +211,35 @@ public class FixtureGenerationService(
         // something these six-slot orders don't describe.
         if (request.MatchDates.Count == 1 && FixedSchedules.TryGetValue(selectedTeams.Count, out var fixedSchedule))
         {
-            // Resolved by name, not by position in the configured list: the club's schedule names
-            // the red and white shirts specifically, and JerseyColors is sorted white-first, so
-            // taking colors[0]/colors[1] would hand every "red" row a white shirt. Falls back to
-            // the first two configured colors when a club isn't using red/white at all.
-            var redJersey = jerseyColors.FirstOrDefault(c => string.Equals(c, "red", StringComparison.OrdinalIgnoreCase));
-            var whiteJersey = jerseyColors.FirstOrDefault(c => string.Equals(c, "white", StringComparison.OrdinalIgnoreCase));
-            if (assignJerseys && (redJersey == null || whiteJersey == null))
+            if (fixedTeamJerseyColors != null)
             {
-                redJersey = jerseyColors[0];
-                whiteJersey = jerseyColors[1];
+                // A jersey per team: keep the club's running order, but leave its color slots
+                // unused and let the fixed per-team mode above dress each team in its own color
+                // for the whole MatchDay. The slots describe sharing two physical bib sets, which
+                // isn't what this club is doing - resolving them anyway would throw the configured
+                // palette away and put every team back into the same two colors.
+                pairings = fixedSchedule
+                    .Select(slot => (
+                        Home: selectedTeams[slot.Home],
+                        Away: selectedTeams[slot.Away],
+                        HomeColor: (string?)null,
+                        AwayColor: (string?)null))
+                    .ToList();
             }
+            else
+            {
+                // Both halves of a fixed slot are set together, so a team's shirt for its next
+                // match is already decided - nothing downstream carries a rotation forward.
+                var sharedJerseys = assignJerseys ? ResolveSharedJerseyPair(jerseyColors) : null;
 
-            pairings = fixedSchedule
-                .Select(slot => (
-                    Home: selectedTeams[slot.Home],
-                    Away: selectedTeams[slot.Away],
-                    HomeColor: assignJerseys ? (slot.HomeWearsRed ? redJersey : whiteJersey) : null,
-                    AwayColor: assignJerseys ? (slot.HomeWearsRed ? whiteJersey : redJersey) : null))
-                .ToList();
-
-            // Both halves of a fixed slot are set together, so a team's shirt for its next match
-            // is already decided - nothing downstream should carry a rotation forward from here.
-            fixedTeamJerseyColors = null;
+                pairings = fixedSchedule
+                    .Select(slot => (
+                        Home: selectedTeams[slot.Home],
+                        Away: selectedTeams[slot.Away],
+                        HomeColor: sharedJerseys?[slot.HomeColorSlot],
+                        AwayColor: sharedJerseys?[1 - slot.HomeColorSlot]))
+                    .ToList();
+            }
         }
 
         // Rotation-mode continuity: a team that just played keeps the same jersey into its next
@@ -345,6 +366,26 @@ public class FixtureGenerationService(
         await db.SaveChangesAsync();
         liveMatchUpdatePublisher.PublishMatchUpdate(matchDayId, null, "FIXTURES_GENERATED");
         return matches;
+    }
+
+    /// <summary>The two bib colors a fixed schedule's color slots refer to, in slot order.
+    /// Resolved by name rather than by position in the configured list: the club's printed
+    /// schedule names its red and white shirts specifically, and JerseyColors is sorted
+    /// white-first, so taking colors[0]/colors[1] blind would hand every slot-0 row a white
+    /// shirt. Falls back to the first two configured colors for a club that isn't using red and
+    /// white at all. Only called when at least two colors are configured (the assignJerseys
+    /// gate), so both indices exist.</summary>
+    private static string[] ResolveSharedJerseyPair(List<string> jerseyColors)
+    {
+        var slotZero = jerseyColors.FirstOrDefault(c => string.Equals(c, "red", StringComparison.OrdinalIgnoreCase));
+        var slotOne = jerseyColors.FirstOrDefault(c => string.Equals(c, "white", StringComparison.OrdinalIgnoreCase));
+        if (slotZero == null || slotOne == null)
+        {
+            slotZero = jerseyColors[0];
+            slotOne = jerseyColors[1];
+        }
+
+        return [slotZero, slotOne];
     }
 
     /// <summary>First configured color that isn't <paramref name="avoid"/>, starting the search at

@@ -13,6 +13,7 @@ import {
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import IPlayer from "../../interfaces/IPlayer";
+import { countPlayersByStatus, getPlayerStatus, matchesStatusFilter, PlayerStatusFilter } from "../../utils/playerStatus";
 import { useGetPlayersQuery } from "../../state/features/player/playerSlice";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -81,7 +82,7 @@ function Players() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTabKey, setActiveTabKey] = useState<"all" | "active" | "inactive">("all");
+  const [activeTabKey, setActiveTabKey] = useState<PlayerStatusFilter>("all");
   const isMobile = useIsMobile(576);
   const [mobilePage, setMobilePage] = useState(1);
   const mobilePageSize = 8;
@@ -107,10 +108,8 @@ function Players() {
   const filteredPlayers = useMemo(() => {
     const players = playersData?.content ?? [];
     return players.filter((player: IPlayer) => {
-      const matchesTab =
-        activeTabKey === "all" ||
-        (activeTabKey === "active" && player.active) ||
-        (activeTabKey === "inactive" && !player.active);
+      // SPEC: spec-3c0385 - each player sits under the tab that matches their status badge.
+      const matchesTab = matchesStatusFilter(player, activeTabKey);
       const matchesSearch =
         !searchTerm ||
         player.name?.toLowerCase().includes(searchTerm) ||
@@ -235,9 +234,12 @@ function Players() {
   const canManagePlayers = loginInfo.roles.includes("ADMIN") || loginInfo.roles.includes("SUPERADMIN");
   const isSuperAdmin = loginInfo.roles.includes("SUPERADMIN");
 
-  const allCount = playersData?.content?.length || 0;
-  const activeCount = playersData?.content?.filter((p) => p.active).length || 0;
-  const inactiveCount = playersData?.content?.filter((p) => !p.active).length || 0;
+  const {
+    all: allCount,
+    active: activeCount,
+    paused: pausedCount,
+    inactive: inactiveCount,
+  } = countPlayersByStatus(playersData?.content ?? []);
 
   const PlayerAvatar = ({ record, size = 36 }: { record: IPlayer; size?: number }) => (
     <Avatar
@@ -253,7 +255,7 @@ function Players() {
   // them this week": a paused player is still active, they are just not being asked. Inactive
   // still wins over both - someone who has left is not merely away.
   const StatusBadge = ({ active, paused }: { active: boolean; paused?: boolean }) => {
-    const state = !active ? "inactive" : paused ? "paused" : "active";
+    const state = getPlayerStatus({ active, paused });
     const tone = {
       active: "bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500",
       paused: "bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-warning-500",
@@ -397,6 +399,9 @@ function Players() {
         </button>
         <button type="button" onClick={() => setActiveTabKey("active")} className={segmentBtn(activeTabKey === "active")}>
           Active <Badge variant={activeTabKey === "active" ? "light" : "success"}>{activeCount}</Badge>
+        </button>
+        <button type="button" onClick={() => setActiveTabKey("paused")} className={segmentBtn(activeTabKey === "paused")}>
+          Paused <Badge variant={activeTabKey === "paused" ? "light" : "warning"}>{pausedCount}</Badge>
         </button>
         <button type="button" onClick={() => setActiveTabKey("inactive")} className={segmentBtn(activeTabKey === "inactive")}>
           Inactive <Badge variant={activeTabKey === "inactive" ? "light" : "error"}>{inactiveCount}</Badge>

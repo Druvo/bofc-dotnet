@@ -31,10 +31,14 @@ const GuestCard: React.FC<GuestCardProps> = ({ guest, handleRemoveGuest, handleS
         {handleSetGuestRank && (
             // A native select is one of the elements react-beautiful-dnd treats as interactive,
             // so picking a rank does not start a drag of the card it sits on.
+            // SPEC: spec-6d7e9b
+            // py-0 and pr-7, not py-2/px-1.5: @tailwindcss/forms gives a select 0.5rem of vertical
+            // padding and draws its arrow up to 1.625rem in from the right. At h-7 that padding left
+            // 10px for an 18px line, and px-1.5 put the label under the arrow - both clipped it.
             <select
                 title="Rank used by Generate Teams (1 = strongest)"
                 aria-label={`Rank for ${guest.name}`}
-                className="h-7 shrink-0 rounded-md border border-gray-200 bg-transparent px-1.5 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-white/80"
+                className="h-7 shrink-0 rounded-md border border-gray-200 bg-transparent py-0 pl-1.5 pr-7 text-theme-xs text-gray-700 focus:border-brand-300 focus:outline-none dark:border-[var(--color-rule)] dark:bg-[var(--color-paper-3)] dark:text-white/80"
                 value={guest.rank == null ? "" : String(guest.rank)}
                 onChange={(e) => handleSetGuestRank(parseGuestRank(e.target.value))}
             >

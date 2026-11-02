@@ -1,0 +1,68 @@
+using System.Text.Json;
+using BofcBackend.Api.Common.Json;
+using BofcBackend.Api.Data;
+using BofcBackend.Api.Domain.Entities;
+using BofcBackend.Api.Features.Accounting;
+using BofcBackend.Api.Features.Players;
+
+// SPEC: spec-3a773e - collection responses carry the stored description, so the edit form's
+// Comments box and the Dashboard's Log Payment window can show it.
+var tests = new (string Name, Func<Task> Run)[]
+{
+    ("GET by id returns the stored description", async () =>
+    {
+        var (service, _) = Build(new AcCollection { Id = 7, TransactionId = "COLABC", Description = "Paid via bKash, late" });
+        var json = Serialize(service.GetAcCollectionResponse(await service.GetAcCollectionByIdAsync(7)));
+        AssertDescription(json, "Paid via bKash, late");
+    }),
+    ("GET list returns the stored description", async () =>
+    {
+        var (service, _) = Build(new AcCollection { Id = 8, TransactionId = "COLDEF", Description = "Half paid in cash" });
+        var json = Serialize((await service.GetAllAcCollectionsAsync()).Single());
+        AssertDescription(json, "Half paid in cash");
+    }),
+    ("GET by id leaves description out when none is stored", async () =>
+    {
+        var (service, _) = Build(new AcCollection { Id = 9, TransactionId = "COLGHI", Description = null });
+        var json = Serialize(service.GetAcCollectionResponse(await service.GetAcCollectionByIdAsync(9)));
+        AssertDescription(json, null);
+    }),
+};
+
+var failed = 0;
+foreach (var (name, run) in tests)
+{
+    try
+    {
+        await run();
+        Console.WriteLine($"PASS {name}");
+    }
+    catch (Exception e)
+    {
+        failed++;
+        Console.WriteLine($"FAIL {name}: {e.Message}");
+    }
+}
+
+Console.WriteLine($"{tests.Length - failed} passed, {failed} failed");
+return failed == 0 ? 0 : 1;
+
+static (AcCollectionService, BofcDbContext) Build(AcCollection collection)
+{
+    var db = new BofcDbContext();
+    db.AcCollections.Add(collection);
+    return (new AcCollectionService(db, new FakePlayerService(), new CostTypeService(), new AcVoucherService(), new AcChartService()), db);
+}
+
+// The same naming and null handling MVC uses for API responses (Program.cs AddJsonOptions).
+static JsonElement Serialize(object response) =>
+    JsonDocument.Parse(JsonSerializer.Serialize(response, response.GetType(), JsonDefaults.Options)).RootElement;
+
+static void AssertDescription(JsonElement json, string? expected)
+{
+    var actual = json.TryGetProperty("description", out var value) ? value.GetString() : null;
+    if (actual != expected)
+    {
+        throw new Exception($"expected description {(expected == null ? "absent" : $"\"{expected}\"")}, got {(actual == null ? "absent" : $"\"{actual}\"")} in {json}");
+    }
+}

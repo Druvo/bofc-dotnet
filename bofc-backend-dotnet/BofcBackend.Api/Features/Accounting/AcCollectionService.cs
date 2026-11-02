@@ -151,6 +151,7 @@ public class AcCollectionService(
             MonthOfPayment = collection.MonthOfPayment,
             Amount = collection.Amount,
             TotalAmount = collection.TotalAmount,
+            Description = collection.Description, // SPEC: spec-3a773e
             Players = playerService.GetPlayerResponses(collection.Players).ToList(),
             AllPayersName = string.Join(", ", collection.Players.Select(p => p.Name)),
             PlayerIds = collection.Players.Select(p => p.Id).ToHashSet(),

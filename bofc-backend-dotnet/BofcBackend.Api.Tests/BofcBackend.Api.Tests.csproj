@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Package-free tests: they compile the API's real source files next to small stand-ins
+    (Stubs/) for EF Core and the services those files call, so they build and run without
+    NuGet. Run with: dotnet run - exit code 0 means every test passed.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <UseAppHost>false</UseAppHost>
+    <NoWarn>$(NoWarn);CS1998</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs;Stubs/*.cs" />
+    <Compile Include="../BofcBackend.Api/Domain/**/*.cs" LinkBase="Api/Domain" />
+    <Compile Include="../BofcBackend.Api/Common/Constants/*.cs" LinkBase="Api/Common/Constants" />
+    <Compile Include="../BofcBackend.Api/Common/Exceptions/*.cs" LinkBase="Api/Common/Exceptions" />
+    <Compile Include="../BofcBackend.Api/Common/Json/*.cs" LinkBase="Api/Common/Json" />
+    <Compile Include="../BofcBackend.Api/Common/Util/RandomUtil.cs" LinkBase="Api/Common/Util" />
+    <Compile Include="../BofcBackend.Api/Features/Players/Models/*.cs" LinkBase="Api/Features/Players/Models" />
+    <Compile Include="../BofcBackend.Api/Features/Accounting/Models/*.cs" LinkBase="Api/Features/Accounting/Models" />
+    <Compile Include="../BofcBackend.Api/Features/Accounting/AcCollectionService.cs" LinkBase="Api/Features/Accounting" />
+  </ItemGroup>
+
+</Project>

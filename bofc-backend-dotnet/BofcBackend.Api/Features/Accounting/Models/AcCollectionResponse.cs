@@ -11,6 +11,7 @@ public class AcCollectionResponse
     public DateTime MonthOfPayment { get; set; }
     public decimal Amount { get; set; }
     public decimal TotalAmount { get; set; }
+    public string? Description { get; set; } // SPEC: spec-3a773e
     public DateTime CreatedDate { get; set; }
     public DateTime? UpdatedDate { get; set; }
     public List<PlayerResponse> Players { get; set; } = [];

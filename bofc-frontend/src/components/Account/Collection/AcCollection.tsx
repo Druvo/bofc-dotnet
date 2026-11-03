@@ -20,6 +20,7 @@ import FormSelect from "../../ui/form-select";
 import Badge from "../../ui/badge";
 import Loader from "../../ui/loader";
 import { formatCurrency } from "../../../utils/formatCurrency";
+import { filterPlayersKeepingSelected, matchesCollectionSearch } from "../../../utils/collectionSearch";
 
 type SortField = "date" | "monthOfPayment" | "amount" | "totalAmount" | null;
 type SortOrder = "asc" | "desc";
@@ -46,6 +47,7 @@ function AcCollection() {
     const [selectedDate, setSelectedDate] = useState<string>(dayjs().format("YYYY-MM-DD"));
     const [selectedMonth, setSelectedMonth] = useState<string>(dayjs().format("YYYY-MM"));
     const [selectedPlayerIds, setSelectedPlayerIds] = useState<number[]>([]);
+    const [playerSearchText, setPlayerSearchText] = useState("");
     const [amount, setAmount] = useState<number>(1000);
     const [description, setDescription] = useState("");
     const [transactionId, setTransactionId] = useState("");
@@ -90,6 +92,7 @@ function AcCollection() {
     const clearModalField = () => {
         setTransactionId("");
         setSelectedPlayerIds([]);
+        setPlayerSearchText("");
         setAmount(1000);
         setDescription("");
         setSelectedDate(dayjs().format("YYYY-MM-DD"));
@@ -116,16 +119,21 @@ function AcCollection() {
         setModalOpen(false);
         setModalSpinLoading(false);
         setModalState("CREATE");
+        setPlayerSearchText("");
     };
+
+    // SPEC: spec-334e33 — the form's player list narrowed by name or employee ID, keeping selections.
+    const visiblePlayers = useMemo(
+        () => filterPlayersKeepingSelected(players, playerSearchText, selectedPlayerIds),
+        [players, playerSearchText, selectedPlayerIds]
+    );
 
     const filteredCollections = useMemo(() => {
         let rows = [...acCollections];
 
-        if (searchText) {
-            const q = searchText.toLowerCase();
-            rows = rows.filter(
-                (r) => r.transactionId?.toLowerCase().includes(q) || r.voucherCode?.toLowerCase().includes(q)
-            );
+        // SPEC: spec-334e33 — also match any payer's name or employee ID.
+        if (searchText.trim()) {
+            rows = rows.filter((r) => matchesCollectionSearch(r, searchText));
         }
         if (yearFilter) {
             rows = rows.filter((r) => dayjs(r.date).year() === Number(yearFilter));
@@ -307,7 +315,7 @@ function AcCollection() {
                 <div className="relative w-full sm:w-64">
                     <SearchOutlined className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
-                        placeholder="Search TrxID or Voucher"
+                        placeholder="Search player, TrxID or Voucher"
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
@@ -408,6 +416,16 @@ function AcCollection() {
 
                         <div>
                             <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Player{isMultiPlayers ? "s" : ""}</label>
+                            <div className="relative mb-2">
+                                <SearchOutlined className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    placeholder="Filter by name or employee ID"
+                                    value={playerSearchText}
+                                    disabled={playerApiLoading}
+                                    onChange={(e) => setPlayerSearchText(e.target.value)}
+                                    className="h-10 w-full rounded-lg border border-gray-300 bg-transparent pl-9 pr-3 text-theme-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"
+                                />
+                            </div>
                             <select
                                 multiple={isMultiPlayers}
                                 value={isMultiPlayers ? selectedPlayerIds.map(String) : (selectedPlayerIds[0] ? String(selectedPlayerIds[0]) : "")}
@@ -423,7 +441,7 @@ function AcCollection() {
                                 className={`w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs focus:outline-none focus:ring-3 dark:bg-[var(--color-paper-3)] ${isMultiPlayers ? "h-40" : "h-11"} ${formErrors.playerIds ? "border-error-500 focus:border-error-300 focus:ring-error-500/10" : "border-gray-300 bg-transparent text-gray-800 focus:border-brand-300 focus:ring-brand-500/10 dark:border-[var(--color-rule)] dark:text-white/90"}`}
                             >
                                 {!isMultiPlayers && <option value="" disabled hidden>Select a Player</option>}
-                                {players.map((player) => (
+                                {visiblePlayers.map((player) => (
                                     <option key={player.id} value={player.id}>{player.name} [{player.employeeId}]</option>
                                 ))}
                             </select>

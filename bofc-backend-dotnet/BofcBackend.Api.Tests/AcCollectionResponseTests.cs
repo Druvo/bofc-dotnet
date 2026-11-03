@@ -30,7 +30,7 @@ var tests = new (string Name, Func<Task> Run)[]
 };
 
 var failed = 0;
-foreach (var (name, run) in tests)
+foreach (var (name, run) in tests.Concat(GoalKeepingHistoryTests.All))
 {
     try
     {
@@ -44,7 +44,7 @@ foreach (var (name, run) in tests)
     }
 }
 
-Console.WriteLine($"{tests.Length - failed} passed, {failed} failed");
+Console.WriteLine($"{tests.Length + GoalKeepingHistoryTests.All.Length - failed} passed, {failed} failed");
 return failed == 0 ? 0 : 1;
 
 static (AcCollectionService, BofcDbContext) Build(AcCollection collection)

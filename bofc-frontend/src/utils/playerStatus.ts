@@ -23,3 +23,14 @@ export const countPlayersByStatus = (players: Array<Pick<IPlayer, "active" | "pa
   });
   return counts;
 };
+
+// SPEC: spec-648c30
+/**
+ * The players a payment collection can be recorded for: Active ones only, so nobody who has left
+ * or is paused is offered. Players already on the collection being edited stay, whatever their
+ * status now, so opening an old record never silently drops one of its payers.
+ */
+export const playersForCollectionPicker = <T extends Pick<IPlayer, "id" | "active" | "paused">>(
+  players: T[],
+  selectedPlayerIds: number[]
+) => players.filter((player) => getPlayerStatus(player) === "active" || selectedPlayerIds.includes(player.id));

@@ -1,4 +1,10 @@
-import { countPlayersByStatus, getPlayerStatus, matchesStatusFilter, PlayerStatusFilter } from "./playerStatus";
+import {
+  countPlayersByStatus,
+  getPlayerStatus,
+  matchesStatusFilter,
+  playersForCollectionPicker,
+  PlayerStatusFilter,
+} from "./playerStatus";
 
 /**
  * SPEC: spec-3c0385. The bug: the Players tab's Active filter checked only `active`, so a player
@@ -51,5 +57,28 @@ describe("player status filters", () => {
     const counts = countPlayersByStatus(players);
     expect(counts).toEqual({ all: 5, active: 2, paused: 1, inactive: 2 });
     expect(counts.active + counts.paused + counts.inactive).toBe(counts.all);
+  });
+});
+
+/**
+ * SPEC: spec-648c30. The bug: the payment collection form offered every player from
+ * GET /players, inactive and paused ones included.
+ */
+describe("collection form player picker", () => {
+  const roster = [
+    { id: 1, name: "active", active: true, paused: false },
+    { id: 2, name: "active, paused undefined", active: true },
+    { id: 3, name: "paused", active: true, paused: true },
+    { id: 4, name: "inactive", active: false, paused: false },
+    { id: 5, name: "inactive and paused", active: false, paused: true },
+  ];
+  const offered = (selected: number[]) => playersForCollectionPicker(roster, selected).map((p) => p.name);
+
+  it("offers only Active players on a new collection", () => {
+    expect(offered([])).toEqual(["active", "active, paused undefined"]);
+  });
+
+  it("keeps an edited collection's payers even when they are now paused or inactive", () => {
+    expect(offered([3, 5])).toEqual(["active", "active, paused undefined", "paused", "inactive and paused"]);
   });
 });

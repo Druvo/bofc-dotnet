@@ -11,6 +11,7 @@ import IPaymentAccount from "../../../interfaces/IPaymentAccount";
 import axiosApi from "../../../state/api/axiosBase";
 import { acCollectionApi } from "../../../state/features/account/accountSlice";
 import { selectLoginInfo } from "../../../state/slices/loginInfoSlice";
+import { playersForCollectionPicker } from "../../../utils/playerStatus";
 import FormatCurrencyWithSymbol from "../../Util/FormatCurrencyWithSymbol";
 import PlayerMonthlyAmountChart from "./PlayerMonthlyAmountChart";
 import Button from "../../ui/button";
@@ -123,8 +124,9 @@ function AcCollection() {
     };
 
     // SPEC: spec-334e33 — the form's player list narrowed by name or employee ID, keeping selections.
+    // SPEC: spec-648c30 — only Active players are offered; an edited collection keeps its payers.
     const visiblePlayers = useMemo(
-        () => filterPlayersKeepingSelected(players, playerSearchText, selectedPlayerIds),
+        () => filterPlayersKeepingSelected(playersForCollectionPicker(players, selectedPlayerIds), playerSearchText, selectedPlayerIds),
         [players, playerSearchText, selectedPlayerIds]
     );
 

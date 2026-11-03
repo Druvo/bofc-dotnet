@@ -25,6 +25,7 @@
     <Compile Include="../BofcBackend.Api/Common/Util/StringUtils.cs" LinkBase="Api/Common/Util" />
     <Compile Include="../BofcBackend.Api/Features/Players/Models/*.cs" LinkBase="Api/Features/Players/Models" />
     <Compile Include="../BofcBackend.Api/Features/Accounting/Models/*.cs" LinkBase="Api/Features/Accounting/Models" />
+    <Compile Include="../BofcBackend.Api/Features/Settings/Models/*.cs" LinkBase="Api/Features/Settings/Models" />
     <Compile Include="../BofcBackend.Api/Features/Accounting/AcCollectionService.cs" LinkBase="Api/Features/Accounting" />
     <Compile Include="../BofcBackend.Api/Features/Players/PlayerService.cs" LinkBase="Api/Features/Players" />
   </ItemGroup>

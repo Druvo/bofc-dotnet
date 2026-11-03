@@ -247,7 +247,9 @@ public class PlayerService(
     {
         var rows = await (
             from p in db.Players
-            where p.IsActive
+            // SPEC: spec-648c30 - Goalkeeper Records lists Active players only: a paused player
+            // is away, so they get neither history rows nor the empty row each round is padded with.
+            where p.IsActive && !p.IsPaused
             join h in db.PlayerGoalkeepingHistories on p.Id equals h.PlayerId into gj
             from h in gj.DefaultIfEmpty()
             select new GoalKeeperHistoryDto

@@ -22,9 +22,11 @@
     <Compile Include="../BofcBackend.Api/Common/Exceptions/*.cs" LinkBase="Api/Common/Exceptions" />
     <Compile Include="../BofcBackend.Api/Common/Json/*.cs" LinkBase="Api/Common/Json" />
     <Compile Include="../BofcBackend.Api/Common/Util/RandomUtil.cs" LinkBase="Api/Common/Util" />
+    <Compile Include="../BofcBackend.Api/Common/Util/StringUtils.cs" LinkBase="Api/Common/Util" />
     <Compile Include="../BofcBackend.Api/Features/Players/Models/*.cs" LinkBase="Api/Features/Players/Models" />
     <Compile Include="../BofcBackend.Api/Features/Accounting/Models/*.cs" LinkBase="Api/Features/Accounting/Models" />
     <Compile Include="../BofcBackend.Api/Features/Accounting/AcCollectionService.cs" LinkBase="Api/Features/Accounting" />
+    <Compile Include="../BofcBackend.Api/Features/Players/PlayerService.cs" LinkBase="Api/Features/Players" />
   </ItemGroup>
 
 </Project>

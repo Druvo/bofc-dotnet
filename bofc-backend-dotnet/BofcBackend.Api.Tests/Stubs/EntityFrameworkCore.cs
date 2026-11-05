@@ -10,6 +10,8 @@ namespace Microsoft.EntityFrameworkCore
         private readonly List<T> _rows = [];
 
         public void Add(T entity) => _rows.Add(entity);
+        public void AddRange(IEnumerable<T> entities) => _rows.AddRange(entities);
+        public void RemoveRange(IEnumerable<T> entities) { foreach (var e in entities.ToList()) _rows.Remove(e); }
         public void Remove(T entity) => _rows.Remove(entity);
 
         private IQueryable<T> Query => _rows.AsQueryable();
@@ -74,6 +76,10 @@ namespace BofcBackend.Api.Data
         public DbSet<MatchDayParticipant> MatchDayParticipants { get; } = new();
         public DbSet<PlayerGoalkeepingHistory> PlayerGoalkeepingHistories { get; } = new();
         public DbSet<TeamPlayer> TeamPlayers { get; } = new();
+        public DbSet<Team> Teams { get; } = new();
+        public DbSet<Venue> Venues { get; } = new();
+        public DbSet<Match> Matches { get; } = new();
+        public DbSet<JerseyColor> JerseyColors { get; } = new();
         public FakeDatabase Database { get; } = new();
         public Task<int> SaveChangesAsync() => Task.FromResult(0);
     }

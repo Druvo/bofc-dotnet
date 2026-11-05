@@ -27,6 +27,11 @@
     <Compile Include="../BofcBackend.Api/Features/Accounting/Models/*.cs" LinkBase="Api/Features/Accounting/Models" />
     <Compile Include="../BofcBackend.Api/Features/Accounting/AcCollectionService.cs" LinkBase="Api/Features/Accounting" />
     <Compile Include="../BofcBackend.Api/Features/Players/PlayerService.cs" LinkBase="Api/Features/Players" />
+    <Compile Include="../BofcBackend.Api/Common/RealTime/ILiveMatchUpdatePublisher.cs" LinkBase="Api/Common/RealTime" />
+    <Compile Include="../BofcBackend.Api/Common/Util/JerseyColorValidator.cs" LinkBase="Api/Common/Util" />
+    <Compile Include="../BofcBackend.Api/Features/Fixtures/Models/*.cs" LinkBase="Api/Features/Fixtures/Models" />
+    <Compile Include="../BofcBackend.Api/Features/Fixtures/IFixtureGenerationService.cs" LinkBase="Api/Features/Fixtures" />
+    <Compile Include="../BofcBackend.Api/Features/Fixtures/FixtureGenerationService.cs" LinkBase="Api/Features/Fixtures" />
   </ItemGroup>
 
 </Project>

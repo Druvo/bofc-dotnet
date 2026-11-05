@@ -56,17 +56,14 @@ public class FixtureGenerationService(
         // to back. Here that falls on C (slots 2-3) and D (slots 4-5), and each of them keeps
         // its bib across the double rather than changing shirt while winded.
         //
-        // The color slots are picked so every team wears both shirts: 2-1 or 1-2 over its three
-        // matches, which is the best split available (six slot-0 shirts shared by four teams
-        // playing three matches each). The order these replace left team A in slot 0 for all
-        // three of its matches and team C in slot 1 for all three of its own. Bib handovers
-        // stay at eight, the minimum - a complementary transition has to move both bib sets,
-        // and each of the two shared-team transitions moves only one.
+        // SPEC: spec-dc1746 - the color slots follow the club's rule: C always wears slot 1
+        // (white) and D always wears slot 0 (red), so only A and B change shirt - red against
+        // C, white against D, and A red / B white when they meet each other.
         [4] =
         [
             (0, 1, 0),  // A (slot 0) v B (slot 1)
-            (2, 3, 0),  // C (slot 0) v D (slot 1)
-            (0, 2, 1),  // A (slot 1) v C (slot 0)
+            (2, 3, 1),  // C (slot 1) v D (slot 0)
+            (0, 2, 0),  // A (slot 0) v C (slot 1)
             (1, 3, 1),  // B (slot 1) v D (slot 0)
             (0, 3, 1),  // A (slot 1) v D (slot 0)
             (1, 2, 0),  // B (slot 0) v C (slot 1)

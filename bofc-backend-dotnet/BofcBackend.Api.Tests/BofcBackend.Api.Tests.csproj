@@ -32,6 +32,7 @@
     <Compile Include="../BofcBackend.Api/Features/Fixtures/Models/*.cs" LinkBase="Api/Features/Fixtures/Models" />
     <Compile Include="../BofcBackend.Api/Features/Fixtures/IFixtureGenerationService.cs" LinkBase="Api/Features/Fixtures" />
     <Compile Include="../BofcBackend.Api/Features/Fixtures/FixtureGenerationService.cs" LinkBase="Api/Features/Fixtures" />
+    <Compile Include="../BofcBackend.Api/Features/Settings/Models/UpdateSystemSettingsRequest.cs" LinkBase="Api/Features/Settings/Models" />
   </ItemGroup>
 
 </Project>

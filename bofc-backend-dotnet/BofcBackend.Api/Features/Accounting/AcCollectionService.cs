@@ -220,9 +220,11 @@ public class AcCollectionService(
 
     public async Task<PlayerCollectionMetricsResponse> GetPlayerCollectionMetricsAsync(int? year)
     {
+        // SPEC: spec-0fd3da - filtered on the month paid for, not on Date: the cells below are keyed by
+        // MonthOfPayment, so December dues paid in January must still land in December's year.
         var collections = year == null
             ? await db.AcCollections.Include(c => c.Players).ToListAsync()
-            : await db.AcCollections.Include(c => c.Players).Where(c => c.Date.Year == year).ToListAsync();
+            : await db.AcCollections.Include(c => c.Players).Where(c => c.MonthOfPayment.Year == year).ToListAsync();
 
         var reportMap = new Dictionary<long, PlayerCollectionReport>();
 
@@ -273,8 +275,8 @@ public class AcCollectionService(
             }
         }
 
-        // Filtered on the waived month, not on Date like the collections above - a waiver has
-        // no payment date, and the month is what the report's cells are keyed by.
+        // Filtered on the waived month - a waiver has no payment date, and the month is what the
+        // report's cells are keyed by.
         var waivers = await db.PaymentWaivers.AsNoTracking()
             .Where(w => year == null || w.MonthOfPayment.Year == year)
             .Select(w => new { w.PlayerId, w.MonthOfPayment })
@@ -290,8 +292,9 @@ public class AcCollectionService(
             months.Add(waiver.MonthOfPayment.Month);
         }
 
+        // SPEC: spec-0fd3da - the years the report can show, so a year only paid for in advance is selectable.
         var years = await db.AcCollections
-            .Select(c => c.Date.Year)
+            .Select(c => c.MonthOfPayment.Year)
             .Distinct()
             .OrderByDescending(y => y)
             .ToListAsync();

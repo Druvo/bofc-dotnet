@@ -50,12 +50,14 @@ publish-*/
 .claude/skills/kp-build/
 .claude/skills/kp-decision-pairing/
 .claude/skills/kp-design-match/
+.claude/skills/kp-design-push/
 .claude/skills/kp-gap-hunt/
 .claude/skills/kp-ingest/
 .claude/skills/kp-jira-push/
 .claude/skills/kp-kb-pull/
 .claude/skills/kp-kb-write/
 .claude/skills/kp-setup-sync/
+.claude/skills/kp-spec-repair/
 .claude/skills/kp-verify/
 .claude/skills/kp-wbs/
 .cursor/mcp.json
